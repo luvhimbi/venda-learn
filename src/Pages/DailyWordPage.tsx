@@ -56,7 +56,7 @@ const DailyWordPage: React.FC = () => {
                 ← Murahu (Back)
             </button>
 
-            <div className="card border-0 shadow-lg rounded-5 overflow-hidden w-100" style={{ maxWidth: '600px' }}>
+            <div className="card shadow-lg overflow-hidden w-100" style={{ maxWidth: '600px' }}>
                 <div className="bg-warning p-4 text-center">
                     <span className="badge bg-white text-dark rounded-pill px-3 mb-2">IPFI LA DUVHA</span>
                     <h5 className="mb-0 fw-bold">{new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}</h5>

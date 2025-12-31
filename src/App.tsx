@@ -9,9 +9,10 @@ import Profile from "./Pages/Profile";
 import Muvhigo from "./Pages/Muvhigo";
 import GameRoom from "./Pages/GameRoom";
 import DailyWordPage from "./Pages/DailyWordPage.tsx";
-import Lobby from "./Pages/Lobby.tsx";
-import DuelPage from "./Pages/DuelPage.tsx";
-import CreateChallenge from "./Pages/CreateChallenge.tsx";
+import Courses from "./Pages/Courses.tsx";
+import PrivacyPolicy from "./Pages/PrivacyPolicy.tsx";
+import TermsOfUse from "./Pages/TermsOfUse.tsx";
+import POPIAct from "./Pages/POPIAct.tsx";
 
 function App() {
     return (
@@ -28,10 +29,12 @@ function App() {
                         <Route path="/muvhigo" element={<Muvhigo />} />
                         <Route path="/game/:lessonId" element={<GameRoom />} />
                         <Route path="/word-of-the-day" element={<DailyWordPage/>} />
-                        <Route path="/lobby" element={<Lobby />} />
-                        <Route path="/create-challenge" element={<CreateChallenge />} />
-                        <Route path="/duel/:challengeId" element={<DuelPage />} />
+                        <Route path="/courses"  element={<Courses/>}/>
+
                         <Route path="/profile" element={<Profile />} />
+                        <Route path="/privacy" element={<PrivacyPolicy />} />
+                        <Route path="/terms" element={<TermsOfUse />} />
+                        <Route path="/popiact" element={<POPIAct/>} />
                     </Routes>
                 </main>
 

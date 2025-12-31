@@ -5,115 +5,72 @@ import { doc, getDoc, collection, query, orderBy, limit, getDocs } from 'firebas
 import { onAuthStateChanged } from 'firebase/auth';
 import { getBadgeDetails, getLevelStats } from "../services/levelUtils.ts";
 
-interface Lesson {
-    id: string;
-    title: string;
-    vendaTitle: string;
-    difficulty: string;
-}
-
-interface DailyWord {
-    word: string;
-    meaning: string;
-    explanation: string;
-    example: string;
-}
-
 const Home: React.FC = () => {
     const navigate = useNavigate();
 
     // User & Content States
-    const [userData, setUserData] = useState({
-        username: 'Mufunzi',
-        points: 0,
-        streak: '0'
-    });
-    const [dbLessons, setDbLessons] = useState<Lesson[]>([]);
+    const [userData, setUserData] = useState<any>(null);
+    const [lastLesson, setLastLesson] = useState<any>(null);
     const [topLearners, setTopLearners] = useState<any[]>([]);
-    const [dailyWord, setDailyWord] = useState<DailyWord | null>(null);
+    const [dailyWord, setDailyWord] = useState<any>(null);
     const [loading, setLoading] = useState(true);
-    const [isLoggedOut, setIsLoggedOut] = useState(false);
 
-    // Derived State
-    const stats = getLevelStats(userData.points);
-    const badge = getBadgeDetails(stats.level);
+    // --- TIME-BASED GREETING LOGIC ---
+    const getVendaGreeting = () => {
+        const hour = new Date().getHours();
+        if (hour >= 5 && hour < 12) return "Ndi Matsheloni"; // 05:00 - 11:59
+        if (hour >= 12 && hour < 17) return "Ndi Masiari";   // 12:00 - 16:59
+        if (hour >= 17 && hour <= 23) return "Ndi Madekwana"; // 17:00 - 23:59
+        return "Ndi Madaucha";                               // 00:00 - 04:59
+    };
+
     useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth, async (user) => {
             if (user) {
-                setIsLoggedOut(false);
                 try {
-                    // 1. Fetch User Data with Numeric Enforcement
+                    // 1. Fetch User Data
                     const userDoc = await getDoc(doc(db, "users", user.uid));
                     if (userDoc.exists()) {
                         const data = userDoc.data();
+                        setUserData({ ...data, uid: user.uid });
 
-                        // Force conversion to Number to avoid stale string data
-                        const actualPoints = Number(data.points || 0);
-
-                        setUserData({
-                            username: data.username || 'Mufunzi',
-                            points: actualPoints,
-                            streak: data.streak || '0'
-                        });
-
-                        console.log("Fetched actual points:", actualPoints); // Debugging
+                        // 2. Fetch the specific lesson they were last on
+                        if (data.lastLessonId) {
+                            const lessonSnap = await getDoc(doc(db, "lessons", data.lastLessonId));
+                            if (lessonSnap.exists()) {
+                                setLastLesson({ id: lessonSnap.id, ...lessonSnap.data() });
+                            }
+                        }
                     }
 
-                    // 2. Fetch Lessons
-                    const lessonsSnapshot = await getDocs(collection(db, "lessons"));
-                    const lessonsList = lessonsSnapshot.docs.map(doc => ({
-                        id: doc.id,
-                        ...doc.data()
-                    })) as Lesson[];
-                    setDbLessons(lessonsList);
-
-                    // 3. Fetch Leaderboard - Correcting the Query
-                    // We must cast the query to pull the latest points accurately
-                    const q = query(collection(db, "users"), orderBy("points", "desc"), limit(3));
+                    // 3. Fetch Leaderboard (Top 5)
+                    const q = query(collection(db, "users"), orderBy("points", "desc"), limit(5));
                     const leaderSnapshot = await getDocs(q);
                     setTopLearners(leaderSnapshot.docs.map(doc => ({
                         id: doc.id,
                         ...doc.data(),
-                        points: Number(doc.data().points || 0) // Ensure leaderboard shows numbers too
+                        points: Number(doc.data().points || 0)
                     })));
 
-                    // 4. Word of the Day Logic...
+                    // 4. Fetch Daily Word
                     const today = new Date().toISOString().split('T')[0];
                     const wordSnap = await getDoc(doc(db, "dailyWords", today));
                     if (wordSnap.exists()) {
-                        setDailyWord(wordSnap.data() as DailyWord);
+                        setDailyWord(wordSnap.data());
                     } else {
-                        setDailyWord({
-                            word: "Vhuthu",
-                            meaning: "Humanity",
-                            explanation: "The Venda concept of compassion and respect towards others.",
-                            example: "Muthu u vhonala nga vhuthu hawe."
-                        });
+                        setDailyWord({ word: "Vhuthu", meaning: "Humanity" });
                     }
 
                 } catch (err) {
-                    console.error("Error fetching data:", err);
+                    console.error("Error fetching home data:", err);
                 }
                 setLoading(false);
             } else {
-                setIsLoggedOut(true);
-                setLoading(false);
+                navigate('/login');
             }
         });
         return () => unsubscribe();
-    }, []);
-
-
-// this is to display the difficulty in the lessons
-
-    const getDifficultyStyle = (difficulty: string) => {
-        switch (difficulty?.toLowerCase()) {
-            case 'easy': return { color: 'success', icon: '🌱' };
-            case 'medium': return { color: 'warning', icon: '🔥' };
-            case 'hard': return { color: 'danger', icon: '🏆' };
-            default: return { color: 'primary', icon: '📚' };
-        }
-    };
+    }, [navigate]);
 
     if (loading) return (
         <div className="d-flex justify-content-center align-items-center min-vh-100 bg-light">
@@ -121,127 +78,120 @@ const Home: React.FC = () => {
         </div>
     );
 
-    if (isLoggedOut) return (
-        <div className="container py-5 text-center">
-            <div className="my-5 animate__animated animate__fadeIn">
-                <div className="display-1 mb-4">🐘</div>
-                <h1 className="fw-bold display-4">Ndaa!</h1>
-                <p className="lead text-muted mb-5">Welcome to VendaLearn. Please sign in to track your progress.</p>
-                <div className="d-flex justify-content-center gap-3">
-                    <Link to="/login" className="btn btn-primary btn-lg px-5 rounded-pill shadow">Dzhena (Login)</Link>
-                    <Link to="/register" className="btn btn-outline-primary btn-lg px-5 rounded-pill">Ṅwalisani</Link>
-                </div>
-            </div>
-        </div>
-    );
+    const stats = getLevelStats(userData?.points || 0);
+    const badge = getBadgeDetails(stats.level);
 
     return (
         <div className="container py-4 px-md-5 bg-light min-vh-100 animate__animated animate__fadeIn">
-            {/* Header */}
+            {/* Header with Dynamic Greeting */}
             <div className="row mb-4 align-items-center">
-                <div className="col-md-6">
-                    <h2 className="fw-bold mb-0">Ndaa, {userData.username}!</h2>
-                    <p className="text-muted small">Kha ri gude Tshivenda (Let's learn Tshivenda)</p>
+                <div className="col-md-7">
+                    <h2 className="fw-bold mb-0">{getVendaGreeting()} ,{userData?.username || 'Mufunzi'}!</h2>
+                    <p className="text-muted small">Continue where you left off in your Tshivenda journey.</p>
                 </div>
-                <div className="col-md-6 d-flex justify-content-md-end gap-3 mt-3 mt-md-0">
-                    <div className="bg-white px-3 py-2 rounded-pill shadow-sm border d-flex align-items-center">
-                        <span className="me-2">💎</span> <strong>{userData.points} LP</strong>
+                <div className="col-md-5 d-flex justify-content-md-end gap-2 mt-3 mt-md-0">
+                    <div className="bg-white px-3 py-2 rounded-pill shadow-sm border">
+                        <span className="me-1">💎</span> <strong>{userData?.points || 0} LP</strong>
                     </div>
-                    <div className="bg-white px-3 py-2 rounded-pill shadow-sm border d-flex align-items-center">
-                        <span className="me-2">🔥</span> <strong>{userData.streak} Streak</strong>
+                    <div className="bg-white px-3 py-2 rounded-pill shadow-sm border">
+                        <span className="me-1">🔥</span> <strong>{userData?.streak || 0}</strong>
                     </div>
                 </div>
             </div>
 
             <div className="row">
-                {/* Main Content: Lessons */}
+                {/* Main Content: Recent Activity */}
                 <div className="col-lg-8">
-                    <h4 className="fw-bold mb-3">Tshigwada tsha pfunzo (Lessons)</h4>
-                    <div className="row g-4">
-                        {dbLessons.map((lesson) => {
-                            const style = getDifficultyStyle(lesson.difficulty);
-                            return (
-                                <div key={lesson.id} className="col-md-6">
-                                    <div className="card h-100 border-0 shadow-sm overflow-hidden rounded-4 transition-all hover-shadow">
-                                        <div className="card-body p-4">
-                                            <span className={`badge bg-${style.color} bg-opacity-10 text-${style.color} mb-2 px-3 py-2`}>
-                                                {style.icon} {lesson.difficulty}
-                                            </span>
-                                            <h5 className="fw-bold mb-1">{lesson.title}</h5>
-                                            <p className="text-primary small fw-bold mb-3">{lesson.vendaTitle}</p>
-                                            <Link to={`/game/${lesson.id}`} className={`btn btn-${style.color} w-100 fw-bold rounded-pill`}>
-                                                Thoma (Start)
-                                            </Link>
-                                        </div>
-                                    </div>
+
+                    {/* Resume Progress Card */}
+                    <div className="mb-4">
+                        <h4 className="fw-bold mb-3">Bvelelani phanda (Continue)</h4>
+                        {lastLesson ? (
+                            <div className="card border-0 shadow-sm rounded-4 bg-primary text-white p-4 position-relative overflow-hidden transition-all hover-shadow">
+                                <div className="position-relative z-index-1">
+                                    <span className="badge bg-white text-primary mb-2 px-3 py-2">IN PROGRESS</span>
+                                    <h3 className="fw-bold mb-1">{lastLesson.title}</h3>
+                                    <p className="opacity-75 mb-4">{lastLesson.vendaTitle}</p>
+                                    <button
+                                        onClick={() => navigate(`/game/${lastLesson.id}`)}
+                                        className="btn btn-light rounded-pill px-5 fw-bold shadow-sm"
+                                    >
+                                        Resume Lesson
+                                    </button>
                                 </div>
-                            );
-                        })}
+                                <div className="position-absolute end-0 top-50 translate-middle-y opacity-10" style={{fontSize: '8rem', marginRight: '20px'}}>
+                                    🐘
+                                </div>
+                            </div>
+                        ) : (
+                            <div className="card border-0 shadow-sm rounded-4 p-5 text-center bg-white">
+                                <div className="display-4 mb-3">📚</div>
+                                <h4>Ready to start learning?</h4>
+                                <p className="text-muted mb-4">You haven't started any lessons yet. Browse the catalog to begin!</p>
+                                <Link to="/courses" className="btn btn-primary rounded-pill px-5 fw-bold shadow">
+                                    Browse Courses
+                                </Link>
+                            </div>
+                        )}
+                    </div>
+
+                    {/* Quick Access Menu */}
+                    <h4 className="fw-bold mb-3">Quick Access</h4>
+                    <div className="row g-3">
+                        <div className="col-md-6">
+                            <Link to="/courses" className="card border-0 shadow-sm p-4 rounded-4 text-center text-decoration-none hover-shadow transition-all bg-white h-100">
+                                <div className="display-6 mb-2">📖</div>
+                                <h6 className="fw-bold text-dark mb-1">Tshigwada tsha pfunzo</h6>
+                                <p className="small text-muted mb-0">All Courses & Lessons</p>
+                            </Link>
+                        </div>
+                        <div className="col-md-6">
+                            <Link to="/word-of-the-day" className="card border-0 shadow-sm p-4 rounded-4 text-center text-decoration-none hover-shadow transition-all bg-white h-100">
+                                <div className="display-6 mb-2">💡</div>
+                                <h6 className="fw-bold text-dark mb-1">Ipfi la duvha</h6>
+                                <p className="small text-muted mb-0">Word of the Day: <strong>{dailyWord?.word}</strong></p>
+                            </Link>
+                        </div>
                     </div>
                 </div>
 
-                {/* Sidebar */}
+                {/* Sidebar: Stats & Leaderboard */}
                 <div className="col-lg-4 mt-4 mt-lg-0">
 
-                    {/* Word of the Day Card - Now Links to its own page */}
-                    <Link to="/word-of-the-day" className="text-decoration-none text-dark">
-                        <div className="card border-0 shadow-sm rounded-4 overflow-hidden mb-4 border-start border-warning border-4 hover-shadow transition-all">
-                            <div className="card-body p-4">
-                                <div className="d-flex justify-content-between align-items-center mb-3">
-                                    <span className="badge bg-warning text-dark rounded-pill px-3">Ipfi la duvha</span>
-                                    <small className="text-muted" style={{fontSize: '0.7rem'}}>VIEW FULL →</small>
-                                </div>
-                                <div className="text-center py-2">
-                                    <div className="d-flex align-items-center justify-content-center gap-2">
-                                        <h2 className="fw-bold text-primary mb-0">{dailyWord?.word}</h2>
-                                    </div>
-                                    <p className="text-muted mb-0">"{dailyWord?.meaning}"</p>
-                                </div>
-                                <div className="mt-2 border-top pt-3">
-                                    <p className="small text-dark mb-0 text-truncate">
-                                        <strong>Context:</strong> {dailyWord?.explanation}
-                                    </p>
-                                </div>
-                            </div>
+                    {/* Level Progress */}
+                    <div className="card border-0 shadow-sm p-4 mb-4 bg-dark text-white rounded-4 position-relative overflow-hidden shadow-lg">
+                        <div className="d-flex justify-content-between align-items-center mb-3">
+                            <span className="badge bg-primary px-3 py-2 rounded-pill shadow-sm">{badge.name}</span>
+                            <span className="h3 mb-0">{badge.icon}</span>
                         </div>
-                    </Link>
-
-                    {/* Rank & Progress Card */}
-                    <div className="card border-0 shadow-sm p-4 mb-4 bg-primary text-white rounded-4 overflow-hidden position-relative shadow-lg">
-                        <div className="position-relative z-index-1">
-                            <div className="d-flex justify-content-between align-items-start mb-2">
-                                <div>
-                                    <div className="badge bg-white text-primary rounded-pill px-3 py-2 mb-2 shadow-sm">
-                                        {badge.icon} {badge.name}
-                                    </div>
-                                    <h3 className="fw-bold mb-0">Level {stats.level}</h3>
-                                </div>
-                                <div className="text-end">
-                                    <span className="fw-bold">{stats.pointsInCurrentLevel}</span>
-                                    <span className="opacity-75 small"> / {stats.pointsForNextLevel} LP</span>
-                                </div>
-                            </div>
-                            <div className="progress mb-2" style={{ height: '12px', backgroundColor: 'rgba(255,255,255,0.2)', borderRadius: '10px' }}>
-                                <div className="progress-bar bg-white shadow-sm" style={{ width: `${stats.progress}%`, transition: 'width 1s' }}></div>
-                            </div>
-                            <small className="opacity-75">{stats.pointsForNextLevel - stats.pointsInCurrentLevel} LP to Level {stats.level + 1}</small>
+                        <h5 className="fw-bold mb-1">Level {stats.level}</h5>
+                        <div className="progress my-2" style={{ height: '10px', backgroundColor: 'rgba(255,255,255,0.1)', borderRadius: '10px' }}>
+                            <div className="progress-bar bg-primary shadow-sm" style={{ width: `${stats.progress}%` }}></div>
                         </div>
-                        <div className="position-absolute end-0 bottom-0 opacity-10" style={{ fontSize: '6rem', transform: 'translate(10%, 20%)' }}>🐘</div>
+                        <div className="d-flex justify-content-between mt-1">
+                            <small className="text-muted">{userData?.points || 0} LP Total</small>
+                            <small className="text-primary fw-bold">{stats.nextLevelThreshold - (userData?.points || 0)} LP to Level {stats.level + 1}</small>
+                        </div>
                     </div>
 
-                    {/* Leaderboard */}
-                    <div className="card border-0 shadow-sm p-4 rounded-4">
-                        <h5 className="fw-bold mb-3">Muvhigo (Top 3)</h5>
+                    {/* Muvhigo (Leaderboard) */}
+                    <div className="card border-0 shadow-sm p-4 rounded-4 bg-white">
+                        <div className="d-flex justify-content-between align-items-center mb-3">
+                            <h5 className="fw-bold mb-0">Muvhigo (Top 5)</h5>
+                            <span className="badge bg-warning text-dark rounded-pill">🏆</span>
+                        </div>
                         {topLearners.map((learner, index) => (
-                            <div key={learner.id} className="d-flex align-items-center mb-3">
+                            <div key={learner.id} className={`d-flex align-items-center p-2 mb-2 rounded-3 ${learner.uid === auth.currentUser?.uid ? 'bg-primary bg-opacity-10 border border-primary border-opacity-25' : ''}`}>
                                 <div className="me-3 fw-bold text-muted" style={{width: '20px'}}>{index + 1}</div>
-                                <div className="rounded-circle bg-light d-flex align-items-center justify-content-center me-3" style={{width: '35px', height: '35px', fontSize: '0.8rem'}}>
-                                    {learner.username?.charAt(0).toUpperCase()}
+                                <div className="flex-grow-1 small fw-bold text-truncate">
+                                    {learner.username} {learner.uid === auth.currentUser?.uid && <span className="ms-1 text-primary">(You)</span>}
                                 </div>
-                                <div className="flex-grow-1 small fw-bold text-truncate">{learner.username}</div>
                                 <div className="small text-primary fw-bold">{learner.points} LP</div>
                             </div>
                         ))}
+                        <Link to="/muvhigo" className="btn btn-outline-primary btn-sm w-100 rounded-pill mt-3 fw-bold">
+                            View Full Leaderboard
+                        </Link>
                     </div>
 
                 </div>
