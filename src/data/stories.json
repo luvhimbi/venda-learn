@@ -1,0 +1,15 @@
+[
+  {
+    "id": "ngano-001",
+    "title": "Phunguvhe na Khwali",
+    "level": "Beginner",
+    "vendaText": "Kale-kale, Phunguvhe na Khwali vho vha vhe dzikhonani khulwane. Phunguvhe o vha e na vhufhura vhunzhi...",
+    "englishText": "Long ago, Jackal and Partridge were great friends. Jackal had much deceit...",
+    "vocabulary": [
+      { "word": "Kale-kale", "mean": "Long ago" },
+      { "word": "Dzikhonani", "mean": "Friends" },
+      { "word": "Vhufhura", "mean": "Deceit / Cunning" }
+    ],
+    "lpReward": 300
+  }
+]

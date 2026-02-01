@@ -37,9 +37,9 @@ export const getLevelStats = (totalPoints: number = 0) => {
 };
 
 export const getBadgeDetails = (level: number) => {
-    if (level >= 20) return { name: "Thovhele", icon: "👑" };
-    if (level >= 15) return { name: "Gota", icon: "🐘" };
-    if (level >= 10) return { name: "Vele", icon: "🦁" };
-    if (level >= 5) return { name: "Muhali", icon: "🛡️" };
-    return { name: "Mufunzi", icon: "🌱" };
+    if (level >= 20) return { name: "Thovhele", icon: "👑", color: "#f59e0b" }; // Gold
+    if (level >= 15) return { name: "Gota", icon: "🐘", color: "#059669" }; // Emerald
+    if (level >= 10) return { name: "Vele", icon: "🦁", color: "#4f46e5" }; // Indigo
+    if (level >= 5) return { name: "Muhali", icon: "🛡️", color: "#4f46e5" }; // Indigo
+    return { name: "Mufunzi", icon: "🌱", color: "#10b981" }; // Green
 };

@@ -2,6 +2,7 @@ import React, { useState, type FormEvent } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { auth } from '../services/firebaseConfig';
 import { signInWithEmailAndPassword } from 'firebase/auth';
+import { updateStreak } from '../services/streakUtils';
 
 const Login: React.FC = () => {
     const [email, setEmail] = useState<string>('');
@@ -17,7 +18,9 @@ const Login: React.FC = () => {
         setLoading(true);
 
         try {
-            await signInWithEmailAndPassword(auth, email, password);
+            const userCredential = await signInWithEmailAndPassword(auth, email, password);
+            await updateStreak(userCredential.user.uid);
+
             const redirectTo = localStorage.getItem('redirectUrl');
             if (redirectTo) {
                 localStorage.removeItem('redirectUrl');
@@ -26,128 +29,110 @@ const Login: React.FC = () => {
                 navigate('/');
             }
         } catch (err: any) {
-            setError("Tshikwama tsha u dzhena tsho xela. (Login failed. Please check your details.)");
+            setError("Zi do do mbedzwa zwavho asi zone avha dovhe hafhu.");
         } finally {
             setLoading(false);
         }
     };
 
     return (
-        <div className="container-fluid p-0 overflow-hidden">
-            <div className="row g-0 min-vh-100">
+        <div className="min-vh-100 d-flex align-items-center justify-content-center bg-white px-3 py-5">
+            <div className="w-100" style={{ maxWidth: '400px' }}>
 
-                {/* LEFT SIDE: BRANDING & WELCOME (Visible on md and up) */}
-                <div className="col-lg-6 d-none d-lg-flex flex-column justify-content-center align-items-center bg-primary text-white p-5 position-relative">
-                    <div className="position-absolute top-0 start-0 p-4">
-                        <h4 className="fw-bold mb-0 ls-1">VENDA LEARN</h4>
+                <div className="text-center mb-5 animate__animated animate__fadeIn">
+                    <div className="d-inline-flex align-items-center justify-content-center rounded-3 mb-3"
+                         style={{ width: '56px', height: '56px', backgroundColor: '#FACC15' }}>
+                        <span className="fw-bold fs-2 text-dark">V</span>
                     </div>
-
-                    <div className="text-center animate__animated animate__fadeInLeft">
-                        <div className="display-1 mb-4">🇿🇦</div>
-                        <h1 className="display-3 fw-bold mb-3">Ndaa & Aa!</h1>
-                        <p className="fs-5 opacity-75 max-width-400">
-                            Join thousands of warriors mastering the Tshivenda language and climbing the Muvhigo.
-                        </p>
-                    </div>
-
-                    {/* Decorative element */}
-                    <div className="position-absolute bottom-0 start-0 w-100 p-4 opacity-25 text-center">
-                        <small>© 2025 Venda Learn • Built for the Community</small>
-                    </div>
+                    <h2 className="fw-bold ls-1 text-dark mb-1">VENDA LEARN</h2>
+                    <p className="text-muted small">VhoTanganedzwa kha Platform yashu<br/> Kha vha pange zidodombedzwa zwavho </p>
                 </div>
 
-                {/* RIGHT SIDE: LOGIN FORM */}
-                <div className="col-lg-6 d-flex align-items-center justify-content-center bg-white">
-                    <div className="w-100 p-4 p-md-5" style={{ maxWidth: '500px' }}>
+                {error && (
+                    <div className="alert border-0 py-3 small mb-4 text-center"
+                         style={{ backgroundColor: '#FEF2F2', color: '#B91C1C', borderBottom: '2px solid #EF4444' }}>
+                        {error}
+                    </div>
+                )}
 
-                        <div className="mb-5 animate__animated animate__fadeInUp">
-                            <h2 className="fw-bold text-dark h1">Vho Dzhena</h2>
-                            <p className="text-muted">Sign in to continue your learning journey.</p>
-                        </div>
-
-                        {error && (
-                            <div className="alert alert-danger border-0 shadow-sm py-3 small animate__animated animate__shakeX">
-                                <strong>Ndaela:</strong> {error}
-                            </div>
-                        )}
-
-                        <form onSubmit={handleSubmit} className="animate__animated animate__fadeInUp animate__delay-1s">
-                            <div className="mb-4">
-                                <label className="form-label small fw-bold text-uppercase text-muted ls-1">Email Address</label>
-                                <div className="input-group">
-                                    <span className="input-group-text bg-light border-end-0">
-                                        <i className="bi bi-envelope text-muted"></i>
-                                    </span>
-                                    <input
-                                        type="email"
-                                        className="form-control form-control-lg bg-light border-start-0 fs-6"
-                                        placeholder="vhadau@example.com"
-                                        value={email}
-                                        onChange={(e) => setEmail(e.target.value)}
-                                        required
-                                        disabled={loading}
-                                    />
-                                </div>
-                            </div>
-
-                            <div className="mb-4">
-                                <div className="d-flex justify-content-between">
-                                    <label className="form-label small fw-bold text-uppercase text-muted ls-1">Password</label>
-                                    <Link to="/reset-password" name="reset" className="small text-decoration-none fw-bold text-primary">
-                                        Forgot?
-                                    </Link>
-                                </div>
-                                <div className="input-group">
-                                    <span className="input-group-text bg-light border-end-0">
-                                        <i className="bi bi-lock text-muted"></i>
-                                    </span>
-                                    <input
-                                        type="password"
-                                        className="form-control form-control-lg bg-light border-start-0 fs-6"
-                                        placeholder="••••••••"
-                                        value={password}
-                                        onChange={(e) => setPassword(e.target.value)}
-                                        required
-                                        disabled={loading}
-                                    />
-                                </div>
-                            </div>
-
-                            <div className="mb-4 d-flex align-items-center">
-                                <input type="checkbox" className="form-check-input me-2" id="remember" />
-                                <label htmlFor="remember" className="small text-muted mb-0">Remember me</label>
-                            </div>
-
-                            <button
-                                type="submit"
-                                className="btn btn-primary btn-lg w-100 fw-bold shadow-sm py-3 mb-4 transition-all hover-lift"
+                <form onSubmit={handleSubmit}>
+                    <div className="mb-4">
+                        <label className="form-label small fw-bold text-uppercase text-muted ls-1">Email</label>
+                        <div className="custom-input-group">
+                            <input
+                                type="email"
+                                className="form-control form-control-lg border-0 bg-transparent fs-6 px-0"
+                                placeholder="vhadau@example.com"
+                                value={email}
+                                onChange={(e) => setEmail(e.target.value)}
+                                required
                                 disabled={loading}
-                            >
-                                {loading ? (
-                                    <>
-                                        <span className="spinner-border spinner-border-sm me-2"></span>
-                                        U khou dzhena...
-                                    </>
-                                ) : 'SIGN IN'}
-                            </button>
-                        </form>
-
-                        <div className="text-center pt-2">
-                            <p className="text-muted">
-                                New here? <Link to="/register" className="text-decoration-none fw-bold text-primary">Dzhenisani Dzina (Sign Up)</Link>
-                            </p>
+                            />
                         </div>
                     </div>
-                </div>
 
+                    <div className="mb-4">
+                        <div className="d-flex justify-content-between">
+                            <label className="form-label small fw-bold text-uppercase text-muted ls-1">Password</label>
+                            <Link to="/reset-password" intrinsic-name="reset" className="small text-decoration-none fw-bold" style={{ color: '#111827' }}>
+                                Forgot?
+                            </Link>
+                        </div>
+                        <div className="custom-input-group">
+                            <input
+                                type="password"
+                                className="form-control form-control-lg border-0 bg-transparent fs-6 px-0"
+                                placeholder="••••••••"
+                                value={password}
+                                onChange={(e) => setPassword(e.target.value)}
+                                required
+                                disabled={loading}
+                            />
+                        </div>
+                    </div>
+
+                    <button type="submit" className="btn btn-lg w-100 fw-bold py-3 mb-4 game-btn-primary" disabled={loading}>
+                        {loading ? <span className="spinner-border spinner-border-sm me-2"></span> : 'SIGN IN'}
+                    </button>
+                </form>
+
+                <div className="text-center mt-3">
+                    <p className="text-muted small mb-3">New here?</p>
+                    <Link to="/register" className="btn btn-outline-dark w-100 fw-bold py-2 rounded-3 btn-signup-action">
+                        CREATE ACCOUNT
+                    </Link>
+                </div>
             </div>
 
             <style>{`
                 .ls-1 { letter-spacing: 1px; }
-                .max-width-400 { max-width: 400px; margin: 0 auto; }
-                .hover-lift:hover { transform: translateY(-2px); box-shadow: 0 10px 20px rgba(0,0,0,0.1) !important; }
-                .form-control:focus { background-color: #fff !important; box-shadow: none; border-color: #0d6efd; }
-                .input-group-text { border-color: #dee2e6; }
+                .game-btn-primary { 
+                    background-color: #FACC15 !important; 
+                    color: #111827 !important; 
+                    border: none !important; 
+                    border-radius: 12px; 
+                    box-shadow: 0 4px 0 #EAB308 !important; 
+                    transition: all 0.2s; 
+                }
+                .game-btn-primary:active { transform: translateY(2px); box-shadow: 0 2px 0 #EAB308 !important; }
+                
+                .custom-input-group { 
+                    border-bottom: 2px solid #F3F4F6; 
+                    transition: 0.2s; 
+                    background: transparent; 
+                }
+                .custom-input-group:focus-within { border-color: #FACC15; }
+                .form-control:focus { background-color: transparent !important; box-shadow: none; outline: none; }
+                
+                .btn-signup-action {
+                    border: 2px solid #111827;
+                    font-size: 0.85rem;
+                    letter-spacing: 0.5px;
+                }
+                .btn-signup-action:hover {
+                    background-color: #111827;
+                    color: #fff;
+                }
             `}</style>
         </div>
     );

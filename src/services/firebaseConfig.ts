@@ -1,7 +1,12 @@
-// src/firebaseConfig.ts
+// src/services/firebaseConfig.ts
 import { initializeApp } from "firebase/app";
 import { getAuth } from "firebase/auth";
-import { getFirestore } from "firebase/firestore";
+import {
+    initializeFirestore,
+    persistentLocalCache,
+    persistentMultipleTabManager
+} from "firebase/firestore";
+
 const firebaseConfig = {
     apiKey: "AIzaSyDktGtTGJDo11ol3FLJGI-ygKFnIZkqzuM",
     authDomain: "venda-learn.firebaseapp.com",
@@ -14,6 +19,13 @@ const firebaseConfig = {
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 
-// Export services to use in your pages
+// Initialize Firestore with Persistent Caching
+// Multi-tab manager allows the cache to work across different browser tabs
+export const db = initializeFirestore(app, {
+    localCache: persistentLocalCache({
+        tabManager: persistentMultipleTabManager()
+    })
+});
+
+// Export Auth
 export const auth = getAuth(app);
-export const db = getFirestore(app);

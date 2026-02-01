@@ -5,18 +5,10 @@ import { doc, setDoc, updateDoc, increment } from 'firebase/firestore';
 import { auth, db } from '../services/firebaseConfig';
 
 const Register: React.FC = () => {
-    const [formData, setFormData] = useState({
-        username: '',
-        email: '',
-        password: '',
-        confirmPassword: ''
-    });
-
+    const [formData, setFormData] = useState({ username: '', email: '', password: '', confirmPassword: '' });
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const navigate = useNavigate();
-
-    // Check URL for referral code (?ref=USER_ID)
     const [searchParams] = useSearchParams();
     const referrerId = searchParams.get('ref');
 
@@ -28,188 +20,112 @@ const Register: React.FC = () => {
     const handleSubmit = async (e: FormEvent) => {
         e.preventDefault();
         setError(null);
-
         if(formData.password !== formData.confirmPassword) {
-            setError("Phaswidzi dza vhoiwe dzo fhambana! (Passwords do not match!)");
+            setError("Phaswidzi dza vhoiwe dzo fhambana!");
             return;
         }
-
         setLoading(true);
-
         try {
-            // 1. Create the new user in Firebase Auth
-            const userCredential = await createUserWithEmailAndPassword(
-                auth,
-                formData.email,
-                formData.password
-            );
-
-            // 2. Save the new user's profile to Firestore
+            const userCredential = await createUserWithEmailAndPassword(auth, formData.email, formData.password);
             await setDoc(doc(db, "users", userCredential.user.uid), {
-                username: formData.username,
-                email: formData.email,
-                points: 0,
-                level: 1,
-                streak: 0,
-                completedLessons: [],
-                createdAt: new Date().toISOString()
+                username: formData.username, email: formData.email, points: 0, level: 1, streak: 0, completedLessons: [], createdAt: new Date().toISOString()
             });
-
-            // 3. REFERRAL LOGIC: Reward the friend who invited them
             if (referrerId) {
-                try {
-                    const referrerRef = doc(db, "users", referrerId);
-                    await updateDoc(referrerRef, {
-                        points: increment(500) // Automatically adds 500 LP to the inviter
-                    });
-                    console.log("Success: Referrer rewarded with 500 LP!");
-                } catch (refErr) {
-                    // We don't block registration if the referral update fails
-                    console.error("Referral reward failed:", refErr);
-                }
+                try { await updateDoc(doc(db, "users", referrerId), { points: increment(500) }); } catch (err) { console.error(err); }
             }
-
             navigate('/');
         } catch (err: any) {
-            if (err.code === 'auth/email-already-in-use') {
-                setError("Iyi imeili yo no shumiswa. (This email is already in use.)");
-            } else {
-                setError(err.message);
-            }
-        } finally {
-            setLoading(false);
-        }
+            setError(err.code === 'auth/email-already-in-use' ? "Iyi imeili yo no shumiswa." : err.message);
+        } finally { setLoading(false); }
     };
 
     return (
-        <div className="container-fluid p-0 overflow-hidden">
-            <div className="row g-0 min-vh-100">
+        <div className="min-vh-100 d-flex align-items-center justify-content-center bg-white px-3 py-5">
+            <div className="w-100" style={{ maxWidth: '450px' }}>
 
-                {/* LEFT SIDE: BRANDING */}
-                <div className="col-lg-6 d-none d-lg-flex flex-column justify-content-center align-items-center bg-success text-white p-5 position-relative">
-                    <div className="position-absolute top-0 start-0 p-4">
-                        <h4 className="fw-bold mb-0 ls-1">VENDA LEARN</h4>
+                <div className="text-center mb-5 animate__animated animate__fadeIn">
+                    <div className="d-inline-flex align-items-center justify-content-center rounded-3 mb-3"
+                         style={{ width: '56px', height: '56px', backgroundColor: '#FACC15' }}>
+                        <span className="fw-bold fs-2 text-dark">V</span>
                     </div>
-
-                    <div className="text-center animate__animated animate__fadeInLeft">
-                        <div className="display-1 mb-4">🛡️</div>
-                        <h1 className="display-3 fw-bold mb-3">Vhuya u fhedze!</h1>
-                        <p className="fs-5 opacity-75 max-width-400">
-                            Create your profile and start earning points to become a Tshivenda language legend.
-                        </p>
-                        {referrerId && (
-                            <div className="badge bg-white text-success px-3 py-2 rounded-pill mt-3 shadow-sm animate__animated animate__pulse animate__infinite">
-                                🎁 You were invited! Join to help your friend earn 500 LP.
-                            </div>
-                        )}
-                    </div>
-
-                    <div className="position-absolute bottom-0 start-0 w-100 p-4 opacity-25 text-center">
-                        <small>© 2025 Venda Learn • Thoma u guda namusi</small>
-                    </div>
+                    <h2 className="fw-bold ls-1 text-dark mb-1">VENDA LEARN</h2>
                 </div>
 
-                {/* RIGHT SIDE: REGISTER FORM */}
-                <div className="col-lg-6 d-flex align-items-center justify-content-center bg-white">
-                    <div className="w-100 p-4 p-md-5" style={{ maxWidth: '550px' }}>
+                {error && (
+                    <div className="alert border-0 py-3 small mb-4 text-center"
+                         style={{ backgroundColor: '#FEF2F2', color: '#B91C1C', borderBottom: '2px solid #EF4444' }}>
+                        {error}
+                    </div>
+                )}
 
-                        <div className="mb-4 animate__animated animate__fadeInUp">
-                            <h2 className="fw-bold text-dark h1">Ṅwalisani</h2>
-                            <p className="text-muted">Fill in your details to create a new account.</p>
-                        </div>
-
-                        {error && (
-                            <div className="alert alert-danger border-0 shadow-sm py-3 small animate__animated animate__shakeX">
-                                <strong>Ndaela:</strong> {error}
-                            </div>
-                        )}
-
-                        <form onSubmit={handleSubmit} className="animate__animated animate__fadeInUp animate__delay-1s">
-                            <div className="row">
-                                <div className="col-12 mb-3">
-                                    <label className="form-label small fw-bold text-uppercase text-muted ls-1">Full Name (Dzina)</label>
-                                    <input
-                                        name="username"
-                                        type="text"
-                                        className="form-control form-control-lg bg-light border-0 fs-6"
-                                        placeholder="John Doe"
-                                        onChange={handleChange}
-                                        required
-                                        disabled={loading}
-                                    />
-                                </div>
-
-                                <div className="col-12 mb-3">
-                                    <label className="form-label small fw-bold text-uppercase text-muted ls-1">Email</label>
-                                    <input
-                                        name="email"
-                                        type="email"
-                                        className="form-control form-control-lg bg-light border-0 fs-6"
-                                        placeholder="vhadau@example.com"
-                                        onChange={handleChange}
-                                        required
-                                        disabled={loading}
-                                    />
-                                </div>
-
-                                <div className="col-md-6 mb-3">
-                                    <label className="form-label small fw-bold text-uppercase text-muted ls-1">Password</label>
-                                    <input
-                                        name="password"
-                                        type="password"
-                                        className="form-control form-control-lg bg-light border-0 fs-6"
-                                        placeholder="••••••••"
-                                        onChange={handleChange}
-                                        required
-                                        disabled={loading}
-                                    />
-                                </div>
-
-                                <div className="col-md-6 mb-4">
-                                    <label className="form-label small fw-bold text-uppercase text-muted ls-1">Confirm</label>
-                                    <input
-                                        name="confirmPassword"
-                                        type="password"
-                                        className="form-control form-control-lg bg-light border-0 fs-6"
-                                        placeholder="••••••••"
-                                        onChange={handleChange}
-                                        required
-                                        disabled={loading}
-                                    />
-                                </div>
-                            </div>
-
-                            <button
-                                type="submit"
-                                className="btn btn-success btn-lg w-100 fw-bold shadow-sm py-3 mb-4 transition-all hover-lift"
-                                disabled={loading}
-                            >
-                                {loading ? (
-                                    <>
-                                        <span className="spinner-border spinner-border-sm me-2"></span>
-                                        U khou ṅwalisa...
-                                    </>
-                                ) : 'CREATE ACCOUNT'}
-                            </button>
-                        </form>
-
-                        <div className="text-center pt-2">
-                            <p className="text-muted">
-                                Already have an account? <Link to="/login" className="text-decoration-none fw-bold text-success">Vho dzhena (Login)</Link>
-                            </p>
+                <form onSubmit={handleSubmit}>
+                    <div className="mb-3">
+                        <label className="form-label small fw-bold text-uppercase text-muted ls-1">Full Name</label>
+                        <div className="custom-input-group">
+                            <input name="username" type="text" className="form-control form-control-lg border-0 bg-transparent fs-6 px-0" placeholder="John Doe" onChange={handleChange} required disabled={loading} />
                         </div>
                     </div>
-                </div>
+                    <div className="mb-3">
+                        <label className="form-label small fw-bold text-uppercase text-muted ls-1">Email</label>
+                        <div className="custom-input-group">
+                            <input name="email" type="email" className="form-control form-control-lg border-0 bg-transparent fs-6 px-0" placeholder="vhadau@example.com" onChange={handleChange} required disabled={loading} />
+                        </div>
+                    </div>
+                    <div className="row mb-4">
+                        <div className="col-md-6 mb-3 mb-md-0">
+                            <label className="form-label small fw-bold text-uppercase text-muted ls-1">Password</label>
+                            <div className="custom-input-group">
+                                <input name="password" type="password" className="form-control form-control-lg border-0 bg-transparent fs-6 px-0" placeholder="••••••••" onChange={handleChange} required disabled={loading} />
+                            </div>
+                        </div>
+                        <div className="col-md-6">
+                            <label className="form-label small fw-bold text-uppercase text-muted ls-1">Confirm</label>
+                            <div className="custom-input-group">
+                                <input name="confirmPassword" type="password" className="form-control form-control-lg border-0 bg-transparent fs-6 px-0" placeholder="••••••••" onChange={handleChange} required disabled={loading} />
+                            </div>
+                        </div>
+                    </div>
+                    <button type="submit" className="btn btn-lg w-100 fw-bold py-3 mb-4 game-btn-primary" disabled={loading}>
+                        {loading ? <span className="spinner-border spinner-border-sm me-2"></span> : 'CREATE ACCOUNT'}
+                    </button>
+                </form>
 
+                <div className="text-center mt-3">
+                    <p className="text-muted small mb-3">Already have an account?</p>
+                    <Link to="/login" className="btn btn-outline-dark w-100 fw-bold py-2 rounded-3 btn-login-action">
+                        LOG IN
+                    </Link>
+                </div>
             </div>
 
             <style>{`
                 .ls-1 { letter-spacing: 1px; }
-                .max-width-400 { max-width: 400px; margin: 0 auto; }
-                .hover-lift:hover { transform: translateY(-2px); box-shadow: 0 10px 20px rgba(0,0,0,0.1) !important; }
-                .form-control:focus { background-color: #fff !important; box-shadow: none; border: 1px solid #198754; }
-                .bg-success { background-color: #198754 !important; }
-                .text-success { color: #198754 !important; }
+                .game-btn-primary { 
+                    background-color: #FACC15 !important; 
+                    color: #111827 !important; 
+                    border: none !important; 
+                    border-radius: 12px; 
+                    box-shadow: 0 4px 0 #EAB308 !important; 
+                    transition: all 0.2s; 
+                }
+                .game-btn-primary:active { transform: translateY(2px); box-shadow: 0 2px 0 #EAB308 !important; }
+                
+                .custom-input-group { 
+                    border-bottom: 2px solid #F3F4F6; 
+                    transition: 0.2s; 
+                }
+                .custom-input-group:focus-within { border-color: #FACC15; }
+                .form-control:focus { background-color: transparent !important; box-shadow: none; outline: none; }
+                
+                .btn-login-action {
+                    border: 2px solid #111827;
+                    font-size: 0.85rem;
+                    letter-spacing: 0.5px;
+                }
+                .btn-login-action:hover {
+                    background-color: #111827;
+                    color: #fff;
+                }
             `}</style>
         </div>
     );

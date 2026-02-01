@@ -1,0 +1,189 @@
+/* ============================================
+   VENDA LEARN - GAMIFICATION DESIGN SYSTEM
+   Theme: High-Energy Amber (Poppins / Compact Scale)
+   ============================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&display=swap');
+
+:root {
+  /* Brand Colors */
+  --game-primary: #f59e0b;
+  --game-primary-dark: #d97706;
+  --game-primary-light: #fbbf24;
+
+  --game-bg-primary: #0f172a;
+  --game-bg-secondary: #1e293b;
+
+  --game-text-light: #ffffff;
+  --game-text-inverse: #111827;
+
+  /* Refined Scaling */
+  --game-radius-md: 8px;
+  --game-font-family: 'Poppins', sans-serif;
+}
+
+/* ============================================
+   GLOBAL TYPOGRAPHY - Reduced Size
+   ============================================ */
+body {
+  font-family: var(--game-font-family);
+  font-size: 14px; /* Reduced from default 16px */
+  background-color: var(--game-bg-primary);
+  color: var(--game-text-light);
+  line-height: 1.5;
+}
+
+/* ============================================
+   BUTTONS - Compact & Tactile
+   ============================================ */
+.btn-game {
+  font-family: var(--game-font-family);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border: none;
+  border-radius: var(--game-radius-md);
+
+  /* Compact Padding */
+  padding: 0.5rem 1.1rem;
+  font-size: 0.75rem; /* Small, sharp text */
+
+  transition: all 0.15s ease-in-out;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  position: relative;
+}
+
+.btn-game-primary {
+  background-color: var(--game-primary);
+  color: var(--game-text-inverse);
+  /* The "Game" Depth Effect */
+  box-shadow: 0 3px 0 var(--game-primary-dark);
+}
+
+.btn-game-primary:hover {
+  background-color: var(--game-primary-light);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 0 var(--game-primary-dark);
+}
+
+.btn-game-primary:active {
+  transform: translateY(2px);
+  box-shadow: 0 1px 0 var(--game-primary-dark);
+}
+
+/* Extra Small variant for Navbars */
+.btn-game-xs {
+  padding: 0.3rem 0.7rem;
+  font-size: 0.65rem;
+  border-radius: 6px;
+  box-shadow: 0 2px 0 var(--game-primary-dark);
+}
+
+.btn-game-xs:active {
+  box-shadow: 0 0px 0 var(--game-primary-dark);
+}
+
+/* ============================================
+   COMPACT UI ELEMENTS
+   ============================================ */
+
+/* Streak Label */
+.streak-container {
+  background-color: #f97316;
+  padding: 0.3rem 0.7rem;
+  border-radius: 6px;
+  font-weight: 800;
+  font-size: 0.7rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* Level Badge (Smaller) */
+.level-badge {
+  width: 32px;
+  height: 32px;
+  background-color: var(--game-primary);
+  color: var(--game-text-inverse);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  font-size: 0.8rem;
+  border: 2px solid var(--game-bg-primary);
+}
+
+/* XP Text */
+.xp-tag {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #10b981;
+}
+/* Customizing the SweetAlert2 Container */
+.swal2-popup {
+  font-family: 'Poppins', sans-serif !important;
+  border-radius: 20px !important;
+  padding: 2rem !important;
+  background: #ffffff !important;
+  border: 3px solid #111827 !important; /* Coal border */
+}
+
+/* Customizing the Title */
+.swal2-title {
+  font-weight: 800 !important;
+  text-transform: uppercase !important;
+  letter-spacing: -0.5px !important;
+  color: #111827 !important;
+  font-size: 1.5rem !important;
+}
+
+/* Customizing the Content/Text */
+.swal2-html-container {
+  font-size: 14px !important;
+  color: #475569 !important;
+}
+
+/* The Success/Error Icons */
+.swal2-icon.swal2-success {
+  border-color: #10B981 !important;
+}
+.swal2-icon.swal2-success [class^='swal2-success-line'] {
+  background-color: #10B981 !important;
+}
+.swal2-backdrop-show {
+  background: rgba(15, 23, 42, 0.8) !important; /* Dark Slate transparent */
+  backdrop-filter: blur(4px); /* Modern blur effect */
+}
+/* Customizing the Confirm Button to match your Game Buttons */
+.swal2-confirm {
+  background-color: #FACC15 !important;
+  color: #111827 !important;
+  font-weight: 700 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 1px !important;
+  font-size: 11px !important;
+  border-radius: 10px !important;
+  padding: 12px 30px !important;
+  box-shadow: 0 4px 0 #EAB308 !important; /* 3D effect */
+  border: none !important;
+}
+
+.swal2-confirm:focus {
+  box-shadow: 0 4px 0 #EAB308 !important;
+}
+
+.swal2-confirm:active {
+  transform: translateY(2px) !important;
+  box-shadow: 0 2px 0 #EAB308 !important;
+}
+
+/* Small Headings */
+h1, .h1 { font-size: 1.75rem; font-weight: 800; }
+h2, .h2 { font-size: 1.5rem; font-weight: 700; }
+h3, .h3 { font-size: 1.25rem; font-weight: 700; }
+h4, .h4 { font-size: 1rem; font-weight: 700; }

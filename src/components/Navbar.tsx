@@ -7,7 +7,7 @@ import Swal from 'sweetalert2';
 
 const Navbar: React.FC = () => {
     const [user, setUser] = useState<User | null>(null);
-    const [username, setUsername] = useState<string>('');
+    const [userData, setUserData] = useState<{username: string, points: number} | null>(null);
     const navigate = useNavigate();
     const location = useLocation();
 
@@ -18,12 +18,15 @@ const Navbar: React.FC = () => {
                 const userRef = doc(db, "users", currentUser.uid);
                 const unsubDoc = onSnapshot(userRef, (docSnap) => {
                     if (docSnap.exists()) {
-                        setUsername(docSnap.data().username || '');
+                        setUserData({
+                            username: docSnap.data().username || '',
+                            points: docSnap.data().points || 0
+                        });
                     }
                 });
                 return () => unsubDoc();
             } else {
-                setUsername('');
+                setUserData(null);
             }
         });
         return () => unsubscribe();
@@ -35,13 +38,13 @@ const Navbar: React.FC = () => {
             text: "Vho khwaṱha uri vha khou fhedza u shumisa system?",
             icon: 'question',
             showCancelButton: true,
-            confirmButtonColor: '#0d6efd',
-            cancelButtonColor: '#adb5bd',
+            confirmButtonColor: '#FACC15',
+            cancelButtonColor: '#111827',
             confirmButtonText: 'Yes, Sign Out',
             cancelButtonText: 'Cancel',
-            padding: '2rem',
             customClass: {
-                popup: 'rounded-4 border-0 shadow-lg'
+                popup: 'rounded-4 border-0 shadow-none',
+                confirmButton: 'text-dark fw-bold'
             }
         }).then(async (result) => {
             if (result.isConfirmed) {
@@ -51,87 +54,107 @@ const Navbar: React.FC = () => {
         });
     };
 
-    const getInitials = () => {
-        if (username) return username.charAt(0).toUpperCase();
-        if (user?.email) return user.email.charAt(0).toUpperCase();
-        return 'V';
-    };
-
-    // Helper to identify active link
     const isActive = (path: string) => location.pathname === path;
 
     return (
-        <nav className="navbar navbar-expand-lg sticky-top bg-white border-bottom py-3 shadow-sm animate__animated animate__fadeInDown">
-            <div className="container">
-                {/* LOGO STYLE MATCHING AUTH PAGES */}
-                <Link className="navbar-brand d-flex align-items-center" to="/">
-                    <div className="bg-primary text-white rounded-3 me-2 d-flex align-items-center justify-content-center fw-bold shadow-sm"
-                         style={{ width: '32px', height: '32px', fontSize: '1rem' }}>V</div>
-                    <span className="fw-bold text-dark ls-1" style={{ fontSize: '1.25rem', letterSpacing: '-0.5px' }}>
-                        VENDA<span className="text-primary">LEARN</span>
-                    </span>
+        <nav className="navbar navbar-expand-lg sticky-top bg-white border-bottom py-3">
+            <div className="container" style={{ maxWidth: '1100px' }}>
+
+                {/* BRAND LOGO & SLOGAN */}
+                <Link className="navbar-brand d-flex align-items-center mb-0 text-decoration-none shadow-none" to="/">
+                    <div className="text-dark rounded-3 me-3 d-flex align-items-center justify-content-center fw-bold flex-shrink-0"
+                         style={{ width: '42px', height: '42px', fontSize: '1.2rem', backgroundColor: '#FACC15', boxShadow: '0 2px 4px rgba(0,0,0,0.1)' }}>
+                        V
+                    </div>
+                    <div className="d-flex flex-column justify-content-center">
+                        <span className="fw-bold text-dark ls-tight lh-1" style={{ fontSize: '1.25rem' }}>
+                            VENDA<span style={{ color: '#FACC15' }}>LEARN</span>
+                        </span>
+                        <span className="shumela-venda-pulse fw-bold ls-2 text-uppercase">
+                            Shumela Venda
+                        </span>
+                    </div>
                 </Link>
 
                 <button className="navbar-toggler border-0 shadow-none" type="button" data-bs-toggle="collapse" data-bs-target="#vendaNavbar">
-                    <span className="navbar-toggler-icon"></span>
+                    <i className="bi bi-list fs-2 text-dark"></i>
                 </button>
 
                 <div className="collapse navbar-collapse" id="vendaNavbar">
-                    <ul className="navbar-nav ms-auto gap-lg-3 align-items-center">
-                        <li className="nav-item">
-                            <Link className={`nav-link fw-bold small text-uppercase ls-1 px-3 ${isActive('/') ? 'text-primary' : 'text-muted hover-primary'}`} to="/">
+                    <ul className="navbar-nav ms-auto gap-lg-4 align-items-center">
+                        <li className="nav-item w-100 w-lg-auto text-center">
+                            <Link className={`nav-link nav-custom-link ${isActive('/') ? 'active-link' : ''}`} to="/">
                                 Hayani
                             </Link>
                         </li>
-
-                        <li className="nav-item">
-                            <Link className={`nav-link fw-bold small text-uppercase ls-1 px-3 ${isActive('/muvhigo') ? 'text-primary' : 'text-muted hover-primary'}`} to="/muvhigo">
+                        <li className="nav-item w-100 w-lg-auto text-center">
+                            <Link className={`nav-link nav-custom-link ${isActive('/courses') ? 'active-link' : ''}`} to="/courses">
+                                Pfunzo
+                            </Link>
+                        </li>
+                        <li className="nav-item w-100 w-lg-auto text-center">
+                            <Link className={`nav-link nav-custom-link ${isActive('/history') ? 'active-link' : ''}`} to="/history">
+                                History
+                            </Link>
+                        </li>
+                        <li className="nav-item w-100 w-lg-auto text-center">
+                            <Link className={`nav-link nav-custom-link ${isActive('/muvhigo') ? 'active-link' : ''}`} to="/muvhigo">
                                 Muvhigo
                             </Link>
                         </li>
 
                         {user ? (
-                            <li className="nav-item dropdown ms-lg-3 mt-3 mt-lg-0 w-100 w-lg-auto">
+                            <li className="nav-item dropdown ms-lg-2 w-100 w-lg-auto text-center mt-3 mt-lg-0">
                                 <button
-                                    className="nav-link dropdown-toggle d-flex align-items-center gap-2 border-0 bg-light rounded-pill px-3 py-2 transition-all hover-shadow mx-auto mx-lg-0"
+                                    className="nav-link dropdown-toggle d-flex align-items-center justify-content-center gap-3 border-0 bg-transparent p-0 mx-auto shadow-none"
                                     data-bs-toggle="dropdown"
-                                    aria-expanded="false"
                                 >
-                                    <div className="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center fw-bold shadow-sm"
-                                         style={{ width: '32px', height: '32px', fontSize: '0.85rem' }}>
-                                        {getInitials()}
+                                    <div className="text-dark rounded-circle d-flex align-items-center justify-content-center fw-bold shadow-sm"
+                                         style={{ width: '38px', height: '38px', fontSize: '0.8rem', backgroundColor: '#FACC15', border: '2px solid #111827' }}>
+                                        {userData?.username.charAt(0).toUpperCase() || 'W'}
                                     </div>
-
-                                    <div className="text-start d-flex flex-column">
-                                        <span className="fw-bold text-dark small lh-1">
-                                            {username || "Warrior"}
-                                        </span>
-                                    </div>
+                                    <span className="d-lg-none fw-bold text-dark small text-uppercase ls-1">
+                                        {userData?.username || "Warrior"}
+                                    </span>
                                 </button>
-                                <ul className="dropdown-menu dropdown-menu-end shadow-lg border-0 mt-3 p-2 rounded-4 animate__animated animate__fadeIn">
-                                    <li className="px-3 py-2 border-bottom mb-2">
-                                        <div className="fw-bold text-dark small">Signed in as</div>
-                                        <div className="text-muted truncate small" style={{maxWidth: '150px'}}>{user.email}</div>
+
+                                <ul className="dropdown-menu dropdown-menu-end border shadow-lg mt-3 p-0 overflow-hidden rounded-4 mx-auto" style={{ minWidth: '240px' }}>
+                                    <li className="px-4 py-4 bg-light border-bottom text-start">
+                                        <p className="smallest fw-bold text-muted mb-1 ls-2 text-uppercase">Warrior Status</p>
+                                        <h6 className="fw-bold text-dark mb-0">{userData?.username || "Learner"}</h6>
+                                        <div className="d-flex align-items-center gap-2 mt-2">
+                                            <span className="badge bg-dark rounded-pill smallest ls-1">{userData?.points || 0} LP</span>
+                                            <span className="smallest text-muted fw-bold">Active</span>
+                                        </div>
                                     </li>
-                                    <li>
-                                        <Link className="dropdown-item rounded-3 py-2 transition-all" to="/profile">
-                                            <span className="me-2">👤</span> Profile
+
+                                    <li className="p-2 text-start">
+                                        <Link className="dropdown-item rounded-3 py-2 px-3 d-flex align-items-center gap-3 shadow-none" to="/profile">
+                                            <i className="bi bi-person text-muted"></i>
+                                            <span className="small fw-bold">Profile</span>
                                         </Link>
                                     </li>
-                                    <li><hr className="dropdown-divider opacity-50" /></li>
-                                    <li>
-                                        <button className="dropdown-item rounded-3 py-2 text-danger transition-all" onClick={handleLogout}>
-                                            <span className="me-2">🚪</span> Sign Out
+                                    <li className="p-2 pt-0 text-start">
+                                        <Link className="dropdown-item rounded-3 py-2 px-3 d-flex align-items-center gap-3 shadow-none" to="/settings">
+                                            <i className="bi bi-gear text-muted"></i>
+                                            <span className="small fw-bold">Settings</span>
+                                        </Link>
+                                    </li>
+
+                                    <li className="border-top p-2 bg-white text-start">
+                                        <button className="dropdown-item rounded-3 py-2 px-3 d-flex align-items-center gap-3 text-danger shadow-none" onClick={handleLogout}>
+                                            <i className="bi bi-box-arrow-right"></i>
+                                            <span className="small fw-bold">Sign Out</span>
                                         </button>
                                     </li>
                                 </ul>
                             </li>
                         ) : (
-                            <div className="ms-lg-4 mt-3 mt-lg-0 d-flex gap-2">
-                                <Link to="/login" className="btn btn-link text-decoration-none text-muted fw-bold small ls-1 px-3">
+                            <div className="ms-lg-4 d-flex flex-column flex-lg-row gap-2 mt-3 mt-lg-0 w-100 w-lg-auto">
+                                <Link to="/login" className="btn btn-link text-decoration-none text-dark fw-bold smallest ls-1 px-3 shadow-none">
                                     DZHENA
                                 </Link>
-                                <Link to="/register" className="btn btn-primary rounded-pill px-4 py-2 fw-bold small ls-1 shadow-sm transition-all hover-lift">
+                                <Link to="/register" className="btn game-btn-primary fw-bold smallest ls-1 px-4 py-2 shadow-none">
                                     ṄWALISANI
                                 </Link>
                             </div>
@@ -141,13 +164,70 @@ const Navbar: React.FC = () => {
             </div>
 
             <style>{`
+                .ls-tight { letter-spacing: -1.5px; }
                 .ls-1 { letter-spacing: 1px; }
-                .hover-primary:hover { color: #0d6efd !important; transition: 0.2s ease; }
-                .hover-shadow:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.08) !important; }
-                .hover-lift:hover { transform: translateY(-1px); box-shadow: 0 6px 15px rgba(13, 110, 253, 0.2) !important; }
-                .dropdown-item:active { background-color: #0d6efd; }
-                .truncate { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-                .transition-all { transition: all 0.2s ease-in-out; }
+                .ls-2 { letter-spacing: 2px; }
+                .smallest { font-size: 11px; }
+                
+                /* CLEAN NAV LINKS */
+                .nav-custom-link {
+                    font-weight: 700 !important;
+                    font-size: 11px !important;
+                    letter-spacing: 2px !important;
+                    text-transform: uppercase !important;
+                    color: #6B7280 !important; /* text-muted */
+                    padding: 0.5rem 0 !important;
+                    position: relative;
+                    transition: color 0.2s ease;
+                    text-decoration: none !important; /* Removes default underline */
+                    outline: none !important; /* Removes focus ring */
+                }
+
+                .nav-custom-link:hover {
+                    color: #FACC15 !important;
+                }
+
+                .active-link {
+                    color: #111827 !important; /* text-dark */
+                }
+
+                /* THE SINGLE YELLOW BAR */
+                @media (min-width: 992px) {
+                    .active-link::after {
+                        content: '';
+                        position: absolute;
+                        bottom: -2px;
+                        left: 0;
+                        width: 100%;
+                        height: 3px;
+                        background-color: #FACC15;
+                        border-radius: 10px;
+                    }
+                }
+
+                .shumela-venda-pulse {
+                    font-size: 9px;
+                    color: #9CA3AF;
+                    animation: pulseVenda 3s infinite ease-in-out;
+                }
+
+                @keyframes pulseVenda {
+                    0% { opacity: 0.6; transform: scale(1); }
+                    50% { opacity: 1; color: #FACC15; transform: scale(1.02); }
+                    100% { opacity: 0.6; transform: scale(1); }
+                }
+
+                .game-btn-primary { 
+                    background-color: #FACC15 !important; 
+                    color: #111827 !important; 
+                    border: none !important; 
+                    border-radius: 8px; 
+                    box-shadow: 0 3px 0 #EAB308 !important; 
+                    transition: all 0.2s; 
+                }
+                .game-btn-primary:active { transform: translateY(1px); box-shadow: 0 1px 0 #EAB308 !important; }
+                
+                .dropdown-toggle::after { display: none; }
             `}</style>
         </nav>
     );

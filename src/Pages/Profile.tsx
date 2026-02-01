@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { auth, db } from '../services/firebaseConfig';
-import { doc, getDoc, setDoc, updateDoc, increment } from 'firebase/firestore';
+import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { onAuthStateChanged } from 'firebase/auth';
 import { seedLessons } from "../services/seedDatabase.ts";
 import Swal from 'sweetalert2';
@@ -8,7 +8,7 @@ import Swal from 'sweetalert2';
 interface UserProfile {
     username: string;
     email: string;
-    points: number; // Changed to number for easier math
+    points: number;
     level: number;
     streak: number;
     completedLessons: string[];
@@ -21,7 +21,6 @@ const Profile: React.FC = () => {
     const [updateLoading, setUpdateLoading] = useState(false);
     const [editUsername, setEditUsername] = useState('');
 
-    // Referral Link
     const inviteLink = `${window.location.origin}/register?ref=${auth.currentUser?.uid}`;
 
     useEffect(() => {
@@ -39,17 +38,6 @@ const Profile: React.FC = () => {
                         streak: Number(data.streak) || 0
                     });
                     setEditUsername(data.username || '');
-                } else {
-                    const initialData: UserProfile = {
-                        username: 'New Learner',
-                        email: user.email || '',
-                        points: 0,
-                        level: 1,
-                        streak: 0,
-                        completedLessons: []
-                    };
-                    setUserData(initialData);
-                    setEditUsername('New Learner');
                 }
             }
             setLoading(false);
@@ -61,7 +49,7 @@ const Profile: React.FC = () => {
         navigator.clipboard.writeText(inviteLink);
         Swal.fire({
             title: 'Khopi!',
-            text: 'Invite link copied to clipboard. Send it to your friends!',
+            text: 'Invite link copied to clipboard.',
             icon: 'success',
             timer: 2000,
             showConfirmButton: false,
@@ -91,105 +79,117 @@ const Profile: React.FC = () => {
         }
     };
 
-    if (loading) return <div className="text-center p-5"><div className="spinner-border text-primary"></div></div>;
+    if (loading) return (
+        <div className="min-vh-100 bg-white d-flex justify-content-center align-items-center">
+            <div className="spinner-border" style={{ color: '#FACC15' }}></div>
+        </div>
+    );
 
     return (
-        <div className="container py-5 animate__animated animate__fadeIn">
-            <div className="row justify-content-center">
-                <div className="col-md-6 col-lg-5">
+        <div className="bg-white min-vh-100 py-5">
+            <div className="container" style={{ maxWidth: '700px' }}>
 
-                    {/* USER CARD */}
-                    <div className="card border-0 shadow-sm p-4 rounded-4 bg-white mb-4">
-                        <div className="text-center mb-4">
-                            <div className="bg-primary text-white rounded-circle mx-auto mb-3 d-flex align-items-center justify-content-center shadow-lg"
-                                 style={{ width: '100px', height: '100px', fontSize: '2.5rem', fontWeight: 'bold' }}>
-                                {userData?.username?.charAt(0).toUpperCase() || 'V'}
+                {/* HEADER */}
+                <header className="text-center mb-5 pb-5 border-bottom">
+                    <div className="text-dark rounded-circle mx-auto mb-4 d-flex align-items-center justify-content-center fw-bold shadow-sm"
+                         style={{ width: '120px', height: '120px', fontSize: '3rem', backgroundColor: '#FACC15', border: '4px solid #111827' }}>
+                        {userData?.username?.charAt(0).toUpperCase() || 'V'}
+                    </div>
+                    <h1 className="fw-bold mb-1 ls-tight">{userData?.username}</h1>
+                    <p className="smallest fw-bold text-muted text-uppercase ls-2">{userData?.email}</p>
+                </header>
+
+                {/* STATS STRIP */}
+                <section className="row text-center mb-5 g-0">
+                    <div className="col-4 border-end">
+                        <p className="smallest fw-bold text-muted mb-1 ls-2 text-uppercase">Total LP</p>
+                        <h3 className="fw-bold mb-0">{userData?.points}</h3>
+                    </div>
+                    <div className="col-4 border-end">
+                        <p className="smallest fw-bold text-muted mb-1 ls-2 text-uppercase">Level</p>
+                        <h3 className="fw-bold mb-0" style={{ color: '#FACC15' }}>{userData?.level}</h3>
+                    </div>
+                    <div className="col-4">
+                        <p className="smallest fw-bold text-muted mb-1 ls-2 text-uppercase">Streak</p>
+                        <h3 className="fw-bold mb-0">{userData?.streak} 🔥</h3>
+                    </div>
+                </section>
+
+                {/* PROFILE EDITING */}
+                <section className="mb-5 pb-5 border-bottom">
+                    {!isEditing ? (
+                        <button onClick={() => setIsEditing(true)} className="btn btn-outline-dark border-2 w-100 py-3 fw-bold ls-1 rounded-3">
+                            EDIT PROFILE
+                        </button>
+                    ) : (
+                        <form onSubmit={handleUpdate} className="animate__animated animate__fadeIn">
+                            <div className="mb-4">
+                                <label className="smallest fw-bold text-muted text-uppercase ls-2 mb-2">Dzina (Username)</label>
+                                <input
+                                    type="text"
+                                    className="form-control border-0 bg-light py-3 px-4 rounded-3 fw-bold"
+                                    value={editUsername}
+                                    onChange={(e) => setEditUsername(e.target.value)}
+                                    required
+                                />
                             </div>
-                            <h2 className="fw-bold mb-0">{userData?.username}</h2>
-                            <p className="text-muted small">{auth.currentUser?.email}</p>
-                        </div>
-
-                        {!isEditing ? (
-                            <div className="text-center">
-                                <div className="row bg-light rounded-4 p-3 mb-4 g-0 border">
-                                    <div className="col-4 border-end">
-                                        <h5 className="mb-0 fw-bold text-primary">{userData?.points}</h5>
-                                        <small className="text-muted text-uppercase fw-bold" style={{fontSize: '10px'}}>Points</small>
-                                    </div>
-                                    <div className="col-4 border-end">
-                                        <h5 className="mb-0 fw-bold text-success">{userData?.level}</h5>
-                                        <small className="text-muted text-uppercase fw-bold" style={{fontSize: '10px'}}>Level</small>
-                                    </div>
-                                    <div className="col-4">
-                                        <h5 className="mb-0 fw-bold text-warning">{userData?.streak}</h5>
-                                        <small className="text-muted text-uppercase fw-bold" style={{fontSize: '10px'}}>Streak</small>
-                                    </div>
-                                </div>
-                                <button onClick={() => setIsEditing(true)} className="btn btn-primary w-100 rounded-pill fw-bold py-2 shadow-sm">
-                                    Edit Profile
+                            <div className="d-flex gap-2">
+                                <button type="submit" className="btn game-btn-primary flex-grow-1 py-3 fw-bold ls-1" disabled={updateLoading}>
+                                    {updateLoading ? 'SAVING...' : 'SAVE CHANGES'}
+                                </button>
+                                <button type="button" onClick={() => setIsEditing(false)} className="btn btn-light px-4 py-3 fw-bold ls-1">
+                                    CANCEL
                                 </button>
                             </div>
-                        ) : (
-                            <form onSubmit={handleUpdate}>
-                                <div className="mb-3 text-start">
-                                    <label className="form-label small fw-bold text-uppercase text-muted">Username (Dzina)</label>
-                                    <input
-                                        type="text"
-                                        className="form-control form-control-lg fs-6 border-0 bg-light"
-                                        value={editUsername}
-                                        onChange={(e) => setEditUsername(e.target.value)}
-                                        required
-                                    />
-                                </div>
-                                <div className="d-flex gap-2">
-                                    <button type="submit" className="btn btn-success flex-grow-1 fw-bold rounded-pill" disabled={updateLoading}>
-                                        {updateLoading ? 'Saving...' : 'Save Changes'}
-                                    </button>
-                                    <button type="button" onClick={() => setIsEditing(false)} className="btn btn-light fw-bold rounded-pill">
-                                        Cancel
-                                    </button>
-                                </div>
-                            </form>
-                        )}
-                    </div>
+                        </form>
+                    )}
+                </section>
 
-                    {/* INVITE SECTION */}
-                    <div className="card border-0 shadow-sm p-4 rounded-4 bg-white text-center border-top border-primary border-5">
-                        <div className="mb-3">
-                            <span className="display-6">🎁</span>
-                        </div>
-                        <h5 className="fw-bold">Invite & Earn 500 LP</h5>
-                        <p className="text-muted small px-3">
-                            Ramba vhangana vhavho! Share your link and get 500 points when they join Venda Learn.
+                {/* REFERRAL / INVITE SECTION */}
+                <section className="bg-dark text-white p-5 rounded-4 position-relative overflow-hidden shadow-lg">
+                    <div className="position-relative z-1">
+                        <p className="smallest fw-bold ls-2 text-uppercase mb-2" style={{ color: '#FACC15' }}>Vhuimo ha Thonifho</p>
+                        <h2 className="fw-bold mb-3">Invite & Earn 500 LP</h2>
+                        <p className="small opacity-75 mb-4 pe-lg-5">
+                            Ramba vhangana vhavho! Spread the language. You'll receive 500 Learning Points for every warrior who joins through your link.
                         </p>
 
-                        <div className="input-group mb-3 bg-light rounded-pill p-1 border">
-                            <input
-                                type="text"
-                                className="form-control bg-transparent border-0 small px-3"
-                                value={inviteLink}
-                                readOnly
-                            />
-                            <button className="btn btn-primary rounded-pill px-4 fw-bold" onClick={handleCopyLink}>
-                                Copy
+                        <div className="d-flex flex-column flex-md-row gap-2">
+                            <div className="flex-grow-1 bg-white bg-opacity-10 rounded-3 p-3 small text-truncate border border-secondary border-opacity-25">
+                                {inviteLink}
+                            </div>
+                            <button className="btn game-btn-primary px-4 py-2 fw-bold ls-1" onClick={handleCopyLink}>
+                                COPY LINK
                             </button>
                         </div>
-
-                        <small className="text-primary fw-bold">#KhaRiGudeVenda</small>
                     </div>
+                    {/* Background decoration */}
+                    <div className="position-absolute top-0 end-0 opacity-10 display-1 p-4">🐘</div>
+                </section>
 
-                    {/* ADMIN TOOLS */}
-                    <div className="mt-4 text-center">
-                        <button onClick={seedLessons} className="btn btn-link text-muted smallest text-decoration-none">
-                            <i className="bi bi-gear-fill me-1"></i> Admin: Seed Lessons
-                        </button>
-                    </div>
-
-                </div>
+                {/* ADMIN TOOLS */}
+                <footer className="mt-5 pt-5 text-center">
+                    <button onClick={seedLessons} className="btn btn-link text-muted text-decoration-none smallest fw-bold ls-2 opacity-50">
+                        <i className="bi bi-shield-lock me-2"></i> ADMIN: SEED DATABASE
+                    </button>
+                </footer>
             </div>
 
             <style>{`
+                .ls-tight { letter-spacing: -1.5px; }
+                .ls-1 { letter-spacing: 1px; }
+                .ls-2 { letter-spacing: 2px; }
                 .smallest { font-size: 11px; }
+                
+                .game-btn-primary { 
+                    background-color: #FACC15 !important; 
+                    color: #111827 !important; 
+                    border: none !important; 
+                    border-radius: 8px; 
+                    box-shadow: 0 4px 0 #EAB308 !important; 
+                    transition: all 0.2s; 
+                }
+                .game-btn-primary:active { transform: translateY(2px); box-shadow: 0 2px 0 #EAB308 !important; }
             `}</style>
         </div>
     );

@@ -2,7 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { db, auth } from '../services/firebaseConfig';
 import { collection, query, getDocs, orderBy, limit } from 'firebase/firestore';
 import { getLevelStats, getBadgeDetails } from "../services/levelUtils.ts";
-import { Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
+import { onAuthStateChanged } from 'firebase/auth';
 
 interface Player {
     id: string;
@@ -11,12 +12,19 @@ interface Player {
 }
 
 const Leaderboard: React.FC = () => {
+    const navigate = useNavigate();
     const [players, setPlayers] = useState<Player[]>([]);
     const [currentUserRank, setCurrentUserRank] = useState<{rank: number, player: Player} | null>(null);
     const [loading, setLoading] = useState(true);
+    const [isLoggedIn, setIsLoggedIn] = useState(false);
     const [communityStats, setCommunityStats] = useState({ totalLP: 0, avgLevel: 0 });
 
     useEffect(() => {
+        // Track Auth State for the sidebar display
+        const unsubAuth = onAuthStateChanged(auth, (user) => {
+            setIsLoggedIn(!!user);
+        });
+
         const fetchLeaderboard = async () => {
             try {
                 const q = query(collection(db, "users"), orderBy("points", "desc"), limit(20));
@@ -58,11 +66,12 @@ const Leaderboard: React.FC = () => {
         };
 
         fetchLeaderboard();
+        return () => unsubAuth();
     }, []);
 
     if (loading) return (
-        <div className="d-flex justify-content-center align-items-center vh-100 bg-light">
-            <div className="spinner-grow text-primary" role="status"></div>
+        <div className="d-flex justify-content-center align-items-center vh-100 bg-white">
+            <div className="spinner-border" style={{ color: '#FACC15' }}></div>
         </div>
     );
 
@@ -70,162 +79,162 @@ const Leaderboard: React.FC = () => {
     const topTen = players.slice(0, 10);
 
     return (
-        <div className="min-vh-100 bg-light py-5 animate__animated animate__fadeIn">
-            <div className="container-fluid px-md-5">
+        <div className="bg-white min-vh-100 py-5">
+            <div className="container" style={{ maxWidth: '1100px' }}>
 
-                {/* PAGE TITLE */}
-                <div className="mb-5 text-center">
-                    <Link to="/" className="text-primary text-decoration-none fw-bold small text-uppercase ls-1">
-                        ← Murahu (Back Home)
-                    </Link>
-                    <h1 className="display-4 fw-bold mt-2">Muvhigo wa Vhahali</h1>
-                    <p className="text-muted">Celebrating the top Tshivenda learners in our community.</p>
-                </div>
+                {/* BACK NAVIGATION */}
+                <button
+                    className="btn btn-link text-decoration-none p-0 mb-5 d-flex align-items-center gap-2 text-dark fw-bold smallest ls-2 text-uppercase"
+                    onClick={() => navigate('/')}
+                >
+                    <i className="bi bi-arrow-left"></i> Murahu
+                </button>
 
-                <div className="row g-4">
-                    {/* LEFT COLUMN: MAIN LEADERBOARD */}
-                    <div className="col-lg-8">
+                {/* HEADER SECTION */}
+                <header className="mb-5 border-bottom pb-4">
+                    <div className="d-flex justify-content-between align-items-end">
+                        <div>
+                            <p className="smallest fw-bold text-muted mb-1 ls-2 text-uppercase">Muvhigo wa Vhahali</p>
+                            <h2 className="fw-bold mb-0 ls-tight">LEADERBOARD</h2>
+                        </div>
+                        <div className="text-end d-none d-md-block">
+                            <span className="smallest fw-bold text-muted ls-1 uppercase">Top 10 Average</span>
+                            <h5 className="fw-bold mb-0">Level {communityStats.avgLevel}</h5>
+                        </div>
+                    </div>
+                </header>
 
-                        {/* VISUAL PODIUM */}
-                        <div className="row align-items-end mb-5 text-center g-2 px-md-5">
+                <div className="row g-5">
+                    {/* LEFT COLUMN: PODIUM & HALL OF FAME */}
+                    <main className="col-lg-8">
+
+                        {/* THE PODIUM */}
+                        <div className="row align-items-end mb-5 g-0 text-center border-bottom pb-5">
                             {topThree[1] && (
-                                <div className="col-4">
-                                    <div className="card border-0 shadow-sm rounded-4 p-3 mb-2 bg-white scale-hover">
-                                        <div className="fs-1">🥈</div>
-                                        <div className="fw-bold text-truncate">{topThree[1].username}</div>
-                                        <div className="text-primary small fw-bold">{topThree[1].points} LP</div>
-                                    </div>
-                                    <div className="bg-secondary bg-opacity-25 rounded-top-4" style={{ height: '60px' }}></div>
+                                <div className="col-4 px-2">
+                                    <div className="mb-2 fs-2">🥈</div>
+                                    <div className="fw-bold text-truncate small">{topThree[1].username}</div>
+                                    <div className="smallest fw-bold text-muted mb-3">{topThree[1].points} LP</div>
+                                    <div className="bg-light rounded-top-3" style={{ height: '80px', opacity: 0.6 }}></div>
                                 </div>
                             )}
                             {topThree[0] && (
-                                <div className="col-4">
-                                    <div className="position-relative">
-                                        <div className="position-absolute top-0 start-50 translate-middle mt-n4" style={{fontSize: '2rem'}}>👑</div>
-                                        <div className="card border-0 shadow rounded-4 p-3 mb-2 bg-white border-top border-warning border-4 scale-hover-lg">
-                                            <div className="fs-1">🥇</div>
-                                            <div className="fw-bold text-truncate">{topThree[0].username}</div>
-                                            <div className="text-primary fw-bold">{topThree[0].points} LP</div>
-                                        </div>
-                                    </div>
-                                    <div className="bg-warning bg-opacity-25 rounded-top-4" style={{ height: '100px' }}></div>
+                                <div className="col-4 px-2">
+                                    <div className="mb-2 fs-1">🥇</div>
+                                    <div className="fw-bold text-truncate">{topThree[0].username}</div>
+                                    <div className="small fw-bold mb-3" style={{ color: '#FACC15' }}>{topThree[0].points} LP</div>
+                                    <div className="rounded-top-3" style={{ height: '140px', backgroundColor: '#FACC15' }}></div>
                                 </div>
                             )}
                             {topThree[2] && (
-                                <div className="col-4">
-                                    <div className="card border-0 shadow-sm rounded-4 p-3 mb-2 bg-white scale-hover">
-                                        <div className="fs-1">🥉</div>
-                                        <div className="fw-bold text-truncate">{topThree[2].username}</div>
-                                        <div className="text-primary small fw-bold">{topThree[2].points} LP</div>
-                                    </div>
-                                    <div className="bg-danger bg-opacity-10 rounded-top-4" style={{ height: '40px' }}></div>
+                                <div className="col-4 px-2">
+                                    <div className="mb-2 fs-2">🥉</div>
+                                    <div className="fw-bold text-truncate small">{topThree[2].username}</div>
+                                    <div className="smallest fw-bold text-muted mb-3">{topThree[2].points} LP</div>
+                                    <div className="bg-light rounded-top-3" style={{ height: '50px', opacity: 0.4 }}></div>
                                 </div>
                             )}
                         </div>
 
-                        {/* FULL TOP 10 LIST */}
-                        <div className="card border-0 shadow-sm rounded-4 overflow-hidden mb-4 bg-white">
-                            <div className="card-header bg-white py-4 border-0">
-                                <h4 className="fw-bold mb-0">Hall of Fame</h4>
-                                <p className="text-muted small mb-0">Top 10 learners ranked by total Learning Points (LP)</p>
-                            </div>
-                            <div className="list-group list-group-flush">
+                        {/* FULL LIST */}
+                        <section>
+                            <h6 className="fw-bold text-uppercase text-muted small ls-2 mb-4">Hall of Fame</h6>
+                            <div className="list-group list-group-flush mb-5">
                                 {topTen.map((player, index) => {
                                     const stats = getLevelStats(player.points);
                                     const badge = getBadgeDetails(stats.level);
-                                    const isMe = player.id === auth.currentUser?.uid;
-                                    const rank = index + 1;
-                                    const gap = index > 0 ? players[index - 1].points - player.points : 0;
+                                    const isMe = isLoggedIn && player.id === auth.currentUser?.uid;
 
                                     return (
-                                        <div key={player.id} className={`list-group-item d-flex align-items-center py-3 px-4 border-bottom ${isMe ? 'bg-primary bg-opacity-10' : ''}`}>
-                                            <div className="me-3 d-flex align-items-center justify-content-center fw-bold text-muted" style={{width: '35px'}}>
-                                                {rank === 1 ? '🥇' : rank === 2 ? '🥈' : rank === 3 ? '🥉' : `#${rank}`}
-                                            </div>
-                                            <div className="rounded-circle bg-light border d-flex align-items-center justify-content-center fw-bold me-3 shadow-sm" style={{ width: '48px', height: '48px', color: badge.color }}>
-                                                {player.username.charAt(0).toUpperCase()}
-                                            </div>
+                                        <div key={player.id} className={`list-group-item bg-transparent border-0 px-0 py-4 d-flex align-items-center ${isMe ? 'border-start border-4 ps-3' : ''}`} style={isMe ? { borderColor: '#FACC15' } : {}}>
+                                            <span className="me-3 fw-bold text-muted smallest" style={{ width: '25px' }}>#{index + 1}</span>
+
                                             <div className="flex-grow-1">
-                                                <div className="fw-bold mb-0">{player.username} {isMe && <span className="badge bg-primary ms-1" style={{fontSize: '0.6rem'}}>YOU</span>}</div>
-                                                <div className="small text-muted fw-bold" style={{fontSize: '0.7rem'}}>{badge.icon} {badge.name} • Lvl {stats.level}</div>
+                                                <div className="d-flex align-items-center gap-2">
+                                                    <span className={`fw-bold ${isMe ? 'text-dark' : 'text-secondary'}`}>{player.username}</span>
+                                                    {isMe && <span className="smallest fw-bold ls-1 text-uppercase" style={{ color: '#FACC15' }}> (YOU)</span>}
+                                                </div>
+                                                <div className="smallest fw-bold text-muted ls-1">{badge.icon} {badge.name} • LEVEL {stats.level}</div>
                                             </div>
+
                                             <div className="text-end">
-                                                <div className="fw-bold text-dark mb-0">{player.points.toLocaleString()} LP</div>
-                                                <div className="text-muted" style={{fontSize: '0.65rem'}}>{index === 0 ? 'LEADER' : `-${gap} LP gap`}</div>
+                                                <div className="fw-bold" style={{ color: isMe ? '#FACC15' : '#111827' }}>{player.points.toLocaleString()} LP</div>
+                                                <div className="smallest text-muted text-uppercase ls-1 fw-bold">Earned</div>
                                             </div>
                                         </div>
                                     );
                                 })}
                             </div>
-                        </div>
-                    </div>
+                        </section>
+                    </main>
 
-                    {/* RIGHT COLUMN: SIDEBAR */}
-                    <div className="col-lg-4">
+                    {/* RIGHT COLUMN: LOGOUT STATE / GUIDE */}
+                    <aside className="col-lg-4 ps-lg-5">
 
-                        {/* HOW TO EARN POINTS GUIDE */}
-                        <div className="card border-0 shadow-sm rounded-4 p-4 mb-4 bg-white sticky-top" style={{ top: '20px' }}>
-                            <h5 className="fw-bold mb-4">
-                                <span className="me-2">💡</span> Hu winiwa hani?
-                            </h5>
+                        {/* 1. DYNAMIC AUTH STATE CARD */}
+                        {!isLoggedIn ? (
+                            <section className="p-4 bg-dark text-white rounded-4 shadow-lg mb-5 animate__animated animate__fadeIn">
+                                <p className="smallest fw-bold ls-2 text-uppercase mb-2" style={{ color: '#FACC15' }}>Join the Tribe</p>
+                                <h4 className="fw-bold mb-3">Vha khou bvelela hani?</h4>
+                                <p className="small opacity-75 mb-4">Log in to track your personal ranking, earn badges, and climb the Venda Learn Hall of Fame.</p>
+                                <button onClick={() => navigate('/login')} className="btn game-btn-primary w-100 py-3 fw-bold smallest ls-1">
+                                    SIGN IN TO RANK
+                                </button>
+                            </section>
+                        ) : (
+                            currentUserRank && currentUserRank.rank > 10 && (
+                                <section className="p-4 bg-dark text-white rounded-4 shadow-lg mb-5 animate__animated animate__fadeInUp">
+                                    <p className="smallest fw-bold text-muted mb-1 ls-2 text-uppercase">Your Status</p>
+                                    <div className="d-flex justify-content-between align-items-center">
+                                        <h3 className="fw-bold mb-0">Rank #{currentUserRank.rank}</h3>
+                                        <div className="text-end">
+                                            <div className="fw-bold" style={{ color: '#FACC15' }}>{currentUserRank.player.points} LP</div>
+                                            <div className="smallest fw-bold opacity-50">TOTAL</div>
+                                        </div>
+                                    </div>
+                                    <button onClick={() => navigate('/courses')} className="btn game-btn-primary w-100 mt-4 py-2 smallest fw-bold ls-1">
+                                        CLIMB HIGHER
+                                    </button>
+                                </section>
+                            )
+                        )}
 
+                        {/* 2. HOW TO WIN GUIDE */}
+                        <section>
+                            <h6 className="fw-bold text-uppercase text-muted small ls-2 mb-4">How to Win</h6>
                             <div className="mb-4">
-                                <div className="d-flex align-items-start mb-3">
-                                    <div className="bg-primary bg-opacity-10 text-primary rounded-3 p-2 me-3">📚</div>
-                                    <div>
-                                        <h6 className="fw-bold mb-0">Pfunzo (Lessons)</h6>
-                                        <p className="small text-muted mb-0">Complete a lesson to earn up to 100 LP.</p>
-                                    </div>
+                                <div className="mb-4">
+                                    <p className="smallest fw-bold text-dark mb-1 ls-1">📚 LESSONS</p>
+                                    <p className="small text-muted">Earn base points for every successfully completed module.</p>
                                 </div>
-                                <div className="d-flex align-items-start mb-3">
-                                    <div className="bg-success bg-opacity-10 text-success rounded-3 p-2 me-3">🔥</div>
-                                    <div>
-                                        <h6 className="fw-bold mb-0">Muvhigo (Streaks)</h6>
-                                        <p className="small text-muted mb-0">Daily logins multiply your lesson rewards.</p>
-                                    </div>
+                                <div className="mb-4">
+                                    <p className="smallest fw-bold text-dark mb-1 ls-1">🔥 STREAKS</p>
+                                    <p className="small text-muted">Maintain a daily learning streak to multiply your rewards.</p>
                                 </div>
-                                <div className="d-flex align-items-start mb-3">
-                                    <div className="bg-warning bg-opacity-10 text-warning rounded-3 p-2 me-3">🎯</div>
-                                    <div>
-                                        <h6 className="fw-bold mb-0">Milingo (Quizzes)</h6>
-                                        <p className="small text-muted mb-0">Get 100% accuracy for a "Perfect" bonus.</p>
-                                    </div>
+                                <div className="mb-4">
+                                    <p className="smallest fw-bold text-dark mb-1 ls-1">🎯 ACCURACY</p>
+                                    <p className="small text-muted">Perfect scores in quizzes grant the "Muhali" bonus.</p>
                                 </div>
                             </div>
-
-                            <hr className="my-4 opacity-50" />
-
-                            {/* COMMUNITY QUICK STATS */}
-                            <h6 className="text-muted text-uppercase small fw-bold mb-3">Top 10 Insights</h6>
-                            <div className="bg-light rounded-4 p-3 mb-2">
-                                <small className="text-muted d-block">Combined LP</small>
-                                <span className="fw-bold h5 text-primary mb-0">{communityStats.totalLP.toLocaleString()}</span>
-                            </div>
-                            <div className="bg-light rounded-4 p-3">
-                                <small className="text-muted d-block">Average Warrior Level</small>
-                                <span className="fw-bold h5 text-success mb-0">Lvl {communityStats.avgLevel}</span>
-                            </div>
-
-                            {/* USER POSITION (If not in top 10) */}
-                            {currentUserRank && currentUserRank.rank > 10 && (
-                                <div className="mt-4 p-3 bg-dark text-white rounded-4 shadow-lg animate__animated animate__pulse animate__infinite">
-                                    <div className="d-flex justify-content-between align-items-center mb-1">
-                                        <small className="opacity-75">Your Ranking</small>
-                                        <span className="badge bg-primary">#{currentUserRank.rank}</span>
-                                    </div>
-                                    <div className="h4 fw-bold mb-0 text-warning">{currentUserRank.player.points} LP</div>
-                                </div>
-                            )}
-                        </div>
-                    </div>
+                        </section>
+                    </aside>
                 </div>
             </div>
 
             <style>{`
-                .scale-hover:hover { transform: translateY(-5px); transition: 0.3s; }
-                .scale-hover-lg:hover { transform: translateY(-10px); transition: 0.3s; }
+                .ls-tight { letter-spacing: -1.5px; }
                 .ls-1 { letter-spacing: 1px; }
-                .sticky-top { z-index: 10; }
+                .ls-2 { letter-spacing: 2px; }
+                .smallest { font-size: 11px; }
+                .game-btn-primary { 
+                    background-color: #FACC15 !important; 
+                    color: #111827 !important; 
+                    border: none !important; 
+                    border-radius: 12px; 
+                    box-shadow: 0 4px 0 #EAB308 !important; 
+                    transition: all 0.2s; 
+                }
+                .game-btn-primary:active { transform: translateY(2px); box-shadow: 0 2px 0 #EAB308 !important; }
             `}</style>
         </div>
     );
