@@ -3,75 +3,86 @@ import { doc, getDoc, updateDoc } from 'firebase/firestore';
 import { db } from './firebaseConfig';
 
 /**
- * Updates the user's streak based on their last activity date.
- * This should be called whenever a user completes an activity (lesson, story, etc.)
- * 
- * @param uid - User ID
- * @returns Promise<number> - The updated streak count
+ * Safely converts a Firestore date field to a JS Date.
+ * Handles: Firestore Timestamp, ISO string, Date object, or null.
  */
-export const updateStreak = async (uid: string): Promise<number> => {
+const toDate = (val: any): Date | null => {
+    if (!val) return null;
+    // Firestore Timestamp has a .toDate() method
+    if (typeof val?.toDate === 'function') return val.toDate();
+    // ISO string or Date-like
+    const d = new Date(val);
+    return isNaN(d.getTime()) ? null : d;
+};
+
+/**
+ * Gets midnight of a given date (strips time component for accurate day-diff).
+ */
+const toMidnight = (d: Date): number =>
+    new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime();
+
+/**
+ * Updates the user's streak based on their last activity date.
+ * Called on every app visit. Returns streak count and whether today is a new day.
+ */
+export const updateStreak = async (uid: string): Promise<{ streak: number; isNewDay: boolean }> => {
     try {
         const userRef = doc(db, "users", uid);
         const userSnap = await getDoc(userRef);
 
         if (!userSnap.exists()) {
             console.error("User document not found");
-            return 0;
+            return { streak: 0, isNewDay: false };
         }
 
         const data = userSnap.data();
         const now = new Date();
-        const today = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+        const todayMid = toMidnight(now);
 
-        // Get last activity date (use lastActivity if available, otherwise lastLogin)
-        const lastActivityDate = data.lastActivity 
-            ? new Date(data.lastActivity) 
-            : (data.lastLogin ? new Date(data.lastLogin) : null);
+        // Parse last activity — handle Firestore Timestamps, ISO strings, etc.
+        const lastActivityDate = toDate(data.lastActivity) || toDate(data.lastLogin);
 
         let newStreak = data.streak || 0;
+        let isNewDay = false;
 
         if (lastActivityDate) {
-            const lastActivityMid = new Date(
-                lastActivityDate.getFullYear(), 
-                lastActivityDate.getMonth(), 
-                lastActivityDate.getDate()
-            ).getTime();
-            
-            const diffInDays = (today - lastActivityMid) / (1000 * 60 * 60 * 24);
+            const lastMid = toMidnight(lastActivityDate);
+            const diffInDays = Math.round((todayMid - lastMid) / (1000 * 60 * 60 * 24));
 
             if (diffInDays === 1) {
-                // Consecutive day - increment streak
+                // CONSECUTIVE DAY → increment streak
                 newStreak = (data.streak || 0) + 1;
+                isNewDay = true;
                 await updateDoc(userRef, {
                     streak: newStreak,
                     lastActivity: now.toISOString(),
-                    lastLogin: now.toISOString() // Also update lastLogin for backward compatibility
+                    lastLogin: now.toISOString()
                 });
             } else if (diffInDays > 1) {
-                // Missed at least one day - reset streak to 1
+                // BROKEN STREAK → reset to 1 (today still counts)
                 newStreak = 1;
+                isNewDay = true;
                 await updateDoc(userRef, {
                     streak: 1,
                     lastActivity: now.toISOString(),
                     lastLogin: now.toISOString()
                 });
             } else if (diffInDays === 0) {
-                // Same day - keep streak, just update timestamp
+                // SAME DAY → don't touch streak, just update timestamp
+                isNewDay = false;
+                newStreak = data.streak || 0;
                 await updateDoc(userRef, {
                     lastActivity: now.toISOString()
                 });
-                newStreak = data.streak || 0;
             } else {
-                // Future date (shouldn't happen, but handle it)
-                await updateDoc(userRef, {
-                    lastActivity: now.toISOString(),
-                    lastLogin: now.toISOString()
-                });
+                // Negative diff (clock skew) → safe no-op
                 newStreak = data.streak || 0;
+                isNewDay = false;
             }
         } else {
-            // First time activity - start streak at 1
+            // FIRST EVER VISIT
             newStreak = 1;
+            isNewDay = true;
             await updateDoc(userRef, {
                 streak: 1,
                 lastActivity: now.toISOString(),
@@ -79,10 +90,9 @@ export const updateStreak = async (uid: string): Promise<number> => {
             });
         }
 
-        return newStreak;
+        return { streak: newStreak, isNewDay };
     } catch (error) {
         console.error("Error updating streak:", error);
-        return 0;
+        return { streak: 0, isNewDay: false };
     }
 };
-

@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { db } from '../services/firebaseConfig';
-import { doc, getDoc } from 'firebase/firestore';
+import { fetchDailyWord } from '../services/dataCache';
 
 interface DailyWord {
     word: string;
@@ -18,20 +17,8 @@ const DailyWordPage: React.FC = () => {
 
     useEffect(() => {
         const fetchWord = async () => {
-            const today = new Date().toISOString().split('T')[0];
-            const docRef = doc(db, "dailyWords", today);
-            const docSnap = await getDoc(docRef);
-
-            if (docSnap.exists()) {
-                setWordData(docSnap.data() as DailyWord);
-            } else {
-                setWordData({
-                    word: "Vhuthu",
-                    meaning: "Humanity / Kindness",
-                    explanation: "This is the core of Venda social values. It refers to respect and the idea that our humanity is tied to others.",
-                    example: "Muthu u vhonala nga vhuthu hawe."
-                });
-            }
+            const word = await fetchDailyWord();
+            setWordData(word as DailyWord);
             setLoading(false);
         };
         fetchWord();

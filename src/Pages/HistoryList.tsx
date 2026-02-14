@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import { db, auth } from '../services/firebaseConfig';
-import { collection, getDocs, query, orderBy } from 'firebase/firestore';
+import { auth } from '../services/firebaseConfig';
 import { useNavigate } from 'react-router-dom';
 import { onAuthStateChanged } from 'firebase/auth';
+import { fetchHistoryData } from '../services/dataCache';
 
 interface HistoryStory {
     id: string;
@@ -30,15 +30,10 @@ const HistoryList: React.FC = () => {
             setIsLoggedIn(!!user);
         });
 
-        const fetchHistory = async () => {
+        const loadHistory = async () => {
             try {
-                const q = query(collection(db, "history"), orderBy("order", "asc"));
-                const querySnapshot = await getDocs(q);
-                const data = querySnapshot.docs.map(doc => ({
-                    id: doc.id,
-                    ...doc.data()
-                })) as HistoryStory[];
-                setStories(data);
+                const data = await fetchHistoryData();
+                setStories(data as HistoryStory[]);
             } catch (error) {
                 console.error("Error fetching cultural data:", error);
             } finally {
@@ -46,7 +41,7 @@ const HistoryList: React.FC = () => {
             }
         };
 
-        fetchHistory();
+        loadHistory();
         return () => unsubscribe();
     }, []);
 
@@ -157,7 +152,7 @@ const HistoryList: React.FC = () => {
                                 >
                                     {/* IMAGE BUCKET */}
                                     <div className="bg-light d-flex align-items-center justify-content-center position-relative"
-                                         style={{ width: '100%', maxWidth: '200px', minHeight: '140px' }}>
+                                        style={{ width: '100%', maxWidth: '200px', minHeight: '140px' }}>
                                         {story.imageUrl ? (
                                             <img src={story.imageUrl} alt={story.title} className="w-100 h-100 object-fit-cover" />
                                         ) : (

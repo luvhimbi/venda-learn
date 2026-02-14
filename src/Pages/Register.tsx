@@ -1,7 +1,7 @@
 import React, { useState, type FormEvent, type ChangeEvent } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
-import { doc, setDoc, updateDoc, increment } from 'firebase/firestore';
+import { doc, setDoc } from 'firebase/firestore';
 import { auth, db } from '../services/firebaseConfig';
 
 const Register: React.FC = () => {
@@ -20,7 +20,7 @@ const Register: React.FC = () => {
     const handleSubmit = async (e: FormEvent) => {
         e.preventDefault();
         setError(null);
-        if(formData.password !== formData.confirmPassword) {
+        if (formData.password !== formData.confirmPassword) {
             setError("Phaswidzi dza vhoiwe dzo fhambana!");
             return;
         }
@@ -31,7 +31,17 @@ const Register: React.FC = () => {
                 username: formData.username, email: formData.email, points: 0, level: 1, streak: 0, completedLessons: [], createdAt: new Date().toISOString()
             });
             if (referrerId) {
-                try { await updateDoc(doc(db, "users", referrerId), { points: increment(500) }); } catch (err) { console.error(err); }
+                try {
+                    await setDoc(doc(db, "invites", `${referrerId}_${userCredential.user.uid}`), {
+                        inviterId: referrerId,
+                        inviteeId: userCredential.user.uid,
+                        inviteeName: formData.username,
+                        claimed: false,
+                        createdAt: new Date().toISOString()
+                    });
+                } catch (err) {
+                    console.error("Referral failed:", err);
+                }
             }
             navigate('/');
         } catch (err: any) {
@@ -45,7 +55,7 @@ const Register: React.FC = () => {
 
                 <div className="text-center mb-5 animate__animated animate__fadeIn">
                     <div className="d-inline-flex align-items-center justify-content-center rounded-3 mb-3"
-                         style={{ width: '56px', height: '56px', backgroundColor: '#FACC15' }}>
+                        style={{ width: '56px', height: '56px', backgroundColor: '#FACC15' }}>
                         <span className="fw-bold fs-2 text-dark">V</span>
                     </div>
                     <h2 className="fw-bold ls-1 text-dark mb-1">VENDA LEARN</h2>
@@ -53,7 +63,7 @@ const Register: React.FC = () => {
 
                 {error && (
                     <div className="alert border-0 py-3 small mb-4 text-center"
-                         style={{ backgroundColor: '#FEF2F2', color: '#B91C1C', borderBottom: '2px solid #EF4444' }}>
+                        style={{ backgroundColor: '#FEF2F2', color: '#B91C1C', borderBottom: '2px solid #EF4444' }}>
                         {error}
                     </div>
                 )}

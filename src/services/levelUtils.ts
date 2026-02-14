@@ -24,7 +24,7 @@ export const getLevelStats = (totalPoints: number = 0) => {
     const pointsIntoLevel = totalPoints - pointsAtStart;
 
     // 4. Percentage Calculation
-    const progress = Math.min(100, Math.max(0, (pointsIntoLevel / levelRange) * 100));
+    const progress = Math.min(100, Math.max(0, Math.round((pointsIntoLevel / levelRange) * 100)));
 
     return {
         level: currentLevel,
@@ -37,9 +37,9 @@ export const getLevelStats = (totalPoints: number = 0) => {
 };
 
 export const getBadgeDetails = (level: number) => {
-    if (level >= 20) return { name: "Thovhele", icon: "👑", color: "#f59e0b" }; // Gold
-    if (level >= 15) return { name: "Gota", icon: "🐘", color: "#059669" }; // Emerald
-    if (level >= 10) return { name: "Vele", icon: "🦁", color: "#4f46e5" }; // Indigo
-    if (level >= 5) return { name: "Muhali", icon: "🛡️", color: "#4f46e5" }; // Indigo
-    return { name: "Mufunzi", icon: "🌱", color: "#10b981" }; // Green
+    if (level >= 20) return { name: "Thovhele", icon: "bi-trophy-fill", color: "#f59e0b" }; // Gold
+    if (level >= 15) return { name: "Gota", icon: "bi-award-fill", color: "#059669" }; // Emerald
+    if (level >= 10) return { name: "Vele", icon: "bi-shield-shaded", color: "#4f46e5" }; // Indigo
+    if (level >= 5) return { name: "Muhali", icon: "bi-patch-check-fill", color: "#4f46e5" }; // Indigo
+    return { name: "Mugudi", icon: "bi-seedling", color: "#10b981" }; // Green
 };

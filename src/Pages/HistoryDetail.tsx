@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { db } from '../services/firebaseConfig';
-import { doc, getDoc } from 'firebase/firestore';
+import { fetchHistoryData } from '../services/dataCache';
 
 interface StoryData {
     title: string;
@@ -14,6 +13,8 @@ interface StoryData {
     thumbnailEmoji: string;
 }
 
+import PodcastPlayer from '../components/PodcastPlayer';
+
 const HistoryDetail: React.FC = () => {
     const { storyId } = useParams();
     const navigate = useNavigate();
@@ -25,9 +26,10 @@ const HistoryDetail: React.FC = () => {
         const fetchStory = async () => {
             if (!storyId) return;
             try {
-                const docSnap = await getDoc(doc(db, "history", storyId));
-                if (docSnap.exists()) {
-                    setStory(docSnap.data() as StoryData);
+                const allHistory = await fetchHistoryData();
+                const found = allHistory.find((s: any) => s.id === storyId);
+                if (found) {
+                    setStory(found as StoryData);
                 } else {
                     navigate('/history');
                 }
@@ -47,6 +49,8 @@ const HistoryDetail: React.FC = () => {
     );
 
     if (!story) return null;
+
+    const textToRead = `${story.title}. ${story.vendaTitle}. ${story.content}`;
 
     return (
         <div className="bg-white min-vh-100 pb-5">
@@ -90,7 +94,7 @@ const HistoryDetail: React.FC = () => {
             </div>
 
             <div className="container mt-5" style={{ maxWidth: '750px' }}>
-                <header className="mb-5">
+                <header className="mb-4">
                     <div className="d-flex align-items-center gap-3 mb-3">
                         <span className="meta-tag">{story.era}</span>
                         <div className="dot-separator"></div>
@@ -99,6 +103,14 @@ const HistoryDetail: React.FC = () => {
                     <h1 className="display-5 fw-bold ls-tight mb-2 text-dark">{story.title}</h1>
                     <p className="venda-subtitle">{story.vendaTitle}</p>
                 </header>
+
+                {/* REUSABLE PODCAST PLAYER */}
+                <div className="mb-5">
+                    <PodcastPlayer
+                        title="Listen to Story"
+                        textToRead={textToRead}
+                    />
+                </div>
 
                 <article className="article-content">
                     {story.content.split('\n').map((paragraph, idx) => (
@@ -128,12 +140,6 @@ const HistoryDetail: React.FC = () => {
                             <h6 className="fw-bold mb-0">{story.category}</h6>
                         </div>
                     </div>
-                    <button
-                        onClick={() => navigate(`/history/edit/${storyId}`)}
-                        className="btn btn-edit-venda"
-                    >
-                        EDIT CONTENT
-                    </button>
                 </div>
             </div>
 
@@ -209,14 +215,7 @@ const HistoryDetail: React.FC = () => {
                     margin-bottom: 1.5rem;
                 }
                 
-                .btn-edit-venda {
-                    border: 2px solid #E5E7EB;
-                    border-radius: 12px;
-                    padding: 8px 20px;
-                    font-size: 11px;
-                    font-weight: 700;
-                    letter-spacing: 1px;
-                }
+                /* Player styles removed as they are now in PodcastPlayer component */
             `}</style>
         </div>
     );

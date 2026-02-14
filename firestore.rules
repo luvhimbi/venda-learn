@@ -1,0 +1,136 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // HELPER FUNCTION: Checks if the logged-in user has an admin role in the users collection
+    function isAdmin() {
+      return request.auth != null && 
+             get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    }
+
+    // --- USER PROFILES & LEADERBOARD ---
+    match /users/{userId} {
+      // Users can only write to their own document
+      // Exception: Admins can modify any user (useful for banning or fixing accounts)
+      allow write: if (request.auth != null && request.auth.uid == userId) || isAdmin();
+      
+      // Allow any logged-in user to read any profile (required for Leaderboard)
+      allow read: if request.auth != null;
+    }
+
+    // --- CHALLENGES ---
+    match /challenges/{challengeId} {
+      // Allow any authenticated user to read the challenge 
+      allow read: if request.auth != null;
+      
+      // Allow creation
+      allow create: if request.auth != null;
+      
+      // Allow update if the user is already a player OR if there is space to join
+      // Or if the user is an admin (to cleanup stuck games)
+      allow update: if isAdmin() || (
+        request.auth != null && 
+        (request.auth.uid in resource.data.players || resource.data.players.size() < 2)
+      );
+
+      // Only admins should be able to delete challenges
+      allow delete: if isAdmin();
+    }
+
+    // --- LESSONS ---
+    match /lessons/{lessonId} {
+      allow read: if request.auth != null;
+      
+      // Admin only write (create, update, delete)
+      allow write: if isAdmin(); 
+    }
+
+    // --- WORD OF THE DAY ---
+    match /dailyWords/{dateId} {
+      allow read: if true; // Temporarily allow public read for debugging
+      
+      // Admin only write
+      allow write: if isAdmin() || request.auth != null; // Allow auth users to seed
+    }
+
+    // --- CULTURE, HISTORY & HERITAGE ---
+    match /history/{storyId} {
+      // Allows users to browse history, food, dance, and attire
+      allow read: if request.auth != null;
+      
+      // Admin only write: Prevents regular users from changing heritage data
+      allow write: if isAdmin();
+    }
+
+    // --- WORD PUZZLES (VENDA WORDLE) ---
+    match /puzzleWords/{puzzleId} {
+      allow read: if request.auth != null;
+      allow write: if isAdmin() || request.auth != null;
+    }
+
+    // --- SYLLABLE PUZZLES ---
+    match /syllablePuzzles/{puzzleId} {
+        allow read: if request.auth != null;
+        allow write: if isAdmin() || request.auth != null;
+    }
+
+    // --- SENTENCE PUZZLES ---
+    match /sentencePuzzles/{puzzleId} {
+        allow read: if request.auth != null;
+        allow write: if isAdmin() || request.auth != null;
+    }
+
+    // --- LOGS ---
+    match /logs/{logId} {
+      allow read: if isAdmin();
+      allow create: if request.auth != null;
+      allow update, delete: if false;
+    }
+
+    // --- KNOWLEDGE BATTLES (Ndivhano) ---
+    match /battles/{battleId} {
+      // Any authenticated user can read battles (to browse open rooms & history)
+      allow read: if request.auth != null;
+
+      // Any authenticated user can create a battle (they become the challenger)
+      allow create: if request.auth != null
+                    && request.resource.data.challengerId == request.auth.uid;
+
+      // Update allowed if:
+      //   - User is the challenger (updating their own score/progress)
+      //   - User is the opponent (updating their score/progress)
+      //   - User is joining (opponentId was null, now being set to their uid)
+      //   - Admin (cleanup)
+      allow update: if isAdmin() || (
+        request.auth != null && (
+          request.auth.uid == resource.data.challengerId ||
+          request.auth.uid == resource.data.opponentId ||
+          (resource.data.opponentId == null && request.resource.data.opponentId == request.auth.uid)
+        )
+      );
+
+      // Only admins can delete battles
+      allow delete: if isAdmin();
+    }
+    
+    // --- INVITES & REFERRALS ---
+    match /invites/{inviteId} {
+      // Allow any user to read if they are either the inviter or invitee
+      allow read: if request.auth != null && (
+        request.auth.uid == resource.data.inviterId || 
+        request.auth.uid == resource.data.inviteeId
+      );
+      
+      // Allow creation during registration
+      // InviteeId must match the current auth user
+      allow create: if request.auth != null && 
+                    request.resource.data.inviteeId == request.auth.uid;
+      
+      // Allow inviter to update (mark as claimed)
+      allow update: if request.auth != null && 
+                    request.auth.uid == resource.data.inviterId &&
+                    request.resource.data.claimed == true;
+    }
+  }
+}

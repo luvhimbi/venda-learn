@@ -3,11 +3,12 @@ import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { onAuthStateChanged, signOut, type User } from 'firebase/auth';
 import { doc, onSnapshot } from 'firebase/firestore';
 import { auth, db } from '../services/firebaseConfig';
+import { invalidateCache } from '../services/dataCache';
 import Swal from 'sweetalert2';
 
 const Navbar: React.FC = () => {
     const [user, setUser] = useState<User | null>(null);
-    const [userData, setUserData] = useState<{username: string, points: number} | null>(null);
+    const [userData, setUserData] = useState<{ username: string, points: number } | null>(null);
     const navigate = useNavigate();
     const location = useLocation();
 
@@ -49,6 +50,7 @@ const Navbar: React.FC = () => {
         }).then(async (result) => {
             if (result.isConfirmed) {
                 await signOut(auth);
+                invalidateCache(); // Clear session data
                 navigate('/login');
             }
         });
@@ -62,8 +64,16 @@ const Navbar: React.FC = () => {
 
                 {/* BRAND LOGO & SLOGAN */}
                 <Link className="navbar-brand d-flex align-items-center mb-0 text-decoration-none shadow-none" to="/">
-                    <div className="text-dark rounded-3 me-3 d-flex align-items-center justify-content-center fw-bold flex-shrink-0"
-                         style={{ width: '42px', height: '42px', fontSize: '1.2rem', backgroundColor: '#FACC15', boxShadow: '0 2px 4px rgba(0,0,0,0.1)' }}>
+                    <div
+                        className="text-dark rounded-3 me-3 d-flex align-items-center justify-content-center fw-bold flex-shrink-0"
+                        style={{
+                            width: '42px',
+                            height: '42px',
+                            fontSize: '1.2rem',
+                            backgroundColor: '#FACC15',
+                            boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+                        }}
+                    >
                         V
                     </div>
                     <div className="d-flex flex-column justify-content-center">
@@ -76,10 +86,17 @@ const Navbar: React.FC = () => {
                     </div>
                 </Link>
 
-                <button className="navbar-toggler border-0 shadow-none" type="button" data-bs-toggle="collapse" data-bs-target="#vendaNavbar">
+                {/* MOBILE TOGGLER */}
+                <button
+                    className="navbar-toggler border-0 shadow-none"
+                    type="button"
+                    data-bs-toggle="collapse"
+                    data-bs-target="#vendaNavbar"
+                >
                     <i className="bi bi-list fs-2 text-dark"></i>
                 </button>
 
+                {/* NAV LINKS & USER ACTIONS */}
                 <div className="collapse navbar-collapse" id="vendaNavbar">
                     <ul className="navbar-nav ms-auto gap-lg-4 align-items-center">
                         <li className="nav-item w-100 w-lg-auto text-center">
@@ -94,7 +111,7 @@ const Navbar: React.FC = () => {
                         </li>
                         <li className="nav-item w-100 w-lg-auto text-center">
                             <Link className={`nav-link nav-custom-link ${isActive('/history') ? 'active-link' : ''}`} to="/history">
-                                History
+                                Culture & History
                             </Link>
                         </li>
                         <li className="nav-item w-100 w-lg-auto text-center">
@@ -102,15 +119,29 @@ const Navbar: React.FC = () => {
                                 Muvhigo
                             </Link>
                         </li>
+                        <li className="nav-item w-100 w-lg-auto text-center">
+                            <Link className={`nav-link nav-custom-link ${isActive('/mitambo') || isActive('/word-puzzle') || isActive('/picture-puzzle') ? 'active-link' : ''}`} to="/mitambo">
+                                Mitambo
+                            </Link>
+                        </li>
 
                         {user ? (
+                            /* AUTHENTICATED USER DROPDOWN */
                             <li className="nav-item dropdown ms-lg-2 w-100 w-lg-auto text-center mt-3 mt-lg-0">
                                 <button
                                     className="nav-link dropdown-toggle d-flex align-items-center justify-content-center gap-3 border-0 bg-transparent p-0 mx-auto shadow-none"
                                     data-bs-toggle="dropdown"
                                 >
-                                    <div className="text-dark rounded-circle d-flex align-items-center justify-content-center fw-bold shadow-sm"
-                                         style={{ width: '38px', height: '38px', fontSize: '0.8rem', backgroundColor: '#FACC15', border: '2px solid #111827' }}>
+                                    <div
+                                        className="text-dark rounded-circle d-flex align-items-center justify-content-center fw-bold shadow-sm"
+                                        style={{
+                                            width: '38px',
+                                            height: '38px',
+                                            fontSize: '0.8rem',
+                                            backgroundColor: '#FACC15',
+                                            border: '2px solid #111827'
+                                        }}
+                                    >
                                         {userData?.username.charAt(0).toUpperCase() || 'W'}
                                     </div>
                                     <span className="d-lg-none fw-bold text-dark small text-uppercase ls-1">
@@ -150,6 +181,7 @@ const Navbar: React.FC = () => {
                                 </ul>
                             </li>
                         ) : (
+                            /* GUEST BUTTONS */
                             <div className="ms-lg-4 d-flex flex-column flex-lg-row gap-2 mt-3 mt-lg-0 w-100 w-lg-auto">
                                 <Link to="/login" className="btn btn-link text-decoration-none text-dark fw-bold smallest ls-1 px-3 shadow-none">
                                     DZHENA
@@ -169,18 +201,17 @@ const Navbar: React.FC = () => {
                 .ls-2 { letter-spacing: 2px; }
                 .smallest { font-size: 11px; }
                 
-                /* CLEAN NAV LINKS */
                 .nav-custom-link {
                     font-weight: 700 !important;
                     font-size: 11px !important;
                     letter-spacing: 2px !important;
                     text-transform: uppercase !important;
-                    color: #6B7280 !important; /* text-muted */
+                    color: #6B7280 !important;
                     padding: 0.5rem 0 !important;
                     position: relative;
                     transition: color 0.2s ease;
-                    text-decoration: none !important; /* Removes default underline */
-                    outline: none !important; /* Removes focus ring */
+                    text-decoration: none !important;
+                    outline: none !important;
                 }
 
                 .nav-custom-link:hover {
@@ -188,10 +219,9 @@ const Navbar: React.FC = () => {
                 }
 
                 .active-link {
-                    color: #111827 !important; /* text-dark */
+                    color: #111827 !important;
                 }
 
-                /* THE SINGLE YELLOW BAR */
                 @media (min-width: 992px) {
                     .active-link::after {
                         content: '';
@@ -224,10 +254,19 @@ const Navbar: React.FC = () => {
                     border-radius: 8px; 
                     box-shadow: 0 3px 0 #EAB308 !important; 
                     transition: all 0.2s; 
+                    text-decoration: none;
                 }
-                .game-btn-primary:active { transform: translateY(1px); box-shadow: 0 1px 0 #EAB308 !important; }
+
+                .game-btn-primary:active { 
+                    transform: translateY(1px); 
+                    box-shadow: 0 1px 0 #EAB308 !important; 
+                }
                 
                 .dropdown-toggle::after { display: none; }
+
+                .dropdown-item:hover {
+                    background-color: #F3F4F6 !important;
+                }
             `}</style>
         </nav>
     );

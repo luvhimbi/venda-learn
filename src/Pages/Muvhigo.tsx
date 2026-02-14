@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import { db, auth } from '../services/firebaseConfig';
-import { collection, query, getDocs, orderBy, limit } from 'firebase/firestore';
+import { auth } from '../services/firebaseConfig';
 import { getLevelStats, getBadgeDetails } from "../services/levelUtils.ts";
 import { useNavigate } from 'react-router-dom';
 import { onAuthStateChanged } from 'firebase/auth';
+import { fetchTopLearners } from '../services/dataCache';
 
 interface Player {
     id: string;
@@ -14,7 +14,7 @@ interface Player {
 const Leaderboard: React.FC = () => {
     const navigate = useNavigate();
     const [players, setPlayers] = useState<Player[]>([]);
-    const [currentUserRank, setCurrentUserRank] = useState<{rank: number, player: Player} | null>(null);
+    const [currentUserRank, setCurrentUserRank] = useState<{ rank: number, player: Player } | null>(null);
     const [loading, setLoading] = useState(true);
     const [isLoggedIn, setIsLoggedIn] = useState(false);
     const [communityStats, setCommunityStats] = useState({ totalLP: 0, avgLevel: 0 });
@@ -27,36 +27,28 @@ const Leaderboard: React.FC = () => {
 
         const fetchLeaderboard = async () => {
             try {
-                const q = query(collection(db, "users"), orderBy("points", "desc"), limit(20));
-                const querySnapshot = await getDocs(q);
+                const playersData = await fetchTopLearners(20);
 
                 let totalLP = 0;
                 let totalLevel = 0;
 
-                const playersData = querySnapshot.docs.map((doc, index) => {
-                    const data = doc.data();
-                    const player = {
-                        id: doc.id,
-                        username: data.username || "Anonymous",
-                        points: Number(data.points) || 0
-                    };
-
+                playersData.forEach((player, index) => {
                     if (index < 10) {
                         totalLP += player.points;
                         totalLevel += getLevelStats(player.points).level;
                     }
 
-                    if (doc.id === auth.currentUser?.uid) {
+                    if (player.id === auth.currentUser?.uid) {
                         setCurrentUserRank({ rank: index + 1, player });
                     }
-
-                    return player;
                 });
 
                 setPlayers(playersData);
                 setCommunityStats({
                     totalLP,
-                    avgLevel: Math.round(totalLevel / Math.min(playersData.length, 10))
+                    avgLevel: playersData.length > 0
+                        ? Math.round(totalLevel / Math.min(playersData.length, 10))
+                        : 0
                 });
             } catch (error) {
                 console.error("Error fetching leaderboard:", error);
@@ -112,7 +104,7 @@ const Leaderboard: React.FC = () => {
                         <div className="row align-items-end mb-5 g-0 text-center border-bottom pb-5">
                             {topThree[1] && (
                                 <div className="col-4 px-2">
-                                    <div className="mb-2 fs-2">🥈</div>
+                                    <div className="mb-2"><i className="bi bi-award-fill text-secondary fs-1"></i></div>
                                     <div className="fw-bold text-truncate small">{topThree[1].username}</div>
                                     <div className="smallest fw-bold text-muted mb-3">{topThree[1].points} LP</div>
                                     <div className="bg-light rounded-top-3" style={{ height: '80px', opacity: 0.6 }}></div>
@@ -120,7 +112,7 @@ const Leaderboard: React.FC = () => {
                             )}
                             {topThree[0] && (
                                 <div className="col-4 px-2">
-                                    <div className="mb-2 fs-1">🥇</div>
+                                    <div className="mb-2"><i className="bi bi-trophy-fill text-warning" style={{ fontSize: '3rem' }}></i></div>
                                     <div className="fw-bold text-truncate">{topThree[0].username}</div>
                                     <div className="small fw-bold mb-3" style={{ color: '#FACC15' }}>{topThree[0].points} LP</div>
                                     <div className="rounded-top-3" style={{ height: '140px', backgroundColor: '#FACC15' }}></div>
@@ -128,7 +120,7 @@ const Leaderboard: React.FC = () => {
                             )}
                             {topThree[2] && (
                                 <div className="col-4 px-2">
-                                    <div className="mb-2 fs-2">🥉</div>
+                                    <div className="mb-2"><i className="bi bi-award-fill fs-2" style={{ color: '#CD7F32' }}></i></div>
                                     <div className="fw-bold text-truncate small">{topThree[2].username}</div>
                                     <div className="smallest fw-bold text-muted mb-3">{topThree[2].points} LP</div>
                                     <div className="bg-light rounded-top-3" style={{ height: '50px', opacity: 0.4 }}></div>

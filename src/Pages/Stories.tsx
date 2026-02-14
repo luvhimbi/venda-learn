@@ -2,8 +2,8 @@
 import React, { useState, useEffect } from 'react';
 import storiesData from '../data/stories.json';
 import { completeStory } from '../services/storyService';
-import { auth, db } from '../services/firebaseConfig';
-import { doc, getDoc } from 'firebase/firestore';
+import { auth } from '../services/firebaseConfig';
+import { fetchUserData } from '../services/dataCache';
 import Swal from 'sweetalert2';
 
 const Stories: React.FC = () => {
@@ -14,16 +14,15 @@ const Stories: React.FC = () => {
 
     // Fetch user's completed stories on mount
     useEffect(() => {
-        const fetchUserData = async () => {
+        const loadUserData = async () => {
             if (auth.currentUser) {
-                const userRef = doc(db, "users", auth.currentUser.uid);
-                const docSnap = await getDoc(userRef);
-                if (docSnap.exists()) {
-                    setUserCompletedList(docSnap.data().completedStories || []);
+                const data = await fetchUserData();
+                if (data) {
+                    setUserCompletedList(data.completedStories || []);
                 }
             }
         };
-        fetchUserData();
+        loadUserData();
     }, []);
 
     useEffect(() => {

@@ -1,7 +1,8 @@
 import React, { useState, type FormEvent } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { auth } from '../services/firebaseConfig';
+import { auth, db } from '../services/firebaseConfig'; // Ensure db is exported from your config
 import { signInWithEmailAndPassword } from 'firebase/auth';
+import { doc, getDoc } from 'firebase/firestore';
 import { updateStreak } from '../services/streakUtils';
 
 const Login: React.FC = () => {
@@ -19,14 +20,27 @@ const Login: React.FC = () => {
 
         try {
             const userCredential = await signInWithEmailAndPassword(auth, email, password);
-            await updateStreak(userCredential.user.uid);
+            const uid = userCredential.user.uid;
 
-            const redirectTo = localStorage.getItem('redirectUrl');
-            if (redirectTo) {
-                localStorage.removeItem('redirectUrl');
-                navigate(redirectTo);
+            // 1. Update user streak
+            await updateStreak(uid);
+
+            // 2. Check Admin Status (Assuming you store roles in Firestore 'users' collection)
+            const userDoc = await getDoc(doc(db, 'users', uid));
+            const userData = userDoc.data();
+            const isAdmin = userData?.role === 'admin';
+
+            // 3. Handle Redirection
+            if (isAdmin) {
+                navigate('/admin/dashboard');
             } else {
-                navigate('/');
+                const redirectTo = localStorage.getItem('redirectUrl');
+                if (redirectTo) {
+                    localStorage.removeItem('redirectUrl');
+                    navigate(redirectTo);
+                } else {
+                    navigate('/');
+                }
             }
         } catch (err: any) {
             setError("Zi do do mbedzwa zwavho asi zone avha dovhe hafhu.");

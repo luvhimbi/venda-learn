@@ -47,11 +47,38 @@ const lessonsData = [
             },
             {
                 id: 2,
-                question: "How do you say 'Hello'  as woman?",
-                options: ["Ndaa", "Aa", "Vhusiku"],
-                correctAnswer: "Aa",
-                explanation: "'Ndaa' is specifically for men. 'Aa' is used by women, and 'Matsheloni' means morning.",
-                type: "multiple-choice"
+                question: "'Aa' is the greeting used by men.",
+                correctAnswer: false,
+                explanation: "'Aa' is the greeting used by women. Men use 'Ndaa'.",
+                type: "true-false"
+            },
+            {
+                id: 3,
+                question: "Ndi ___ (Good morning)",
+                correctAnswer: "matsheloni",
+                hint: "matsh...",
+                explanation: "'Ndi matsheloni' means Good morning in Tshivenda.",
+                type: "fill-in-the-blank"
+            },
+            {
+                id: 4,
+                question: "Match the Venda greetings to their English meanings",
+                pairs: [
+                    { venda: "Ndaa", english: "Hello (Male)" },
+                    { venda: "Aa", english: "Hello (Female)" },
+                    { venda: "Ndi matsheloni", english: "Good morning" }
+                ],
+                explanation: "Ndaa (male hello), Aa (female hello), Ndi matsheloni (good morning).",
+                type: "match-pairs"
+            },
+            {
+                id: 5,
+                vendaWord: "Ndi madekwana",
+                question: "What did you hear?",
+                options: ["Good morning", "Good afternoon", "Good night"],
+                correctAnswer: "Good night",
+                explanation: "'Ndi madekwana' means Good night, used from around 5 PM.",
+                type: "listen-and-choose"
             }
         ]
     },
@@ -88,35 +115,39 @@ const lessonsData = [
             },
             {
                 id: 2,
-                question: "What is 'Fumi' in English?",
-                options: ["5", "10", "20"],
-                correctAnswer: "10",
-                explanation: "Fumi is the standard word for 10. For 20, we use Fahuvhili.",
-                type: "multiple-choice"
+                question: "'Fumi' means Five in Tshivenda.",
+                correctAnswer: false,
+                explanation: "Fumi means Ten (10), not Five. Five is 'Ṱhanu'.",
+                type: "true-false"
             },
             {
                 id: 3,
-                question: "How do you say 'Four'?",
-                options: ["Ina", "Ṱhanu", "Raru"],
-                correctAnswer: "Ina",
-                explanation: "Ina is 4. Ṱhanu is 5, and Raru is 3.",
-                type: "multiple-choice"
+                question: "Ṱhanu na ___ = Seven (Ṱhanu + ?)",
+                correctAnswer: "vhuvhili",
+                hint: "vhuv...",
+                explanation: "Seven is 'Ṱhanu na vhuvhili' (Five and Two).",
+                type: "fill-in-the-blank"
             },
             {
                 id: 4,
-                question: "What does 'Fahuraru' represent?",
-                options: ["13", "30", "300"],
-                correctAnswer: "30",
-                explanation: "Fahuraru comes from 'Fumi' (ten) and 'Raru' (three), meaning three tens: 30.",
-                type: "multiple-choice"
+                question: "Match the Venda numbers to their English values",
+                pairs: [
+                    { venda: "Nthihi", english: "One" },
+                    { venda: "Raru", english: "Three" },
+                    { venda: "Fumi", english: "Ten" },
+                    { venda: "Ḓana", english: "One Hundred" }
+                ],
+                explanation: "Nthihi=1, Raru=3, Fumi=10, Ḓana=100.",
+                type: "match-pairs"
             },
             {
                 id: 5,
-                question: "How do you say 'Seven'?",
-                options: ["Ṱhanu na nthihi", "Ṱhanu na vhuvhili", "Fumi na vhuvhili"],
-                correctAnswer: "Ṱhanu na vhuvhili",
-                explanation: "7 is composed of 5 (Ṱhanu) and 2 (Vhuvhili).",
-                type: "multiple-choice"
+                vendaWord: "Ṱhanu",
+                question: "What number did you hear?",
+                options: ["Three", "Five", "Ten"],
+                correctAnswer: "Five",
+                explanation: "'Ṱhanu' means Five (5) in Tshivenda.",
+                type: "listen-and-choose"
             }
         ]
     },
@@ -183,27 +214,39 @@ const lessonsData = [
             },
             {
                 id: 2,
-                question: "What does 'Musadzi' mean?",
-                options: ["Man", "Woman", "Child"],
-                correctAnswer: "Woman",
-                explanation: "Musadzi is the Tshivenda word for an adult female (Woman).",
-                type: "multiple-choice"
+                question: "'Musadzi' means Man in Tshivenda.",
+                correctAnswer: false,
+                explanation: "Musadzi means Woman. Man is 'Munna' in Tshivenda.",
+                type: "true-false"
             },
             {
                 id: 3,
-                question: "If you are talking about a 'Girl', which word do you use?",
-                options: ["Mutukana", "Muanana", "Musidzana"],
-                correctAnswer: "Musidzana",
+                question: "A young girl is called a ___ in Tshivenda.",
+                correctAnswer: "musidzana",
+                hint: "musid...",
                 explanation: "Musidzana specifically refers to a young girl.",
-                type: "multiple-choice"
+                type: "fill-in-the-blank"
             },
             {
                 id: 4,
-                question: "What is a 'Muanana'?",
-                options: ["An old man", "A small child/infant", "A leader"],
-                correctAnswer: "A small child/infant",
-                explanation: "Muanana is a tender term for a baby or a very small toddler.",
-                type: "multiple-choice"
+                question: "Match the Venda identity words to English",
+                pairs: [
+                    { venda: "Mutukana", english: "Boy" },
+                    { venda: "Musidzana", english: "Girl" },
+                    { venda: "Munna", english: "Man" },
+                    { venda: "Musadzi", english: "Woman" }
+                ],
+                explanation: "Mutukana=Boy, Musidzana=Girl, Munna=Man, Musadzi=Woman.",
+                type: "match-pairs"
+            },
+            {
+                id: 5,
+                vendaWord: "Musadzi",
+                question: "What did you hear?",
+                options: ["Boy", "Woman", "Man"],
+                correctAnswer: "Woman",
+                explanation: "'Musadzi' means Woman in Tshivenda.",
+                type: "listen-and-choose"
             }
         ]
     },
@@ -255,8 +298,8 @@ const lessonsData = [
                 explanation: "Vothi means door. Think of it as the 'vote' to enter a room!",
                 type: "multiple-choice"
             }
-]
-},
+        ]
+    },
     {
         id: 'days-of-the-week',
         title: 'Days of the Week',
