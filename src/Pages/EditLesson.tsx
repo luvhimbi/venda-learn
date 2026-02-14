@@ -109,6 +109,52 @@ const EditLesson: React.FC = () => {
         });
     };
 
+    const handleBulkAdd = async () => {
+        const { value: text } = await Swal.fire({
+            title: 'Bulk Add Slides',
+            input: 'textarea',
+            inputLabel: 'Paste words (Venda | English | Context)',
+            inputPlaceholder: 'Ndaa | Hello | Greeting\nVukani | Wake up\nMasiari | Afternoon',
+            inputAttributes: {
+                'aria-label': 'Paste your words here'
+            },
+            showCancelButton: true,
+            confirmButtonColor: '#FACC15',
+            confirmButtonText: 'Add Slides',
+            footer: '<small>Format: Venda | English | Context (one per line)</small>'
+        });
+
+        if (text) {
+            const lines = text.split('\n').filter((l: string) => l.trim());
+            const newSlides = lines.map((line: string) => {
+                const parts = line.split('|').map(p => p.trim());
+                return {
+                    venda: parts[0] || '',
+                    english: parts[1] || '',
+                    context: parts[2] || ''
+                };
+            });
+
+            if (newSlides.length > 0) {
+                // Remove the initial empty slide if it's the only one and is empty
+                const currentSlides = [...lesson.slides];
+                if (currentSlides.length === 1 && !currentSlides[0].venda && !currentSlides[0].english && !currentSlides[0].context) {
+                    setLesson({ ...lesson, slides: newSlides });
+                } else {
+                    setLesson({ ...lesson, slides: [...currentSlides, ...newSlides] });
+                }
+
+                Swal.fire({
+                    title: 'Success!',
+                    text: `Added ${newSlides.length} slides.`,
+                    icon: 'success',
+                    timer: 2000,
+                    showConfirmButton: false
+                });
+            }
+        }
+    };
+
     const removeSlide = (index: number) => {
         if (lesson.slides.length <= 1) return Swal.fire('Notice', 'A lesson must have at least one slide.', 'info');
         const newSlides = lesson.slides.filter((_: any, i: number) => i !== index);
@@ -208,9 +254,14 @@ const EditLesson: React.FC = () => {
                                 <h5 className="fw-bold mb-0 text-dark">Teaching Slides</h5>
                                 <span className="smallest text-muted fw-bold ls-1">{lesson?.slides?.length || 0} SLIDE{(lesson?.slides?.length || 0) !== 1 ? 'S' : ''}</span>
                             </div>
-                            <button type="button" onClick={addSlide} className="btn btn-dark btn-sm fw-bold smallest ls-1 rounded-pill px-3 py-1 shadow-sm">
-                                <i className="bi bi-plus-lg me-1"></i> ADD SLIDE
-                            </button>
+                            <div className="d-flex gap-2">
+                                <button type="button" onClick={handleBulkAdd} className="btn btn-outline-dark btn-sm fw-bold smallest ls-1 rounded-pill px-3 py-1 shadow-sm">
+                                    <i className="bi bi-stack me-1"></i> BULK ADD
+                                </button>
+                                <button type="button" onClick={addSlide} className="btn btn-dark btn-sm fw-bold smallest ls-1 rounded-pill px-3 py-1 shadow-sm">
+                                    <i className="bi bi-plus-lg me-1"></i> ADD SLIDE
+                                </button>
+                            </div>
                         </div>
                         <div className="section-body">
                             <div className="row g-4">

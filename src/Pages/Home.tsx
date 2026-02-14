@@ -6,6 +6,11 @@ import { getBadgeDetails, getLevelStats } from "../services/levelUtils.ts";
 import { updateStreak } from "../services/streakUtils.ts";
 import { fetchLessons, fetchTopLearners, fetchDailyWord, refreshUserData } from '../services/dataCache';
 import InstallBanner from '../components/InstallBanner';
+import Mascot from '../components/Mascot';
+import LandingPage from './LandingPage';
+import TourGuide from '../components/TourGuide';
+import { doc, updateDoc } from 'firebase/firestore';
+import { db } from '../services/firebaseConfig';
 
 // --- STREAK MOTIVATION MODAL ---
 const StreakModal: React.FC<{ streak: number; onClose: () => void }> = ({ streak, onClose }) => {
@@ -52,6 +57,21 @@ const Home: React.FC = () => {
     const [totalLessonsCount, setTotalLessonsCount] = useState(0);
     const [loading, setLoading] = useState(true);
     const [showStreakModal, setShowStreakModal] = useState(false);
+    const [isTourOpen, setIsTourOpen] = useState(false);
+
+    const handleTourComplete = async () => {
+        setIsTourOpen(false);
+        if (auth.currentUser) {
+            try {
+                const userRef = doc(db, "users", auth.currentUser.uid);
+                await updateDoc(userRef, { tourCompleted: true });
+                // We don't necessarily need to refresh everything, just set local state if needed
+                setUserData((prev: any) => ({ ...prev, tourCompleted: true }));
+            } catch (err) {
+                console.error("Error updating tour status:", err);
+            }
+        }
+    };
 
     const getVendaGreeting = () => {
         const hour = new Date().getHours();
@@ -100,6 +120,16 @@ const Home: React.FC = () => {
                         }
                     }
 
+                    // Auto-start tour if never completed (Tablet/Desktop only)
+                    if (userData && userData.tourCompleted === false && window.innerWidth >= 768) {
+                        // Check if we've already tried to open it in this session to prevent loops
+                        const tourSeenThisSession = sessionStorage.getItem('tour_offered');
+                        if (!tourSeenThisSession) {
+                            setIsTourOpen(true);
+                            sessionStorage.setItem('tour_offered', 'true');
+                        }
+                    }
+
                 } catch (err) {
                     console.error("Error fetching home data:", err);
                 }
@@ -121,28 +151,7 @@ const Home: React.FC = () => {
     );
 
     if (!isLoggedIn) {
-        return (
-            <div className="min-vh-100 d-flex align-items-center justify-content-center px-4"
-                style={{ background: 'linear-gradient(180deg, #111827 0%, #1F2937 60%, #FACC15 100%)' }}>
-                <div className="text-center" style={{ maxWidth: '500px' }}>
-                    <div className="d-inline-flex align-items-center justify-content-center rounded-4 mb-4"
-                        style={{ width: '72px', height: '72px', backgroundColor: '#FACC15' }}>
-                        <span className="fw-bold fs-1 text-dark">V</span>
-                    </div>
-                    <h1 className="fw-bold text-white mb-3 ls-tight" style={{ fontSize: '2.5rem' }}>Learn Tshivenda.</h1>
-                    <p className="mb-5 ls-1" style={{ color: 'rgba(255,255,255,.7)' }}>Join the community preserving the heart of Venda through gamified education.</p>
-                    <div className="d-grid gap-3 d-sm-flex justify-content-center">
-                        <button onClick={() => navigate('/register')} className="btn px-5 py-3 fw-bold rounded-3 ls-1"
-                            style={{ backgroundColor: '#FACC15', color: '#111827', boxShadow: '0 4px 0 #EAB308' }}>
-                            START LEARNING
-                        </button>
-                        <button onClick={() => navigate('/login')} className="btn btn-outline-light border-2 px-5 py-3 fw-bold rounded-3 smallest uppercase ls-1">
-                            LOG IN
-                        </button>
-                    </div>
-                </div>
-            </div>
-        );
+        return <LandingPage />;
     }
 
     const stats = getLevelStats(userData?.points || 0);
@@ -154,7 +163,7 @@ const Home: React.FC = () => {
     const motivation = getLevelMotivation(stats.level, stats.progress);
 
     return (
-        <div className="bg-white min-vh-100">
+        <div className="bg-white min-vh-100" style={{ overflowX: 'hidden' }}>
             {/* Streak Popup */}
             {showStreakModal && (
                 <StreakModal
@@ -163,30 +172,48 @@ const Home: React.FC = () => {
                 />
             )}
 
-            {/* DARK HERO HEADER */}
-            <div className="px-3 py-5" style={{ background: 'linear-gradient(135deg, #111827, #1F2937)' }}>
+
+            {/* App Tour Guide */}
+            <TourGuide
+                isOpen={isTourOpen}
+                onClose={() => setIsTourOpen(false)}
+                onComplete={handleTourComplete}
+            />
+
+            {/* LIGHT HERO HEADER WITH MASCOT */}
+            <div className="px-3 py-5" style={{ background: 'linear-gradient(180deg, #FFFFFF 0%, #F8FAFC 100%)', borderBottom: '1px solid #E2E8F0' }}>
                 <div className="container" style={{ maxWidth: '1100px' }}>
                     <InstallBanner />
-                    <div className="d-flex justify-content-between align-items-center">
-                        <div>
-                            <h2 className="fw-bold text-white mb-1 ls-tight">{getVendaGreeting()}, {userData?.username || 'Learner'}</h2>
-                            <span className="smallest fw-bold ls-2 uppercase" style={{ color: 'rgba(255,255,255,.5)' }}>Kha ri gude Tshivenda</span>
+                    <div className="row align-items-center">
+                        <div className="col-8">
+                            <h2 className="fw-bold text-slate mb-1 ls-tight">{getVendaGreeting()}, {userData?.username || 'Learner'}</h2>
+                            <span className="smallest fw-bold ls-2 uppercase text-muted">Kha ri gude Tshivenda</span>
+
+                            <div className="d-flex gap-4 mt-4">
+                                <div className="d-flex align-items-center gap-2">
+                                    <div className="d-inline-flex align-items-center justify-content-center rounded-3"
+                                        style={{ width: 40, height: 40, backgroundColor: 'rgba(250,204,21,.15)' }}>
+                                        <i className="bi bi-gem" style={{ color: '#FACC15' }}></i>
+                                    </div>
+                                    <div>
+                                        <p className="mb-0 fw-bold text-slate ls-1">{userData?.points || 0}</p>
+                                        <p className="mb-0 smallest text-muted uppercase">LP Points</p>
+                                    </div>
+                                </div>
+                                <div className="d-flex align-items-center gap-2">
+                                    <div className="d-inline-flex align-items-center justify-content-center rounded-3"
+                                        style={{ width: 40, height: 40, backgroundColor: 'rgba(239,68,68,.15)' }}>
+                                        <i className="bi bi-fire" style={{ color: '#EF4444' }}></i>
+                                    </div>
+                                    <div>
+                                        <p className="mb-0 fw-bold text-slate ls-1">{userData?.streak || 0}</p>
+                                        <p className="mb-0 smallest text-muted uppercase">Day Streak</p>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
-                        <div className="d-flex gap-4">
-                            <div className="text-center">
-                                <div className="d-inline-flex align-items-center justify-content-center rounded-3 mb-1"
-                                    style={{ width: 40, height: 40, backgroundColor: 'rgba(250,204,21,.15)' }}>
-                                    <i className="bi bi-gem" style={{ color: '#FACC15' }}></i>
-                                </div>
-                                <p className="mb-0 smallest fw-bold text-white ls-1">{userData?.points || 0}</p>
-                            </div>
-                            <div className="text-center">
-                                <div className="d-inline-flex align-items-center justify-content-center rounded-3 mb-1"
-                                    style={{ width: 40, height: 40, backgroundColor: 'rgba(239,68,68,.15)' }}>
-                                    <i className="bi bi-fire" style={{ color: '#EF4444' }}></i>
-                                </div>
-                                <p className="mb-0 smallest fw-bold text-white ls-1">{userData?.streak || 0}</p>
-                            </div>
+                        <div className="col-4 d-flex justify-content-center">
+                            <Mascot width="140px" height="140px" />
                         </div>
                     </div>
                 </div>
@@ -242,7 +269,7 @@ const Home: React.FC = () => {
                                 <div className="py-5 text-center rounded-4" style={{ backgroundColor: '#F9FAFB', border: '1px dashed #D1D5DB' }}>
                                     <div className="mb-3"><i className="bi bi-mortarboard-fill text-muted" style={{ fontSize: '40px' }}></i></div>
                                     <p className="text-muted smallest fw-bold uppercase ls-1 mb-3">No active lesson found</p>
-                                    <button onClick={() => navigate('/courses')} className="btn btn-dark rounded-3 px-4 py-2 fw-bold smallest ls-1">
+                                    <button onClick={() => navigate('/courses')} className="btn btn-slate rounded-3 px-4 py-2 fw-bold smallest ls-1">
                                         EXPLORE LESSONS
                                     </button>
                                 </div>
@@ -279,18 +306,18 @@ const Home: React.FC = () => {
                     <aside className="col-lg-5">
                         <div className="ps-lg-4 text-start">
 
-                            {/* RANK CARD */}
-                            <div className="mb-4 p-4 rounded-4 shadow-sm position-relative overflow-hidden"
-                                style={{ background: 'linear-gradient(135deg, #111827, #1F2937)', color: 'white' }}>
-                                <h6 className="fw-bold smallest ls-2 uppercase mb-4" style={{ color: 'rgba(255,255,255,.5)' }}>Your Rank</h6>
+                            {/* RANK CARD - LIGHT THEME */}
+                            <div className="mb-4 p-4 rounded-4 shadow-sm position-relative overflow-hidden bg-white border tour-stats-card"
+                                style={{ borderColor: '#E2E8F0' }}>
+                                <h6 className="fw-bold smallest ls-2 uppercase mb-4 text-muted">Your Rank</h6>
 
                                 <div className="d-flex align-items-center gap-3 mb-4">
                                     <div className="d-flex align-items-center justify-content-center rounded-circle"
-                                        style={{ width: 56, height: 56, backgroundColor: badge.color + '22', border: `2px solid ${badge.color}` }}>
+                                        style={{ width: 56, height: 56, backgroundColor: badge.color + '15', border: `2px solid ${badge.color}` }}>
                                         <i className={`bi ${badge.icon}`} style={{ fontSize: '28px', color: badge.color }}></i>
                                     </div>
                                     <div>
-                                        <h4 className="fw-bold mb-0 text-white">Level {stats.level}</h4>
+                                        <h4 className="fw-bold mb-0 text-slate">Level {stats.level}</h4>
                                         <span className="fw-bold smallest ls-1" style={{ color: badge.color }}>{badge.name}</span>
                                     </div>
                                 </div>
@@ -298,41 +325,41 @@ const Home: React.FC = () => {
                                 {/* XP Progress */}
                                 <div className="mb-3">
                                     <div className="d-flex justify-content-between mb-2">
-                                        <span className="smallest fw-bold ls-1" style={{ color: 'rgba(255,255,255,.5)' }}>XP PROGRESS</span>
-                                        <span className="smallest fw-bold ls-1" style={{ color: '#FACC15' }}>{stats.progress}%</span>
+                                        <span className="smallest fw-bold ls-1 text-muted">XP PROGRESS</span>
+                                        <span className="smallest fw-bold ls-1 text-warning">{stats.progress}%</span>
                                     </div>
-                                    <div style={{ height: 8, borderRadius: 10, backgroundColor: 'rgba(255,255,255,.1)' }}>
+                                    <div style={{ height: 8, borderRadius: 10, backgroundColor: '#F1F5F9' }}>
                                         <div style={{
                                             width: `${stats.progress}%`, height: '100%', borderRadius: 10,
                                             background: 'linear-gradient(90deg, #FACC15, #F59E0B)',
                                             transition: 'width 0.8s ease'
                                         }}></div>
                                     </div>
-                                    <p className="smallest mt-2 mb-0" style={{ color: 'rgba(255,255,255,.4)' }}>
+                                    <p className="smallest mt-2 mb-0 text-muted">
                                         {stats.pointsInCurrentLevel} / {stats.pointsForNextLevel} XP to Level {stats.level + 1}
                                     </p>
                                 </div>
 
                                 {/* Course Progress */}
-                                <div className="pt-3" style={{ borderTop: '1px solid rgba(255,255,255,.1)' }}>
+                                <div className="pt-3" style={{ borderTop: '1px solid #F1F5F9' }}>
                                     <div className="d-flex justify-content-between mb-2">
-                                        <span className="smallest fw-bold ls-1" style={{ color: 'rgba(255,255,255,.5)' }}>COURSE PROGRESS</span>
-                                        <span className="smallest fw-bold ls-1 text-white">{courseProgressPercentage}%</span>
+                                        <span className="smallest fw-bold ls-1 text-muted">COURSE PROGRESS</span>
+                                        <span className="smallest fw-bold ls-1 text-slate">{courseProgressPercentage}%</span>
                                     </div>
-                                    <div style={{ height: 8, borderRadius: 10, backgroundColor: 'rgba(255,255,255,.1)' }}>
+                                    <div style={{ height: 8, borderRadius: 10, backgroundColor: '#F1F5F9' }}>
                                         <div style={{
                                             width: `${courseProgressPercentage}%`, height: '100%', borderRadius: 10,
                                             backgroundColor: '#10B981',
                                             transition: 'width 0.8s ease'
                                         }}></div>
                                     </div>
-                                    <p className="smallest mt-2 mb-0" style={{ color: 'rgba(255,255,255,.4)' }}>
+                                    <p className="smallest mt-2 mb-0 text-muted">
                                         {completedCount} / {totalLessonsCount} lessons completed
                                     </p>
                                 </div>
 
                                 {/* Motivation message */}
-                                <div className="mt-4 p-3 rounded-3" style={{ backgroundColor: 'rgba(255,255,255,.05)' }}>
+                                <div className="mt-4 p-3 rounded-3" style={{ backgroundColor: '#F8FAFC' }}>
                                     <p className="mb-0 small fw-bold" style={{ color: motivation.color }}>{motivation.msg}</p>
                                 </div>
                             </div>
@@ -371,7 +398,7 @@ const Home: React.FC = () => {
                                         </div>
                                     ))}
                                 </div>
-                                <Link to="/muvhigo" className="btn btn-outline-dark w-100 py-2 fw-bold ls-1 smallest uppercase rounded-3">
+                                <Link to="/muvhigo" className="btn btn-outline-slate w-100 py-2 fw-bold ls-1 smallest uppercase rounded-3">
                                     FULL LEADERBOARD
                                 </Link>
                             </div>
@@ -392,12 +419,32 @@ const Home: React.FC = () => {
                 
                 .game-btn-primary { 
                     background-color: #FACC15 !important; 
-                    color: #111827 !important; 
+                    color: #1e293b !important; 
                     border: none !important; 
                     border-radius: 8px; 
                     box-shadow: 0 3px 0 #EAB308 !important; 
                 }
                 .game-btn-primary:active { transform: translateY(2px); box-shadow: 0 1px 0 #EAB308 !important; }
+
+                .btn-slate {
+                    background-color: #1e293b;
+                    color: white;
+                }
+                .btn-slate:hover {
+                    background-color: #334155;
+                    color: white;
+                }
+                .btn-outline-slate {
+                    border: 1px solid #1e293b;
+                    color: #1e293b;
+                }
+                .btn-outline-slate:hover {
+                    background-color: #1e293b;
+                    color: white;
+                }
+                .text-slate {
+                    color: #1e293b !important;
+                }
             `}</style>
         </div>
     );

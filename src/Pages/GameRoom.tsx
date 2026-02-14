@@ -7,6 +7,28 @@ import { getBadgeDetails, getLevelStats } from "../services/levelUtils.ts";
 import { updateStreak } from "../services/streakUtils.ts";
 import { calculateScore, CONSOLATION_POINTS, type Difficulty, type ScoreResult } from "../services/scoringUtils.ts";
 import { fetchLessons, fetchUserData, refreshUserData, invalidateCache } from '../services/dataCache';
+import Mascot from '../components/Mascot';
+
+const ExitModal: React.FC<{ onClose: () => void, onConfirm: () => void }> = ({ onClose, onConfirm }) => (
+    <div className="position-fixed top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center bg-black bg-opacity-50" style={{ zIndex: 1050 }}>
+        <div className="bg-white p-4 rounded-4 shadow-lg text-center animate__animated animate__fadeInUp" style={{ maxWidth: '320px' }}>
+            <div className="mb-3 d-flex justify-content-center">
+                <Mascot mood="sad" width="120px" height="120px" />
+            </div>
+            <h5 className="fw-bold mb-2 text-dark">Leaving so soon?</h5>
+            <p className="text-muted small mb-4">You'll lose your progress for this session.</p>
+            <div className="d-flex gap-2">
+                <button className="btn btn-light flex-grow-1 fw-bold text-dark" onClick={onClose}>
+                    Stay
+                </button>
+                <button className="btn btn-danger flex-grow-1 fw-bold" onClick={onConfirm}>
+                    Exit
+                </button>
+            </div>
+        </div>
+    </div>
+);
+
 
 // =============================================
 //  TYPES
@@ -286,6 +308,8 @@ const GameRoom: React.FC = () => {
     const mediaRecorderRef = useRef<MediaRecorder | null>(null);
     const audioChunksRef = useRef<Blob[]>([]);
 
+    const [showExitModal, setShowExitModal] = useState(false);
+
     // Reset question timer when moving to a new question
     useEffect(() => {
         if (gameState === 'QUIZ') setQuestionStartTime(Date.now());
@@ -499,7 +523,7 @@ const GameRoom: React.FC = () => {
                     <div className="container" style={{ maxWidth: '700px' }}>
                         {/* Top bar */}
                         <div className="d-flex justify-content-between align-items-center mb-4">
-                            <button className="btn btn-link text-decoration-none p-0 text-white fw-bold smallest ls-2" onClick={() => navigate('/courses')}>
+                            <button className="btn btn-link text-decoration-none p-0 text-white fw-bold smallest ls-2" onClick={() => setShowExitModal(true)}>
                                 <i className="bi bi-x-lg me-2"></i> EXIT
                             </button>
                             <div className="d-flex align-items-center gap-2">
@@ -632,6 +656,7 @@ const GameRoom: React.FC = () => {
                         </div>
                     </div>
                 </div>
+                {showExitModal && <ExitModal onClose={() => setShowExitModal(false)} onConfirm={() => navigate('/courses')} />}
             </div>
         );
     }
@@ -722,7 +747,9 @@ const GameRoom: React.FC = () => {
         <div className="min-vh-100 bg-white d-flex align-items-center justify-content-center p-3">
             {showLevelUp && <LevelUpModal level={newLevelReached} onClose={() => setShowLevelUp(false)} />}
             <div className="text-center w-100" style={{ maxWidth: '500px' }}>
-                <div className="display-1 mb-4">{isFirstTime ? '🐘🏅' : '📖✨'}</div>
+                <div className="d-flex justify-content-center mb-4">
+                    <Mascot mood="excited" width="150px" height="150px" />
+                </div>
                 <h1 className="fw-bold display-4 text-dark mb-2 ls-tight">
                     {isFirstTime ? 'Ro Fhedza!' : 'Review Done!'}
                 </h1>

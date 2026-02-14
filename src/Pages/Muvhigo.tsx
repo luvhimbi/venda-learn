@@ -71,7 +71,7 @@ const Leaderboard: React.FC = () => {
     const topTen = players.slice(0, 10);
 
     return (
-        <div className="bg-white min-vh-100 py-5">
+        <div className="bg-white min-vh-100 py-5" style={{ overflowX: 'hidden' }}>
             <div className="container" style={{ maxWidth: '1100px' }}>
 
                 {/* BACK NAVIGATION */}
@@ -83,16 +83,14 @@ const Leaderboard: React.FC = () => {
                 </button>
 
                 {/* HEADER SECTION */}
-                <header className="mb-5 border-bottom pb-4">
-                    <div className="d-flex justify-content-between align-items-end">
-                        <div>
-                            <p className="smallest fw-bold text-muted mb-1 ls-2 text-uppercase">Muvhigo wa Vhahali</p>
-                            <h2 className="fw-bold mb-0 ls-tight">LEADERBOARD</h2>
-                        </div>
-                        <div className="text-end d-none d-md-block">
-                            <span className="smallest fw-bold text-muted ls-1 uppercase">Top 10 Average</span>
-                            <h5 className="fw-bold mb-0">Level {communityStats.avgLevel}</h5>
-                        </div>
+                <header className="mb-5 border-bottom pb-4 text-center">
+                    <div>
+                        <p className="smallest fw-bold text-muted mb-1 ls-2 text-uppercase">Muvhigo wa Vhahali</p>
+                        <h2 className="fw-bold mb-2 ls-tight">LEADERBOARD</h2>
+                    </div>
+                    <div className="d-none d-md-block">
+                        <span className="smallest fw-bold text-muted ls-1 uppercase me-2">Top 10 Average:</span>
+                        <span className="fw-bold text-dark">Level {communityStats.avgLevel}</span>
                     </div>
                 </header>
 
@@ -101,7 +99,7 @@ const Leaderboard: React.FC = () => {
                     <main className="col-lg-8">
 
                         {/* THE PODIUM */}
-                        <div className="row align-items-end mb-5 g-0 text-center border-bottom pb-5">
+                        <div className="row align-items-end mb-5 g-0 text-center border-bottom pb-5 mx-auto" style={{ maxWidth: '600px' }}>
                             {topThree[1] && (
                                 <div className="col-4 px-2">
                                     <div className="mb-2"><i className="bi bi-award-fill text-secondary fs-1"></i></div>
@@ -129,9 +127,9 @@ const Leaderboard: React.FC = () => {
                         </div>
 
                         {/* FULL LIST */}
-                        <section>
+                        <section className="text-center">
                             <h6 className="fw-bold text-uppercase text-muted small ls-2 mb-4">Hall of Fame</h6>
-                            <div className="list-group list-group-flush mb-5">
+                            <div className="list-group list-group-flush mb-5 mx-auto" style={{ maxWidth: '600px' }}>
                                 {topTen.map((player, index) => {
                                     const stats = getLevelStats(player.points);
                                     const badge = getBadgeDetails(stats.level);
@@ -139,9 +137,9 @@ const Leaderboard: React.FC = () => {
 
                                     return (
                                         <div key={player.id} className={`list-group-item bg-transparent border-0 px-0 py-4 d-flex align-items-center ${isMe ? 'border-start border-4 ps-3' : ''}`} style={isMe ? { borderColor: '#FACC15' } : {}}>
-                                            <span className="me-3 fw-bold text-muted smallest" style={{ width: '25px' }}>#{index + 1}</span>
+                                            <span className="me-3 fw-bold text-muted smallest" style={{ width: '25px', textAlign: 'left' }}>#{index + 1}</span>
 
-                                            <div className="flex-grow-1">
+                                            <div className="flex-grow-1 text-start">
                                                 <div className="d-flex align-items-center gap-2">
                                                     <span className={`fw-bold ${isMe ? 'text-dark' : 'text-secondary'}`}>{player.username}</span>
                                                     {isMe && <span className="smallest fw-bold ls-1 text-uppercase" style={{ color: '#FACC15' }}> (YOU)</span>}

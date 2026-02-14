@@ -29,7 +29,14 @@ const Courses: React.FC = () => {
                     fetchUserData()
                 ]);
 
-                setLessons(lessonsData);
+                // Ensure data is sorted by order field (double-check cache sort)
+                const sorted = [...lessonsData].sort((a, b) => {
+                    const orderA = a.order ?? 999;
+                    const orderB = b.order ?? 999;
+                    return orderA - orderB;
+                });
+
+                setLessons(sorted);
 
                 if (userData) {
                     setCompletedIds(userData.completedLessons || []);
@@ -49,7 +56,7 @@ const Courses: React.FC = () => {
 
     const getDifficultyStyle = (d: string) => {
         const diff = d?.toLowerCase();
-        if (diff === 'easy') return { color: '#10B981', bg: '#ECFDF5', label: 'MAVHAYI', icon: '🌱' };
+        if (diff === 'easy') return { color: '#10B981', bg: '#EDFDF5', label: 'MAVHAYI', icon: '🌱' };
         if (diff === 'medium') return { color: '#F59E0B', bg: '#FFFBEB', label: 'VHUKATI', icon: '🦁' };
         return { color: '#EF4444', bg: '#FEF2F2', label: 'VHUḒU', icon: '🔥' };
     };
@@ -69,7 +76,7 @@ const Courses: React.FC = () => {
 
                 {/* NAVIGATION */}
                 <button
-                    className="btn btn-link text-decoration-none p-0 mb-5 d-flex align-items-center gap-2 text-dark fw-bold smallest ls-2 text-uppercase"
+                    className="btn btn-link text-decoration-none p-0 mb-5 d-flex align-items-center gap-2 text-dark fw-bold smallest ls-1 text-uppercase"
                     onClick={() => navigate('/')}
                 >
                     <i className="bi bi-arrow-left"></i> Murahu
@@ -92,7 +99,7 @@ const Courses: React.FC = () => {
                 {/* RESUME BANNER */}
                 {lastLessonId && isLoggedIn && (
                     <div className="mb-5 p-4 rounded-4 d-flex align-items-center justify-content-between"
-                        style={{ background: 'linear-gradient(135deg, #111827, #1F2937)', color: 'white' }}>
+                        style={{ background: 'linear-gradient(135deg, #1e293b, #0f172a)', color: 'white' }}>
                         <div>
                             <p className="smallest fw-bold ls-2 text-uppercase mb-1" style={{ color: '#FACC15' }}>CONTINUE WHERE YOU LEFT OFF</p>
                             <p className="fw-bold mb-0">{lessons.find(l => l.id === lastLessonId)?.title || 'Last Lesson'}</p>
@@ -100,7 +107,7 @@ const Courses: React.FC = () => {
                         <Link
                             to={`/game/${lastLessonId}?start=${lastProgressIndex}&type=${lastProgressType === 'quiz' ? 'QUIZ' : 'STUDY'}`}
                             className="btn px-4 py-2 fw-bold smallest ls-1 rounded-3"
-                            style={{ backgroundColor: '#FACC15', color: '#111827', boxShadow: '0 3px 0 #EAB308' }}
+                            style={{ backgroundColor: '#FACC15', color: '#1e293b', boxShadow: '0 3px 0 #EAB308' }}
                         >
                             RESUME →
                         </Link>
@@ -112,6 +119,13 @@ const Courses: React.FC = () => {
                     const totalPages = Math.ceil(lessons.length / lessonsPerPage);
                     const startIdx = (currentPage - 1) * lessonsPerPage;
                     const paginatedLessons = lessons.slice(startIdx, startIdx + lessonsPerPage);
+
+                    // ROBUST SEQUENTIAL CALCULATION:
+                    // Find the highest absolute index the user has EVER completed.
+                    // Everything up to that index + 1 is unlocked.
+                    const maxCompletedIdx = lessons.reduce((max, l, i) =>
+                        completedIds.includes(l.id) ? i : max, -1);
+
                     return (<>
                         <div className="position-relative">
                             {/* Connector line */}
@@ -120,26 +134,28 @@ const Courses: React.FC = () => {
                             {paginatedLessons.map((lesson, pageIdx) => {
                                 const index = startIdx + pageIdx;
                                 const isDone = completedIds.includes(lesson.id);
-                                // Sequential hierarchy: first lesson always unlocked,
-                                // subsequent lessons unlock when the previous one is completed
-                                const isUnlocked = index === 0 || completedIds.includes(lessons[index - 1]?.id);
+
+                                // Lesson is unlocked if it's the first one, or if any earlier lesson is done.
+                                // index 0 is always <= (maxCompletedIdx + 1) because max is at least -1.
+                                const isUnlocked = index <= (maxCompletedIdx + 1);
+
                                 const diffStyle = getDifficultyStyle(lesson.difficulty);
                                 const slideCount = lesson.slides?.length || 0;
                                 const questionCount = lesson.questions?.length || 0;
 
                                 return (
-                                    <div key={lesson.id} className="position-relative mb-4 ps-5 animate__animated animate__fadeInUp" style={{ animationDelay: `${index * 0.08}s` }}>
+                                    <div key={lesson.id} className="position-relative mb-4 ps-5 animate__animated animate__fadeInUp" style={{ animationDelay: `${pageIdx * 0.08}s` }}>
 
                                         {/* Step Indicator */}
                                         <div className="position-absolute start-0 d-flex align-items-center justify-content-center rounded-circle"
                                             style={{
                                                 width: '42px', height: '42px', zIndex: 1,
-                                                backgroundColor: isDone ? '#10B981' : (isUnlocked ? '#FACC15' : '#F3F4F6'),
+                                                backgroundColor: isDone ? '#10B981' : (isUnlocked ? '#FACC15' : '#E5E7EB'),
                                                 border: '3px solid white',
                                                 boxShadow: isDone ? '0 0 12px rgba(16,185,129,.3)' : (isUnlocked ? '0 0 12px rgba(250,204,21,.3)' : 'none')
                                             }}>
                                             {isDone ? <i className="bi bi-check-lg text-white fw-bold"></i>
-                                                : isUnlocked ? <span className="fw-bold smallest">{index + 1}</span>
+                                                : isUnlocked ? <span className="fw-bold smallest text-dark">{index + 1}</span>
                                                     : <i className="bi bi-lock-fill text-muted small"></i>}
                                         </div>
 
@@ -176,7 +192,7 @@ const Courses: React.FC = () => {
                                                             {isDone ? '🔄 REVIEW' : '▶ THOMA'}
                                                         </Link>
                                                     ) : (
-                                                        <span className="smallest fw-bold text-muted ls-1">🔒 LOCKED</span>
+                                                        <span className="smallest fw-bold text-muted ls-1"><i className="bi bi-lock-fill me-1"></i> LOCKED</span>
                                                     )}
                                                 </div>
                                             </div>
@@ -246,7 +262,7 @@ const Courses: React.FC = () => {
                 
                 .game-btn-primary { 
                     background-color: #FACC15 !important; 
-                    color: #111827 !important; 
+                    color: #1e293b !important; 
                     border: none !important; 
                     border-radius: 8px; 
                     box-shadow: 0 4px 0 #EAB308 !important; 

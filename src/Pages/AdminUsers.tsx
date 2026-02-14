@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { db } from '../services/firebaseConfig';
-import { collection, doc, deleteDoc, addDoc, serverTimestamp } from 'firebase/firestore';
+import { collection, doc, deleteDoc, addDoc, serverTimestamp, setDoc } from 'firebase/firestore';
 import AdminNavbar from '../components/AdminNavbar';
 import { fetchAllUsers, invalidateCache } from '../services/dataCache';
 import Swal from 'sweetalert2';
@@ -42,6 +42,77 @@ const AdminUsers: React.FC = () => {
     const indexOfFirstUser = indexOfLastUser - usersPerPage;
     const currentUsers = filteredUsers.slice(indexOfFirstUser, indexOfLastUser);
     const totalPages = Math.ceil(filteredUsers.length / usersPerPage);
+
+    const handleEditUser = async (user: any) => {
+        const { value: formValues } = await Swal.fire({
+            title: `Edit ${user.username || 'User'}`,
+            html:
+                `<div class="text-start">
+                    <label class="form-label smallest fw-bold text-uppercase ls-1">Learning Points (XP)</label>
+                    <input id="swal-input1" class="form-control mb-3" type="number" value="${user.points || 0}">
+                    
+                    <div class="form-check form-switch mb-3">
+                        <input class="form-check-input" type="checkbox" id="swal-input2" ${user.isNativeSpeaker ? 'checked' : ''}>
+                        <label class="form-check-label small fw-bold" for="swal-input2">Is Native Speaker (Manually Set)</label>
+                    </div>
+
+                    <label class="form-label smallest fw-bold text-uppercase ls-1">Verification Status</label>
+                    <select id="swal-input3" class="form-select mb-3">
+                        <option value="none" ${user.nativeVerificationStatus === 'none' ? 'selected' : ''}>None</option>
+                        <option value="pending" ${user.nativeVerificationStatus === 'pending' ? 'selected' : ''}>Pending</option>
+                        <option value="verified" ${user.nativeVerificationStatus === 'verified' ? 'selected' : ''}>Verified</option>
+                        <option value="rejected" ${user.nativeVerificationStatus === 'rejected' ? 'selected' : ''}>Rejected</option>
+                    </select>
+
+                    ${user.nativeSpeakerBio ? `
+                        <label class="form-label smallest fw-bold text-uppercase ls-1">Verification Bio</label>
+                        <div class="p-2 bg-light border rounded smallest text-muted">${user.nativeSpeakerBio}</div>
+                    ` : ''}
+                </div>`,
+            focusConfirm: false,
+            showCancelButton: true,
+            confirmButtonText: 'UPDATE',
+            confirmButtonColor: '#FACC15',
+            preConfirm: () => {
+                return {
+                    points: (document.getElementById('swal-input1') as HTMLInputElement).value,
+                    isNativeSpeaker: (document.getElementById('swal-input2') as HTMLInputElement).checked,
+                    nativeVerificationStatus: (document.getElementById('swal-input3') as HTMLSelectElement).value
+                }
+            }
+        });
+
+        if (formValues) {
+            try {
+                const userRef = doc(db, "users", user.id);
+                // If moving to 'verified', automatically set isNativeSpeaker to true
+                // If moving to 'rejected' or 'none', set isNativeSpeaker to false
+                const newIsNative = formValues.nativeVerificationStatus === 'verified';
+
+                await setDoc(userRef, {
+                    points: Number(formValues.points),
+                    isNativeSpeaker: newIsNative,
+                    nativeVerificationStatus: formValues.nativeVerificationStatus
+                }, { merge: true });
+
+                // --- ADD AUDIT LOG TRIGGER ---
+                await addDoc(collection(db, "logs"), {
+                    action: "UPDATE",
+                    details: `Updated user: ${user.username}. Points: ${formValues.points}, NativeSpeaker: ${newIsNative}`,
+                    adminEmail: "Admin",
+                    targetId: user.id,
+                    timestamp: serverTimestamp()
+                });
+
+                Swal.fire('Updated!', 'User records successfully updated.', 'success');
+                invalidateCache('allUsers');
+                loadUsers();
+            } catch (error) {
+                console.error("Update error:", error);
+                Swal.fire('Error', 'Failed to update user.', 'error');
+            }
+        }
+    };
 
     const handleDeleteUser = async (userId: string, userName: string) => {
         const result = await Swal.fire({
@@ -153,12 +224,39 @@ const AdminUsers: React.FC = () => {
                                                             Lessons: <span className="text-dark">{user.completedLessons?.length || 0} Completed</span>
                                                         </span>
                                                     </div>
+                                                    {user.nativeVerificationStatus === 'pending' && (
+                                                        <div className="bg-warning-subtle px-3 py-1 rounded-pill border border-warning">
+                                                            <span className="smallest fw-bold text-uppercase text-warning-emphasis">
+                                                                <i className="bi bi-shield-fill-exclamation me-1"></i> Pending Vetting
+                                                            </span>
+                                                        </div>
+                                                    )}
+                                                    {user.isNativeSpeaker && (
+                                                        <div className="bg-success-subtle px-3 py-1 rounded-pill border border-success">
+                                                            <span className="smallest fw-bold text-uppercase text-success">
+                                                                <i className="bi bi-patch-check-fill me-1"></i> Verified Native
+                                                            </span>
+                                                        </div>
+                                                    )}
                                                 </div>
+                                                {user.nativeVerificationStatus === 'pending' && user.nativeSpeakerBio && (
+                                                    <div className="mt-3 p-2 bg-light rounded border border-dashed small text-muted">
+                                                        <span className="smallest fw-bold text-uppercase text-muted d-block mb-1">Vetting Bio:</span>
+                                                        "{user.nativeSpeakerBio}"
+                                                    </div>
+                                                )}
                                             </div>
 
                                             {/* Actions Column */}
                                             <div className="col-md-4 text-md-end mt-4 mt-md-0 d-flex gap-2 justify-content-md-end">
-                                                <button className="btn btn-outline-dark fw-bold smallest ls-1 px-4">
+                                                <button
+                                                    onClick={() => handleEditUser(user)}
+                                                    className="btn btn-warning fw-bold smallest ls-1 px-3 shadow-none border-dark"
+                                                    style={{ border: '2px solid #000' }}
+                                                >
+                                                    EDIT
+                                                </button>
+                                                <button className="btn btn-outline-dark fw-bold smallest ls-1 px-3">
                                                     HISTORY
                                                 </button>
                                                 <button

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { onAuthStateChanged, signOut, type User } from 'firebase/auth';
-import { doc, onSnapshot } from 'firebase/firestore';
+import { doc, onSnapshot, collection, query, where } from 'firebase/firestore';
 import { auth, db } from '../services/firebaseConfig';
 import { invalidateCache } from '../services/dataCache';
 import Swal from 'sweetalert2';
@@ -9,6 +9,7 @@ import Swal from 'sweetalert2';
 const Navbar: React.FC = () => {
     const [user, setUser] = useState<User | null>(null);
     const [userData, setUserData] = useState<{ username: string, points: number } | null>(null);
+    const [chatCount, setChatCount] = useState(0);
     const navigate = useNavigate();
     const location = useLocation();
 
@@ -16,6 +17,7 @@ const Navbar: React.FC = () => {
         const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
             setUser(currentUser);
             if (currentUser) {
+                // User Data Listener
                 const userRef = doc(db, "users", currentUser.uid);
                 const unsubDoc = onSnapshot(userRef, (docSnap) => {
                     if (docSnap.exists()) {
@@ -25,9 +27,20 @@ const Navbar: React.FC = () => {
                         });
                     }
                 });
-                return () => unsubDoc();
+
+                // Chat Count Listener
+                const unsubscribeChats = onSnapshot(
+                    query(collection(db, "chats"), where("participants", "array-contains", currentUser.uid)),
+                    (snap) => setChatCount(snap.docs.length)
+                );
+
+                return () => {
+                    unsubDoc();
+                    unsubscribeChats();
+                };
             } else {
                 setUserData(null);
+                setChatCount(0);
             }
         });
         return () => unsubscribe();
@@ -124,6 +137,16 @@ const Navbar: React.FC = () => {
                                 Mitambo
                             </Link>
                         </li>
+                        <li className="nav-item w-100 w-lg-auto text-center">
+                            <Link className={`nav-link nav-custom-link position-relative ${isActive('/practice') ? 'active-link' : ''}`} to="/practice">
+                                Practice
+                                {chatCount > 0 && (
+                                    <span className="position-absolute top-0 start-100 translate-middle p-1 bg-danger border border-light rounded-circle" style={{ width: '8px', height: '8px' }}>
+                                        <span className="visually-hidden">New alerts</span>
+                                    </span>
+                                )}
+                            </Link>
+                        </li>
 
                         {user ? (
                             /* AUTHENTICATED USER DROPDOWN */
@@ -166,7 +189,16 @@ const Navbar: React.FC = () => {
                                         </Link>
                                     </li>
                                     <li className="p-2 pt-0 text-start">
-                                        <Link className="dropdown-item rounded-3 py-2 px-3 d-flex align-items-center gap-3 shadow-none" to="/settings">
+                                        <Link className="dropdown-item rounded-3 py-2 px-3 d-flex align-items-center gap-3 shadow-none justify-content-between" to="/practice">
+                                            <div className="d-flex align-items-center gap-3">
+                                                <i className="bi bi-chat-text text-muted"></i>
+                                                <span className="small fw-bold">Practice</span>
+                                            </div>
+                                            {chatCount > 0 && <span className="badge bg-danger rounded-pill smallest-pill">{chatCount}</span>}
+                                        </Link>
+                                    </li>
+                                    <li className="p-2 pt-0 text-start">
+                                        <Link className="dropdown-item rounded-3 py-2 px-3 d-flex align-items-center gap-3 shadow-none" to="/profile">
                                             <i className="bi bi-gear text-muted"></i>
                                             <span className="small fw-bold">Settings</span>
                                         </Link>
@@ -200,6 +232,7 @@ const Navbar: React.FC = () => {
                 .ls-1 { letter-spacing: 1px; }
                 .ls-2 { letter-spacing: 2px; }
                 .smallest { font-size: 11px; }
+                .smallest-pill { font-size: 9px; padding: 0.35em 0.65em; }
                 
                 .nav-custom-link {
                     font-weight: 700 !important;

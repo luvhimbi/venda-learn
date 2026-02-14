@@ -3,18 +3,30 @@ import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { doc, setDoc } from 'firebase/firestore';
 import { auth, db } from '../services/firebaseConfig';
+import ReCAPTCHA from 'react-google-recaptcha';
 
 const Register: React.FC = () => {
-    const [formData, setFormData] = useState({ username: '', email: '', password: '', confirmPassword: '' });
+    const [formData, setFormData] = useState({
+        username: '',
+        email: '',
+        password: '',
+        confirmPassword: '',
+        isNativeSpeaker: false,
+        nativeSpeakerBio: ''
+    });
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [captchaValue, setCaptchaValue] = useState<string | null>(null);
     const navigate = useNavigate();
     const [searchParams] = useSearchParams();
     const referrerId = searchParams.get('ref');
 
     const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
-        const { name, value } = e.target;
-        setFormData(prev => ({ ...prev, [name]: value }));
+        const { name, value, type, checked } = e.target;
+        setFormData(prev => ({
+            ...prev,
+            [name]: type === 'checkbox' ? checked : value
+        }));
     };
 
     const handleSubmit = async (e: FormEvent) => {
@@ -28,7 +40,17 @@ const Register: React.FC = () => {
         try {
             const userCredential = await createUserWithEmailAndPassword(auth, formData.email, formData.password);
             await setDoc(doc(db, "users", userCredential.user.uid), {
-                username: formData.username, email: formData.email, points: 0, level: 1, streak: 0, completedLessons: [], createdAt: new Date().toISOString()
+                username: formData.username,
+                email: formData.email,
+                points: 0,
+                level: 1,
+                streak: 0,
+                completedLessons: [],
+                isNativeSpeaker: false, // Remains false until verified
+                nativeVerificationStatus: formData.isNativeSpeaker ? 'pending' : 'none',
+                nativeSpeakerBio: formData.isNativeSpeaker ? formData.nativeSpeakerBio : "",
+                tourCompleted: false,
+                createdAt: new Date().toISOString()
             });
             if (referrerId) {
                 try {
@@ -81,7 +103,7 @@ const Register: React.FC = () => {
                             <input name="email" type="email" className="form-control form-control-lg border-0 bg-transparent fs-6 px-0" placeholder="vhadau@example.com" onChange={handleChange} required disabled={loading} />
                         </div>
                     </div>
-                    <div className="row mb-4">
+                    <div className="row mb-3">
                         <div className="col-md-6 mb-3 mb-md-0">
                             <label className="form-label small fw-bold text-uppercase text-muted ls-1">Password</label>
                             <div className="custom-input-group">
@@ -95,7 +117,59 @@ const Register: React.FC = () => {
                             </div>
                         </div>
                     </div>
-                    <button type="submit" className="btn btn-lg w-100 fw-bold py-3 mb-4 game-btn-primary" disabled={loading}>
+
+                    <div className="mb-4 p-3 rounded-3 border d-flex align-items-start gap-3 bg-light border-light">
+                        <div className="form-check form-switch pt-1">
+                            <input
+                                className="form-check-input"
+                                type="checkbox"
+                                name="isNativeSpeaker"
+                                id="isNativeSpeaker"
+                                checked={formData.isNativeSpeaker}
+                                onChange={handleChange}
+                                disabled={loading}
+                            />
+                        </div>
+                        <div>
+                            <label className="form-check-label fw-bold d-block mb-1" style={{ fontSize: '13px' }} htmlFor="isNativeSpeaker">
+                                I am a Native Venda Speaker
+                            </label>
+                            <p className="text-muted mb-0" style={{ fontSize: '11px', lineHeight: '1.4' }}>
+                                Your status will be pending until verified by an admin. Once verified, you'll appear in the Practice Hub.
+                            </p>
+                        </div>
+                    </div>
+
+                    {formData.isNativeSpeaker && (
+                        <div className="mb-4 animate__animated animate__fadeIn">
+                            <label className="form-label small fw-bold text-uppercase text-muted ls-1">Why are you a native speaker?</label>
+                            <div className="custom-input-group">
+                                <input
+                                    name="nativeSpeakerBio"
+                                    type="text"
+                                    className="form-control form-control-lg border-0 bg-transparent fs-6 px-0"
+                                    placeholder="e.g. Born and raised in Venda, Tshifudi village."
+                                    onChange={handleChange}
+                                    required={formData.isNativeSpeaker}
+                                    disabled={loading}
+                                />
+                            </div>
+                            <p className="smallest text-muted mt-1">This helps us vet your profile for the Practice Hub.</p>
+                        </div>
+                    )}
+
+                    <div className="mb-4 d-flex justify-content-center">
+                        <ReCAPTCHA
+                            sitekey="6LeKx2ssAAAAAHk2f6trCWqsFxx7OkbceJFsGsFW" // Test key
+                            onChange={(value) => setCaptchaValue(value)}
+                        />
+                    </div>
+
+                    <button
+                        type="submit"
+                        className="btn btn-lg w-100 fw-bold py-3 mb-4 game-btn-primary"
+                        disabled={loading || !captchaValue}
+                    >
                         {loading ? <span className="spinner-border spinner-border-sm me-2"></span> : 'CREATE ACCOUNT'}
                     </button>
                 </form>

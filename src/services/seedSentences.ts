@@ -3,24 +3,24 @@ import { collection, writeBatch, doc } from 'firebase/firestore';
 
 export interface SentencePuzzle {
     id: string;
-    words: string[]; // Correct order: ["Ndi", "funa", "zwili"]
+    words: string[];
     translation: string;
     difficulty: 'Easy' | 'Medium' | 'Hard';
 }
 
 const sentenceData = [
     {
-        words: ["Ndi", "funa", "zwili"],
+        words: ["Ndi", "funa", "zwiliwa"],
         translation: "I like food",
         difficulty: "Easy"
     },
     {
-        words: ["Ndi", "a", "livhuwa"],
+        words: ["Ndo", "livhuwa"],
         translation: "Thank you (I possess gratitude)",
         difficulty: "Easy"
     },
     {
-        words: ["Vha", "khou", "ita", "mini?"],
+        words: ["Ni", "khou", "ita", "mini?"],
         translation: "What are you doing?",
         difficulty: "Medium"
     },
@@ -30,18 +30,38 @@ const sentenceData = [
         difficulty: "Medium"
     },
     {
-        words: ["Muthu", "udi", "nga", "vhathu"],
+        words: ["Muthu", "ndi", "Muthu","nga", "vhathu"],
         translation: "A person is a person through other people",
         difficulty: "Hard"
     },
     {
-        words: ["Ndi", "khou", "pfa", "ndala"],
+        words: ["Ndina",  "ndala"],
         translation: "I am hungry",
         difficulty: "Easy"
     },
     {
-        words: ["U", "bva", "gai?"],
+        words: ["Ni", "Kho u","bva", "gai?"],
         translation: "Where are you from?",
+        difficulty: "Easy"
+    },
+    {
+        words: ["Ni", "Kho uya ","gai"],
+        translation: "Where are you going?",
+        difficulty: "Easy"
+    },
+    {
+        words: ["Ni", "do vhuya nga  ","tshifhinga-de"],
+        translation: "What time are you coming back?",
+        difficulty: "Easy"
+    },
+    {
+        words: ["Ndi", "ani ","funa"],
+        translation: "I love you",
+        difficulty: "Easy"
+    },
+    {
+        words: ["Ndi ", "Kho uya "," u vhala"],
+        translation: "Am going to study",
         difficulty: "Easy"
     }
 ];

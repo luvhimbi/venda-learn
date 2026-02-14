@@ -19,7 +19,7 @@ const GamesDashboard: React.FC = () => {
     const games = [
         {
             id: 'word-puzzle',
-            title: 'U Vumba',
+            title: 'Guess The correct venda word',
             description: 'Guess the 5-letter Venda word. A daily challenge to test your vocabulary!',
             icon: '🧩',
             route: '/word-puzzle',
@@ -28,7 +28,7 @@ const GamesDashboard: React.FC = () => {
         },
         {
             id: 'picture-puzzle',
-            title: 'Tshifaniso Race',
+            title: 'Match the pictures with venda words',
             description: 'Race against the clock! Match the pictures to the correct Venda words.',
             icon: '🖼️',
             route: '/picture-puzzle',
@@ -37,7 +37,7 @@ const GamesDashboard: React.FC = () => {
         },
         {
             id: 'syllable-builder',
-            title: 'Zwiaki (Syllables)',
+            title: 'Build the venda Words(Syllables)',
             description: 'Learn how to build words! Arrange the blocks in the correct order.',
             icon: '🧱',
             route: '/syllable-builder',
@@ -46,7 +46,7 @@ const GamesDashboard: React.FC = () => {
         },
         {
             id: 'sentence-scramble',
-            title: 'Mutaladzi (Sentences)',
+            title: 'Build sentences(Sentences)',
             description: 'Unscramble the words to form correct Venda sentences!',
             icon: '📝',
             route: '/game/scramble',
@@ -55,7 +55,7 @@ const GamesDashboard: React.FC = () => {
         },
         {
             id: 'knowledge-battle',
-            title: 'Ndivhano (Battle)',
+            title: 'Battle each other',
             description: 'Challenge others who completed the same lessons to a live quiz showdown!',
             icon: <i className="bi bi-lightning-charge-fill text-warning"></i>,
             route: '/battle',

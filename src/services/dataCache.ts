@@ -215,6 +215,19 @@ export const fetchSentences = async (): Promise<any[]> => {
     return puzzles;
 };
 
+export const fetchChatMetadata = async (chatId: string): Promise<any | null> => {
+    const cacheKey = `chat_${chatId}`;
+    const cached = getCached<any>(cacheKey);
+    if (cached) return cached;
+
+    const snap = await getDoc(doc(db, "chats", chatId));
+    if (!snap.exists()) return null;
+
+    const data = { id: snap.id, ...snap.data() };
+    setCache(cacheKey, data);
+    return data;
+};
+
 // ----- NEW GAME FETCHERS & WARMUP -----
 
 export const fetchPicturePuzzles = async (): Promise<any[]> => {

@@ -1,8 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { auth, db } from '../services/firebaseConfig';
-import { doc, setDoc, collection, query, where, getDocs, writeBatch, increment } from 'firebase/firestore';
-import { onAuthStateChanged } from 'firebase/auth';
-import { seedLessons } from "../services/seedDatabase.ts";
+import { doc, setDoc, updateDoc, collection, query, where, getDocs, writeBatch, increment } from 'firebase/firestore';
+import { onAuthStateChanged, signOut } from 'firebase/auth';
 import { fetchUserData, invalidateCache, refreshUserData, fetchLearnedStats } from '../services/dataCache';
 import { getLevelStats, getBadgeDetails } from '../services/levelUtils';
 import Swal from 'sweetalert2';
@@ -14,6 +13,9 @@ interface UserProfile {
     level: number;
     streak: number;
     completedLessons: string[];
+    isNativeSpeaker?: boolean;
+    nativeSpeakerBio?: string;
+    nativeVerificationStatus?: 'none' | 'pending' | 'verified' | 'rejected';
 }
 
 interface LearnedStats {
@@ -33,6 +35,8 @@ const Profile: React.FC = () => {
     const [updateLoading, setUpdateLoading] = useState(false);
     const [claimLoading, setClaimLoading] = useState(false);
     const [editUsername, setEditUsername] = useState('');
+    const [editBio, setEditBio] = useState('');
+    const [isNativeSpeaker, setIsNativeSpeaker] = useState(false);
     const [unclaimedInvites, setUnclaimedInvites] = useState<any[]>([]);
 
     const inviteLink = `${window.location.origin}/register?ref=${auth.currentUser?.uid}`;
@@ -54,6 +58,8 @@ const Profile: React.FC = () => {
                         streak: Number(profile.streak) || 0
                     });
                     setEditUsername(profile.username || '');
+                    setEditBio(profile.nativeSpeakerBio || '');
+                    setIsNativeSpeaker(!!profile.isNativeSpeaker);
 
                     // Fetch unclaimed invites
                     const q = query(
@@ -93,12 +99,30 @@ const Profile: React.FC = () => {
         setUpdateLoading(true);
         try {
             const userRef = doc(db, "users", auth.currentUser.uid);
+
+            // Logic for verification status
+            let newStatus = userData?.nativeVerificationStatus || 'none';
+            if (isNativeSpeaker && (newStatus === 'none' || newStatus === 'rejected')) {
+                newStatus = 'pending';
+            } else if (!isNativeSpeaker) {
+                newStatus = 'none';
+            }
+
             await setDoc(userRef, {
                 username: editUsername,
-                email: auth.currentUser.email
+                email: auth.currentUser.email,
+                isNativeSpeaker: newStatus === 'verified', // only verified users have the flag
+                nativeSpeakerBio: editBio,
+                nativeVerificationStatus: newStatus
             }, { merge: true });
 
-            setUserData(prev => prev ? { ...prev, username: editUsername } : null);
+            setUserData(prev => prev ? {
+                ...prev,
+                username: editUsername,
+                isNativeSpeaker: newStatus === 'verified',
+                nativeSpeakerBio: editBio,
+                nativeVerificationStatus: newStatus
+            } : null);
             setIsEditing(false);
             invalidateCache(`user_${auth.currentUser.uid}`);
             Swal.fire('Success', 'Phurofayili yo vusuluswa!', 'success');
@@ -170,36 +194,113 @@ const Profile: React.FC = () => {
             <div className="container" style={{ maxWidth: '850px' }}>
 
                 {/* PROFILE HEADER & SETTINGS */}
-                <header className="mb-5 pb-5 border-bottom">
+                <header className={`mb-5 pb-5 border-bottom transition-all ${isEditing ? 'bg-light p-4 rounded-4 border-warning shadow-sm' : ''}`}>
                     <div className="d-flex flex-column flex-md-row align-items-center gap-4 text-center text-md-start">
                         <div className="text-dark rounded-circle d-flex align-items-center justify-content-center fw-bold shadow-sm"
                             style={{ width: '100px', height: '100px', fontSize: '2.5rem', backgroundColor: '#FACC15', border: '3px solid #111827' }}>
                             {userData?.username?.charAt(0).toUpperCase() || 'V'}
                         </div>
                         <div className="flex-grow-1">
-                            <h1 className="fw-bold mb-1 ls-tight">{userData?.username}</h1>
+                            <div className="d-flex align-items-center gap-2 mb-1">
+                                <h1 className="fw-bold mb-0 ls-tight">{userData?.username}</h1>
+                                {userData?.isNativeSpeaker && (
+                                    <span className="badge bg-success text-white smallest fw-bold ls-1 rounded-pill px-3">
+                                        <i className="bi bi-patch-check-fill me-1"></i> VERIFIED NATIVE
+                                    </span>
+                                )}
+                                {userData?.nativeVerificationStatus === 'pending' && (
+                                    <span className="badge bg-warning text-dark smallest fw-bold ls-1 rounded-pill px-3">
+                                        VERIFICATION PENDING
+                                    </span>
+                                )}
+                                {userData?.nativeVerificationStatus === 'rejected' && (
+                                    <span className="badge bg-danger text-white smallest fw-bold ls-1 rounded-pill px-3">
+                                        VERIFICATION REJECTED
+                                    </span>
+                                )}
+                            </div>
                             <p className="smallest fw-bold text-muted text-uppercase ls-2 mb-3">{userData?.email}</p>
 
                             {!isEditing ? (
-                                <button onClick={() => setIsEditing(true)} className="btn btn-dark btn-sm px-4 py-2 fw-bold ls-1 rounded-pill">
-                                    EDIT PROFILE
-                                </button>
+                                <div className="d-flex gap-2 flex-wrap justify-content-center justify-content-md-start">
+                                    <button onClick={() => setIsEditing(true)} className="btn btn-dark btn-sm px-4 py-2 fw-bold ls-1 rounded-pill shadow-sm">
+                                        <i className="bi bi-pencil-square me-2"></i> EDIT PROFILE
+                                    </button>
+                                    {window.innerWidth >= 768 && (
+                                        <button
+                                            onClick={async () => {
+                                                const userRef = doc(db, "users", auth.currentUser!.uid);
+                                                await updateDoc(userRef, { tourCompleted: false });
+                                                sessionStorage.removeItem('tour_offered');
+                                                window.location.href = '/';
+                                            }}
+                                            className="btn btn-outline-warning btn-sm px-4 py-2 fw-bold ls-1 rounded-pill shadow-sm text-dark"
+                                        >
+                                            <i className="bi bi-compass me-2 fw-bold"></i> RESTART TOUR
+                                        </button>
+                                    )}
+                                    <button onClick={async () => {
+                                        await signOut(auth);
+                                        invalidateCache();
+                                        window.location.href = '/login';
+                                    }} className="btn btn-outline-danger btn-sm px-4 py-2 fw-bold ls-1 rounded-pill shadow-sm">
+                                        <i className="bi bi-box-arrow-right me-2"></i> LOGOUT
+                                    </button>
+                                </div>
                             ) : (
-                                <form onSubmit={handleUpdate} className="animate__animated animate__fadeIn d-flex gap-2 justify-content-center justify-content-md-start">
-                                    <input
-                                        type="text"
-                                        className="form-control form-control-sm border-0 bg-light py-2 px-3 rounded-pill fw-bold"
-                                        style={{ maxWidth: '200px' }}
-                                        value={editUsername}
-                                        onChange={(e) => setEditUsername(e.target.value)}
-                                        required
-                                    />
-                                    <button type="submit" className="btn btn-warning btn-sm px-3 py-2 fw-bold ls-1 rounded-pill" disabled={updateLoading}>
-                                        {updateLoading ? '...' : 'SAVE'}
-                                    </button>
-                                    <button type="button" onClick={() => setIsEditing(false)} className="btn btn-light btn-sm px-3 py-2 fw-bold ls-1 rounded-pill">
-                                        CANCEL
-                                    </button>
+                                <form onSubmit={handleUpdate} className="animate__animated animate__fadeIn">
+                                    <div className="d-flex flex-column gap-3">
+                                        <div className="d-flex gap-2 justify-content-center justify-content-md-start">
+                                            <input
+                                                type="text"
+                                                className="form-control form-control-sm border-0 bg-light py-2 px-3 rounded-pill fw-bold"
+                                                style={{ maxWidth: '200px' }}
+                                                value={editUsername}
+                                                onChange={(e) => setEditUsername(e.target.value)}
+                                                required
+                                            />
+                                        </div>
+
+                                        <div className="p-3 rounded-4 bg-light border-0 text-start" style={{ maxWidth: '400px' }}>
+                                            <div className="form-check form-switch mb-2">
+                                                <input
+                                                    className="form-check-input"
+                                                    type="checkbox"
+                                                    id="isSpeakerToggle"
+                                                    checked={isNativeSpeaker}
+                                                    onChange={(e) => setIsNativeSpeaker(e.target.checked)}
+                                                />
+                                                <label className="form-check-label small fw-bold" htmlFor="isSpeakerToggle">
+                                                    Apply for Native Speaker Status
+                                                </label>
+                                            </div>
+                                            <p className="smallest text-muted mb-2">
+                                                Verification allows you to appear in the Practice Hub and help others.
+                                            </p>
+                                            {isNativeSpeaker && (
+                                                <textarea
+                                                    className="form-control form-control-sm border-0 bg-white rounded-3 small mt-2"
+                                                    placeholder="Short bio for learners..."
+                                                    rows={2}
+                                                    value={editBio}
+                                                    onChange={(e) => setEditBio(e.target.value)}
+                                                />
+                                            )}
+                                        </div>
+
+                                        <div className="d-flex gap-2 justify-content-center justify-content-md-start mt-2">
+                                            <button type="submit" className="btn btn-warning btn-lg px-5 py-3 fw-bold ls-1 rounded-pill shadow" disabled={updateLoading}>
+                                                {updateLoading ? (
+                                                    <span className="spinner-border spinner-border-sm me-2"></span>
+                                                ) : (
+                                                    <><i className="bi bi-check-circle-fill me-2"></i> SAVE CHANGES</>
+                                                )}
+                                            </button>
+                                            <button type="button" onClick={() => setIsEditing(false)} className="btn btn-light btn-lg px-4 py-3 fw-bold ls-1 rounded-pill">
+                                                CANCEL
+                                            </button>
+                                        </div>
+                                    </div>
                                 </form>
                             )}
                         </div>
@@ -361,12 +462,7 @@ const Profile: React.FC = () => {
                     <div className="position-absolute top-0 end-0 opacity-10 display-1 p-4">🐘</div>
                 </section>
 
-                {/* ADMIN TOOLS */}
-                <footer className="mt-5 pt-5 text-center">
-                    <button onClick={seedLessons} className="btn btn-link text-muted text-decoration-none smallest fw-bold ls-2 opacity-50">
-                        <i className="bi bi-shield-lock me-2"></i> ADMIN: SEED DATABASE
-                    </button>
-                </footer>
+
             </div>
 
             <style>{`
