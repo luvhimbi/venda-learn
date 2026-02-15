@@ -106,11 +106,19 @@ const Sidebar: React.FC = () => {
         <>
             {/* MOBILE TOP BAR (Hidden on Desktop) */}
             <div className="d-lg-none mobile-top-bar bg-white border-bottom px-4 d-flex align-items-center justify-content-between sticky-top shadow-sm">
-                <div className="d-flex align-items-center gap-2">
-                    <div className="bg-warning rounded-pill p-1 d-flex align-items-center justify-content-center" style={{ width: '32px', height: '32px' }}>
+                <div className="d-flex align-items-center gap-1"> {/* Reduced gap from 2 to 1 */}
+                    <div
+                        className="bg-warning rounded-pill d-flex align-items-center justify-content-center flex-shrink-0"
+                        style={{ width: '32px', height: '32px' }}
+                    >
                         <span className="fw-bold smallest">V</span>
                     </div>
-                    <span className="fw-bold ls-tight">VENDA<span className="text-warning">LEARN</span></span>
+                    <span
+                        className="fw-bold ls-tight mb-0"
+                        style={{ marginLeft: '-2px' }} // Negative margin to pull text closer to the 'V' circle
+                    >
+            VENDA<span className="text-warning">LEARN</span>
+        </span>
                 </div>
 
                 {/* Mobile Profile Link */}

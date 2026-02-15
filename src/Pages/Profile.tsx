@@ -5,6 +5,7 @@ import { onAuthStateChanged, signOut } from 'firebase/auth';
 import { fetchUserData, invalidateCache, refreshUserData, fetchLearnedStats } from '../services/dataCache';
 import { getLevelStats, getBadgeDetails } from '../services/levelUtils';
 import Swal from 'sweetalert2';
+import {useNavigate} from "react-router-dom";
 
 interface UserProfile {
     username: string;
@@ -38,7 +39,7 @@ const Profile: React.FC = () => {
     const [editBio, setEditBio] = useState('');
     const [isNativeSpeaker, setIsNativeSpeaker] = useState(false);
     const [unclaimedInvites, setUnclaimedInvites] = useState<any[]>([]);
-
+    const  navigate = useNavigate();
     const inviteLink = `${window.location.origin}/register?ref=${auth.currentUser?.uid}`;
 
     useEffect(() => {
@@ -242,7 +243,7 @@ const Profile: React.FC = () => {
                                     <button onClick={async () => {
                                         await signOut(auth);
                                         invalidateCache();
-                                        window.location.href = '/login';
+                                        navigate('/login');
                                     }} className="btn btn-outline-danger btn-sm px-4 py-2 fw-bold ls-1 rounded-pill shadow-sm">
                                         <i className="bi bi-box-arrow-right me-2"></i> LOGOUT
                                     </button>

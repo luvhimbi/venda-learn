@@ -22,7 +22,7 @@ const AuthNavbar: React.FC = () => {
                     <Link to="/login" className="btn btn-link text-decoration-none text-dark fw-bold smallest ls-1 shadow-none px-2 px-md-3">
                         DZHENA
                     </Link>
-                    <Link to="/register" className="btn btn-dark fw-bold smallest ls-1 px-3 px-md-4 py-2 rounded-pill shadow-sm">
+                    <Link to="/register" className="btn btn-game-primary fw-bold smallest ls-1 px-3 px-md-4 py-2 rounded-pill shadow-sm">
                         JOIN FREE
                     </Link>
                 </div>
