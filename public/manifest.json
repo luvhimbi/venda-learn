@@ -1,25 +1,31 @@
 {
   "short_name": "VendaLearn",
   "name": "VendaLearn: Shumela Venda",
+  "description": "Learn Tshivenda through interactive stories, games, and lessons",
   "icons": [
     {
-      "src": "favicon.ico",
-      "sizes": "64x64 32x32 24x24 16x16",
-      "type": "image/x-icon"
+      "src": "images/vendalearn.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
     },
     {
-      "src": "img.png",
+      "src": "images/vendalearn.png",
+      "sizes": "512x512",
       "type": "image/png",
-      "sizes": "192x192"
-    },
-    {
-      "src": "logo512.png",
-      "type": "image/png",
-      "sizes": "512x512"
+      "purpose": "any maskable"
     }
   ],
-  "start_url": ".",
+  "start_url": "/",
+  "scope": "/",
   "display": "standalone",
-  "theme_color": "#FACC15",
-  "background_color": "#ffffff"
+  "orientation": "any",
+  "theme_color": "#0f172a",
+  "background_color": "#0f172a",
+  "categories": [
+    "education",
+    "language"
+  ],
+  "lang": "en",
+  "dir": "ltr"
 }

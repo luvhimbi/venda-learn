@@ -3,39 +3,42 @@ import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-route
 import Sidebar from "./components/Sidebar";
 import AuthNavbar from "./components/AuthNavbar";
 import Footer from "./components/Footer";
-import Login from "./Pages/Login";
-import Register from "./Pages/Register";
-import ResetPassword from "./Pages/ResetPassword";
+import GuestNudge from "./components/GuestNudge";
+import Login from "./Pages/Auth/Login";
+import Register from "./Pages/Auth/Register";
+import ResetPassword from "./Pages/Auth/ResetPassword";
 import Home from "./Pages/Home";
-import Profile from "./Pages/Profile";
-import Muvhigo from "./Pages/Muvhigo";
-import GameRoom from "./Pages/GameRoom";
-import DailyWordPage from "./Pages/DailyWordPage.tsx";
-import Courses from "./Pages/Courses.tsx";
-import PrivacyPolicy from "./Pages/PrivacyPolicy.tsx";
-import TermsOfUse from "./Pages/TermsOfUse.tsx";
-import POPIAct from "./Pages/POPIAct.tsx";
-import Stories from "./Pages/Stories.tsx";
-import HistoryList from "./Pages/HistoryList.tsx";
-import AddHistory from "./Pages/AddHistory.tsx";
-import HistoryDetail from "./Pages/HistoryDetail.tsx";
+import Profile from "./Pages/Auth/Profile";
+import Muvhigo from "./Pages/Admin/Muvhigo";
+import GameRoom from "./Pages/Games/GameRoom";
+import DailyWordPage from "./Pages/Learning/DailyWordPage";
+import Courses from "./Pages/Learning/Courses";
+import CourseLessons from "./Pages/Learning/CourseLessons";
+import PrivacyPolicy from "./Pages/Policy/PrivacyPolicy";
+import TermsOfUse from "./Pages/Policy/TermsOfUse";
+import POPIAct from "./Pages/Policy/POPIAct";
+import Stories from "./Pages/Learning/Stories";
+import HistoryList from "./Pages/Records/HistoryList";
+import AddHistory from "./Pages/Admin/AddHistory";
+import HistoryDetail from "./Pages/Records/HistoryDetail";
 import InstallBanner from "./components/InstallBanner.tsx";
 import AdminRoute from "./components/AdminRoute.tsx";
-import AdminDashboard from "./Pages/AdminDashboard.tsx";
-import EditLesson from "./Pages/EditLesson.tsx";
-import AddLesson from "./Pages/AddLesson.tsx";
-import AdminLessons from "./Pages/AdminLesson.tsx";
-import AdminUsers from './Pages/AdminUsers.tsx';
-import AdminAuditLog from "./Pages/AdminAuditLog.tsx";
-import AdminDailyWords from "./Pages/AdminDailyWords";
-import AdminHistory from "./Pages/AdminHistory";
-import WordPuzzle from "./Pages/WordPuzzle";
-import GamesDashboard from "./Pages/GamesDashboard";
-import PicturePuzzle from "./Pages/PicturePuzzle";
-import SyllableBuilder from "./Pages/SyllableBuilder";
-import SentenceScramble from "./Pages/SentenceScramble";
-import KnowledgeBattle from "./Pages/KnowledgeBattle";
-import PracticeHub from "./Pages/PracticeHub";
+import AdminDashboard from "./Pages/Admin/AdminDashboard";
+import EditLesson from "./Pages/Admin/EditLesson";
+import AddLesson from "./Pages/Admin/AddLesson";
+import AdminLessons from "./Pages/Admin/AdminLesson";
+import AdminUsers from './Pages/Admin/AdminUsers';
+import AdminAuditLog from "./Pages/Admin/AdminAuditLog";
+import AdminDailyWords from "./Pages/Admin/AdminDailyWords";
+import AdminHistory from "./Pages/Admin/AdminHistory";
+import WordPuzzle from "./Pages/Games/WordPuzzle";
+import GamesDashboard from "./Pages/Games/GamesDashboard";
+import PicturePuzzle from "./Pages/Games/PicturePuzzle";
+import SyllableBuilder from "./Pages/Games/SyllableBuilder";
+import SentenceScramble from "./Pages/Games/SentenceScramble";
+import KnowledgeBattle from "./Pages/Games/KnowledgeBattle";
+import PracticeHub from "./Pages/Games/PracticeHub";
+import DailyChallenge from "./Pages/Games/DailyChallenge";
 import ChatRoom from "./Pages/ChatRoom";
 import ErrorBoundary from "./components/ErrorBoundary";
 import NotFound from "./Pages/NotFound";
@@ -69,7 +72,7 @@ const AppContent: React.FC = () => {
             <div className={`flex-grow-1 d-flex flex-column ${user && !isAdminPath && !isAuthPath ? 'main-container' : ''}`}>
 
                 {/* Show minimalist AuthNavbar for Login/Register or public users */}
-                {!isAdminPath && (!user || isAuthPath) && <AuthNavbar />}
+                {!isAdminPath && (!user || isAuthPath) && <AuthNavbar user={user} />}
 
                 {!isAdminPath && !isAuthPath && user && !isChatPath && (
                     <div className="p-2 bg-white d-lg-none">
@@ -87,7 +90,7 @@ const AppContent: React.FC = () => {
                         <Route path="/register" element={<Register />} />
                         <Route path="/reset-password" element={<ResetPassword />} />
                         <Route path="/muvhigo" element={<Muvhigo />} />
-                        <Route path="/game/:lessonId" element={<GameRoom />} />
+                        <Route path="/game/:lessonId/:microLessonId?" element={<GameRoom />} />
                         <Route path="/word-of-the-day" element={<DailyWordPage />} />
                         <Route path="/mitambo" element={<GamesDashboard />} />
                         <Route path="/word-puzzle" element={<WordPuzzle />} />
@@ -97,6 +100,7 @@ const AppContent: React.FC = () => {
                         <Route path="/battle" element={<KnowledgeBattle />} />
                         <Route path="/history" element={<HistoryList />} />
                         <Route path="/courses" element={<Courses />} />
+                        <Route path="/courses/:courseId" element={<CourseLessons />} />
                         <Route path="/history/add" element={<AddHistory />} />
                         <Route path="/history/:storyId" element={<HistoryDetail />} />
                         <Route path="/profile" element={<Profile />} />
@@ -105,10 +109,10 @@ const AppContent: React.FC = () => {
                         <Route path="/popiact" element={<POPIAct />} />
                         <Route path="/ngano" element={<Stories />} />
                         <Route path="/practice" element={<PracticeHub />} />
+                        <Route path="/daily-challenge" element={<DailyChallenge />} />
                         <Route path="/chat/:chatId" element={<ErrorBoundary><ChatRoom /></ErrorBoundary>} />
 
                         {/* Protected Admin Routes */}
-                    /* ADMIN ROUTES */
                         <Route
                             path="/admin/dashboard"
                             element={
@@ -165,11 +169,10 @@ const AppContent: React.FC = () => {
                         <Route path="/admin/history/add" element={<AdminRoute><AddHistory /></AdminRoute>} />
                         <Route path="/admin/history/edit/:storyId" element={<AdminRoute><AddHistory /></AdminRoute>} />
 
-                        {/* Future Admin routes can be added here, e.g. /admin/users */}
-
                         {/* 404 Catch-All Route */}
                         <Route path="*" element={<NotFound />} />
                     </Routes>
+                    <GuestNudge />
                 </main>
 
                 {!isAdminPath && !user && <Footer />}

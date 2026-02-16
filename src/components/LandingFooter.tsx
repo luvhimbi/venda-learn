@@ -1,5 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import { Twitter, Instagram, Facebook } from 'lucide-react';
 
 const LandingFooter: React.FC = () => {
     return (
@@ -16,9 +17,9 @@ const LandingFooter: React.FC = () => {
                             Preserving the heart of Venda through gamified education. Join our community of learners today.
                         </p>
                         <div className="d-flex gap-3 justify-content-center justify-content-lg-start">
-                            <a href="#" className="text-muted fs-5"><i className="bi bi-twitter"></i></a>
-                            <a href="#" className="text-muted fs-5"><i className="bi bi-instagram"></i></a>
-                            <a href="#" className="text-muted fs-5"><i className="bi bi-facebook"></i></a>
+                            <a href="#" className="text-muted fs-5"><Twitter size={20} /></a>
+                            <a href="#" className="text-muted fs-5"><Instagram size={20} /></a>
+                            <a href="#" className="text-muted fs-5"><Facebook size={20} /></a>
                         </div>
                     </div>
                     <div className="col-lg-6 col-12 d-flex justify-content-center justify-content-lg-end">

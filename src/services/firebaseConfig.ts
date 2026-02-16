@@ -28,4 +28,6 @@ export const db = initializeFirestore(app, {
 });
 
 // Export Auth
+import { GoogleAuthProvider } from "firebase/auth";
 export const auth = getAuth(app);
+export const googleProvider = new GoogleAuthProvider();

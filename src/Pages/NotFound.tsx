@@ -70,7 +70,6 @@ const NotFound: React.FC = () => {
             </div>
 
             <h1 className="display-1 fw-bold text-dark mb-0 ls-tight">404</h1>
-            <h2 className="fw-bold text-muted text-uppercase ls-2 mb-4">Ndi Ngeo?</h2>
 
             <p className="lead text-muted mb-5" style={{ maxWidth: '500px' }}>
                 (Is it there?) <br />
@@ -78,7 +77,7 @@ const NotFound: React.FC = () => {
                 Let's get you back on the right path.
             </p>
 
-            <button onClick={handleGoBack} className="btn btn-dark px-5 py-3 rounded-pill fw-bold ls-1 text-uppercase shadow-lg transition-all hover-scale">
+            <button onClick={handleGoBack} className="btn btn-primary  px-5 py-3 rounded-pill fw-bold ls-1 text-uppercase shadow-lg transition-all hover-scale">
                 <i className="bi bi-arrow-left me-2"></i>
                 {userRole === 'admin' ? 'Back to Dashboard' :
                     userRole === 'user' ? 'Back to Learning' :

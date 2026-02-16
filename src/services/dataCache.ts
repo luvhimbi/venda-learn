@@ -13,25 +13,70 @@ interface CacheEntry<T> {
 
 const cache = new Map<string, CacheEntry<any>>();
 const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
+const STORAGE_PREFIX = 'venda_cache_';
 
 const getCached = <T>(key: string): T | null => {
+    // 1. Check in-memory first
     const entry = cache.get(key);
-    if (!entry) return null;
-    if (Date.now() - entry.timestamp > CACHE_TTL) {
-        cache.delete(key);
-        return null;
+    if (entry) {
+        if (Date.now() - entry.timestamp > CACHE_TTL) {
+            cache.delete(key);
+            // Also invalidate storage if expired
+            try { sessionStorage.removeItem(STORAGE_PREFIX + key); } catch (e) { }
+            return null;
+        }
+        return entry.data as T;
     }
-    return entry.data as T;
+
+    // 2. Check SessionStorage
+    try {
+        const stored = sessionStorage.getItem(STORAGE_PREFIX + key);
+        if (stored) {
+            const parsed = JSON.parse(stored) as CacheEntry<T>;
+            if (Date.now() - parsed.timestamp > CACHE_TTL) {
+                sessionStorage.removeItem(STORAGE_PREFIX + key);
+                return null;
+            }
+            // Hydrate in-memory cache
+            cache.set(key, parsed);
+            return parsed.data;
+        }
+    } catch (e) {
+        console.warn("SessionStorage read error:", e);
+    }
+
+    return null;
 };
 
 const setCache = <T>(key: string, data: T): void => {
-    cache.set(key, { data, timestamp: Date.now() });
+    const entry = { data, timestamp: Date.now() };
+
+    // 1. Write to in-memory
+    cache.set(key, entry);
+
+    // 2. Write to SessionStorage
+    try {
+        sessionStorage.setItem(STORAGE_PREFIX + key, JSON.stringify(entry));
+    } catch (e) {
+        console.warn("SessionStorage write failed (quota exceeded?):", e);
+        // Optional: clear old entries to make space
+    }
 };
 
 // Invalidate a specific key (e.g. after completing a lesson)
 export const invalidateCache = (key?: string) => {
-    if (key) cache.delete(key);
-    else cache.clear();
+    if (key) {
+        cache.delete(key);
+        try { sessionStorage.removeItem(STORAGE_PREFIX + key); } catch (e) { }
+    } else {
+        cache.clear();
+        try {
+            // Clear only our keys
+            Object.keys(sessionStorage).forEach(k => {
+                if (k.startsWith(STORAGE_PREFIX)) sessionStorage.removeItem(k);
+            });
+        } catch (e) { }
+    }
 };
 
 // ----- SHARED DATA FETCHERS -----
@@ -53,6 +98,26 @@ export const fetchLessons = async (): Promise<any[]> => {
 
     setCache('lessons', lessons);
     return lessons;
+};
+
+/**
+ * Normalize a course doc into micro lessons.
+ * Supports both new `microLessons[]` format and legacy `slides/questions` format.
+ */
+export const getMicroLessons = (course: any): any[] => {
+    if (course.microLessons && course.microLessons.length > 0) {
+        return course.microLessons;
+    }
+    // Legacy fallback: wrap top-level slides/questions into a single micro lesson
+    if (course.slides || course.questions) {
+        return [{
+            id: `${course.id}__ml_0`,
+            title: 'Part 1',
+            slides: course.slides || [],
+            questions: course.questions || []
+        }];
+    }
+    return [];
 };
 
 export const fetchUserData = async (): Promise<any | null> => {
@@ -234,20 +299,23 @@ export const fetchPicturePuzzles = async (): Promise<any[]> => {
     const cached = getCached<any[]>('picturePuzzles');
     if (cached) return cached;
 
-    const lessons = await fetchLessons();
+    const courses = await fetchLessons();
     const slides: any[] = [];
-    lessons.forEach((lesson: any) => {
-        if (lesson.slides) {
-            lesson.slides.forEach((slide: any) => {
-                if (slide.imageUrl && slide.venda) {
-                    slides.push({
-                        imageUrl: slide.imageUrl,
-                        venda: slide.venda,
-                        english: slide.english
-                    });
-                }
-            });
-        }
+    courses.forEach((course: any) => {
+        const mls = getMicroLessons(course);
+        mls.forEach((ml: any) => {
+            if (ml.slides) {
+                ml.slides.forEach((slide: any) => {
+                    if (slide.imageUrl && slide.venda) {
+                        slides.push({
+                            imageUrl: slide.imageUrl,
+                            venda: slide.venda,
+                            english: slide.english
+                        });
+                    }
+                });
+            }
+        });
     });
 
     setCache('picturePuzzles', slides);
@@ -255,36 +323,87 @@ export const fetchPicturePuzzles = async (): Promise<any[]> => {
 };
 
 export const fetchLearnedStats = async (): Promise<any> => {
-    const [userData, lessons] = await Promise.all([fetchUserData(), fetchLessons()]);
+    const [userData, courses] = await Promise.all([fetchUserData(), fetchLessons()]);
     if (!userData) return null;
 
-    const completedIds = userData.completedLessons || [];
-    const completedLessons = lessons.filter(l => completedIds.includes(l.id));
+    const completedMlIds = userData.completedLessons || [];
+    const completedCourseIds = userData.completedCourses || [];
 
-    // Estimate words learned: Count all unique 'venda' words in slides and questions of completed lessons
+    // Estimate words learned from completed micro lessons
     const learnedWords = new Set<string>();
-    completedLessons.forEach(lesson => {
-        if (lesson.slides) {
-            lesson.slides.forEach((s: any) => { if (s.venda) learnedWords.add(s.venda.toLowerCase().trim()); });
-        }
-        if (lesson.questions) {
-            lesson.questions.forEach((q: any) => { if (q.venda) learnedWords.add(q.venda.toLowerCase().trim()); });
-        }
+    courses.forEach((course: any) => {
+        const mls = getMicroLessons(course);
+        mls.forEach((ml: any) => {
+            if (completedMlIds.includes(ml.id)) {
+                if (ml.slides) {
+                    ml.slides.forEach((s: any) => { if (s.venda) learnedWords.add(s.venda.toLowerCase().trim()); });
+                }
+                if (ml.questions) {
+                    ml.questions.forEach((q: any) => { if (q.venda) learnedWords.add(q.venda.toLowerCase().trim()); });
+                }
+            }
+        });
     });
 
     return {
         wordsCount: learnedWords.size,
-        lessonsCount: completedIds.length,
+        lessonsCount: completedMlIds.length,
+        coursesCount: completedCourseIds.length,
         points: userData.points || 0,
         streak: userData.streak || 0,
         level: userData.level || 1,
-        completedLessons: completedIds
+        completedLessons: completedMlIds,
+        completedCourses: completedCourseIds
     };
 };
 
 /**
  * Pre-fetches common game data to reduce load times when entering games.
  */
+/**
+ * Fetches 20 random questions for the Daily Challenge.
+ * Persists the set in LocalStorage for the current day to ensure consistency.
+ */
+export const fetchDailyChallenge = async (): Promise<any[]> => {
+    const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
+    const storageKey = `dailyChallenge_${today}`;
+
+    // 1. Check LocalStorage for today's challenge
+    const stored = localStorage.getItem(storageKey);
+    if (stored) {
+        return JSON.parse(stored);
+    }
+
+    // 2. Fetch all lessons and extract questions
+    const courses = await fetchLessons();
+    let allQuestions: any[] = [];
+
+    courses.forEach((course: any) => {
+        const mls = getMicroLessons(course);
+        mls.forEach((ml: any) => {
+            if (ml.questions) {
+                allQuestions.push(...ml.questions);
+            }
+        });
+    });
+
+    // 3. Shuffle and pick 20
+    const shuffled = allQuestions.sort(() => 0.5 - Math.random());
+    const selected = shuffled.slice(0, 20);
+
+    // 4. Save to LocalStorage
+    localStorage.setItem(storageKey, JSON.stringify(selected));
+
+    // Cleanup old keys (optional, simple housekeeping)
+    Object.keys(localStorage).forEach(k => {
+        if (k.startsWith('dailyChallenge_') && k !== storageKey) {
+            localStorage.removeItem(k);
+        }
+    });
+
+    return selected;
+};
+
 export const warmupGameCache = async () => {
     console.log("Warming up game cache...");
     try {

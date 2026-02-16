@@ -1,4 +1,22 @@
 import React from 'react';
+import { GripVertical, Trash2 } from 'lucide-react';
+import {
+    DndContext,
+    closestCenter,
+    KeyboardSensor,
+    PointerSensor,
+    useSensor,
+    useSensors,
+    type DragEndEvent
+} from '@dnd-kit/core';
+import {
+    arrayMove,
+    SortableContext,
+    sortableKeyboardCoordinates,
+    verticalListSortingStrategy,
+    useSortable
+} from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 
 type QuestionType = 'multiple-choice' | 'true-false' | 'fill-in-the-blank' | 'match-pairs' | 'listen-and-choose';
 
@@ -10,7 +28,7 @@ const QUESTION_TYPES: { value: QuestionType; label: string; icon: string }[] = [
     { value: 'listen-and-choose', label: 'Listen & Choose', icon: 'bi-headphones' },
 ];
 
-const newQuestion = (type: QuestionType, id: number): any => {
+const newQuestion = (type: QuestionType, id: string | number): any => {
     const base = { id, type, explanation: '' };
     switch (type) {
         case 'multiple-choice':
@@ -31,7 +49,97 @@ interface Props {
     onChange: (questions: any[]) => void;
 }
 
+interface SortableQuestionProps {
+    id: string;
+    index: number;
+    q: any;
+    typeInfo: any;
+    getTypeColor: (type: QuestionType) => string;
+    changeType: (index: number, newType: QuestionType) => void;
+    removeQuestion: (index: number) => void;
+    renderFields: (q: any, idx: number) => React.ReactNode;
+    update: (index: number, field: string, value: any) => void;
+}
+
+const SortableQuestion: React.FC<SortableQuestionProps> = ({
+    id, index, q, typeInfo, getTypeColor, changeType, removeQuestion, renderFields, update
+}) => {
+    const {
+        attributes,
+        listeners,
+        setNodeRef,
+        transform,
+        transition,
+        isDragging
+    } = useSortable({ id });
+
+    const style = {
+        transform: CSS.Transform.toString(transform),
+        transition,
+        zIndex: isDragging ? 10 : 1,
+        opacity: isDragging ? 0.5 : 1,
+    };
+
+    return (
+        <div ref={setNodeRef} style={style} className="bg-white border rounded-4 shadow-sm mb-4 overflow-hidden">
+            {/* Header */}
+            <div className="px-4 py-3 border-bottom d-flex justify-content-between align-items-center"
+                style={{ backgroundColor: `${getTypeColor(q.type)}10` }}>
+                <div className="d-flex align-items-center gap-2">
+                    <div {...attributes} {...listeners} className="me-2" style={{ cursor: 'grab' }}>
+                        <GripVertical size={16} className="text-muted" />
+                    </div>
+                    <i className={`bi ${typeInfo.icon}`} style={{ color: getTypeColor(q.type), fontSize: 18 }}></i>
+                    <span className="fw-bold" style={{ fontSize: 12, letterSpacing: 1, textTransform: 'uppercase', color: '#374151' }}>
+                        Q{index + 1}
+                    </span>
+                    <select className="form-select form-select-sm border-0 bg-transparent fw-bold shadow-none"
+                        style={{ fontSize: 12, width: 'auto', color: getTypeColor(q.type) }}
+                        value={q.type} onChange={e => changeType(index, e.target.value as QuestionType)}>
+                        {QUESTION_TYPES.map(t => (
+                            <option key={t.value} value={t.value}>{t.label}</option>
+                        ))}
+                    </select>
+                </div>
+                <button type="button" className="btn btn-sm text-danger p-0 shadow-none" onClick={() => removeQuestion(index)}>
+                    <Trash2 size={16} />
+                </button>
+            </div>
+
+            {/* Body */}
+            <div className="p-4">
+                {renderFields(q, index)}
+                <div>
+                    <label className="qb-label">Explanation (shown after answering)</label>
+                    <textarea className="form-control qb-input" rows={2} placeholder="Why is this the correct answer?"
+                        value={q.explanation || ''} onChange={e => update(index, 'explanation', e.target.value)} />
+                </div>
+            </div>
+        </div>
+    );
+};
+
 const QuestionBuilder: React.FC<Props> = ({ questions, onChange }) => {
+
+    const sensors = useSensors(
+        useSensor(PointerSensor, {
+            activationConstraint: {
+                distance: 8,
+            },
+        }),
+        useSensor(KeyboardSensor, {
+            coordinateGetter: sortableKeyboardCoordinates,
+        })
+    );
+
+    const handleDragEnd = (event: DragEndEvent) => {
+        const { active, over } = event;
+        if (over && active.id !== over.id) {
+            const oldIndex = questions.findIndex((q: any) => q.id === active.id);
+            const newIndex = questions.findIndex((q: any) => q.id === over.id);
+            onChange(arrayMove(questions, oldIndex, newIndex));
+        }
+    };
 
     const update = (index: number, field: string, value: any) => {
         const copy = [...questions];
@@ -82,7 +190,7 @@ const QuestionBuilder: React.FC<Props> = ({ questions, onChange }) => {
     };
 
     const addQuestion = (type: QuestionType) => {
-        const nextId = questions.length > 0 ? Math.max(...questions.map((q: any) => q.id || 0)) + 1 : 1;
+        const nextId = `q-${Date.now()}`;
         onChange([...questions, newQuestion(type, nextId)]);
     };
 
@@ -274,43 +382,34 @@ const QuestionBuilder: React.FC<Props> = ({ questions, onChange }) => {
     return (
         <div>
             {/* Question Cards */}
-            {questions.map((q: any, idx: number) => {
-                const typeInfo = QUESTION_TYPES.find(t => t.value === q.type) || QUESTION_TYPES[0];
-                return (
-                    <div key={idx} className="bg-white border rounded-4 shadow-sm mb-4 overflow-hidden">
-                        {/* Header */}
-                        <div className="px-4 py-3 border-bottom d-flex justify-content-between align-items-center"
-                            style={{ backgroundColor: `${getTypeColor(q.type)}10` }}>
-                            <div className="d-flex align-items-center gap-2">
-                                <i className={`bi ${typeInfo.icon}`} style={{ color: getTypeColor(q.type), fontSize: 18 }}></i>
-                                <span className="fw-bold" style={{ fontSize: 12, letterSpacing: 1, textTransform: 'uppercase', color: '#374151' }}>
-                                    Q{idx + 1}
-                                </span>
-                                <select className="form-select form-select-sm border-0 bg-transparent fw-bold shadow-none"
-                                    style={{ fontSize: 12, width: 'auto', color: getTypeColor(q.type) }}
-                                    value={q.type} onChange={e => changeType(idx, e.target.value as QuestionType)}>
-                                    {QUESTION_TYPES.map(t => (
-                                        <option key={t.value} value={t.value}>{t.label}</option>
-                                    ))}
-                                </select>
-                            </div>
-                            <button type="button" className="btn btn-sm text-danger p-0 shadow-none" onClick={() => removeQuestion(idx)}>
-                                <i className="bi bi-trash3-fill"></i>
-                            </button>
-                        </div>
-
-                        {/* Body */}
-                        <div className="p-4">
-                            {renderFields(q, idx)}
-                            <div>
-                                <label className="qb-label">Explanation (shown after answering)</label>
-                                <textarea className="form-control qb-input" rows={2} placeholder="Why is this the correct answer?"
-                                    value={q.explanation || ''} onChange={e => update(idx, 'explanation', e.target.value)} />
-                            </div>
-                        </div>
-                    </div>
-                );
-            })}
+            <DndContext
+                sensors={sensors}
+                collisionDetection={closestCenter}
+                onDragEnd={handleDragEnd}
+            >
+                <SortableContext
+                    items={questions.map((q: any) => q.id || q.question)}
+                    strategy={verticalListSortingStrategy}
+                >
+                    {questions.map((q: any, idx: number) => {
+                        const typeInfo = QUESTION_TYPES.find(t => t.value === q.type) || QUESTION_TYPES[0];
+                        return (
+                            <SortableQuestion
+                                key={q.id || idx}
+                                id={q.id || q.question}
+                                index={idx}
+                                q={q}
+                                typeInfo={typeInfo}
+                                getTypeColor={getTypeColor}
+                                changeType={changeType}
+                                removeQuestion={removeQuestion}
+                                renderFields={renderFields}
+                                update={update}
+                            />
+                        );
+                    })}
+                </SortableContext>
+            </DndContext>
 
             {/* Add Question Controls */}
             <div className="bg-white border rounded-4 p-4 shadow-sm">

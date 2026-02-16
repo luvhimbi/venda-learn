@@ -8,17 +8,17 @@ import Mascot from './Mascot';
 
 const LogoutModal: React.FC<{ onClose: () => void, onConfirm: () => void }> = ({ onClose, onConfirm }) => (
     <div className="position-fixed top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center bg-black bg-opacity-50" style={{ zIndex: 1050 }}>
-        <div className="bg-white p-4 rounded-4 shadow-lg text-center animate__animated animate__zoomIn" style={{ maxWidth: '320px' }}>
-            <div className="mb-3 d-flex justify-content-center">
-                <Mascot mood="sad" width="120px" height="120px" />
+        <div className="bg-white p-5 rounded-4 shadow-lg text-center animate__animated animate__zoomIn" style={{ maxWidth: '450px', width: '90%' }}>
+            <div className="mb-4 d-flex justify-content-center">
+                <Mascot mood="sad" width="180px" height="180px" />
             </div>
-            <h5 className="fw-bold mb-2 text-slate">Leaving so soon?</h5>
-            <p className="text-muted small mb-4">Are you sure u want to leave so soon?</p>
-            <div className="d-flex gap-2">
-                <button className="btn btn-light flex-grow-1 fw-bold text-slate" onClick={onClose}>
+            <h4 className="fw-bold mb-3 text-slate">Leaving so soon?</h4>
+            <p className="text-muted mb-4">Are you sure you want to leave so soon?</p>
+            <div className="d-flex gap-3">
+                <button className="btn btn-light flex-grow-1 fw-bold text-slate py-3 rounded-pill" onClick={onClose}>
                     Stay
                 </button>
-                <button className="btn btn-danger flex-grow-1 fw-bold" onClick={onConfirm}>
+                <button className="btn bg-game-primary flex-grow-1 fw-bold py-3 rounded-pill text-dark" onClick={onConfirm}>
                     Logout
                 </button>
             </div>
@@ -93,7 +93,8 @@ const Sidebar: React.FC = () => {
     const navItems: { path: string, label: string, icon: string, badge?: number, tourClass?: string }[] = [
         { path: '/', label: 'Home', icon: 'bi-house-heart-fill', tourClass: 'tour-sidebar-home' },
         { path: '/courses', label: 'Lessons', icon: 'bi-journal-bookmark-fill', tourClass: 'tour-sidebar-lessons' },
-        { path: '/history', label: 'Culture', icon: 'bi-bank2' ,tourClass: 'tour-sidebar-culture'},
+        { path: '/ngano', label: 'Ngano', icon: 'bi-book-half', tourClass: 'tour-sidebar-ngano' },
+        { path: '/history', label: 'Culture', icon: 'bi-bank2', tourClass: 'tour-sidebar-culture' },
         { path: '/practice', label: 'Practice', icon: 'bi-chat-heart-fill', badge: chatCount, tourClass: 'tour-sidebar-practice' },
         { path: '/mitambo', label: 'Games', icon: 'bi-controller', tourClass: 'tour-sidebar-games' },
         { path: '/muvhigo', label: 'Progress', icon: 'bi-graph-up-arrow' },
@@ -106,20 +107,28 @@ const Sidebar: React.FC = () => {
         <>
             {/* MOBILE TOP BAR (Hidden on Desktop) */}
             <div className="d-lg-none mobile-top-bar bg-white border-bottom px-4 d-flex align-items-center justify-content-between sticky-top shadow-sm">
-                <div className="d-flex align-items-center gap-2">
-                    <div className="bg-warning rounded-pill p-1 d-flex align-items-center justify-content-center" style={{ width: '32px', height: '32px' }}>
+                <div className="d-flex align-items-center">
+                    <div
+                        className="bg-warning rounded-pill d-flex align-items-center justify-content-center flex-shrink-0"
+                        style={{ width: '32px', height: '32px' }}
+                    >
                         <span className="fw-bold smallest">V</span>
                     </div>
-                    <span className="fw-bold ls-tight">VENDA<span className="text-warning">LEARN</span></span>
+                    <span
+                        className="fw-bold ls-tight mb-0"
+                        style={{ marginLeft: '-4px' }} // Negative margin to pull text closer to the 'V' circle
+                    >
+                        VENDA<span className="text-warning">LEARN</span>
+                    </span>
                 </div>
 
                 {/* Mobile Profile Link */}
                 <Link to="/profile" className="d-flex align-items-center gap-2 text-decoration-none bg-light rounded-pill pe-3 p-1 border">
                     <div className="bg-warning rounded-circle d-flex align-items-center justify-content-center fw-bold text-slate border shadow-sm"
                         style={{ width: '28px', height: '28px', fontSize: '12px' }}>
-                        {userData?.username.charAt(0).toUpperCase() || 'W'}
+                        {userData?.username.charAt(0).toUpperCase() || (user?.isAnonymous ? 'G' : 'W')}
                     </div>
-                    <span className="smallest fw-bold text-muted ls-1">{userData?.points || 0} LP</span>
+                    <span className="smallest fw-bold text-muted ls-1">{userData?.points || 0} LP {user?.isAnonymous && <span className="text-secondary">(G)</span>}</span>
                 </Link>
             </div>
 
@@ -127,8 +136,8 @@ const Sidebar: React.FC = () => {
             <aside className="sidebar bg-white border-end d-none d-lg-flex flex-column transition-all">
 
                 {/* BRAND */}
-                <div className="sidebar-brand px-4 py-5 d-flex align-items-center gap-3">
-                    <div className="text-slate rounded-3 me-3 d-flex align-items-center justify-content-center fw-bold flex-shrink-0 bg-warning shadow-sm"
+                <div className="sidebar-brand px-4 py-5 d-flex align-items-center gap-2">
+                    <div className="text-slate rounded-3 d-flex align-items-center justify-content-center fw-bold flex-shrink-0 bg-warning shadow-sm"
                         style={{ width: '40px', height: '40px', fontSize: '1.1rem' }}>
                         V
                     </div>
@@ -169,7 +178,10 @@ const Sidebar: React.FC = () => {
                                 {userData?.username.charAt(0).toUpperCase() || 'W'}
                             </div>
                             <div className="overflow-hidden">
-                                <h6 className="fw-bold mb-0 text-truncate small">{userData?.username || "Warrior"}</h6>
+                                <div className="d-flex align-items-center gap-1">
+                                    <h6 className="fw-bold mb-0 text-truncate small">{userData?.username || (user?.isAnonymous ? "Guest Learner" : "Warrior")}</h6>
+                                    {user?.isAnonymous && <span className="badge bg-secondary rounded-pill fw-bold" style={{ fontSize: '8px', padding: '2px 4px' }}>GUEST</span>}
+                                </div>
                                 <p className="smallest text-muted mb-0 fw-bold ls-1">{userData?.points || 0} LP</p>
                             </div>
                         </div>

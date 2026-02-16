@@ -3,13 +3,116 @@
     "id": "ngano-001",
     "title": "Phunguvhe na Khwali",
     "level": "Beginner",
-    "vendaText": "Kale-kale, Phunguvhe na Khwali vho vha vhe dzikhonani khulwane. Phunguvhe o vha e na vhufhura vhunzhi...",
-    "englishText": "Long ago, Jackal and Partridge were great friends. Jackal had much deceit...",
-    "vocabulary": [
-      { "word": "Kale-kale", "mean": "Long ago" },
-      { "word": "Dzikhonani", "mean": "Friends" },
-      { "word": "Vhufhura", "mean": "Deceit / Cunning" }
+    "coverImage": "images/story_01_cover.png",
+    "pages": [
+      {
+        "pageId": 1,
+        "venda": "Kale-kale, Phunguvhe na Khwali vho vha vhe dzikhonani khulwane. Vho vha vha tshi dzula vho takala, vha tshi tamba vhothe duvha linwe na linwe.",
+        "english": "Long ago, Jackal and Partridge were great friends. They lived happily, playing together every day.",
+        "image": "images/story_01_01.png"
+      },
+      {
+        "pageId": 2,
+        "venda": "Phunguvhe o vha e na vhufhura vhunzhi. Musi vha tshi ya u zwima, Phunguvhe o vha a tshi dzhia nama yothe a sa fhi Khwali.",
+        "english": "Jackal had much deceit. When they went hunting, Jackal would take all the meat and give none to Partridge.",
+        "image": "images/story_01_02.png"
+      },
+      {
+        "pageId": 3,
+        "venda": "Nga linwe duvha, Khwali a tshi vhona vhufhura ha Phunguvhe, a gungula nge a vona u sa fulufhedzea ha khonani yawe.",
+        "english": "One day, Partridge seeing Jackal's deceit, complained because he saw the unfaithfulness of his friend.",
+        "image": "images/story_01_03.png"
+      }
     ],
-    "lpReward": 300
+    "vocabulary": [
+      {
+        "word": "Kale-kale",
+        "mean": "Long ago"
+      },
+      {
+        "word": "Dzikhonani",
+        "mean": "Friends"
+      },
+      {
+        "word": "Vhufhura",
+        "mean": "Deceit / Cunning"
+      },
+      {
+        "word": "Zwima",
+        "mean": "Hunt"
+      },
+      {
+        "word": "Gungula",
+        "mean": "Complain / Grumble"
+      }
+    ],
+    "lpReward": 15
+  },
+  {
+    "id": "ngano-002",
+    "title": "Nungwi na Phele",
+    "level": "Beginner",
+    "coverImage": "images/story_02_cover.png",
+    "pages": [
+      {
+        "pageId": 1,
+        "venda": "Kale-kale, Nungwi o vha a tshi dzula tsini na mulambo muhulu. O vha a tshi funesa u edela zuwa kha matombo a fhisaho. Nungwi o vha mutuku fhedzi o vha e na vhuṱali vhuhulu.",
+        "english": "Long ago, Tortoise lived near a great river. He loved to bask in the sun on warm rocks. Tortoise was small but he had great wisdom.",
+        "image": "images/story_02_01.png"
+      },
+      {
+        "pageId": 2,
+        "venda": "Nga linwe duvha, Phele a swika a tshi sea Nungwi. 'U a ṱoḓa u gidima na nṋe? Ndi ḓo u kunda lwa u ralo!' Phele a amba a tshi sea. Nungwi a fhindula a ri, 'Ee, ndi a tenda. Ri ḓo gidimela murafho u re kule.'",
+        "english": "One day, Hyena came and laughed at Tortoise. 'Do you want to race me? I will beat you easily!' Hyena said mockingly. Tortoise replied, 'Yes, I agree. We will race to the distant hill.'",
+        "image": "images/story_02_02.png"
+      },
+      {
+        "pageId": 3,
+        "venda": "Nungwi o vha e na pulane. O vhidza vharathu vhawe vhoṱhe, a vha vhea nḓilani nnyi na nnyi a tshi vha fhethu hawe. Tshifhinga tsha mbilo tshi tshi swika, Phele a thoma u gidima nga u ṱavhanya.",
+        "english": "Tortoise had a plan. He called all his relatives and placed them along the path, each one in a different spot. When the time for the race came, Hyena started running very fast.",
+        "image": "images/story_02_03.png"
+      },
+      {
+        "pageId": 4,
+        "venda": "Fhedzi fhethu hoṱhe he Phele a swika hone, ho vha hu na Nungwi a tshi ri, 'Ndo no vha hafha!' Phele a gidima u swika a neta, a wa fhasi. Nungwi a kunda mbilo nga vhuṱali hawe, a si nga luvhilo.",
+        "english": "But everywhere Hyena arrived, there was a Tortoise saying, 'I am already here!' Hyena ran until he was exhausted and collapsed. Tortoise won the race through his wisdom, not through speed.",
+        "image": "images/story_02_04.png"
+      }
+    ],
+    "vocabulary": [
+      {
+        "word": "Nungwi",
+        "mean": "Tortoise"
+      },
+      {
+        "word": "Phele",
+        "mean": "Hyena"
+      },
+      {
+        "word": "Mulambo",
+        "mean": "River"
+      },
+      {
+        "word": "Vhuṱali",
+        "mean": "Wisdom / Intelligence"
+      },
+      {
+        "word": "Gidima",
+        "mean": "Run"
+      },
+      {
+        "word": "Mbilo",
+        "mean": "Race"
+      },
+      {
+        "word": "Vharathu",
+        "mean": "Relatives / Siblings"
+      },
+      {
+        "word": "Kunda",
+        "mean": "Win / Defeat"
+      }
+    ],
+    "lpReward": 15
   }
 ]

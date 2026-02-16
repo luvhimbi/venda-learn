@@ -23,6 +23,8 @@ const ChatRoom: React.FC = () => {
     const [suggestions, setSuggestions] = useState<string[]>([]);
     const [loading, setLoading] = useState(true);
     const [isExpired, setIsExpired] = useState(false);
+    const [timeRemaining, setTimeRemaining] = useState<string>('');
+    const [showEmojiPicker, setShowEmojiPicker] = useState(false);
     const scrollRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
@@ -42,16 +44,27 @@ const ChatRoom: React.FC = () => {
                 if (data) {
                     setChatData(data);
 
-                    // Check for expiry (1 hour)
-                    const HOUR_MS = 60 * 60 * 1000;
+                    // Check for expiry (2 hours for better UX)
+                    const SESSION_DURATION_MS = 2 * 60 * 60 * 1000; // 2 hours
                     const createdAt = data.createdAt?.toDate ? data.createdAt.toDate().getTime() : Date.now();
-                    const checkExpiry = () => {
-                        const expired = (Date.now() - createdAt) > HOUR_MS;
-                        setIsExpired(expired);
+
+                    const updateTimer = () => {
+                        const elapsed = Date.now() - createdAt;
+                        const remaining = SESSION_DURATION_MS - elapsed;
+
+                        if (remaining <= 0) {
+                            setIsExpired(true);
+                            setTimeRemaining('Expired');
+                        } else {
+                            setIsExpired(false);
+                            const hours = Math.floor(remaining / (60 * 60 * 1000));
+                            const minutes = Math.floor((remaining % (60 * 60 * 1000)) / (60 * 1000));
+                            setTimeRemaining(`${hours}h ${minutes}m`);
+                        }
                     };
-                    checkExpiry();
-                    checkExpiry();
-                    const interval = setInterval(checkExpiry, 30000); // Check every 30s
+
+                    updateTimer(); // Initial check
+                    const interval = setInterval(updateTimer, 30000); // Update every 30s
 
                     // Reset unread count for current user
                     try {
@@ -88,14 +101,24 @@ const ChatRoom: React.FC = () => {
         const loadSuggestions = async () => {
             const userData = await fetchUserData();
             const completedLessons = userData?.completedLessons || [];
-            let bases = ["U nga nndumedisa nga Tshivenda?", "Dzina ḽanga ndi...", "Ndi khou guda Tshivenda."];
-            if (completedLessons.some((id: string) => id.toLowerCase().includes('greet'))) {
-                bases.push("Ndi masiari", "Ndi maphina", "Vho vuwa hani?");
-            }
+
+            // Core fun suggestions
+            let bases = [
+                "Ndi matshelo! 🌞",
+                "Vho vuwa hani? 👋",
+                "Ndi a livhuwa! 🙏",
+                "Ni bva gai? 🌍",
+                "Zwino, ni khou ita mini? 🤔",
+                "Ndi khou funa u guda Tshivenda! 📚",
+                "Ndi nnyi ane a khou amba? 🎤"
+            ];
+
             if (completedLessons.some((id: string) => id.toLowerCase().includes('food'))) {
-                bases.push("Vho ḽa mini?", "Ndi a funa vhuswa.");
+                bases.push("Vho ḽa mini? 🍕", "Ndi a funa vhuswa na nama! 🍖");
             }
-            setSuggestions(bases);
+
+            // Randomize and pick 5
+            setSuggestions(bases.sort(() => 0.5 - Math.random()).slice(0, 6));
         };
         loadSuggestions();
     }, []);
@@ -207,9 +230,14 @@ const ChatRoom: React.FC = () => {
                         </div>
                         <div>
                             <h6 className="fw-bold mb-0 text-dark">{partnerName}</h6>
-                            <div className="d-flex align-items-center gap-1">
+                            <div className="d-flex align-items-center gap-2">
                                 <span className="online-indicator"></span>
                                 <span className="smallest text-muted fw-bold ls-1 uppercase">Practice Online</span>
+                                {timeRemaining && !isExpired && (
+                                    <span className="badge bg-light text-dark border smallest ms-1">
+                                        <i className="bi bi-clock me-1"></i>{timeRemaining}
+                                    </span>
+                                )}
                             </div>
                         </div>
                     </div>
@@ -229,7 +257,7 @@ const ChatRoom: React.FC = () => {
                         )}
                         {isExpired && (
                             <div className="mt-2 text-danger fw-bold smallest ls-1 uppercase animate__animated animate__shakeX bg-white d-inline-block px-4 py-2 rounded-pill border shadow-sm">
-                                <i className="bi bi-exclamation-triangle-fill me-1"></i> SESSION EXPIRED (1 HOUR)
+                                <i className="bi bi-exclamation-triangle-fill me-1"></i> SESSION EXPIRED (2 HOURS)
                             </div>
                         )}
                     </div>
@@ -257,12 +285,12 @@ const ChatRoom: React.FC = () => {
                 </div>
             </main>
 
-            <footer className="chat-footer bg-white border-top p-3 p-md-4">
+            <footer className="chat-footer bg-white border-top px-3 pt-3 pb-1 px-md-4 pt-md-4 pb-md-2">
                 <div className="container" style={{ maxWidth: '800px' }}>
                     {isExpired ? (
                         <div className="text-center bg-light p-4 rounded-4 border">
                             <h6 className="fw-bold mb-1">Session Closed</h6>
-                            <p className="text-muted small mb-3">This practice session has reached its 1-hour limit. Please start a new session from the Practice Hub.</p>
+                            <p className="text-muted small mb-3">This practice session has reached its 2-hour limit. Please start a new session from the Practice Hub.</p>
                             <button onClick={() => navigate('/practice')} className="btn btn-dark rounded-pill px-4 py-2 fw-bold smallest ls-1">GO TO PRACTICE HUB</button>
                         </div>
                     ) : (
@@ -282,15 +310,50 @@ const ChatRoom: React.FC = () => {
                                 </div>
                             )}
 
-                            <form onSubmit={handleSendMessage} className="d-flex gap-2 align-items-center">
+                            <form onSubmit={handleSendMessage} className="d-flex gap-2 align-items-end">
                                 <div className="flex-grow-1 position-relative">
+                                    {showEmojiPicker && (
+                                        <div className="position-absolute bottom-100 start-0 mb-2 bg-white rounded-4 shadow-lg border p-3" style={{ zIndex: 1000, maxWidth: '320px' }}>
+                                            <div className="d-flex justify-content-between align-items-center mb-2">
+                                                <span className="smallest fw-bold text-muted ls-1">QUICK EMOJIS</span>
+                                                <button type="button" onClick={() => setShowEmojiPicker(false)} className="btn btn-sm btn-light rounded-circle p-0" style={{ width: '24px', height: '24px' }}>
+                                                    <i className="bi bi-x"></i>
+                                                </button>
+                                            </div>
+                                            <div className="d-flex flex-wrap gap-2">
+                                                {['😊', '😂', '👍', '❤️', '🎉', '🔥', '💯', '👏', '🙏', '😍', '🤔', '😅', '💪', '✨', '🎯', '📚', '🌟', '👌', '🙌', '💡'].map((emoji, i) => (
+                                                    <button
+                                                        key={i}
+                                                        type="button"
+                                                        onClick={() => {
+                                                            setNewMessage(prev => prev + emoji);
+                                                            setShowEmojiPicker(false);
+                                                        }}
+                                                        className="btn btn-light rounded-circle p-2 emoji-btn"
+                                                        style={{ width: '40px', height: '40px', fontSize: '1.2rem', lineHeight: 1 }}
+                                                    >
+                                                        {emoji}
+                                                    </button>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    )}
                                     <input
                                         type="text"
                                         className="form-control border-0 bg-light rounded-pill py-3 px-4 shadow-none fs-6"
                                         placeholder="Practice Tshivenda..."
                                         value={newMessage}
                                         onChange={(e) => setNewMessage(e.target.value)}
+                                        style={{ paddingRight: '50px' }}
                                     />
+                                    <button
+                                        type="button"
+                                        onClick={() => setShowEmojiPicker(!showEmojiPicker)}
+                                        className="btn btn-link position-absolute end-0 top-50 translate-middle-y text-decoration-none p-2"
+                                        style={{ marginRight: '8px' }}
+                                    >
+                                        <i className="bi bi-emoji-smile fs-5" style={{ color: '#FACC15' }}></i>
+                                    </button>
                                 </div>
                                 <button type="submit" className="btn btn-warning rounded-pill px-4 py-3 d-flex align-items-center justify-content-center shadow-lg border-0 transition-all send-btn"
                                     disabled={!newMessage.trim()}
@@ -304,21 +367,43 @@ const ChatRoom: React.FC = () => {
             </footer>
 
             <style>{`
-                .chat-layout { height: calc(100vh - 72px); }
+                .chat-layout { height: 100dvh; background-color: #F3F4F6; }
+                .chat-header { background-color: #ffffff; border-bottom: 1px solid #E5E7EB; }
+                .chat-messages {
+                    background-color: #F9FAFB;
+                    background-image: radial-gradient(#E5E7EB 1px, transparent 1px);
+                    background-size: 20px 20px;
+                }
+                .chat-footer { background-color: #ffffff; border-top: 1px solid #E5E7EB; box-shadow: 0 -4px 20px rgba(0,0,0,0.02); }
                 .chat-messages::-webkit-scrollbar { display: none; }
-                .message-bubble { max-width: 85%; position: relative; }
-                .me-bubble { background: linear-gradient(135deg, #2D3748, #1A202C); border-radius: 20px 20px 4px 20px; color: white; }
-                .partner-bubble { background-color: white; border: 1px solid #edf2f7; border-radius: 20px 20px 20px 4px; color: #2d3748; }
-                .online-indicator { width: 7px; height: 7px; background-color: #10b981; border-radius: 50%; box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.2); }
-                .suggestion-btn { background-color: #FFFBEB; color: #92400E !important; font-size: 11px; font-weight: 700; white-space: nowrap; border: 1px solid #FEF3C7 !important; }
-                .suggestion-btn:hover { background-color: #FDE68A !important; transform: translateY(-2px); }
-                .send-btn:hover:not(:disabled) { transform: scale(1.05); box-shadow: 0 8px 20px rgba(250, 204, 21, 0.3) !important; }
-                .send-btn:active { transform: scale(0.95); }
-                .smallest { font-size: 10px; }
-                .ls-1 { letter-spacing: 1px; }
+                .message-bubble { max-width: 80%; position: relative; font-size: 15px; }
+                .me-bubble { background: #111827; border-radius: 20px 20px 4px 20px; color: white; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+                .partner-bubble { background-color: white; border: 1px solid #E5E7EB; border-radius: 20px 20px 20px 4px; color: #1F2937; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
+                .online-indicator { width: 8px; height: 8px; background-color: #10B981; border-radius: 50%; box-shadow: 0 0 0 2px white; }
+                .suggestion-btn { 
+                    background-color: #FFFBEB; 
+                    color: #B45309 !important; 
+                    font-size: 12px; 
+                    font-weight: 600; 
+                    white-space: nowrap; 
+                    border: 1px solid #FDE68A !important; 
+                    padding: 6px 16px !important;
+                    box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+                }
+                .suggestion-btn:hover { background-color: #FEF3C7 !important; transform: translateY(-1px); box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+                .send-btn:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 10px 15px -3px rgba(250, 204, 21, 0.3) !important; }
+                .send-btn:active { transform: translateY(0); }
+                .smallest { font-size: 11px; }
+                .ls-1 { letter-spacing: 0.5px; }
                 .uppercase { text-transform: uppercase; }
-                @media (max-width: 768px) { .chat-layout { height: 100vh; } .message-bubble { max-width: 90%; } }
-                .transition-all { transition: all 0.2s ease; }
+                @media (min-width: 768px) { .chat-layout { height: calc(100vh - 72px); } }
+                @media (max-width: 768px) { 
+                    .chat-layout { height: 100dvh; } 
+                    .message-bubble { max-width: 88%; font-size: 14px; } 
+                    .chat-messages { padding: 1rem !important; }
+                    .chat-footer { padding: 1rem 1rem 0.5rem 1rem !important; }
+                }
+                .transition-all { transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); }
             `}</style>
         </div>
     );

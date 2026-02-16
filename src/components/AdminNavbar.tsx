@@ -4,6 +4,7 @@ import { onAuthStateChanged, signOut, type User } from 'firebase/auth';
 import { auth } from '../services/firebaseConfig';
 import { invalidateCache } from '../services/dataCache';
 import Swal from 'sweetalert2';
+import { Menu, LogOut } from 'lucide-react';
 
 const AdminNavbar: React.FC = () => {
     const [user, setUser] = useState<User | null>(null);
@@ -49,7 +50,7 @@ const AdminNavbar: React.FC = () => {
                 {/* BRAND LOGO - Matches Student UI exactly */}
                 <Link className="navbar-brand d-flex align-items-center mb-0 text-decoration-none shadow-none" to="/admin/dashboard">
                     <div
-                        className="text-dark rounded-3 me-3 d-flex align-items-center justify-content-center fw-bold flex-shrink-0"
+                        className="text-dark rounded-3 me-2 d-flex align-items-center justify-content-center fw-bold flex-shrink-0"
                         style={{
                             width: '42px',
                             height: '42px',
@@ -77,7 +78,7 @@ const AdminNavbar: React.FC = () => {
                     data-bs-toggle="collapse"
                     data-bs-target="#adminNavbar"
                 >
-                    <i className="bi bi-list fs-2 text-white"></i>
+                    <Menu size={32} className="text-white" />
                 </button>
 
                 {/* ADMIN SPECIFIC NAV LINKS */}
@@ -118,9 +119,9 @@ const AdminNavbar: React.FC = () => {
                             <li className="nav-item ms-lg-2 w-100 w-lg-auto text-center mt-3 mt-lg-0">
                                 <button
                                     onClick={handleLogout}
-                                    className="btn game-btn-admin-logout fw-bold smallest ls-1 px-4 py-2 shadow-none"
+                                    className="btn game-btn-admin-logout fw-bold smallest ls-1 px-4 py-2 shadow-none d-flex align-items-center gap-2"
                                 >
-                                    LOGOUT
+                                    <LogOut size={16} /> LOGOUT
                                 </button>
                             </li>
                         )}
