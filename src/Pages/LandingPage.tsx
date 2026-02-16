@@ -17,7 +17,7 @@ const LandingPage: React.FC = () => {
                     <div className="row align-items-center">
                         <div className="col-lg-6 mb-5 mb-lg-0 order-2 order-lg-1 text-center text-lg-start">
                             <div className="d-inline-flex align-items-center gap-2 px-3 py-1 rounded-pill bg-white shadow-sm mb-4 border border-warning animate__animated animate__fadeInDown">
-                                <span className="badge bg-warning text-dark">NEW</span>
+                                <span className="badge rounded-pill bg-primary">NEW</span>
                                 <span className="smallest fw-bold text-muted ls-1 uppercase">Native Speaker Chat is Live!</span>
                             </div>
                             <h1 className="display-4 fw-bold ls-tight mb-4 text-slate animate__animated animate__fadeInUp">

@@ -16,7 +16,7 @@ const LandingNavbar: React.FC = () => {
         <nav className={`navbar navbar-expand-lg fixed-top transition-all py-3 ${scrolled ? 'bg-white shadow-sm' : 'bg-transparent'}`}>
             <div className="container" style={{ maxWidth: '1100px' }}>
                 <Link className="navbar-brand d-flex align-items-center mb-0 text-decoration-none shadow-none" to="/">
-                    <div className="text-dark rounded-3 me-3 d-flex align-items-center justify-content-center fw-bold flex-shrink-0 bg-warning shadow-sm"
+                    <div className="text-dark rounded-3 me-2 d-flex align-items-center justify-content-center fw-bold flex-shrink-0 bg-warning shadow-sm"
                         style={{ width: '40px', height: '40px', fontSize: '1.1rem' }}>
                         V
                     </div>

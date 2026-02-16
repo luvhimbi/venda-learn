@@ -4,7 +4,7 @@ import { auth } from '../services/firebaseConfig';
 import { onAuthStateChanged } from 'firebase/auth';
 import { getBadgeDetails, getLevelStats } from "../services/levelUtils.ts";
 import { updateStreak } from "../services/streakUtils.ts";
-import { fetchLessons, fetchTopLearners, fetchDailyWord, refreshUserData } from '../services/dataCache';
+import { fetchLessons, fetchTopLearners, fetchDailyWord, refreshUserData, getMicroLessons } from '../services/dataCache';
 import InstallBanner from '../components/InstallBanner';
 import Mascot from '../components/Mascot';
 import LandingPage from './LandingPage';
@@ -54,7 +54,7 @@ const Home: React.FC = () => {
     const [lastLesson, setLastLesson] = useState<any>(null);
     const [topLearners, setTopLearners] = useState<any[]>([]);
     const [dailyWord, setDailyWord] = useState<any>(null);
-    const [totalLessonsCount, setTotalLessonsCount] = useState(0);
+    const [totalMlsCount, setTotalMlsCount] = useState(0);
     const [loading, setLoading] = useState(true);
     const [showStreakModal, setShowStreakModal] = useState(false);
     const [isTourOpen, setIsTourOpen] = useState(false);
@@ -102,17 +102,27 @@ const Home: React.FC = () => {
 
                     if (userData) {
                         setUserData(userData);
-                        setTotalLessonsCount(lessons.length);
+                        setTotalMlsCount(lessons.reduce((acc: number, course: any) => acc + getMicroLessons(course).length, 0));
                         setTopLearners(topLearnersData);
                         setDailyWord(dailyWordData);
 
                         // Resolve last lesson from cached lessons instead of extra Firestore call
                         if (userData.lastLessonId) {
-                            const cached = lessons.find((l: any) => l.id === userData.lastLessonId);
-                            if (cached) {
+                            const cachedCourse = lessons.find((l: any) => l.id === userData.lastLessonId);
+                            if (cachedCourse) {
+                                const microLessons = getMicroLessons(cachedCourse);
+                                let targetMl = microLessons[0];
+
+                                if (userData.lastMicroLessonId) {
+                                    const foundMl = microLessons.find((ml: any) => ml.id === userData.lastMicroLessonId);
+                                    if (foundMl) targetMl = foundMl;
+                                }
+
                                 setLastLesson({
-                                    id: cached.id,
-                                    ...cached,
+                                    id: cachedCourse.id,
+                                    microLessonId: targetMl.id,
+                                    title: targetMl.title || cachedCourse.title,
+                                    courseTitle: cachedCourse.title,
                                     savedIndex: userData.lastProgressIndex || 0,
                                     savedType: userData.lastProgressType || 'slide'
                                 });
@@ -156,10 +166,14 @@ const Home: React.FC = () => {
 
     const stats = getLevelStats(userData?.points || 0);
     const badge = getBadgeDetails(stats.level);
-    const completedCount = userData?.completedLessons?.length || 0;
-    const courseProgressPercentage = totalLessonsCount > 0
-        ? Math.round((completedCount / totalLessonsCount) * 100)
+
+    // Correct progress calculation for micro-lessons architecture
+    const completedMlsCount = userData?.completedLessons?.length || 0;
+
+    const overallProgressPercentage = totalMlsCount > 0
+        ? Math.round((completedMlsCount / totalMlsCount) * 100)
         : 0;
+
     const motivation = getLevelMotivation(stats.level, stats.progress);
 
     return (
@@ -255,9 +269,10 @@ const Home: React.FC = () => {
                                             </span>
                                         </div>
                                         <h3 className="fw-bold mb-1 text-dark">{lastLesson.title}</h3>
-                                        <p className="text-muted small mb-4">{lastLesson.vendaTitle}</p>
+                                        <p className="text-muted small mb-0">{lastLesson.courseTitle}</p>
+                                        <div className="mb-4"></div>
                                         <button
-                                            onClick={() => navigate(`/game/${lastLesson.id}?start=${lastLesson.savedIndex}&type=${lastLesson.savedType?.toUpperCase()}`)}
+                                            onClick={() => navigate(`/game/${lastLesson.id}/${lastLesson.microLessonId}?start=${lastLesson.savedIndex}&type=${lastLesson.savedType?.toUpperCase()}`)}
                                             className="btn game-btn-primary px-4 py-2 fw-bold smallest ls-1"
                                         >
                                             ▶ RESUME NOW
@@ -343,18 +358,18 @@ const Home: React.FC = () => {
                                 {/* Course Progress */}
                                 <div className="pt-3" style={{ borderTop: '1px solid #F1F5F9' }}>
                                     <div className="d-flex justify-content-between mb-2">
-                                        <span className="smallest fw-bold ls-1 text-muted">COURSE PROGRESS</span>
-                                        <span className="smallest fw-bold ls-1 text-slate">{courseProgressPercentage}%</span>
+                                        <span className="smallest fw-bold ls-1 text-muted">LANGUAGE PROGRESS</span>
+                                        <span className="smallest fw-bold ls-1 text-slate">{overallProgressPercentage}%</span>
                                     </div>
                                     <div style={{ height: 8, borderRadius: 10, backgroundColor: '#F1F5F9' }}>
                                         <div style={{
-                                            width: `${courseProgressPercentage}%`, height: '100%', borderRadius: 10,
+                                            width: `${overallProgressPercentage}%`, height: '100%', borderRadius: 10,
                                             backgroundColor: '#10B981',
                                             transition: 'width 0.8s ease'
                                         }}></div>
                                     </div>
                                     <p className="smallest mt-2 mb-0 text-muted">
-                                        {completedCount} / {totalLessonsCount} lessons completed
+                                        {completedMlsCount} / {totalMlsCount} micro-lessons completed
                                     </p>
                                 </div>
 

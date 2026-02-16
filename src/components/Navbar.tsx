@@ -5,6 +5,7 @@ import { doc, onSnapshot, collection, query, where } from 'firebase/firestore';
 import { auth, db } from '../services/firebaseConfig';
 import { invalidateCache } from '../services/dataCache';
 import Swal from 'sweetalert2';
+import { Menu, User as UserIcon, MessageSquare, Settings, LogOut } from 'lucide-react';
 
 const Navbar: React.FC = () => {
     const [user, setUser] = useState<User | null>(null);
@@ -78,7 +79,7 @@ const Navbar: React.FC = () => {
                 {/* BRAND LOGO & SLOGAN */}
                 <Link className="navbar-brand d-flex align-items-center mb-0 text-decoration-none shadow-none" to="/">
                     <div
-                        className="text-dark rounded-3 me-3 d-flex align-items-center justify-content-center fw-bold flex-shrink-0"
+                        className="text-dark rounded-3 me-2 d-flex align-items-center justify-content-center fw-bold flex-shrink-0"
                         style={{
                             width: '42px',
                             height: '42px',
@@ -106,7 +107,7 @@ const Navbar: React.FC = () => {
                     data-bs-toggle="collapse"
                     data-bs-target="#vendaNavbar"
                 >
-                    <i className="bi bi-list fs-2 text-dark"></i>
+                    <Menu size={32} className="text-dark" />
                 </button>
 
                 {/* NAV LINKS & USER ACTIONS */}
@@ -184,14 +185,14 @@ const Navbar: React.FC = () => {
 
                                     <li className="p-2 text-start">
                                         <Link className="dropdown-item rounded-3 py-2 px-3 d-flex align-items-center gap-3 shadow-none" to="/profile">
-                                            <i className="bi bi-person text-muted"></i>
+                                            <UserIcon size={18} className="text-muted" />
                                             <span className="small fw-bold">Profile</span>
                                         </Link>
                                     </li>
                                     <li className="p-2 pt-0 text-start">
                                         <Link className="dropdown-item rounded-3 py-2 px-3 d-flex align-items-center gap-3 shadow-none justify-content-between" to="/practice">
                                             <div className="d-flex align-items-center gap-3">
-                                                <i className="bi bi-chat-text text-muted"></i>
+                                                <MessageSquare size={18} className="text-muted" />
                                                 <span className="small fw-bold">Practice</span>
                                             </div>
                                             {chatCount > 0 && <span className="badge bg-danger rounded-pill smallest-pill">{chatCount}</span>}
@@ -199,14 +200,14 @@ const Navbar: React.FC = () => {
                                     </li>
                                     <li className="p-2 pt-0 text-start">
                                         <Link className="dropdown-item rounded-3 py-2 px-3 d-flex align-items-center gap-3 shadow-none" to="/profile">
-                                            <i className="bi bi-gear text-muted"></i>
+                                            <Settings size={18} className="text-muted" />
                                             <span className="small fw-bold">Settings</span>
                                         </Link>
                                     </li>
 
                                     <li className="border-top p-2 bg-white text-start">
                                         <button className="dropdown-item rounded-3 py-2 px-3 d-flex align-items-center gap-3 text-danger shadow-none" onClick={handleLogout}>
-                                            <i className="bi bi-box-arrow-right"></i>
+                                            <LogOut size={18} />
                                             <span className="small fw-bold">Sign Out</span>
                                         </button>
                                     </li>
