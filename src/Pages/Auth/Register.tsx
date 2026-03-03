@@ -6,6 +6,19 @@ import { doc, setDoc, getDoc } from 'firebase/firestore';
 import { auth, db, googleProvider } from '../../services/firebaseConfig';
 import ReCAPTCHA from 'react-google-recaptcha';
 
+// Best-effort welcome email — never blocks registration
+const sendWelcomeEmail = async (email: string, username: string) => {
+    try {
+        await fetch('/api/send-welcome-email', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email, username }),
+        });
+    } catch (err) {
+        console.error('Welcome email failed (non-blocking):', err);
+    }
+};
+
 const Register: React.FC = () => {
     const [formData, setFormData] = useState({
         username: '',
@@ -53,6 +66,8 @@ const Register: React.FC = () => {
                 tourCompleted: false,
                 createdAt: new Date().toISOString()
             });
+            // Send welcome email (best-effort, non-blocking)
+            sendWelcomeEmail(formData.email, formData.username);
             if (referrerId) {
                 try {
                     await setDoc(doc(db, "invites", `${referrerId}_${userCredential.user.uid}`), {
@@ -97,6 +112,9 @@ const Register: React.FC = () => {
                     tourCompleted: false,
                     createdAt: new Date().toISOString()
                 });
+
+                // Send welcome email for new Google users (best-effort)
+                sendWelcomeEmail(user.email || '', user.displayName || 'Learner');
             }
 
             // No referral handling for Google Sign-In for now to keep it simple,
@@ -178,13 +196,12 @@ const Register: React.FC = () => {
 
                     {formData.isNativeSpeaker && (
                         <div className="mb-3 animate__animated animate__fadeIn">
-                            <label className="form-label smallest fw-bold text-uppercase text-muted ls-1">Why are you a native speaker?</label>
+                            <label className="form-label smallest fw-bold text-uppercase text-muted ls-1">Why do you want to be a native speaker?</label>
                             <div className="custom-input-group">
                                 <input
                                     name="nativeSpeakerBio"
                                     type="text"
                                     className="form-control border-0 bg-transparent fs-6 px-0"
-                                    placeholder="e.g. Born and raised in Venda, Tshifudi village."
                                     onChange={handleChange}
                                     required={formData.isNativeSpeaker}
                                     disabled={loading}
