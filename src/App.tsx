@@ -45,6 +45,7 @@ import AdminWordBomb from "./Pages/Admin/AdminWordBomb";
 import NotFound from "./Pages/NotFound";
 import { auth } from './services/firebaseConfig';
 import { onAuthStateChanged } from 'firebase/auth';
+import { NotificationProvider } from './contexts/NotificationContext';
 
 /**
  * AppContent handles the conditional rendering of the UI.
@@ -206,9 +207,11 @@ const AppContent: React.FC = () => {
 
 function App() {
     return (
-        <Router>
-            <AppContent />
-        </Router>
+        <NotificationProvider>
+            <Router>
+                <AppContent />
+            </Router>
+        </NotificationProvider>
     );
 }
 

@@ -20,7 +20,7 @@ const LandingPage: React.FC = () => {
                                 The Fun Way.
                             </h1>
                             <p className="lead text-muted mb-5 ls-1 animate__animated animate__fadeInUp animate__delay-1s mx-auto mx-lg-0" style={{ maxWidth: '480px' }}>
-                                Master the language of Venda through gamified lessons, interactive stories, and real-time practice with native speakers.
+                                Master the language of Venda through gamified lessons, interactive stories, and engaging minigames.
                             </p>
                             <div className="d-flex gap-3 justify-content-center justify-content-lg-start animate__animated animate__fadeInUp animate__delay-1s">
                                 <button onClick={() => navigate('/register')} className="btn btn-dark btn-lg px-4 px-md-5 py-3 fw-bold rounded-pill shadow-lg hover-lift smallest-md">
@@ -29,20 +29,6 @@ const LandingPage: React.FC = () => {
                                 <button onClick={() => navigate('/courses')} className="btn btn-outline-dark btn-lg px-4 px-md-5 py-3 fw-bold rounded-pill hover-lift smallest-md">
                                     EXPLORE
                                 </button>
-                            </div>
-                            <div className="mt-5 d-flex align-items-center justify-content-center justify-content-lg-start gap-3 animate__animated animate__fadeIn animate__delay-2s">
-                                <div className="d-flex position-relative modules-avatars">
-                                    {[1, 2, 3, 4].map(i => (
-                                        <div key={i} className="rounded-circle border border-2 border-white bg-secondary"
-                                            style={{ width: 40, height: 40, marginLeft: i > 1 ? -15 : 0, backgroundImage: `url(https://i.pravatar.cc/100?img=${10 + i})`, backgroundSize: 'cover' }}></div>
-                                    ))}
-                                </div>
-                                <div className="d-flex flex-column text-start">
-                                    <div className="d-flex text-warning small">
-                                        <i className="bi bi-star-fill"></i><i className="bi bi-star-fill"></i><i className="bi bi-star-fill"></i><i className="bi bi-star-fill"></i><i className="bi bi-star-fill"></i>
-                                    </div>
-                                    <span className="smallest fw-bold text-muted">Loved by 10,000+ Learners</span>
-                                </div>
                             </div>
                         </div>
                         <div className="col-lg-6 text-center position-relative order-1 order-lg-2 mb-5 mb-lg-0">
@@ -65,24 +51,7 @@ const LandingPage: React.FC = () => {
                 </div>
             </header>
 
-            {/*/!* --- STATS SECTION --- *!/*/}
-            {/*<section className="py-5 bg-white">*/}
-            {/*    <div className="container" style={{ maxWidth: '1100px' }}>*/}
-            {/*        <div className="row g-4 text-center">*/}
-            {/*            {[*/}
-            {/*                { label: 'Active Learners', val: '10k+' },*/}
-            {/*                { label: 'Interactive Lessons', val: '500+' },*/}
-            {/*                { label: 'Native Speakers', val: '50+' },*/}
-            {/*                { label: 'App Rating', val: '4.9/5' },*/}
-            {/*            ].map((stat, idx) => (*/}
-            {/*                <div key={idx} className="col-6 col-md-3">*/}
-            {/*                    <h2 className="fw-bold mb-0 text-slate ls-tight">{stat.val}</h2>*/}
-            {/*                    <p className="text-muted smallest uppercase ls-2 fw-bold">{stat.label}</p>*/}
-            {/*                </div>*/}
-            {/*            ))}*/}
-            {/*        </div>*/}
-            {/*    </div>*/}
-            {/*</section>*/}
+
 
             {/* --- FEATURES GRID --- */}
             <section className="py-5 my-5">
@@ -96,10 +65,10 @@ const LandingPage: React.FC = () => {
                     <div className="row g-4">
                         {[
                             { icon: 'bi-controller', title: 'Gamified Learning', desc: 'Earn points, unlock badges, and climb the leaderboard as you master new words.', color: 'text-primary' },
-                            { icon: 'bi-chat-dots-fill', title: 'Native Chat', desc: 'Practice real conversations with verified native Tshivenda speakers.', color: 'text-success' },
+                            { icon: 'bi-puzzle-fill', title: 'Minigames & Puzzles', desc: 'Reinforce your vocabulary with Word Bombs and Picture Puzzles.', color: 'text-success' },
                             { icon: 'bi-bank2', title: 'Cultural Stories', desc: 'Dive into interactive history lessons that bring Venda heritage to life.', color: 'text-warning' },
                             { icon: 'bi-trophy-fill', title: 'Daily Challenges', desc: 'Keep your streak alive with bite-sized daily tasks and quizzes.', color: 'text-danger' },
-                            { icon: 'bi-soundwave', title: 'Audio Pronunciation', desc: 'Listen to native audio for every word and record your own voice.', color: 'text-info' },
+                            { icon: 'bi-soundwave', title: 'Authentic Audio', desc: 'Listen to clear audio pronunciations for every word.', color: 'text-info' },
                             { icon: 'bi-people-fill', title: 'Community', desc: 'Join a vibrant community of learners supporting each other.', color: 'text-secondary' },
                         ].map((feat, i) => (
                             <div key={i} className="col-md-4">
@@ -126,7 +95,7 @@ const LandingPage: React.FC = () => {
                                 {[
                                     { step: '01', title: 'Create a Profile', text: 'Set your goals and join the community.' },
                                     { step: '02', title: 'Start a Lesson', text: 'Learn vocabulary through interactive cards.' },
-                                    { step: '03', title: 'Practice & Speak', text: 'Chat with natives to refine your accent.' },
+                                    { step: '03', title: 'Play & Reinforce', text: 'Master vocabulary through engaging minigames and quizzes.' },
                                 ].map((step, i) => (
                                     <div key={i} className="d-flex gap-4 align-items-start">
                                         <div className="fs-1 fw-bold text-warning opacity-50" style={{ lineHeight: 1 }}>{step.step}</div>
@@ -151,6 +120,158 @@ const LandingPage: React.FC = () => {
                                 </div>
                             </div>
                         </div>
+                    </div>
+                </div>
+            </section>
+
+            {/* --- MINIGAMES SHOWCASE --- */}
+            <section className="py-5 bg-white">
+                <div className="container py-4" style={{ maxWidth: '1100px' }}>
+                    <div className="row align-items-center g-5">
+                        <div className="col-lg-6">
+                            <div className="position-relative">
+                                {/* Abstract Game Dashboard Mockup */}
+                                <div className="bg-light rounded-4 p-4 border shadow-sm" style={{ transform: 'rotate(-1deg)' }}>
+                                    <div className="d-flex justify-content-between align-items-center mb-4">
+                                        <h5 className="fw-bold mb-0 text-dark">Mitambo (Games)</h5>
+                                        <div className="badge bg-warning text-dark px-3 py-2 rounded-pill fw-bold">1200 LP</div>
+                                    </div>
+                                    <div className="row g-3">
+                                        <div className="col-6">
+                                            <div className="bg-white p-3 rounded-4 border text-center hover-lift transition-all">
+                                                <i className="bi bi-heptagon-fill text-danger fs-1 mb-2 d-block"></i>
+                                                <h6 className="fw-bold mb-1">Word Bomb</h6>
+                                                <p className="smallest text-muted mb-0">Type fast to survive!</p>
+                                            </div>
+                                        </div>
+                                        <div className="col-6">
+                                            <div className="bg-white p-3 rounded-4 border text-center hover-lift transition-all">
+                                                <i className="bi bi-image-fill text-primary fs-1 mb-2 d-block"></i>
+                                                <h6 className="fw-bold mb-1">Picture Puzzle</h6>
+                                                <p className="smallest text-muted mb-0">Guess the image!</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div className="position-absolute bg-warning rounded-circle" style={{ width: 60, height: 60, top: -20, right: -20, zIndex: -1, opacity: 0.5 }}></div>
+                                <div className="position-absolute bg-primary rounded-circle" style={{ width: 40, height: 40, bottom: -10, left: -10, zIndex: -1, opacity: 0.3 }}></div>
+                            </div>
+                        </div>
+                        <div className="col-lg-6">
+                            <span className="badge bg-danger text-white mb-3 px-3 py-2 rounded-pill fw-bold ls-1 smallest">PLAY & LEARN</span>
+                            <h2 className="display-5 fw-bold ls-tight mb-4">Master words under pressure.</h2>
+                            <p className="lead text-muted mb-4">
+                                Testing your memory is one thing, but recalling words under pressure builds true fluency. 
+                                Our interactive minigames are designed to make vocabulary stick while you have fun.
+                            </p>
+                            <ul className="list-unstyled d-flex flex-column gap-3 mb-5">
+                                <li className="d-flex align-items-center gap-3">
+                                    <i className="bi bi-check-circle-fill text-success fs-5"></i>
+                                    <span className="fw-bold text-slate">Heart-pounding Word Bomb challenges</span>
+                                </li>
+                                <li className="d-flex align-items-center gap-3">
+                                    <i className="bi bi-check-circle-fill text-success fs-5"></i>
+                                    <span className="fw-bold text-slate">Visual learning with Picture Puzzles</span>
+                                </li>
+                                <li className="d-flex align-items-center gap-3">
+                                    <i className="bi bi-check-circle-fill text-success fs-5"></i>
+                                    <span className="fw-bold text-slate">Earn Leaderboard Points (LP) to rank up</span>
+                                </li>
+                            </ul>
+                            <button onClick={() => navigate('/mitambo')} className="btn btn-outline-dark px-4 py-2 fw-bold rounded-pill shadow-none">
+                                PREVIEW GAMES
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            {/* --- CULTURE & HISTORY --- */}
+            <section className="py-5" style={{ backgroundColor: '#F9FAFB' }}>
+                <div className="container py-4" style={{ maxWidth: '1100px' }}>
+                    <div className="row align-items-center g-5">
+                        <div className="col-lg-6 order-2 order-lg-1">
+                            <span className="badge bg-warning text-dark border-warning mb-3 px-3 py-2 rounded-pill fw-bold ls-1 smallest">CULTURE FIRST</span>
+                            <h2 className="display-5 fw-bold ls-tight mb-4">More than just vocabulary.</h2>
+                            <p className="lead text-muted mb-4">
+                                Language is deeply tied to culture. VendaLearn includes a dedicated <strong>Ḓivhazwakale (History)</strong> section to immerse you in the heritage, traditions, and stories of the Vhavenda people.
+                            </p>
+                            <p className="text-muted mb-4">
+                                Read beautiful interactive stories, learn the significance of traditional attire, and understand the cultural context behind the phrases you are learning.
+                            </p>
+                            <button onClick={() => navigate('/history')} className="btn btn-dark px-4 py-2 fw-bold rounded-pill shadow-none">
+                                EXPLORE HERITAGE
+                            </button>
+                        </div>
+                        <div className="col-lg-6 order-1 order-lg-2">
+                             <div className="d-flex gap-3 px-3">
+                                <div className="d-flex flex-column gap-3 mt-5">
+                                    <div className="bg-white p-4 rounded-4 shadow-sm border text-center hover-lift" style={{ width: '220px' }}>
+                                        <div className="bg-warning bg-opacity-10 rounded-circle d-flex align-items-center justify-content-center mx-auto mb-3" style={{ width: 60, height: 60 }}>
+                                            <i className="bi bi-book-half text-warning fs-3"></i>
+                                        </div>
+                                        <h6 className="fw-bold mb-1">Folktales</h6>
+                                        <p className="smallest text-muted mb-0">Traditional stories</p>
+                                    </div>
+                                    <div className="bg-white p-4 rounded-4 shadow-sm border text-center hover-lift" style={{ width: '220px' }}>
+                                        <div className="bg-danger bg-opacity-10 rounded-circle d-flex align-items-center justify-content-center mx-auto mb-3" style={{ width: 60, height: 60 }}>
+                                            <i className="bi bi-music-note-beamed text-danger fs-3"></i>
+                                        </div>
+                                        <h6 className="fw-bold mb-1">Music</h6>
+                                        <p className="smallest text-muted mb-0">Rhythms of Venda</p>
+                                    </div>
+                                </div>
+                                <div className="d-flex flex-column gap-3">
+                                     <div className="bg-white p-4 rounded-4 shadow-sm border text-center hover-lift" style={{ width: '220px' }}>
+                                        <div className="bg-primary bg-opacity-10 rounded-circle d-flex align-items-center justify-content-center mx-auto mb-3" style={{ width: 60, height: 60 }}>
+                                            <i className="bi bi-geo-alt-fill text-primary fs-3"></i>
+                                        </div>
+                                        <h6 className="fw-bold mb-1">Thohoyandou</h6>
+                                        <p className="smallest text-muted mb-0">The capital city</p>
+                                    </div>
+                                     <div className="bg-white p-4 rounded-4 shadow-sm border text-center hover-lift" style={{ width: '220px' }}>
+                                        <div className="bg-success bg-opacity-10 rounded-circle d-flex align-items-center justify-content-center mx-auto mb-3" style={{ width: 60, height: 60 }}>
+                                            <i className="bi bi-brush-fill text-success fs-3"></i>
+                                        </div>
+                                        <h6 className="fw-bold mb-1">Art & Craft</h6>
+                                        <p className="smallest text-muted mb-0">Pottery & beadwork</p>
+                                    </div>
+                                </div>
+                             </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            {/* --- FAQ SECTION --- */}
+            <section className="py-5 bg-white mb-5">
+                <div className="container py-4" style={{ maxWidth: '800px' }}>
+                    <div className="text-center mb-5">
+                        <h2 className="display-6 fw-bold ls-tight mb-3">Frequently Asked Questions</h2>
+                        <p className="text-muted lead">Common questions from our learners.</p>
+                    </div>
+
+                    <div className="accordion accordion-flush rounded-4 overflow-hidden border" id="faqAccordion">
+                        {[
+                            { q: "Is VendaLearn really free?", a: "Yes! The core learning experience, including courses, minigames, and cultural stories, is completely free to use." },
+                            { q: "Do I need any prior experience with Tshivenda?", a: "Not at all. Our courses are designed for absolute beginners, starting from basic greetings and vocabulary." },
+                            { q: "Can I use VendaLearn on my phone?", a: "Yes! VendaLearn is a Progressive Web App (PWA). You can 'Install' it directly from your mobile browser to your home screen." },
+                            { q: "Are the audio pronunciations accurate?", a: "Yes, all our audio clips are recorded to ensure you learn the correct authentic Venda pronunciation." },
+                            { q: "How does the Leaderboard work?", a: "You earn Leaderboard Points (LP) by completing lessons, maintaining streaks, and playing minigames. Compete with others to reach the top ranks!" }
+                        ].map((faq, i) => (
+                            <div className="accordion-item" key={i}>
+                                <h2 className="accordion-header">
+                                    <button className="accordion-button collapsed fw-bold py-4 shadow-none" type="button" data-bs-toggle="collapse" data-bs-target={`#faq${i}`}>
+                                        {faq.q}
+                                    </button>
+                                </h2>
+                                <div id={`faq${i}`} className="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                                    <div className="accordion-body text-muted pb-4 pt-0">
+                                        {faq.a}
+                                    </div>
+                                </div>
+                            </div>
+                        ))}
                     </div>
                 </div>
             </section>

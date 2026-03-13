@@ -5,7 +5,7 @@ import { doc, onSnapshot } from 'firebase/firestore';
 import { auth, db } from '../services/firebaseConfig';
 import { invalidateCache } from '../services/dataCache';
 import Swal from 'sweetalert2';
-import { Menu, User as UserIcon, Settings, LogOut } from 'lucide-react';
+import { Menu, User as UserIcon, Settings, LogOut, Bell } from 'lucide-react';
 import { AvatarDisplay } from './AvatarPicker';
 
 const Navbar: React.FC = () => {
@@ -133,8 +133,19 @@ const Navbar: React.FC = () => {
                         </li>
 
                         {user ? (
-                            /* AUTHENTICATED USER DROPDOWN */
-                            <li className="nav-item dropdown ms-lg-2 w-100 w-lg-auto text-center mt-3 mt-lg-0">
+                            <div className="d-flex align-items-center justify-content-center gap-3 mt-3 mt-lg-0">
+                                {/* NOTIFICATION BELL */}
+                                <div className="position-relative d-flex align-items-center">
+                                    <button className="btn btn-link text-dark p-1 shadow-none border-0" aria-label="Notifications">
+                                        <Bell size={22} />
+                                        <span className="position-absolute top-0 start-100 translate-middle p-1 bg-danger border border-light rounded-circle">
+                                            <span className="visually-hidden">New alerts</span>
+                                        </span>
+                                    </button>
+                                </div>
+
+                                {/* AUTHENTICATED USER DROPDOWN */}
+                                <li className="nav-item dropdown w-100 w-lg-auto text-center">
                                 <button
                                     className="nav-link dropdown-toggle d-flex align-items-center justify-content-center gap-3 border-0 bg-transparent p-0 mx-auto shadow-none"
                                     data-bs-toggle="dropdown"
@@ -189,6 +200,7 @@ const Navbar: React.FC = () => {
                                     </li>
                                 </ul>
                             </li>
+                            </div>
                         ) : (
                             /* GUEST BUTTONS */
                             <div className="ms-lg-4 d-flex flex-column flex-lg-row gap-2 mt-3 mt-lg-0 w-100 w-lg-auto">

@@ -6,7 +6,7 @@ import AdminNavbar from '../../components/AdminNavbar';
 import { fetchLessons as fetchLessonsFromCache, invalidateCache, getMicroLessons } from '../../services/dataCache';
 import { seedLessons } from '../../services/seedDatabase';
 import Swal from 'sweetalert2';
-import { Trash2, Edit, Plus, RefreshCw, Loader2 } from 'lucide-react';
+import { Trash2, Edit, Plus, RefreshCw, Loader2, Download } from 'lucide-react';
 
 const AdminLessons: React.FC = () => {
     const [lessons, setLessons] = useState<any[]>([]);
@@ -102,6 +102,35 @@ const AdminLessons: React.FC = () => {
         }
     };
 
+    const handleExport = (lesson: any) => {
+        try {
+            // Convert lesson object to formatted JSON string
+            const dataStr = JSON.stringify(lesson, null, 2);
+            // Create a blob and URL
+            const blob = new Blob([dataStr], { type: "application/json" });
+            const url = URL.createObjectURL(blob);
+            // Create temporary link and trigger download
+            const link = document.createElement("a");
+            link.href = url;
+            link.download = `course-${lesson.id}.json`;
+            document.body.appendChild(link);
+            link.click();
+            // Cleanup
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+            
+            createAuditLog("EXPORT", `Exported course data for: ${lesson.id}`, lesson.id);
+        } catch (error) {
+            console.error("Export error:", error);
+            Swal.fire({
+                title: 'Export Failed',
+                text: 'Could not export course data.',
+                icon: 'error',
+                confirmButtonColor: '#DC2626'
+            });
+        }
+    };
+
     return (
         <div className="min-vh-100 pb-5 bg-light">
             <AdminNavbar />
@@ -165,13 +194,20 @@ const AdminLessons: React.FC = () => {
                                                     {getMicroLessons(lesson).length} Micro Lessons • {getMicroLessons(lesson).reduce((acc: number, ml: any) => acc + (ml.slides?.length || 0), 0)} Slides • {getMicroLessons(lesson).reduce((acc: number, ml: any) => acc + (ml.questions?.length || 0), 0)} Questions
                                                 </p>
                                             </div>
-                                            <div className="col-md-4 text-md-end mt-3 mt-md-0 d-flex gap-2 justify-content-md-end">
-                                                <Link
-                                                    to={`/admin/edit-lesson/${lesson.id}`}
-                                                    className="btn btn-outline-secondary fw-bold smallest ls-1 px-4 d-flex align-items-center gap-2"
-                                                >
-                                                    <Edit size={14} /> EDIT
-                                                </Link>
+                                                <div className="col-md-5 text-md-end mt-3 mt-md-0 d-flex gap-2 justify-content-md-end">
+                                                    <button
+                                                        onClick={() => handleExport(lesson)}
+                                                        className="btn btn-outline-primary fw-bold smallest ls-1 px-3 d-flex align-items-center justify-content-center"
+                                                        title="Export Course JSON"
+                                                    >
+                                                        <Download size={16} />
+                                                    </button>
+                                                    <Link
+                                                        to={`/admin/edit-lesson/${lesson.id}`}
+                                                        className="btn btn-outline-secondary fw-bold smallest ls-1 px-4 d-flex align-items-center gap-2"
+                                                    >
+                                                        <Edit size={14} /> EDIT
+                                                    </Link>
                                                 <button
                                                     onClick={() => handleDelete(lesson.id)}
                                                     className="btn btn-outline-danger fw-bold smallest ls-1 px-3 d-flex align-items-center justify-content-center"
