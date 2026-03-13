@@ -4,9 +4,12 @@ import { doc, setDoc, updateDoc, collection, query, where, getDocs, writeBatch, 
 import { onAuthStateChanged, signOut } from 'firebase/auth';
 import { fetchUserData, invalidateCache, refreshUserData, fetchLearnedStats } from '../../services/dataCache';
 import { getLevelStats, getBadgeDetails } from '../../services/levelUtils';
+import { checkAchievements, awardTrophies, ALL_TROPHIES } from '../../services/achievementService';
 import Swal from 'sweetalert2';
 import { useNavigate } from "react-router-dom";
-import { MessageCircle, Book, Flame, Gem, Gift, Edit3, Compass, LogOut, CheckCircle, Info, Shield, Users } from 'lucide-react';
+import { MessageCircle, Book, Flame, Gem, Gift, Edit3, Compass, LogOut, CheckCircle, Info, Shield, Users, Camera } from 'lucide-react';
+import AvatarPicker, { AvatarDisplay } from '../../components/AvatarPicker';
+import StreakCalendar from '../../components/StreakCalendar';
 
 interface UserProfile {
     username: string;
@@ -18,6 +21,10 @@ interface UserProfile {
     isNativeSpeaker?: boolean;
     nativeSpeakerBio?: string;
     nativeVerificationStatus?: 'none' | 'pending' | 'verified' | 'rejected';
+    avatarId?: string;
+    trophies?: string[];
+    streakFreezes?: number;
+    activityHistory?: string[];
 }
 
 interface LearnedStats {
@@ -37,8 +44,7 @@ const Profile: React.FC = () => {
     const [updateLoading, setUpdateLoading] = useState(false);
     const [claimLoading, setClaimLoading] = useState(false);
     const [editUsername, setEditUsername] = useState('');
-    const [editBio, setEditBio] = useState('');
-    const [isNativeSpeaker, setIsNativeSpeaker] = useState(false);
+    const [editAvatarId, setEditAvatarId] = useState('user');
     const [unclaimedInvites, setUnclaimedInvites] = useState<any[]>([]);
     const navigate = useNavigate();
     const inviteLink = `${window.location.origin}/register?ref=${auth.currentUser?.uid}`;
@@ -53,15 +59,42 @@ const Profile: React.FC = () => {
 
                 if (data) {
                     const profile = data as UserProfile;
-                    setUserData({
+                    const normalizedProfile = {
                         ...profile,
                         points: Number(profile.points) || 0,
                         level: Number(profile.level) || 1,
-                        streak: Number(profile.streak) || 0
-                    });
+                        streak: Number(profile.streak) || 0,
+                        trophies: profile.trophies || []
+                    };
+                    setUserData(normalizedProfile);
                     setEditUsername(profile.username || '');
-                    setEditBio(profile.nativeSpeakerBio || '');
-                    setIsNativeSpeaker(!!profile.isNativeSpeaker);
+                    setEditAvatarId(profile.avatarId || 'adventurer');
+
+                    // Check for new achievements (including 1st Login)
+                    const newTrophies = checkAchievements(normalizedProfile, profile.trophies || []);
+                    if (newTrophies.length > 0) {
+                        const newIds = newTrophies.map(t => t.id);
+                        await awardTrophies(user.uid, newIds);
+
+                        // Update local state
+                        setUserData(prev => prev ? {
+                            ...prev,
+                            trophies: [...(prev.trophies || []), ...newIds]
+                        } : null);
+
+                        // Notify user for the most significant one if multiple
+                        const first = newTrophies[0];
+                        Swal.fire({
+                            title: 'Trophy Unlocked!',
+                            text: `New Achievement: ${first.title}!`,
+                            icon: 'success',
+                            imageUrl: 'https://cdn-icons-png.flaticon.com/512/3112/3112946.png',
+                            imageWidth: 80,
+                            confirmButtonColor: '#FACC15',
+                            confirmButtonText: 'Awesome!',
+                            customClass: { popup: 'rounded-4' }
+                        });
+                    }
 
                     // Fetch unclaimed invites
                     const q = query(
@@ -94,6 +127,50 @@ const Profile: React.FC = () => {
         });
     };
 
+    const handleBuyFreeze = async () => {
+        if (!userData || userData.points < 100) {
+            Swal.fire({
+                title: 'Insufficient LP!',
+                text: 'You need 100 LP points to buy a streak freeze.',
+                icon: 'warning',
+                confirmButtonColor: '#FACC15',
+                customClass: { popup: 'rounded-4' }
+            });
+            return;
+        }
+
+        try {
+            setUpdateLoading(true);
+            const userRef = doc(db, "users", auth.currentUser!.uid);
+            await updateDoc(userRef, {
+                points: increment(-100),
+                streakFreezes: increment(1)
+            });
+
+            setUserData(prev => prev ? {
+                ...prev,
+                points: prev.points - 100,
+                streakFreezes: (prev.streakFreezes || 0) + 1
+            } : null);
+
+            invalidateCache(`user_${auth.currentUser!.uid}`);
+            refreshUserData(); // Ensure cache is totally fresh
+
+            Swal.fire({
+                title: 'Freeze Purchased!',
+                text: 'Your streak is now protected for one missed day.',
+                icon: 'success',
+                confirmButtonColor: '#FACC15',
+                customClass: { popup: 'rounded-4' }
+            });
+        } catch (err) {
+            console.error("Error buying freeze:", err);
+            Swal.fire('Error', 'Could not purchase freeze.', 'error');
+        } finally {
+            setUpdateLoading(false);
+        }
+    };
+
     const handleUpdate = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!auth.currentUser) return;
@@ -102,32 +179,20 @@ const Profile: React.FC = () => {
         try {
             const userRef = doc(db, "users", auth.currentUser.uid);
 
-            // Logic for verification status
-            let newStatus = userData?.nativeVerificationStatus || 'none';
-            if (isNativeSpeaker && (newStatus === 'none' || newStatus === 'rejected')) {
-                newStatus = 'pending';
-            } else if (!isNativeSpeaker) {
-                newStatus = 'none';
-            }
-
             await setDoc(userRef, {
                 username: editUsername,
                 email: auth.currentUser.email,
-                isNativeSpeaker: newStatus === 'verified', // only verified users have the flag
-                nativeSpeakerBio: editBio,
-                nativeVerificationStatus: newStatus
+                avatarId: editAvatarId
             }, { merge: true });
 
             setUserData(prev => prev ? {
                 ...prev,
                 username: editUsername,
-                isNativeSpeaker: newStatus === 'verified',
-                nativeSpeakerBio: editBio,
-                nativeVerificationStatus: newStatus
+                avatarId: editAvatarId
             } : null);
             setIsEditing(false);
             invalidateCache(`user_${auth.currentUser.uid}`);
-            Swal.fire('Success', 'Phurofayili yo vusuluswa!', 'success');
+            Swal.fire('Success', 'Profile updated!', 'success');
         } catch (error) {
             Swal.fire('Error', 'Update failed', 'error');
         } finally {
@@ -184,11 +249,16 @@ const Profile: React.FC = () => {
 
     const levelStats = getLevelStats(userData?.points || 0);
     const milestones = [
-        { level: 1, name: "Mugudi", label: "Beginner" },
-        { level: 5, name: "Muhali", label: "Warrior" },
-        { level: 10, name: "Vele", label: "Master" },
-        { level: 15, name: "Gota", label: "Leader" },
-        { level: 20, name: "Thovhele", label: "King" }
+        { level: 1, label: "Beginner" },
+        { level: 2, label: "Apprentice" },
+        { level: 5, label: "Warrior" },
+        { level: 10, label: "Master" },
+        { level: 15, label: "Leader" },
+        { level: 20, label: "Chief" },
+        { level: 25, label: "King/Queen" },
+        { level: 30, label: "Guardian" },
+        { level: 40, label: "Supreme" },
+        { level: 50, label: "Legendary" }
     ];
 
     return (
@@ -198,9 +268,19 @@ const Profile: React.FC = () => {
                 {/* PROFILE HEADER & SETTINGS */}
                 <header className={`mb-5 pb-5 border-bottom transition-all ${isEditing ? 'bg-light p-4 rounded-4 border-warning shadow-sm' : ''}`}>
                     <div className="d-flex flex-column flex-md-row align-items-center gap-4 text-center text-md-start">
-                        <div className="text-dark rounded-circle d-flex align-items-center justify-content-center fw-bold shadow-sm"
-                            style={{ width: '100px', height: '100px', fontSize: '2.5rem', backgroundColor: '#FACC15', border: '3px solid #111827' }}>
-                            {userData?.username?.charAt(0).toUpperCase() || 'V'}
+                        <div className="position-relative">
+                            <AvatarDisplay
+                                avatarId={userData?.avatarId || 'adventurer'}
+                                seed={userData?.username || 'learner'}
+                                size={100}
+                                className="shadow-sm border-dark"
+                                style={{ borderWidth: '3px' }}
+                            />
+                            {isEditing && (
+                                <div className="position-absolute bottom-0 end-0 bg-dark text-white rounded-circle d-flex align-items-center justify-content-center shadow" style={{ width: 32, height: 32, border: '2px solid white' }}>
+                                    <Camera size={16} />
+                                </div>
+                            )}
                         </div>
                         <div className="flex-grow-1">
                             <div className="d-flex align-items-center gap-2 mb-1">
@@ -223,40 +303,56 @@ const Profile: React.FC = () => {
                             </div>
                             <p className="smallest fw-bold text-muted text-uppercase ls-2 mb-3">{userData?.email}</p>
 
-                            {!isEditing ? (
-                                <div className="d-flex gap-2 flex-wrap justify-content-center justify-content-md-start">
-                                    {auth.currentUser?.isAnonymous ? (
-                                        <div className="d-flex align-items-center px-4 py-2 bg-light border rounded-pill shadow-sm">
-                                            <div className="bg-secondary rounded-circle me-2 animate-pulse" style={{ width: 8, height: 8 }}></div>
-                                            <span className="small fw-bold text-muted ls-1 uppercase">Guest Account</span>
-                                        </div>
-                                    ) : (
-                                        <button onClick={() => setIsEditing(true)} className="btn btn-dark btn-sm px-4 py-2 fw-bold ls-1 rounded-pill shadow-sm d-flex align-items-center gap-2">
-                                            <Edit3 size={16} /> EDIT PROFILE
-                                        </button>
-                                    )}
-                                    {window.innerWidth >= 768 && (
-                                        <button
-                                            onClick={async () => {
-                                                const userRef = doc(db, "users", auth.currentUser!.uid);
-                                                await updateDoc(userRef, { tourCompleted: false });
-                                                sessionStorage.removeItem('tour_offered');
-                                                window.location.href = '/';
-                                            }}
-                                            className="btn btn-outline-warning btn-sm px-4 py-2 fw-bold ls-1 rounded-pill shadow-sm text-dark d-flex align-items-center gap-2"
-                                        >
-                                            <Compass size={16} /> RESTART TOUR
-                                        </button>
-                                    )}
-                                    <button onClick={async () => {
-                                        await signOut(auth);
-                                        invalidateCache();
-                                        navigate('/login');
-                                    }} className="btn btn-outline-danger btn-sm px-4 py-2 fw-bold ls-1 rounded-pill shadow-sm d-flex align-items-center gap-2">
-                                        <LogOut size={16} /> LOGOUT
+                            <div className="d-flex gap-2 flex-wrap justify-content-center justify-content-md-start mb-3">
+                                {!isEditing && (
+                                    <>
+                                        {auth.currentUser?.isAnonymous ? (
+                                            <div className="d-flex align-items-center px-4 py-2 bg-light border rounded-pill shadow-sm">
+                                                <div className="bg-secondary rounded-circle me-2 animate-pulse" style={{ width: 8, height: 8 }}></div>
+                                                <span className="small fw-bold text-muted ls-1 uppercase">Guest Account</span>
+                                            </div>
+                                        ) : (
+                                            <button onClick={() => setIsEditing(true)} className="btn btn-dark btn-sm px-4 py-2 fw-bold ls-1 rounded-pill shadow-sm d-flex align-items-center gap-2">
+                                                <Edit3 size={16} /> EDIT PROFILE
+                                            </button>
+                                        )}
+                                        {window.innerWidth >= 768 && (
+                                            <button
+                                                onClick={async () => {
+                                                    const userRef = doc(db, "users", auth.currentUser!.uid);
+                                                    await updateDoc(userRef, { tourCompleted: false });
+                                                    sessionStorage.removeItem('tour_offered');
+                                                    window.location.href = '/';
+                                                }}
+                                                className="btn btn-outline-warning btn-sm px-4 py-2 fw-bold ls-1 rounded-pill shadow-sm text-dark d-flex align-items-center gap-2"
+                                            >
+                                                <Compass size={16} /> RESTART TOUR
+                                            </button>
+                                        )}
+                                    </>
+                                )}
+
+                                {isEditing && (
+                                    <button
+                                        type="button"
+                                        onClick={(e) => handleUpdate(e as any)}
+                                        className="btn btn-warning btn-sm px-4 py-2 fw-bold ls-1 rounded-pill shadow-sm d-flex d-md-none align-items-center gap-2"
+                                        disabled={updateLoading}
+                                    >
+                                        {updateLoading ? <span className="spinner-border spinner-border-sm"></span> : <><CheckCircle size={16} /> SAVE</>}
                                     </button>
-                                </div>
-                            ) : (
+                                )}
+
+                                <button onClick={async () => {
+                                    await signOut(auth);
+                                    invalidateCache();
+                                    navigate('/login');
+                                }} className="btn btn-outline-danger btn-sm px-4 py-2 fw-bold ls-1 rounded-pill shadow-sm d-flex align-items-center gap-2">
+                                    <LogOut size={16} /> LOGOUT
+                                </button>
+                            </div>
+
+                            {isEditing && (
                                 <form onSubmit={handleUpdate} className="animate__animated animate__fadeIn">
                                     <div className="d-flex flex-column gap-3">
                                         <div className="d-flex gap-2 justify-content-center justify-content-md-start">
@@ -271,30 +367,12 @@ const Profile: React.FC = () => {
                                         </div>
 
                                         <div className="p-3 rounded-4 bg-light border-0 text-start" style={{ maxWidth: '400px' }}>
-                                            <div className="form-check form-switch mb-2">
-                                                <input
-                                                    className="form-check-input"
-                                                    type="checkbox"
-                                                    id="isSpeakerToggle"
-                                                    checked={isNativeSpeaker}
-                                                    onChange={(e) => setIsNativeSpeaker(e.target.checked)}
-                                                />
-                                                <label className="form-check-label small fw-bold" htmlFor="isSpeakerToggle">
-                                                    Apply for Native Speaker Status
-                                                </label>
-                                            </div>
-                                            <p className="smallest text-muted mb-2">
-                                                Verification allows you to appear in the Practice Hub and help others.
-                                            </p>
-                                            {isNativeSpeaker && (
-                                                <textarea
-                                                    className="form-control form-control-sm border-0 bg-white rounded-3 small mt-2"
-                                                    placeholder="Short bio for learners..."
-                                                    rows={2}
-                                                    value={editBio}
-                                                    onChange={(e) => setEditBio(e.target.value)}
-                                                />
-                                            )}
+                                            <p className="smallest fw-bold text-muted mb-3 ls-2 text-uppercase">CHOOSE YOUR STYLE</p>
+                                            <AvatarPicker
+                                                selectedStyle={editAvatarId}
+                                                seed={editUsername || 'warrior'}
+                                                onSelect={setEditAvatarId}
+                                            />
                                         </div>
 
                                         <div className="d-flex gap-2 justify-content-center justify-content-md-start mt-2">
@@ -320,7 +398,39 @@ const Profile: React.FC = () => {
                 <section className="mb-5">
                     <div className="d-flex justify-content-between align-items-end mb-4">
                         <div>
-                            <p className="smallest fw-bold text-warning mb-1 ls-2 text-uppercase">Tshimbila na nne</p>
+                            {/* TROPHY CASE */}
+                            <div className="mb-5 animate__animated animate__fadeInUp">
+                                <div className="d-flex justify-content-between align-items-center mb-3">
+                                    <h5 className="fw-bold mb-0 text-uppercase ls-2 smallest text-muted">Trophy Case</h5>
+                                    <span className="smallest fw-bold text-muted">{userData?.trophies?.length || 0} / {ALL_TROPHIES.length} EARNED</span>
+                                </div>
+                                <div className="row g-3">
+                                    {ALL_TROPHIES.map(trophy => {
+                                        const isEarned = (userData?.trophies || []).includes(trophy.id);
+                                        return (
+                                            <div key={trophy.id} className="col-4 col-md-2 text-center">
+                                                <div
+                                                    className={`p-3 rounded-4 transition-all mb-2 ${isEarned ? 'bg-white shadow-sm border border-warning hover-up' : 'opacity-25 bg-light border-dashed border-2'}`}
+                                                    title={trophy.description}
+                                                    style={{ cursor: isEarned ? 'pointer' : 'default' }}
+                                                    onClick={() => isEarned && Swal.fire({
+                                                        title: trophy.title,
+                                                        text: trophy.description,
+                                                        iconHtml: `<i class="bi ${trophy.icon}"></i>`,
+                                                        customClass: { icon: 'border-0', popup: 'rounded-4' },
+                                                        confirmButtonColor: '#111827'
+                                                    })}
+                                                >
+                                                    <i className={`bi ${trophy.icon} display-6`} style={{ color: isEarned ? trophy.color : '#999' }}></i>
+                                                </div>
+                                                <p className={`smallest fw-bold mb-0 text-truncate ${isEarned ? 'text-dark' : 'text-muted'}`}>{trophy.title.split(' (')[0]}</p>
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                            </div>
+
+                            <p className="smallest fw-bold text-warning mb-1 ls-2 text-uppercase">Journey Overview</p>
                             <h2 className="fw-bold mb-0 ls-tight">MY PROGRESS JOURNEY</h2>
                         </div>
                     </div>
@@ -386,52 +496,98 @@ const Profile: React.FC = () => {
                         <div className="position-absolute end-0 bottom-0 opacity-10 display-1 p-4"><Shield size={120} strokeWidth={1} /></div>
                     </div>
 
-                    {/* LEVEL MAP - Visual game world style */}
+                    {/* MASTERY PATH - High Fidelity Zigzag Map */}
                     <div className="card border-0 shadow-sm rounded-4 p-4 p-md-5 mb-5 bg-white overflow-hidden">
-                        <h5 className="fw-bold mb-5 text-uppercase ls-2 smallest text-muted text-center">Your Learning Path</h5>
+                        <div className="text-center mb-5">
+                            <h5 className="fw-bold mb-1 text-uppercase ls-2 smallest text-muted">Venda Mastery Path</h5>
+                            <h3 className="fw-bold text-dark">Your Journey to Fluency</h3>
+                        </div>
 
-                        <div className="level-map position-relative py-5">
-                            {/* The connecting line */}
-                            <div className="position-absolute start-50 top-0 bottom-0 border-start border-3 border-dashed border-secondary opacity-25" style={{ marginLeft: '-1.5px' }}></div>
+                        <div className="mastery-path position-relative py-5">
+                            {/* The connecting path line - Zigzag dynamic path */}
+                            <svg className="position-absolute start-0 top-0 w-100 h-100" style={{ zIndex: 0, overflow: 'visible' }}>
+                                <path
+                                    d={milestones.map((_, idx) => {
+                                        const isRightStagger = idx % 2 === 0;
+                                        const x = isRightStagger ? '25%' : '75%';
+                                        const y = `${(idx * 100) / (milestones.length - 1)}%`;
+                                        return `${idx === 0 ? 'M' : 'L'} ${x} ${y}`;
+                                    }).reverse().join(' ')}
+                                    stroke="url(#pathGradient)"
+                                    strokeWidth="6"
+                                    strokeDasharray="12 12"
+                                    fill="none"
+                                    className="path-animation"
+                                    strokeLinecap="round"
+                                />
+                                <defs>
+                                    <linearGradient id="pathGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                                        <stop offset="0%" stopColor="#FACC15" stopOpacity="1" />
+                                        <stop offset="100%" stopColor="#111827" stopOpacity="0.3" />
+                                    </linearGradient>
+                                </defs>
+                            </svg>
 
-                            <div className="d-flex flex-column gap-5 align-items-center position-relative">
-                                {[...milestones].reverse().map((m) => {
+                            <div className="d-flex flex-column gap-5 position-relative z-1">
+                                {[...milestones].reverse().map((m, idx) => {
                                     const isReached = levelStats.level >= m.level;
+                                    const isCurrent = levelStats.level >= m.level && (idx === 0 || levelStats.level < [...milestones].reverse()[idx - 1].level);
                                     const badge = getBadgeDetails(m.level);
+                                    const isRight = idx % 2 === 0;
 
                                     return (
-                                        <div key={m.level} className={`milestone-node d-flex align-items-center w-100 justify-content-center gap-4 ${isReached ? 'reached' : 'locked'}`}>
-                                            <div className="text-end d-none d-md-block" style={{ width: '150px' }}>
-                                                <h6 className={`fw-bold mb-0 ${isReached ? 'text-dark' : 'text-muted'}`}>{m.name}</h6>
-                                                <span className="smallest text-muted uppercase ls-1">{m.label}</span>
-                                            </div>
+                                        <div key={m.level} className={`path-node d-flex align-items-center justify-content-center w-100 gap-4 ${isReached ? 'reached' : 'locked'} ${isCurrent ? 'current' : ''}`}>
+                                            <div className={`node-content d-flex align-items-center gap-3 ${isRight ? 'flex-row' : 'flex-row-reverse text-end'}`} style={{ width: '100%', maxWidth: '500px' }}>
 
-                                            <div className="milestone-icon-wrapper rounded-circle shadow-lg d-flex align-items-center justify-content-center position-relative z-1"
-                                                style={{
-                                                    width: '70px', height: '70px',
-                                                    backgroundColor: isReached ? '#FACC15' : '#eee',
-                                                    border: isReached ? '3px solid #111827' : '3px dashed #ccc',
-                                                    fontSize: '1.5rem',
-                                                    color: isReached ? '#111827' : '#999',
-                                                    transform: isReached ? 'scale(1.1)' : 'scale(1)',
-                                                    opacity: isReached ? 1 : 0.6
-                                                }}>
-                                                <i className={`bi ${badge.icon}`}></i>
-                                                {isReached && <i className="bi bi-patch-check-fill position-absolute bottom-0 end-0 text-primary fs-5 bg-white rounded-circle"></i>}
-                                            </div>
+                                                <div className="flex-grow-1 d-none d-md-block" style={{ width: '150px' }}>
+                                                    <h6 className={`fw-bold mb-0 ${isReached ? 'text-dark' : 'text-muted'}`}>{badge.name}</h6>
+                                                    <span className="smallest text-muted uppercase ls-1">{m.label}</span>
+                                                </div>
 
-                                            <div className="text-start d-none d-md-block" style={{ width: '150px' }}>
-                                                <span className="smallest fw-bold text-muted ls-1 uppercase">LEVEL {m.level}+</span>
-                                                {isReached ? (
-                                                    <p className="smallest text-success fw-bold mb-0">UNLOCKED</p>
-                                                ) : (
-                                                    <p className="smallest text-muted mb-0">LOCKED</p>
-                                                )}
+                                                <div className="node-icon-wrapper position-relative">
+                                                    <div className={`milestone-circle shadow-lg d-flex align-items-center justify-content-center rounded-circle transition-all ${isReached ? 'heartbeat-sm' : ''}`}
+                                                        style={{
+                                                            width: isCurrent ? '85px' : '70px',
+                                                            height: isCurrent ? '85px' : '70px',
+                                                            backgroundColor: isReached ? badge.color : '#f1f5f9',
+                                                            border: isCurrent ? `4px solid #111827` : isReached ? `2px solid white` : '2px dashed #cbd5e1',
+                                                            fontSize: isCurrent ? '1.8rem' : '1.5rem',
+                                                            color: isReached ? 'white' : '#94a3b8',
+                                                            zIndex: isCurrent ? 10 : 1,
+                                                            boxShadow: isCurrent ? `0 0 20px ${badge.color}66` : 'none'
+                                                        }}>
+                                                        <i className={`bi ${badge.icon}`}></i>
+                                                    </div>
+                                                    {isReached && !isCurrent && (
+                                                        <div className="position-absolute top-0 end-0 bg-success text-white rounded-circle d-flex align-items-center justify-content-center shadow-sm" style={{ width: 22, height: 22, border: '2px solid white' }}>
+                                                            <CheckCircle size={12} fill="currentColor" />
+                                                        </div>
+                                                    )}
+                                                </div>
+
+                                                <div className="flex-grow-1" style={{ width: '150px' }}>
+                                                    <span className="smallest fw-bold text-muted ls-1 uppercase d-block">LEVEL {m.level}</span>
+                                                    {isReached ? (
+                                                        <span className="badge bg-success-subtle text-success border border-success-subtle rounded-pill smallest px-2">UNLOCKED</span>
+                                                    ) : (
+                                                        <span className="badge bg-light text-muted border border-light-subtle rounded-pill smallest px-2">LOCKED</span>
+                                                    )}
+                                                </div>
                                             </div>
                                         </div>
                                     );
                                 })}
                             </div>
+                        </div>
+
+                        {/* STREAK CALENDAR & FREEZES MOVED TO A MORE PROMINENT SPOT WITHIN LEARNING PATH OR AFTER */}
+                        <div className="mt-5 pt-5 border-top">
+                            <StreakCalendar
+                                activityHistory={userData?.activityHistory || []}
+                                streakFreezes={userData?.streakFreezes || 0}
+                                points={userData?.points || 0}
+                                onBuyFreeze={handleBuyFreeze}
+                            />
                         </div>
                     </div>
                 </section>
@@ -439,7 +595,7 @@ const Profile: React.FC = () => {
                 {/* REFERRAL / INVITE SECTION */}
                 <section className="bg-dark text-white p-5 rounded-4 position-relative overflow-hidden shadow-lg mb-5">
                     <div className="position-relative z-1">
-                        <p className="smallest fw-bold ls-2 text-uppercase mb-2" style={{ color: '#FACC15' }}>Vhuimo ha Thonifho</p>
+                        <p className="smallest fw-bold ls-2 text-uppercase mb-2" style={{ color: '#FACC15' }}>Referral Rewards</p>
                         <h2 className="fw-bold mb-3">Invite & Earn 500 LP</h2>
                         <p className="small opacity-75 mb-4 pe-lg-5">
                             Ramba vhangana vhavho! Spread the language. You'll receive 500 Learning Points for every warrior who joins through your link.
@@ -494,18 +650,52 @@ const Profile: React.FC = () => {
                 .hover-up:hover { transform: translateY(-5px); }
                 .transition-all { transition: all 0.3s ease; }
 
-                .progress-bar-animated {
-                    animation: progress-bar-stripes 1s linear infinite;
+                .heartbeat-sm {
+                    animation: heartbeat-sm 2s infinite ease-in-out;
                 }
 
-                @keyframes progress-bar-stripes {
-                    from { background-position: 1rem 0; }
-                    to { background-position: 0 0; }
+                @keyframes heartbeat-sm {
+                    0% { transform: scale(1); }
+                    50% { transform: scale(1.05); }
+                    100% { transform: scale(1); }
                 }
 
-                .milestone-node { opacity: 1; transition: all 0.5s ease; }
-                .milestone-node.locked { opacity: 0.8; }
-                .milestone-node.reached .milestone-icon-wrapper { animation: bounceIn 0.5s; }
+                .path-node.current .milestone-circle {
+                    animation: current-glow 2s infinite alternate;
+                    z-index: 10;
+                }
+
+                @keyframes current-glow {
+                    from { transform: scale(1); box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+                    to { transform: scale(1.1); box-shadow: 0 0 25px currentColor; }
+                }
+
+                .bg-success-subtle { background-color: #dcfce7 !important; }
+                .text-success { color: #166534 !important; }
+                .border-success-subtle { border-color: #bbf7d0 !important; }
+
+                .mastery-path {
+                    max-width: 600px;
+                    margin: 0 auto;
+                }
+
+                .path-node {
+                    transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+                }
+
+                .path-node.locked {
+                    filter: saturate(0.5);
+                    opacity: 0.7;
+                }
+
+                .path-animation {
+                    stroke-dashoffset: 1000;
+                    animation: dash 60s linear infinite;
+                }
+
+                @keyframes dash {
+                    to { stroke-dashoffset: 0; }
+                }
             `}</style>
         </div>
     );

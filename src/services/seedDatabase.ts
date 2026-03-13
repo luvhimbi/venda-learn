@@ -6,7 +6,7 @@ const lessonsData = [
         id: 'greetings',
         title: 'Greetings',
         vendaTitle: 'Ndumeliso',
-        difficulty: 'Easy',
+        difficulty: 'Beginner',
         microLessons: [
             {
                 id: 'greetings__ml_0',
@@ -18,6 +18,36 @@ const lessonsData = [
                 questions: [
                     { id: 1, question: "How do you say 'Hello' as man?", options: ["Ndaa", "Aa", "Matsheloni"], correctAnswer: "Ndaa", explanation: "'Ndaa' is specifically for men. 'Aa' is used by women, and 'Matsheloni' means morning.", type: "multiple-choice" },
                     { id: 2, question: "'Aa' is the greeting used by men.", correctAnswer: false, explanation: "'Aa' is the greeting used by women. Men use 'Ndaa'.", type: "true-false" }
+                ],
+                scenes: [
+                    {
+                        id: 'scene_greetings_0',
+                        title: 'Morning Meeting',
+                        background: 'Village',
+                        dialogue: [
+                            {
+                                characterName: 'Ronewa',
+                                venda: 'Ndaa, Vho-Makhulu!',
+                                english: 'Hello, Grandmother!',
+                                avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Ronewa',
+                                position: 'left'
+                            },
+                            {
+                                characterName: 'Makhulu',
+                                venda: 'Ndaa, Mutukana. Ni khou bva gai?',
+                                english: 'Hello, Boy. Where are you from?',
+                                avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Makhulu',
+                                position: 'right'
+                            },
+                            {
+                                characterName: 'Ronewa',
+                                venda: 'Ndi khou bva hayani.',
+                                english: 'I am coming from home.',
+                                avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Ronewa',
+                                position: 'left'
+                            }
+                        ]
+                    }
                 ]
             },
             {
@@ -40,7 +70,7 @@ const lessonsData = [
         id: 'numbers',
         title: 'Numbers',
         vendaTitle: 'Nomboro',
-        difficulty: 'Easy',
+        difficulty: 'Beginner',
         microLessons: [
             {
                 id: 'numbers__ml_0',
@@ -93,7 +123,7 @@ const lessonsData = [
         id: 'identity',
         title: 'Identity',
         vendaTitle: 'Vhuthu na mbeu',
-        difficulty: 'Easy',
+        difficulty: 'Beginner',
         microLessons: [
             {
                 id: 'identity__ml_0',
@@ -131,7 +161,7 @@ const lessonsData = [
         id: 'objects',
         title: 'Objects',
         vendaTitle: 'Zwithu',
-        difficulty: 'Easy',
+        difficulty: 'Beginner',
         microLessons: [
             {
                 id: 'objects__ml_0',
@@ -153,7 +183,7 @@ const lessonsData = [
         id: 'days-of-the-week',
         title: 'Days of the Week',
         vendaTitle: 'Maduvha a vhege',
-        difficulty: 'Easy',
+        difficulty: 'Beginner',
         microLessons: [
             {
                 id: 'days-of-the-week__ml_0',
@@ -187,7 +217,7 @@ const lessonsData = [
         id: 'months-of-the-year-full',
         title: 'All 12 Months',
         vendaTitle: 'Miṅwedzi ya ṅwaha',
-        difficulty: 'Medium',
+        difficulty: 'Intermediate',
         microLessons: [
             {
                 id: 'months-of-the-year-full__ml_0',

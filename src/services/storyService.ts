@@ -4,7 +4,7 @@ import { updateStreak } from './streakUtils';
 
 export const completeStory = async (storyId: string, points: number) => {
     const user = auth.currentUser;
-    if (!user) return false;
+    if (!user) return { success: false };
 
     const userRef = doc(db, "users", user.uid);
     try {
@@ -15,11 +15,11 @@ export const completeStory = async (storyId: string, points: number) => {
         });
 
         // Update streak when story is completed
-        await updateStreak(user.uid);
+        const streakResult = await updateStreak(user.uid);
 
-        return true;
+        return { success: true, streakResult };
     } catch (error) {
         console.error("Error saving story progress:", error);
-        return false;
+        return { success: false };
     }
 };

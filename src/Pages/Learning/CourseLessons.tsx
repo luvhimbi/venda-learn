@@ -3,6 +3,7 @@ import { auth } from '../../services/firebaseConfig';
 import { onAuthStateChanged } from 'firebase/auth';
 import { useNavigate, useParams, Link } from 'react-router-dom';
 import { fetchLessons, fetchUserData, getMicroLessons } from '../../services/dataCache';
+import { Sprout, Shield, Flame, BookOpen, PartyPopper } from 'lucide-react';
 
 const CourseLessons: React.FC = () => {
     const { courseId } = useParams();
@@ -46,9 +47,9 @@ const CourseLessons: React.FC = () => {
 
     const getDifficultyStyle = (d: string) => {
         const diff = d?.toLowerCase();
-        if (diff === 'easy') return { color: '#10B981', bg: '#EDFDF5', label: 'MAVHAYI', icon: '🌱' };
-        if (diff === 'medium') return { color: '#F59E0B', bg: '#FFFBEB', label: 'VHUKATI', icon: '🦁' };
-        return { color: '#EF4444', bg: '#FEF2F2', label: 'VHUḒU', icon: '🔥' };
+        if (diff === 'beginner') return { color: '#10B981', bg: '#EDFDF5', label: 'MAVHAYI', icon: <Sprout size={14} className="me-1" /> };
+        if (diff === 'intermediate') return { color: '#F59E0B', bg: '#FFFBEB', label: 'VHUKATI', icon: <Shield size={14} className="me-1" /> };
+        return { color: '#EF4444', bg: '#FEF2F2', label: 'VHUḒU', icon: <Flame size={14} className="me-1" /> };
     };
 
     if (loading) return (
@@ -63,7 +64,9 @@ const CourseLessons: React.FC = () => {
     if (!course) return (
         <div className="min-vh-100 bg-white d-flex justify-content-center align-items-center">
             <div className="text-center">
-                <div className="display-1 mb-3">📚</div>
+                <div className="mb-4 text-muted opacity-25">
+                    <BookOpen size={80} className="mx-auto" />
+                </div>
                 <h4 className="fw-bold text-dark">Course not found</h4>
                 <button className="btn btn-dark rounded-pill px-4 mt-3" onClick={() => navigate('/courses')}>Back to Courses</button>
             </div>
@@ -172,14 +175,18 @@ const CourseLessons: React.FC = () => {
                                             <div className="d-flex align-items-center gap-2 mb-2">
                                                 <span className="smallest fw-bold ls-1 px-2 py-1 rounded-pill"
                                                     style={{ color: '#6B7280', backgroundColor: '#F3F4F6' }}>
-                                                    📖 MICRO LESSON {index + 1}
+                                                    MICRO LESSON {index + 1}
                                                 </span>
                                                 {isDone && <span className="smallest fw-bold text-success ls-1">✓ DONE</span>}
                                             </div>
                                             <h5 className="fw-bold mb-1 text-dark">{ml.title}</h5>
                                             <div className="d-flex gap-3">
-                                                <span className="smallest text-muted fw-bold">📖 {slideCount} slides</span>
-                                                <span className="smallest text-muted fw-bold">📝 {questionCount} questions</span>
+                                                <span className="smallest text-muted fw-bold d-flex align-items-center gap-1">
+                                                    <BookOpen size={12} /> {slideCount} slides
+                                                </span>
+                                                <span className="smallest text-muted fw-bold d-flex align-items-center gap-1">
+                                                    <i className="bi bi-pencil-square"></i> {questionCount} questions
+                                                </span>
                                             </div>
                                         </div>
 
@@ -205,7 +212,9 @@ const CourseLessons: React.FC = () => {
                 {/* Course Complete Celebration */}
                 {allDone && (
                     <div className="text-center py-5 animate__animated animate__fadeIn">
-                        <div className="display-1 mb-3">🎉</div>
+                        <div className="mb-3 text-warning">
+                            <PartyPopper size={64} className="mx-auto" />
+                        </div>
                         <h4 className="fw-bold text-dark mb-2">Course Completed!</h4>
                         <p className="text-muted small">You've mastered all {totalCount} micro lessons in this course.</p>
                         <button className="btn btn-dark rounded-pill px-5 py-2 fw-bold smallest ls-1 mt-2" onClick={() => navigate('/courses')}>

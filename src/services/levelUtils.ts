@@ -1,26 +1,19 @@
 // src/services/levelUtils.ts
 
 export const getLevelStats = (totalPoints: number = 0) => {
-    // Constant determines how fast levels are gained
-    // 0.1 means Level 10 is reached at 10,000 points
-    const constant = 0.1;
+    // Each level requires 200 points
+    const POINTS_PER_LEVEL = 200;
 
     // 1. Calculate Current Level
-    // Formula: L = 0.1 * sqrt(points)
-    const currentLevel = Math.floor(constant * Math.sqrt(totalPoints)) || 1;
+    // Level 1: 0-199, Level 2: 200-399, etc.
+    const currentLevel = Math.floor(totalPoints / POINTS_PER_LEVEL) + 1;
 
     // 2. Calculate Point Thresholds
-    // Points needed for the START of the current level
-    const pointsAtStart = Math.pow(currentLevel / constant, 2);
-
-    // Points needed for the NEXT level
-    const pointsAtNext = Math.pow((currentLevel + 1) / constant, 2);
+    const pointsAtStart = (currentLevel - 1) * POINTS_PER_LEVEL;
+    const pointsAtNext = currentLevel * POINTS_PER_LEVEL;
 
     // 3. Math for the Progress Bar
-    // Total points required specifically to cross this current level
-    const levelRange = pointsAtNext - pointsAtStart;
-
-    // How many points the user has earned BEYOND the start of this level
+    const levelRange = POINTS_PER_LEVEL;
     const pointsIntoLevel = totalPoints - pointsAtStart;
 
     // 4. Percentage Calculation
@@ -29,17 +22,22 @@ export const getLevelStats = (totalPoints: number = 0) => {
     return {
         level: currentLevel,
         pointsInCurrentLevel: Math.floor(pointsIntoLevel),
-        pointsForNextLevel: Math.floor(levelRange),
-        nextLevelThreshold: Math.floor(pointsAtNext),
+        pointsForNextLevel: levelRange,
+        nextLevelThreshold: pointsAtNext,
         progress,
         totalPoints
     };
 };
 
 export const getBadgeDetails = (level: number) => {
-    if (level >= 20) return { name: "Thovhele", icon: "bi-trophy-fill", color: "#f59e0b" }; // Gold
-    if (level >= 15) return { name: "Gota", icon: "bi-award-fill", color: "#059669" }; // Emerald
-    if (level >= 10) return { name: "Vele", icon: "bi-shield-shaded", color: "#4f46e5" }; // Indigo
-    if (level >= 5) return { name: "Muhali", icon: "bi-patch-check-fill", color: "#4f46e5" }; // Indigo
-    return { name: "Mugudi", icon: "bi-seedling", color: "#10b981" }; // Green
+    if (level >= 50) return { name: "Tshivhumbeo", icon: "bi-stars", color: "#f472b6" }; // Pink/Legendary
+    if (level >= 40) return { name: "Khosi", icon: "bi-gem", color: "#fb7185" }; // Rose/Supreme
+    if (level >= 30) return { name: "Ndumi", icon: "bi-shield-fill-check", color: "#38bdf8" }; // Sky/Guardian
+    if (level >= 25) return { name: "Thovhele", icon: "bi-trophy-fill", color: "#f59e0b" }; // Gold/King
+    if (level >= 20) return { name: "Vhamusanda", icon: "bi-crown-fill", color: "#fbbf24" }; // Amber/Chief
+    if (level >= 15) return { name: "Gota", icon: "bi-award-fill", color: "#059669" }; // Emerald/Leader
+    if (level >= 10) return { name: "Vele", icon: "bi-shield-shaded", color: "#4f46e5" }; // Indigo/Master
+    if (level >= 5) return { name: "Muhali", icon: "bi-patch-check-fill", color: "#818cf8" }; // Light Indigo/Warrior
+    if (level >= 2) return { name: "Mudzulathungo", icon: "bi-book-fill", color: "#10b981" }; // Green/Apprentice
+    return { name: "Mugudi", icon: "bi-seedling", color: "#34d399" }; // Light Green/Novice
 };

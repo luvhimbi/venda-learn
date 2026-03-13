@@ -17,6 +17,7 @@ import CourseLessons from "./Pages/Learning/CourseLessons";
 import PrivacyPolicy from "./Pages/Policy/PrivacyPolicy";
 import TermsOfUse from "./Pages/Policy/TermsOfUse";
 import POPIAct from "./Pages/Policy/POPIAct";
+import DMCA from "./Pages/Policy/DMCA";
 import Stories from "./Pages/Learning/Stories";
 import HistoryList from "./Pages/Records/HistoryList";
 import AddHistory from "./Pages/Admin/AddHistory";
@@ -31,16 +32,16 @@ import AdminUsers from './Pages/Admin/AdminUsers';
 import AdminAuditLog from "./Pages/Admin/AdminAuditLog";
 import AdminDailyWords from "./Pages/Admin/AdminDailyWords";
 import AdminHistory from "./Pages/Admin/AdminHistory";
+import SystemReset from "./Pages/Admin/SystemReset";
 import WordPuzzle from "./Pages/Games/WordPuzzle";
 import GamesDashboard from "./Pages/Games/GamesDashboard";
 import PicturePuzzle from "./Pages/Games/PicturePuzzle";
 import SyllableBuilder from "./Pages/Games/SyllableBuilder";
 import SentenceScramble from "./Pages/Games/SentenceScramble";
 import KnowledgeBattle from "./Pages/Games/KnowledgeBattle";
-import PracticeHub from "./Pages/Games/PracticeHub";
 import DailyChallenge from "./Pages/Games/DailyChallenge";
-import ChatRoom from "./Pages/ChatRoom";
-import ErrorBoundary from "./components/ErrorBoundary";
+import WordBomb from "./Pages/Games/WordBomb";
+import AdminWordBomb from "./Pages/Admin/AdminWordBomb";
 import NotFound from "./Pages/NotFound";
 import { auth } from './services/firebaseConfig';
 import { onAuthStateChanged } from 'firebase/auth';
@@ -53,7 +54,6 @@ const AppContent: React.FC = () => {
     const location = useLocation();
     const isAdminPath = location.pathname.startsWith('/admin');
     const isAuthPath = ['/login', '/register', '/reset-password'].includes(location.pathname);
-    const isChatPath = location.pathname.startsWith('/chat/');
     const [user, setUser] = useState<any>(null);
 
     useEffect(() => {
@@ -74,7 +74,7 @@ const AppContent: React.FC = () => {
                 {/* Show minimalist AuthNavbar for Login/Register or public users */}
                 {!isAdminPath && (!user || isAuthPath) && <AuthNavbar user={user} />}
 
-                {!isAdminPath && !isAuthPath && user && !isChatPath && (
+                {!isAdminPath && !isAuthPath && user && (
                     <div className="p-2 bg-white d-lg-none">
                         {/* Mobile Spacer */}
                     </div>
@@ -107,10 +107,10 @@ const AppContent: React.FC = () => {
                         <Route path="/privacy" element={<PrivacyPolicy />} />
                         <Route path="/terms" element={<TermsOfUse />} />
                         <Route path="/popiact" element={<POPIAct />} />
+                        <Route path="/dmca" element={<DMCA />} />
                         <Route path="/ngano" element={<Stories />} />
-                        <Route path="/practice" element={<PracticeHub />} />
                         <Route path="/daily-challenge" element={<DailyChallenge />} />
-                        <Route path="/chat/:chatId" element={<ErrorBoundary><ChatRoom /></ErrorBoundary>} />
+                        <Route path="/word-bomb" element={<WordBomb />} />
 
                         {/* Protected Admin Routes */}
                         <Route
@@ -118,6 +118,14 @@ const AppContent: React.FC = () => {
                             element={
                                 <AdminRoute>
                                     <AdminDashboard />
+                                </AdminRoute>
+                            }
+                        />
+                        <Route
+                            path="/admin/reset"
+                            element={
+                                <AdminRoute>
+                                    <SystemReset />
                                 </AdminRoute>
                             }
                         />
@@ -168,6 +176,7 @@ const AppContent: React.FC = () => {
                         <Route path="/admin/history" element={<AdminRoute><AdminHistory /></AdminRoute>} />
                         <Route path="/admin/history/add" element={<AdminRoute><AddHistory /></AdminRoute>} />
                         <Route path="/admin/history/edit/:storyId" element={<AdminRoute><AddHistory /></AdminRoute>} />
+                        <Route path="/admin/word-bomb" element={<AdminRoute><AdminWordBomb /></AdminRoute>} />
 
                         {/* 404 Catch-All Route */}
                         <Route path="*" element={<NotFound />} />

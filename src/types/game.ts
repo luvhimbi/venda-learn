@@ -42,3 +42,19 @@ export interface ScoreBreakdown {
     streakBonus: number;
     consolation: number;
 }
+
+export interface DialogueLine {
+    characterName: string;
+    avatar?: string;
+    position?: 'left' | 'right';
+    venda: string;
+    english: string;
+    audioUrl?: string;
+}
+
+export interface Scene {
+    id: string;
+    title: string;
+    background?: string;
+    dialogue: DialogueLine[];
+}

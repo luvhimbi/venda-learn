@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import type { Question, MCQuestion, TFQuestion, FBQuestion, MPQuestion, LCQuestion } from '../../types/game';
 import ScorePopup from '../../components/Game/ScorePopup';
@@ -9,9 +9,15 @@ import TrueFalseQuestion from '../../components/Game/TrueFalseQuestion';
 import FillBlankQuestion from '../../components/Game/FillBlankQuestion';
 import MatchPairsQuestion from '../../components/Game/MatchPairsQuestion';
 import ListenChooseQuestion from '../../components/Game/ListenChooseQuestion';
+import SceneView from '../../components/Game/SceneView';
 import { useAudio } from '../../hooks/useAudio';
 import { useGameLogic } from '../../hooks/useGameLogic';
 import Mascot from '../../components/Mascot';
+import {
+    MessageSquare, Zap, Flame,
+    FileText, CheckCircle2, Pencil, Link, Volume2, BookOpen,
+    X, Mic, Square, ArrowLeft, ArrowRight, RefreshCw, Save
+} from 'lucide-react';
 import { db, auth } from '../../services/firebaseConfig';
 import { doc, updateDoc, arrayUnion, increment } from 'firebase/firestore';
 import { onAuthStateChanged } from 'firebase/auth';
@@ -19,11 +25,17 @@ import { getLevelStats } from "../../services/levelUtils.ts";
 import { updateStreak } from "../../services/streakUtils.ts";
 import { type Difficulty } from "../../services/scoringUtils.ts";
 import { fetchLessons, fetchUserData, refreshUserData, invalidateCache, getMicroLessons } from '../../services/dataCache';
+import { checkAchievements, awardTrophies } from '../../services/achievementService';
+import Swal from 'sweetalert2';
 
+const MASCOT_CHEERS = [
+    'Zwavhuḓi!',
+    'Ndi zwone!',
+    'Hu ḓo luga!',
+    'Wa ḓivha!',
+    'Ṱhonifhani!',
+];
 
-// =============================================
-//  MAIN GAME ROOM
-// =============================================
 const GameRoom: React.FC = () => {
     const { lessonId, microLessonId } = useParams();
     const navigate = useNavigate();
@@ -33,16 +45,35 @@ const GameRoom: React.FC = () => {
     const startIdx = parseInt(queryParams.get('start') || '0');
     const startType = queryParams.get('type') || 'STUDY';
 
-    // Core state
+    const storageKey = `game_state_${lessonId}_${microLessonId || 'default'}`;
+
+    const getSavedState = useCallback(() => {
+        try {
+            const saved = localStorage.getItem(storageKey);
+            return saved ? JSON.parse(saved) : null;
+        } catch (e) {
+            console.error('Failed to load saved game state', e);
+            return null;
+        }
+    }, [storageKey]);
+
+    const initialPersistentState = getSavedState();
+
     const [lesson, setLesson] = useState<any>(null);
-    const [gameState, setGameState] = useState<'STUDY' | 'QUIZ' | 'RESULT'>(startType as any);
-    const [currentSlide, setCurrentSlide] = useState(startType === 'STUDY' ? startIdx : 0);
+    const [gameState, setGameState] = useState<'STUDY' | 'SCENE' | 'QUIZ' | 'RESULT'>(
+        initialPersistentState?.gameState || (startType as any)
+    );
+    const [currentSlide, setCurrentSlide] = useState(
+        initialPersistentState?.gameState === 'STUDY' ? initialPersistentState.currentSlide : (startType === 'STUDY' ? startIdx : 0)
+    );
+    const [currentSceneIndex, setCurrentSceneIndex] = useState(
+        initialPersistentState?.gameState === 'SCENE' ? initialPersistentState.currentSceneIndex : 0
+    );
     const [isFirstTime, setIsFirstTime] = useState(true);
     const [isFlipped, setIsFlipped] = useState(false);
 
-    // Audio & Recording logic via custom hook
     const { isRecording, audioUrl, isPlayingAudio, speakVenda, startRecording, stopRecording, setAudioUrl } = useAudio();
-    const [studyStartTime, setStudyStartTime] = useState(Date.now());
+    const [studyStartTime, setStudyStartTime] = useState(initialPersistentState?.studyStartTime || Date.now());
 
     const [showExitModal, setShowExitModal] = useState(false);
     const [showLevelUp, setShowLevelUp] = useState(false);
@@ -50,135 +81,9 @@ const GameRoom: React.FC = () => {
     const [selectedOption, setSelectedOption] = useState<string | null>(null);
     const [selectedTF, setSelectedTF] = useState<boolean | null>(null);
 
-    // Game Logic via custom hook
-    const {
-        currentQIndex, setCurrentQIndex,
-        score,
-        lastScoreResult,
-        answerStatus, setAnswerStatus,
-        showExplanation,
-        scoreBreakdown,
-        handleCorrect: onCorrectAnswer,
-        handleWrong: onWrongAnswer,
-        awardConsolation,
-        moveNext: nextQuestion,
-        reset: resetGameLogic
-    } = useGameLogic({
-        difficulty: (lesson?.difficulty as Difficulty) || 'Easy',
-        totalQuestions: lesson?.questions?.length || 0,
-        onFinish: (finalScore, finalCorrect, totalDuration) => handleFinishQuiz(finalScore, finalCorrect, totalDuration),
-        onCorrect: () => {
-            setSelectedOption(null);
-            setSelectedTF(null);
-        }
-    });
-
-    // Reset game logic when switching to QUIZ
-    useEffect(() => {
-        if (gameState === 'QUIZ') {
-            resetGameLogic();
-            if (startType === 'QUIZ' && startIdx > 0) {
-                setCurrentQIndex(startIdx);
-            }
-        }
-        if (gameState === 'STUDY') {
-            setStudyStartTime(Date.now());
-        }
-    }, [gameState, resetGameLogic, startIdx, startType, setCurrentQIndex, setStudyStartTime]);
-
-    // Load lesson + user data
-    useEffect(() => {
-        const unsubscribe = onAuthStateChanged(auth, async (user) => {
-            if (user && lessonId) {
-                const lessons = await fetchLessons();
-                const foundCourse = lessons.find((l: any) => l.id === lessonId);
-                if (foundCourse) {
-                    if (microLessonId) {
-                        const mls = getMicroLessons(foundCourse);
-                        const foundMl = mls.find((ml: any) => ml.id === microLessonId);
-                        if (foundMl) {
-                            setLesson({
-                                ...foundMl,
-                                difficulty: foundCourse.difficulty,
-                                title: foundMl.title,
-                                courseId: foundCourse.id,
-                                courseTitle: foundCourse.title
-                            });
-                        }
-                    } else {
-                        const mls = getMicroLessons(foundCourse);
-                        if (mls.length > 0) {
-                            const ml = mls[0];
-                            setLesson({
-                                ...ml,
-                                difficulty: foundCourse.difficulty,
-                                title: ml.title,
-                                courseId: foundCourse.id,
-                                courseTitle: foundCourse.title
-                            });
-                        } else {
-                            setLesson(foundCourse);
-                        }
-                    }
-                }
-                const userData = await fetchUserData();
-                if (userData) {
-                    const completed = userData.completedLessons || [];
-                    const mlId = microLessonId || `${lessonId}__ml_0`;
-                    setIsFirstTime(!completed.includes(mlId));
-                }
-            }
-        });
-        return () => unsubscribe();
-    }, [lessonId, microLessonId]);
-
-    const saveProgress = async (index: number, type: 'STUDY' | 'QUIZ') => {
-        if (auth.currentUser && lessonId) {
-            const userRef = doc(db, "users", auth.currentUser.uid);
-            await updateDoc(userRef, {
-                lastLessonId: lessonId,
-                lastMicroLessonId: microLessonId || null,
-                lastProgressIndex: index,
-                lastProgressType: type.toLowerCase()
-            });
-        }
-    };
-
-    const handleMCSelect = (opt: string, correctAnswer: string) => {
-        if (selectedOption || answerStatus) return;
-        setSelectedOption(opt);
-        opt === correctAnswer ? onCorrectAnswer() : onWrongAnswer();
-    };
-
-    const handleTFSelect = (val: boolean, correctAnswer: boolean) => {
-        if (selectedTF !== null || answerStatus) return;
-        setSelectedTF(val);
-        val === correctAnswer ? onCorrectAnswer() : onWrongAnswer();
-    };
-
-    const handleFBSubmit = (answer: string, correctAnswer: string) => {
-        if (answer.toLowerCase() === correctAnswer.toLowerCase()) {
-            onCorrectAnswer();
-        } else {
-            onWrongAnswer();
-        }
-    };
-
-    const handleMatchComplete = (allCorrect: boolean) => {
-        if (allCorrect) {
-            onCorrectAnswer();
-        } else {
-            setAnswerStatus('correct');
-            awardConsolation();
-            setTimeout(() => nextQuestion(), 1200);
-        }
-    };
-
-    const handleLCSelect = (opt: string, correctAnswer: string) => {
-        if (selectedOption || answerStatus) return;
-        setSelectedOption(opt);
-        opt === correctAnswer ? onCorrectAnswer() : onWrongAnswer();
-    };
+    const [showMascotCheer, setShowMascotCheer] = useState(false);
+    const [mascotCheerText, setMascotCheerText] = useState(MASCOT_CHEERS[0]);
+    const [showSavedHint, setShowSavedHint] = useState(false);
 
     const handleFinishQuiz = async (finalScore: number, _finalCorrect: number, totalDuration: number) => {
         setGameState('RESULT');
@@ -188,7 +93,6 @@ const GameRoom: React.FC = () => {
             if (currentData) {
                 const mlId = microLessonId || lesson?.id || `${lessonId}__ml_0`;
                 const courseId = lesson?.courseId || lessonId;
-
                 const studyDuration = Math.floor((Date.now() - studyStartTime) / 1000) - totalDuration;
 
                 if (isFirstTime) {
@@ -216,19 +120,213 @@ const GameRoom: React.FC = () => {
                         if (allMlsDone) updateData.completedCourses = arrayUnion(courseId);
                     }
                     await updateDoc(userRef, updateData);
-                    await updateStreak(auth.currentUser.uid);
+                    const streakResult = await updateStreak(auth.currentUser.uid);
                     invalidateCache(`user_${auth.currentUser.uid}`);
                     invalidateCache('topLearners');
+
+                    if (streakResult?.isNewDay) {
+                        setTimeout(() => {
+                            if (streakResult.freezeUsed) {
+                                Swal.fire({
+                                    title: 'Streak Frozen!',
+                                    text: `A freeze was used to protect your ${streakResult.streak} day streak!`,
+                                    icon: 'info',
+                                    imageUrl: 'https://cdn-icons-png.flaticon.com/512/2913/2913524.png',
+                                    imageWidth: 80,
+                                    confirmButtonColor: '#0EA5E9',
+                                    confirmButtonText: 'Whew!',
+                                    customClass: { popup: 'rounded-4' }
+                                });
+                            } else if (streakResult.wasReset) {
+                                Swal.fire({
+                                    title: 'New Streak!',
+                                    text: `Starting fresh today. Keep it up!`,
+                                    icon: 'info',
+                                    confirmButtonColor: '#64748B',
+                                    confirmButtonText: 'Kha ri ye!',
+                                    customClass: { popup: 'rounded-4' }
+                                });
+                            } else {
+                                Swal.fire({
+                                    title: 'Streak Maintained!',
+                                    text: `${streakResult.streak} Days Strong!`,
+                                    icon: 'success',
+                                    imageUrl: 'https://cdn-icons-png.flaticon.com/512/785/785116.png',
+                                    imageWidth: 80,
+                                    confirmButtonColor: '#EF4444',
+                                    confirmButtonText: 'Kha ri ye!',
+                                    customClass: { popup: 'rounded-4' }
+                                });
+                            }
+                        }, 1300);
+                    }
+
                     if (stats.level > (currentData.level || 1)) {
                         setNewLevelReached(stats.level);
                         setShowLevelUp(true);
                     }
+
+                    const newTrophies = checkAchievements(
+                        {
+                            ...currentData,
+                            points: (currentData.points || 0) + finalScore,
+                            level: stats.level,
+                            completedLessons: [...(currentData.completedLessons || []), mlId]
+                        },
+                        currentData.trophies || []
+                    );
+                    if (newTrophies.length > 0) {
+                        await awardTrophies(auth.currentUser.uid, newTrophies.map(t => t.id));
+                        setTimeout(() => {
+                            const first = newTrophies[0];
+                            Swal.fire({
+                                title: 'Trophy Unlocked!',
+                                text: `New Achievement: ${first.title}!`,
+                                icon: 'success',
+                                imageUrl: 'https://cdn-icons-png.flaticon.com/512/3112/3112946.png',
+                                imageWidth: 80,
+                                confirmButtonColor: '#FACC15',
+                                confirmButtonText: 'Awesome!',
+                                customClass: { popup: 'rounded-4' }
+                            });
+                        }, 1000);
+                    }
                 }
+                localStorage.removeItem(storageKey);
             }
         }
     };
 
-    // --- RENDER LOGIC ---
+    const {
+        currentQIndex, setCurrentQIndex,
+        score,
+        lastScoreResult,
+        answerStatus, setAnswerStatus,
+        showExplanation,
+        scoreBreakdown,
+        correctCount,
+        streak,
+        handleCorrect: onCorrectAnswer,
+        handleWrong: onWrongAnswer,
+        awardConsolation,
+        moveNext: nextQuestion,
+        reset: resetGameLogic
+    } = useGameLogic({
+        difficulty: (lesson?.difficulty as Difficulty) || 'Easy',
+        totalQuestions: lesson?.questions?.length || 0,
+        initialState: initialPersistentState?.quizState,
+        onFinish: handleFinishQuiz,
+        onCorrect: () => {
+            setSelectedOption(null);
+            setSelectedTF(null);
+            setMascotCheerText(MASCOT_CHEERS[Math.floor(Math.random() * MASCOT_CHEERS.length)]);
+            setShowMascotCheer(true);
+            setTimeout(() => setShowMascotCheer(false), 1100);
+        }
+    });
+
+    const saveStateToStorage = useCallback((showHint = false) => {
+        if (gameState === 'RESULT') return;
+        const stateToSave = {
+            gameState, currentSlide, currentSceneIndex, studyStartTime,
+            quizState: { currentQIndex, score, correctCount, streak, scoreBreakdown },
+            timestamp: Date.now()
+        };
+        localStorage.setItem(storageKey, JSON.stringify(stateToSave));
+        if (showHint) {
+            setShowSavedHint(true);
+            setTimeout(() => setShowSavedHint(false), 2000);
+        }
+    }, [gameState, currentSlide, currentSceneIndex, studyStartTime, currentQIndex, score, correctCount, streak, scoreBreakdown, storageKey]);
+
+    useEffect(() => { saveStateToStorage(false); }, [saveStateToStorage, gameState, currentSlide, currentSceneIndex, studyStartTime, currentQIndex, score, correctCount, streak, scoreBreakdown]);
+
+    useEffect(() => {
+        if (gameState === 'QUIZ') {
+            const saved = getSavedState();
+            if (!saved || saved.gameState !== 'QUIZ') {
+                resetGameLogic();
+                if (startType === 'QUIZ' && startIdx > 0) setCurrentQIndex(startIdx);
+            }
+        }
+        if (gameState === 'STUDY') {
+            const saved = getSavedState();
+            if (!saved || saved.gameState !== 'STUDY') setStudyStartTime(Date.now());
+        }
+    }, [gameState, resetGameLogic, startIdx, startType, setCurrentQIndex, getSavedState]);
+
+    useEffect(() => {
+        const unsubscribe = onAuthStateChanged(auth, async (user) => {
+            if (user && lessonId) {
+                const lessons = await fetchLessons();
+                const foundCourse = lessons.find((l: any) => l.id === lessonId);
+                if (foundCourse) {
+                    const mls = getMicroLessons(foundCourse);
+                    const foundMl = microLessonId ? mls.find((ml: any) => ml.id === microLessonId) : mls[0];
+                    if (foundMl) {
+                        setLesson({
+                            ...foundMl,
+                            difficulty: foundCourse.difficulty,
+                            title: foundMl.title,
+                            courseId: foundCourse.id,
+                            courseTitle: foundCourse.title
+                        });
+                    }
+                }
+                const userData = await fetchUserData();
+                if (userData) {
+                    const completed = userData.completedLessons || [];
+                    const mlId = microLessonId || `${lessonId}__ml_0`;
+                    setIsFirstTime(!completed.includes(mlId));
+                }
+            }
+        });
+        return () => unsubscribe();
+    }, [lessonId, microLessonId]);
+
+    const saveProgress = async (index: number, type: 'STUDY' | 'QUIZ') => {
+        if (auth.currentUser && lessonId) {
+            await updateDoc(doc(db, "users", auth.currentUser.uid), {
+                lastLessonId: lessonId,
+                lastMicroLessonId: microLessonId || null,
+                lastProgressIndex: index,
+                lastProgressType: type.toLowerCase()
+            });
+        }
+    };
+
+    const handleMCSelect = (opt: string, correctAnswer: string) => {
+        if (selectedOption || answerStatus) return;
+        setSelectedOption(opt);
+        opt === correctAnswer ? onCorrectAnswer() : onWrongAnswer();
+    };
+
+    const handleTFSelect = (val: boolean, correctAnswer: boolean) => {
+        if (selectedTF !== null || answerStatus) return;
+        setSelectedTF(val);
+        val === correctAnswer ? onCorrectAnswer() : onWrongAnswer();
+    };
+
+    const handleFBSubmit = (answer: string, correctAnswer: string) => {
+        answer.toLowerCase() === correctAnswer.toLowerCase() ? onCorrectAnswer() : onWrongAnswer();
+    };
+
+    const handleMatchComplete = (allCorrect: boolean) => {
+        if (allCorrect) {
+            onCorrectAnswer();
+        } else {
+            setAnswerStatus('correct');
+            awardConsolation();
+            setTimeout(() => nextQuestion(), 1200);
+        }
+    };
+
+    const handleLCSelect = (opt: string, correctAnswer: string) => {
+        if (selectedOption || answerStatus) return;
+        setSelectedOption(opt);
+        opt === correctAnswer ? onCorrectAnswer() : onWrongAnswer();
+    };
+
     if (!lesson) {
         return (
             <div className="min-vh-100 bg-white d-flex align-items-center justify-content-center">
@@ -248,9 +346,17 @@ const GameRoom: React.FC = () => {
                     <div className="px-3 pt-4 pb-5" style={{ color: 'white' }}>
                         <div className="container" style={{ maxWidth: '700px' }}>
                             <div className="d-flex justify-content-between align-items-center mb-4">
-                                <button className="btn btn-link text-decoration-none p-0 text-white fw-bold smallest ls-2" onClick={() => setShowExitModal(true)}>
-                                    <i className="bi bi-x-lg me-2"></i> EXIT
-                                </button>
+                                <div className="d-flex align-items-center gap-3">
+                                    <button className="btn btn-link text-decoration-none p-0 text-white fw-bold smallest ls-1 d-flex align-items-center gap-2"
+                                        onClick={() => saveStateToStorage(true)}
+                                        style={{ opacity: showSavedHint ? 1 : 0.7, color: showSavedHint ? '#10B981' : 'white', transition: 'all 0.3s' }}>
+                                        {showSavedHint ? <CheckCircle2 size={14} /> : <Save size={14} />}
+                                        {showSavedHint ? 'PROGRESS SAVED' : 'SAVE PROGRESS'}
+                                    </button>
+                                    <button className="btn btn-link text-decoration-none p-0 text-white fw-bold smallest ls-2 d-flex align-items-center gap-2" onClick={() => setShowExitModal(true)}>
+                                        <X size={16} /> EXIT
+                                    </button>
+                                </div>
                                 <div className="d-flex align-items-center gap-2">
                                     <span className="smallest fw-bold ls-1" style={{ color: '#FACC15' }}>
                                         {!isFirstTime ? '🔄 REVIEW' : `📖 ${lesson.title?.toUpperCase() || 'STUDY'}`}
@@ -281,9 +387,9 @@ const GameRoom: React.FC = () => {
                                             </div>
                                             <h1 className="fw-bold ls-tight mb-4" style={{ fontSize: 'clamp(2.5rem, 10vw, 4rem)', color: '#111827' }}>{slide.venda}</h1>
                                             <button className="btn rounded-circle d-inline-flex align-items-center justify-content-center mb-5" onClick={(e) => { e.stopPropagation(); speakVenda(slide.venda); }} style={{ width: 64, height: 64, backgroundColor: isPlayingAudio ? '#FEF3C7' : '#F9FBFF', border: isPlayingAudio ? '2px solid #FACC15' : '2px solid #E2E8F0', boxShadow: '0 4px 12px rgba(0,0,0,0.05)', transition: 'all 0.2s' }}>
-                                                <i className={`bi ${isPlayingAudio ? 'bi-soundwave' : 'bi-volume-up-fill'} fs-4`} style={{ color: '#111827' }}></i>
+                                                <Volume2 className="fs-4" />
                                             </button>
-                                            <div className="flip-hint"><i className="bi bi-arrow-repeat"></i> TAP TO REVEAL ENGLISH</div>
+                                            <div className="flip-hint"><RefreshCw size={12} /> TAP TO REVEAL ENGLISH</div>
                                         </div>
                                         <div className="flashcard-back">
                                             <p className="smallest fw-bold text-muted ls-2 text-uppercase mb-4">DEFINITION</p>
@@ -293,23 +399,23 @@ const GameRoom: React.FC = () => {
                                                 <p className="smallest fw-bold mb-2 ls-2 text-uppercase" style={{ color: '#92400E' }}>Context</p>
                                                 <p className="mb-0 small fst-italic" style={{ color: '#78350F', lineHeight: 1.5 }}>"{slide.context}"</p>
                                             </div>
-                                            <div className="flip-hint"><i className="bi bi-arrow-repeat"></i> TAP TO SEE VENDA</div>
+                                            <div className="flip-hint"><RefreshCw size={12} /> TAP TO SEE VENDA</div>
                                         </div>
                                     </div>
                                 </div>
 
                                 <div className="bg-white rounded-4 p-4 mt-4 text-center mx-auto" style={{ border: '1px solid #E5E7EB', maxWidth: '500px' }}>
                                     <div className="d-flex align-items-center justify-content-center gap-2 mb-3">
-                                        <i className="bi bi-mic-fill" style={{ color: '#FACC15' }}></i>
+                                        <Mic size={14} style={{ color: '#FACC15' }} />
                                         <span className="smallest fw-bold text-muted ls-2 text-uppercase">Pronunciation Lab</span>
                                     </div>
                                     {!isRecording ? (
-                                        <button className="btn rounded-pill px-4 py-2 fw-bold smallest ls-1" onClick={(e) => { e.stopPropagation(); startRecording(); }} style={{ backgroundColor: '#111827', color: 'white' }}>
-                                            <i className="bi bi-mic-fill me-2"></i> TAP TO RECORD
+                                        <button className="btn rounded-pill px-4 py-2 fw-bold smallest ls-1 d-flex align-items-center gap-2 mx-auto" onClick={(e) => { e.stopPropagation(); startRecording(); }} style={{ backgroundColor: '#111827', color: 'white' }}>
+                                            <Mic size={14} /> TAP TO RECORD
                                         </button>
                                     ) : (
-                                        <button className="btn btn-danger rounded-pill px-4 py-2 fw-bold smallest ls-1 animate__animated animate__pulse animate__infinite" onClick={(e) => { e.stopPropagation(); stopRecording(); }}>
-                                            <i className="bi bi-stop-fill me-2"></i> STOP RECORDING
+                                        <button className="btn btn-danger rounded-pill px-4 py-2 fw-bold smallest ls-1 animate__animated animate__pulse animate__infinite d-flex align-items-center gap-2 mx-auto" onClick={(e) => { e.stopPropagation(); stopRecording(); }}>
+                                            <Square size={14} /> STOP RECORDING
                                         </button>
                                     )}
                                     {audioUrl && <div className="mt-3 d-flex justify-content-center"><audio src={audioUrl} controls style={{ height: 35, width: '100%', maxWidth: 300 }} /></div>}
@@ -319,16 +425,49 @@ const GameRoom: React.FC = () => {
                     </div>
 
                     <div className="d-flex gap-3 pb-4 container mt-auto" style={{ maxWidth: '700px' }}>
-                        <button className="btn btn-outline-dark border-2 w-50 py-3 fw-bold ls-1 rounded-3" disabled={currentSlide === 0} onClick={() => { setIsFlipped(false); setAudioUrl(null); const prev = currentSlide - 1; setCurrentSlide(prev); saveProgress(prev, 'STUDY'); }}>
-                            <i className="bi bi-arrow-left me-2"></i> MURAHU
+                        <button className="btn btn-outline-dark border-2 w-50 py-3 fw-bold ls-1 rounded-3 d-flex align-items-center justify-content-center gap-2" disabled={currentSlide === 0} onClick={() => { setIsFlipped(false); setAudioUrl(null); const prev = currentSlide - 1; setCurrentSlide(prev); saveProgress(prev, 'STUDY'); }}>
+                            <ArrowLeft size={18} /> MURAHU
                         </button>
                         {!isLastSlide ? (
-                            <button className="btn game-btn-primary w-50 py-3 fw-bold ls-1" onClick={() => { setIsFlipped(false); setAudioUrl(null); const next = currentSlide + 1; setCurrentSlide(next); saveProgress(next, 'STUDY'); }}>
-                                PHANDA <i className="bi bi-arrow-right ms-2"></i>
+                            <button className="btn game-btn-primary w-50 py-3 fw-bold ls-1 d-flex align-items-center justify-content-center gap-2" onClick={() => { setIsFlipped(false); setAudioUrl(null); const next = currentSlide + 1; setCurrentSlide(next); saveProgress(next, 'STUDY'); }}>
+                                PHANDA <ArrowRight size={18} />
                             </button>
                         ) : (
-                            <button className="btn w-50 py-3 fw-bold ls-1 text-white rounded-3" style={{ background: 'linear-gradient(135deg, #111827, #374151)', boxShadow: '0 4px 0 #000' }} onClick={() => { setGameState('QUIZ'); saveProgress(0, 'QUIZ'); }}>🧠 START QUIZ</button>
+                            <button className="btn w-50 py-3 fw-bold ls-1 text-white rounded-3 d-flex align-items-center justify-content-center gap-2" style={{ background: 'linear-gradient(135deg, #111827, #374151)', boxShadow: '0 4px 0 #000' }}
+                                onClick={() => {
+                                    if (lesson.scenes && lesson.scenes.length > 0) {
+                                        setGameState('SCENE');
+                                        setCurrentSceneIndex(0);
+                                    } else {
+                                        setGameState('QUIZ');
+                                        saveProgress(0, 'QUIZ');
+                                    }
+                                }}>
+                                <MessageSquare size={18} /> {lesson.scenes && lesson.scenes.length > 0 ? 'VIEW SCENE' : 'START QUIZ'}
+                            </button>
                         )}
+                    </div>
+                </div>
+            );
+        }
+
+        if (gameState === 'SCENE') {
+            const scene = lesson.scenes[currentSceneIndex];
+            return (
+                <div className="min-vh-100 bg-white py-5 px-3">
+                    <div className="container" style={{ maxWidth: '700px' }}>
+                        <SceneView
+                            scene={scene}
+                            speakVenda={speakVenda}
+                            onComplete={() => {
+                                if (currentSceneIndex < (lesson.scenes?.length || 0) - 1) {
+                                    setCurrentSceneIndex(currentSceneIndex + 1);
+                                } else {
+                                    setGameState('QUIZ');
+                                    saveProgress(0, 'QUIZ');
+                                }
+                            }}
+                        />
                     </div>
                 </div>
             );
@@ -348,17 +487,24 @@ const GameRoom: React.FC = () => {
                 }
             };
 
-            const typeLabel: Record<string, string> = {
-                'multiple-choice': '📝 MULTIPLE CHOICE',
-                'true-false': '✅ TRUE OR FALSE',
-                'fill-in-the-blank': '✏️ FILL IN THE BLANK',
-                'match-pairs': '🔗 MATCH PAIRS',
-                'listen-and-choose': '🔊 LISTEN & CHOOSE',
+            const typeLabel: Record<string, { label: string, icon: any }> = {
+                'multiple-choice': { label: 'MULTIPLE CHOICE', icon: <FileText size={12} /> },
+                'true-false': { label: 'TRUE OR FALSE', icon: <CheckCircle2 size={12} /> },
+                'fill-in-the-blank': { label: 'FILL IN THE BLANK', icon: <Pencil size={12} /> },
+                'match-pairs': { label: 'MATCH PAIRS', icon: <Link size={12} /> },
+                'listen-and-choose': { label: 'LISTEN & CHOOSE', icon: <Volume2 size={12} /> },
             };
+            const currentLabel = typeLabel[q.type] || { label: 'QUESTION', icon: <FileText size={12} /> };
 
             return (
                 <div className="min-vh-100 bg-white py-5 px-3">
                     <ScorePopup result={lastScoreResult} />
+                    {showMascotCheer && (
+                        <div className="mascot-cheer-overlay">
+                            <div className="mascot-cheer-bubble">{mascotCheerText}</div>
+                            <Mascot width="90px" height="90px" mood="excited" />
+                        </div>
+                    )}
                     <div className="container" style={{ maxWidth: '700px' }}>
                         <div className="d-flex justify-content-between align-items-center mb-3">
                             <span className="smallest fw-bold ls-1 text-muted">QUESTION {currentQIndex + 1}</span>
@@ -370,8 +516,9 @@ const GameRoom: React.FC = () => {
                             <span className="smallest fw-bold ls-1 text-warning">{isFirstTime ? `${score} LP` : 'REVIEWING'}</span>
                         </div>
                         <div className="d-flex justify-content-between align-items-center mb-4">
-                            <span className="badge rounded-pill bg-light text-dark border smallest">{typeLabel[q.type] || '📝 QUESTION'}</span>
-                            {/* We don't have direct access to streak in GameRoom anymore, but we can if we want. For now, it's inside useGameLogic. */}
+                            <span className="badge rounded-pill bg-light text-dark border smallest d-flex align-items-center gap-2">
+                                {currentLabel.icon} {currentLabel.label}
+                            </span>
                         </div>
                         <div className="py-4 text-center">
                             <h2 className="fw-bold text-dark mb-5 ls-tight">{q.question}</h2>
@@ -381,7 +528,10 @@ const GameRoom: React.FC = () => {
                                         <h5 className="fw-bold text-danger mb-2">Pfarelo (Oops!)</h5>
                                         <p className="text-secondary mb-0">{q.explanation}</p>
                                     </div>
-                                    <button className="btn game-btn-primary w-100 py-3 fw-bold ls-1" onClick={() => { if (isFirstTime) awardConsolation(); nextQuestion(); }}>I UNDERSTAND, NEXT</button>
+                                    <button className="btn game-btn-primary w-100 py-3 fw-bold ls-1" onClick={() => {
+                                        const newScore = isFirstTime ? awardConsolation() : score;
+                                        nextQuestion(newScore);
+                                    }}>I UNDERSTAND, NEXT</button>
                                 </div>
                             )}
                         </div>
@@ -390,7 +540,6 @@ const GameRoom: React.FC = () => {
             );
         }
 
-        // RESULT MODE
         return (
             <div className="min-vh-100 bg-white d-flex align-items-center justify-content-center p-3">
                 {showLevelUp && <LevelUpModal level={newLevelReached} onClose={() => setShowLevelUp(false)} />}
@@ -404,10 +553,25 @@ const GameRoom: React.FC = () => {
                         <div className="py-4 border-top border-bottom mb-4">
                             <h1 className="display-2 fw-bold mb-3" style={{ color: '#FACC15' }}>+{score} LP</h1>
                             <div className="d-flex flex-column gap-2 text-start mx-auto" style={{ maxWidth: 280 }}>
-                                <div className="d-flex justify-content-between smallest text-muted"><span>📝 Base points</span><span className="fw-bold text-dark">{scoreBreakdown.base}</span></div>
-                                {scoreBreakdown.speed > 0 && <div className="d-flex justify-content-between smallest text-muted"><span>⚡ Speed bonus</span><span className="fw-bold text-dark">+{scoreBreakdown.speed}</span></div>}
-                                {scoreBreakdown.streakBonus > 0 && <div className="d-flex justify-content-between smallest text-muted"><span>🔥 Streak bonus</span><span className="fw-bold text-dark">+{scoreBreakdown.streakBonus}</span></div>}
-                                {scoreBreakdown.consolation > 0 && <div className="d-flex justify-content-between smallest text-muted"><span>📖 Learning bonus</span><span className="fw-bold text-dark">+{scoreBreakdown.consolation}</span></div>}
+                                <div className="d-flex justify-content-between smallest text-muted align-items-center">
+                                    <span className="d-flex align-items-center gap-2"><FileText size={14} /> Base points</span>
+                                    <span className="fw-bold text-dark">{scoreBreakdown.base}</span>
+                                </div>
+                                {scoreBreakdown.speed > 0 &&
+                                    <div className="d-flex justify-content-between smallest text-muted align-items-center">
+                                        <span className="d-flex align-items-center gap-2"><Zap size={14} /> Speed bonus</span>
+                                        <span className="fw-bold text-dark">+{scoreBreakdown.speed}</span>
+                                    </div>}
+                                {scoreBreakdown.streakBonus > 0 &&
+                                    <div className="d-flex justify-content-between smallest text-muted align-items-center">
+                                        <span className="d-flex align-items-center gap-2"><Flame size={14} /> Streak bonus</span>
+                                        <span className="fw-bold text-dark">+{scoreBreakdown.streakBonus}</span>
+                                    </div>}
+                                {scoreBreakdown.consolation > 0 &&
+                                    <div className="d-flex justify-content-between smallest text-muted align-items-center">
+                                        <span className="d-flex align-items-center gap-2"><BookOpen size={14} /> Learning bonus</span>
+                                        <span className="fw-bold text-dark">+{scoreBreakdown.consolation}</span>
+                                    </div>}
                             </div>
                         </div>
                     )}
@@ -426,88 +590,25 @@ const GameRoom: React.FC = () => {
     return (
         <div className="game-room">
             {renderContent()}
-
             {showExitModal && <ExitModal onClose={() => setShowExitModal(false)} onConfirm={() => navigate(lesson?.courseId ? `/courses/${lesson.courseId}` : '/courses')} />}
-
             <style>{`
                 .ls-tight { letter-spacing: -1.5px; }
                 .ls-1 { letter-spacing: 1px; }
                 .ls-2 { letter-spacing: 2px; }
                 .smallest { font-size: 11px; }
-                .game-btn-primary {
-                    background-color: #FACC15 !important;
-                    color: #111827 !important;
-                    border: none !important;
-                    border-radius: 12px;
-                    box-shadow: 0 4px 0 #EAB308 !important;
-                    transition: all 0.2s;
-                }
+                .game-btn-primary { background-color: #FACC15 !important; color: #111827 !important; border: none !important; border-radius: 12px; box-shadow: 0 4px 0 #EAB308 !important; transition: all 0.2s; }
                 .game-btn-primary:active { transform: translateY(2px); box-shadow: 0 2px 0 #EAB308 !important; }
                 .game-btn-primary:disabled { opacity: 0.5; }
-
-                /* FLASHCARD STYLES */
-                .flashcard-container {
-                    perspective: 1000px;
-                    width: 100%;
-                    max-width: 500px;
-                    margin: 0 auto;
-                    height: 400px;
-                    cursor: pointer;
-                    position: relative;
-                    z-index: 10;
-                }
-
-                .flashcard-inner {
-                    position: relative;
-                    width: 100%;
-                    height: 100%;
-                    text-align: center;
-                    transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
-                    transform-style: preserve-3d;
-                }
-
-                .flashcard-container.is-flipped .flashcard-inner {
-                    transform: rotateY(180deg);
-                }
-
-                .flashcard-front, .flashcard-back {
-                    position: absolute;
-                    inset: 0;
-                    width: 100%;
-                    height: 100%;
-                    -webkit-backface-visibility: hidden;
-                    backface-visibility: hidden;
-                    display: flex;
-                    flex-direction: column;
-                    align-items: center;
-                    justify-content: center;
-                    border-radius: 28px;
-                    padding: 2.5rem;
-                    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.12);
-                    background-color: white !important;
-                    border: 1px solid #E5E7EB;
-                }
-
-                .flashcard-back {
-                    transform: rotateY(180deg);
-                    background-color: #F8FAFC !important;
-                }
-
-                .flip-hint {
-                    position: absolute;
-                    bottom: 25px;
-                    left: 0;
-                    right: 0;
-                    color: #94A3B8;
-                    font-size: 0.75rem;
-                    font-weight: 600;
-                    letter-spacing: 1px;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    gap: 8px;
-                    text-transform: uppercase;
-                }
+                .flashcard-container { perspective: 1000px; width: 100%; max-width: 500px; margin: 0 auto; height: 400px; cursor: pointer; position: relative; z-index: 10; }
+                .flashcard-inner { position: relative; width: 100%; height: 100%; text-align: center; transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1); transform-style: preserve-3d; }
+                .flashcard-container.is-flipped .flashcard-inner { transform: rotateY(180deg); }
+                .flashcard-front, .flashcard-back { position: absolute; inset: 0; width: 100%; height: 100%; backface-visibility: hidden; display: flex; flex-direction: column; align-items: center; justify-content: center; border-radius: 28px; padding: 2.5rem; box-shadow: 0 15px 35px rgba(0, 0, 0, 0.12); background-color: white !important; border: 1px solid #E5E7EB; }
+                .flashcard-back { transform: rotateY(180deg); background-color: #F8FAFC !important; }
+                @keyframes cheerPopIn { 0% { opacity: 0; transform: translateY(40px) scale(0.7); } 50% { opacity: 1; transform: translateY(-8px) scale(1.05); } 100% { opacity: 1; transform: translateY(0) scale(1); } }
+                .mascot-cheer-overlay { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); z-index: 60; display: flex; flex-direction: column; align-items: center; animation: cheerPopIn 0.4s ease-out forwards; pointer-events: none; filter: drop-shadow(0 6px 20px rgba(0,0,0,0.15)); }
+                .mascot-cheer-bubble { background: #111827; color: #FACC15; font-size: 14px; font-weight: 800; font-family: 'Poppins', sans-serif; letter-spacing: 0.5px; padding: 8px 20px; border-radius: 20px; margin-bottom: 6px; white-space: nowrap; box-shadow: 0 4px 16px rgba(250, 204, 21, 0.25); position: relative; }
+                .mascot-cheer-bubble::after { content: ''; position: absolute; bottom: -6px; left: 50%; transform: translateX(-50%); width: 0; height: 0; border-left: 6px solid transparent; border-right: 6px solid transparent; border-top: 6px solid #111827; }
+                .flip-hint { position: absolute; bottom: 25px; left: 0; right: 0; color: #94A3B8; font-size: 0.75rem; font-weight: 600; letter-spacing: 1px; display: flex; align-items: center; justify-content: center; gap: 8px; text-transform: uppercase; }
             `}</style>
         </div>
     );

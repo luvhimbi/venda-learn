@@ -24,26 +24,42 @@ const toMidnight = (d: Date): number =>
 /**
  * Updates the user's streak based on their last activity date.
  * Called on every app visit. Returns streak count and whether today is a new day.
+ * Includes "Streak Freeze" logic and activity history logging.
  */
-export const updateStreak = async (uid: string): Promise<{ streak: number; isNewDay: boolean }> => {
+export const updateStreak = async (uid: string): Promise<{
+    streak: number;
+    isNewDay: boolean;
+    freezeUsed: boolean;
+    wasReset: boolean;
+}> => {
     try {
         const userRef = doc(db, "users", uid);
         const userSnap = await getDoc(userRef);
 
         if (!userSnap.exists()) {
             console.error("User document not found");
-            return { streak: 0, isNewDay: false };
+            return { streak: 0, isNewDay: false, freezeUsed: false, wasReset: false };
         }
 
         const data = userSnap.data();
         const now = new Date();
         const todayMid = toMidnight(now);
+        const todayStr = now.toISOString().split('T')[0]; // YYYY-MM-DD
 
-        // Parse last activity — handle Firestore Timestamps, ISO strings, etc.
+        // Parse last activity
         const lastActivityDate = toDate(data.lastActivity) || toDate(data.lastLogin);
+
+        // Activity History (Limit to 90 days)
+        let activityHistory = data.activityHistory || [];
+        if (!activityHistory.includes(todayStr)) {
+            activityHistory = [todayStr, ...activityHistory].slice(0, 90);
+        }
 
         let newStreak = data.streak || 0;
         let isNewDay = false;
+        let freezeUsed = false;
+        let wasReset = false;
+        let streakFreezes = data.streakFreezes || 0;
 
         if (lastActivityDate) {
             const lastMid = toMidnight(lastActivityDate);
@@ -53,29 +69,24 @@ export const updateStreak = async (uid: string): Promise<{ streak: number; isNew
                 // CONSECUTIVE DAY → increment streak
                 newStreak = (data.streak || 0) + 1;
                 isNewDay = true;
-                await updateDoc(userRef, {
-                    streak: newStreak,
-                    lastActivity: now.toISOString(),
-                    lastLogin: now.toISOString()
-                });
             } else if (diffInDays > 1) {
-                // BROKEN STREAK → reset to 1 (today still counts)
-                newStreak = 1;
-                isNewDay = true;
-                await updateDoc(userRef, {
-                    streak: 1,
-                    lastActivity: now.toISOString(),
-                    lastLogin: now.toISOString()
-                });
+                // MISSED DAYS → check for streak freeze
+                if (streakFreezes > 0) {
+                    streakFreezes -= 1;
+                    freezeUsed = true;
+                    isNewDay = true;
+                    newStreak = (data.streak || 0) + 1; // Protect and increment as if yesterday was done
+                } else {
+                    // BROKEN STREAK → reset to 1
+                    newStreak = 1;
+                    isNewDay = true;
+                    wasReset = true;
+                }
             } else if (diffInDays === 0) {
-                // SAME DAY → don't touch streak, just update timestamp
+                // SAME DAY → already count
                 isNewDay = false;
                 newStreak = data.streak || 0;
-                await updateDoc(userRef, {
-                    lastActivity: now.toISOString()
-                });
             } else {
-                // Negative diff (clock skew) → safe no-op
                 newStreak = data.streak || 0;
                 isNewDay = false;
             }
@@ -83,16 +94,21 @@ export const updateStreak = async (uid: string): Promise<{ streak: number; isNew
             // FIRST EVER VISIT
             newStreak = 1;
             isNewDay = true;
-            await updateDoc(userRef, {
-                streak: 1,
-                lastActivity: now.toISOString(),
-                lastLogin: now.toISOString()
-            });
         }
 
-        return { streak: newStreak, isNewDay };
+        // Final update to Firestore
+        const updateData: any = {
+            streak: newStreak,
+            lastActivity: now.toISOString(),
+            activityHistory: activityHistory,
+            streakFreezes: streakFreezes
+        };
+
+        await updateDoc(userRef, updateData);
+
+        return { streak: newStreak, isNewDay, freezeUsed, wasReset };
     } catch (error) {
         console.error("Error updating streak:", error);
-        return { streak: 0, isNewDay: false };
+        return { streak: 0, isNewDay: false, freezeUsed: false, wasReset: false };
     }
 };

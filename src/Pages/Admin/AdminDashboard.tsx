@@ -7,13 +7,14 @@ import { seedPuzzles } from '../../services/seedPuzzles';
 import { seedSyllables } from '../../services/seedSyllables';
 import { seedDailyWords } from '../../services/seedDailyWords';
 import { seedSentences } from '../../services/seedSentences';
+import { seedWordBomb } from '../../services/seedWordBomb';
 
 const AdminDashboard: React.FC = () => {
     const [stats, setStats] = useState({
         totalUsers: 0,
         totalLessons: 0,
         totalPoints: 0,
-        difficultyBreakdown: { Easy: 0, Medium: 0, Hard: 0 }
+        difficultyBreakdown: { Beginner: 0, Intermediate: 0, Advanced: 0 }
     });
     const [loading, setLoading] = useState(true);
 
@@ -27,7 +28,7 @@ const AdminDashboard: React.FC = () => {
             });
 
             const lessons = await fetchLessons();
-            const breakdown = { Easy: 0, Medium: 0, Hard: 0 };
+            const breakdown = { Beginner: 0, Intermediate: 0, Advanced: 0 };
             lessons.forEach((l: any) => {
                 const diff = l.difficulty as keyof typeof breakdown;
                 if (breakdown[diff] !== undefined) breakdown[diff]++;
@@ -95,8 +96,16 @@ const AdminDashboard: React.FC = () => {
                                 <button onClick={async () => {
                                     const res = await seedSentences();
                                     alert(res.message);
-                                }} className="btn btn-outline-primary btn-sm w-100 fw-bold">
+                                }} className="btn btn-outline-primary btn-sm w-100 fw-bold mb-2">
                                     Seed Sentences
+                                </button>
+                                <button onClick={async () => {
+                                    if (window.confirm("Seed Word Bomb words?")) {
+                                        const res = await seedWordBomb();
+                                        alert(res.message);
+                                    }
+                                }} className="btn btn-outline-danger btn-sm w-100 fw-bold">
+                                    Seed Word Bomb
                                 </button>
                             </div>
                         </div>
@@ -148,7 +157,7 @@ const AdminDashboard: React.FC = () => {
                                                         className="progress-bar"
                                                         style={{
                                                             width: `${(count / stats.totalLessons) * 100}%`,
-                                                            backgroundColor: level === 'Easy' ? '#10B981' : level === 'Medium' ? '#FACC15' : '#EF4444'
+                                                            backgroundColor: level === 'Beginner' ? '#10B981' : level === 'Intermediate' ? '#FACC15' : '#EF4444'
                                                         }}
                                                     ></div>
                                                 </div>
@@ -167,6 +176,7 @@ const AdminDashboard: React.FC = () => {
                                     <p className="smallest text-secondary ls-1 text-uppercase mb-4">Manage your platform content</p>
                                     <div className="d-grid gap-2">
                                         <Link to="/admin/add-lesson" className="btn btn-warning fw-bold smallest ls-1 py-3 rounded-3">CREATE NEW LESSON</Link>
+                                        <Link to="/admin/reset" className="btn btn-outline-danger fw-bold smallest ls-1 py-3 rounded-3 border-2">SYSTEM RESET / MAINTENANCE</Link>
                                         <Link to="/admin/logs" className="btn btn-outline-light fw-bold smallest ls-1 py-3 rounded-3 border-2">VIEW AUDIT LOGS</Link>
                                     </div>
                                 </div>

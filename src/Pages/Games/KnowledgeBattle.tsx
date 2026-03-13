@@ -16,6 +16,7 @@ import {
     subscribeToBattle, updateBattleProgress, finalizeBattle,
     type Battle
 } from '../../services/battleService';
+import { ArrowLeft, Zap, Search, History, Swords, Layout, Trophy, Clock, CheckCircle2, Pencil, Link, Volume2, AlertTriangle, Users } from 'lucide-react';
 import { doc, updateDoc } from 'firebase/firestore';
 import { db } from '../../services/firebaseConfig';
 import { CONSOLATION_POINTS, type Difficulty } from '../../services/scoringUtils';
@@ -429,11 +430,11 @@ const KnowledgeBattle: React.FC = () => {
                     <div className="text-white mb-5 pb-4">
                         <button className="btn btn-link text-decoration-none p-0 mb-4 d-flex align-items-center gap-2 text-white fw-bold smallest ls-2"
                             onClick={() => navigate('/mitambo')}>
-                            <i className="bi bi-arrow-left"></i> MURAHU
+                            <ArrowLeft size={16} /> MURAHU
                         </button>
                         <div className="d-flex align-items-center gap-3 mb-2">
                             <div className="battle-header-icon">
-                                <i className="bi bi-lightning-charge-fill"></i>
+                                <Zap size={24} fill="currentColor" />
                             </div>
                             <div>
                                 <h1 className="fw-bold mb-0 ls-tight" style={{ fontSize: '2rem' }}>Ndivhano</h1>
@@ -447,15 +448,15 @@ const KnowledgeBattle: React.FC = () => {
 
                     {/* Tabs */}
                     <div className="d-flex gap-2 mb-4" style={{ marginTop: -20 }}>
-                        <button className={`btn flex-fill py-2 fw-bold smallest ls-1 rounded-3 ${lobbyTab === 'find' ? 'text-dark' : 'btn-outline-secondary'}`}
+                        <button className={`btn flex-fill py-2 fw-bold smallest ls-1 rounded-3 d-flex align-items-center justify-content-center gap-2 ${lobbyTab === 'find' ? 'text-dark' : 'btn-outline-secondary'}`}
                             style={lobbyTab === 'find' ? { backgroundColor: '#FACC15', border: 'none', boxShadow: '0 2px 0 #EAB308' } : {}}
                             onClick={() => setLobbyTab('find')}>
-                            <i className="bi bi-search me-2"></i> FIND BATTLE
+                            <Search size={14} /> FIND BATTLE
                         </button>
-                        <button className={`btn flex-fill py-2 fw-bold smallest ls-1 rounded-3 ${lobbyTab === 'history' ? 'text-dark' : 'btn-outline-secondary'}`}
+                        <button className={`btn flex-fill py-2 fw-bold smallest ls-1 rounded-3 d-flex align-items-center justify-content-center gap-2 ${lobbyTab === 'history' ? 'text-dark' : 'btn-outline-secondary'}`}
                             style={lobbyTab === 'history' ? { backgroundColor: '#FACC15', border: 'none', boxShadow: '0 2px 0 #EAB308' } : {}}
                             onClick={() => setLobbyTab('history')}>
-                            <i className="bi bi-clock-history me-2"></i> MY BATTLES ({myBattles.length})
+                            <History size={14} /> MY BATTLES ({myBattles.length})
                         </button>
                     </div>
 
@@ -538,19 +539,19 @@ const KnowledgeBattle: React.FC = () => {
                                                                 <span className="fw-bold">{b.challengerName}</span>
                                                                 <span className="text-muted small ms-2">is waiting...</span>
                                                             </div>
-                                                            <button className="btn btn-sm px-3 py-1 fw-bold smallest ls-1 rounded-pill text-white"
+                                                            <button className="btn btn-sm px-3 py-1 fw-bold smallest ls-1 rounded-pill text-white d-flex align-items-center gap-1"
                                                                 style={{ background: 'linear-gradient(135deg, #10B981, #059669)' }}
                                                                 onClick={() => handleJoinBattle(b)}>
-                                                                ⚔️ ACCEPT
+                                                                <Swords size={12} /> ACCEPT
                                                             </button>
                                                         </div>
                                                     ))}
                                                 </div>
                                             )}
 
-                                            <button className="btn battle-btn-primary w-100 py-3 fw-bold ls-1"
+                                            <button className="btn battle-btn-primary w-100 py-3 fw-bold ls-1 d-flex align-items-center justify-content-center gap-2"
                                                 onClick={handleCreateBattle} disabled={loadingAction}>
-                                                🏟️ CREATE BATTLE ROOM
+                                                <Layout size={18} /> CREATE BATTLE ROOM
                                             </button>
 
                                             {openBattles.length === 0 && (
@@ -612,11 +613,11 @@ const KnowledgeBattle: React.FC = () => {
                                                     </button>
                                                 )}
                                                 <span className={`badge rounded-pill smallest fw-bold d-flex align-items-center gap-1 ${isWaiting ? 'bg-secondary' : isPlaying ? 'bg-primary' : isWinner ? 'bg-success' : isDraw ? 'bg-warning text-dark' : 'bg-danger'}`}>
-                                                    {isWaiting ? <><i className="bi bi-hourglass-split"></i> WAITING</> :
+                                                    {isWaiting ? <><Clock size={12} /> WAITING</> :
                                                         isPlaying ? <><span className="neon-dot"></span> LIVE</> :
-                                                            isWinner ? <><i className="bi bi-trophy-fill"></i> WON</> :
-                                                                isDraw ? <><i className="bi bi-people-fill"></i> DRAW</> :
-                                                                    <><i className="bi bi-exclamation-triangle-fill"></i> LOST</>}
+                                                            isWinner ? <><Trophy size={12} /> WON</> :
+                                                                isDraw ? <><Users size={12} /> DRAW</> :
+                                                                    <><AlertTriangle size={12} /> LOST</>}
                                                 </span>
                                             </div>
                                         </div>
@@ -739,12 +740,12 @@ const KnowledgeBattle: React.FC = () => {
                 }
             };
 
-            const typeLabel: Record<string, string> = {
-                'multiple-choice': '📝 MULTIPLE CHOICE',
-                'true-false': '✅ TRUE OR FALSE',
-                'fill-in-the-blank': '✏️ FILL IN THE BLANK',
-                'match-pairs': '🔗 MATCH PAIRS',
-                'listen-and-choose': '🔊 LISTEN & CHOOSE',
+            const typeLabel: Record<string, { label: string, icon: any }> = {
+                'multiple-choice': { label: 'MULTIPLE CHOICE', icon: <CheckCircle2 size={12} /> },
+                'true-false': { label: 'TRUE OR FALSE', icon: <CheckCircle2 size={12} /> },
+                'fill-in-the-blank': { label: 'FILL IN THE BLANK', icon: <Pencil size={12} /> },
+                'match-pairs': { label: 'MATCH PAIRS', icon: <Link size={12} /> },
+                'listen-and-choose': { label: 'LISTEN & CHOOSE', icon: <Volume2 size={12} /> },
             };
 
             return (
@@ -788,8 +789,10 @@ const KnowledgeBattle: React.FC = () => {
                         {/* Question Header */}
                         <div className="d-flex justify-content-between align-items-center mb-3">
                             <span className="smallest fw-bold ls-1 text-muted">Q{currentQIndex + 1}/{totalQ}</span>
-                            <span className="badge rounded-pill bg-light text-dark border smallest">{typeLabel[q.type] || '📝 QUESTION'}</span>
-                            {streak >= 2 && <span className="badge rounded-pill bg-dark text-warning smallest">🔥 {streak}</span>}
+                            <span className="badge rounded-pill bg-light text-dark border smallest d-flex align-items-center gap-1">
+                                {typeLabel[q.type]?.icon} {typeLabel[q.type]?.label || 'QUESTION'}
+                            </span>
+                            {streak >= 2 && <span className="badge rounded-pill bg-dark text-warning smallest"><Zap size={10} fill="currentColor" /> {streak}</span>}
                         </div>
 
                         {/* Question */}

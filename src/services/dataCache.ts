@@ -280,6 +280,17 @@ export const fetchSentences = async (): Promise<any[]> => {
     return puzzles;
 };
 
+export const fetchWordBombWords = async (): Promise<any[]> => {
+    const cached = getCached<any[]>('wordBombWords');
+    if (cached) return cached;
+
+    const snap = await getDocs(collection(db, "wordBombWords"));
+    const words = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+
+    setCache('wordBombWords', words);
+    return words;
+};
+
 export const fetchChatMetadata = async (chatId: string): Promise<any | null> => {
     const cacheKey = `chat_${chatId}`;
     const cached = getCached<any>(cacheKey);
@@ -413,7 +424,8 @@ export const warmupGameCache = async () => {
             fetchSyllables(),
             fetchSentences(),
             fetchPicturePuzzles(),
-            fetchTopLearners(5)
+            fetchTopLearners(5),
+            fetchWordBombWords()
         ]);
         console.log("Game cache warmup complete.");
     } catch (error) {

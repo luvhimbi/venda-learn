@@ -3,7 +3,6 @@ import { Link, useNavigate } from 'react-router-dom';
 import { auth } from '../services/firebaseConfig';
 import { onAuthStateChanged } from 'firebase/auth';
 import { getBadgeDetails, getLevelStats } from "../services/levelUtils.ts";
-import { updateStreak } from "../services/streakUtils.ts";
 import { fetchLessons, fetchTopLearners, fetchDailyWord, refreshUserData, getMicroLessons } from '../services/dataCache';
 import InstallBanner from '../components/InstallBanner';
 import Mascot from '../components/Mascot';
@@ -12,30 +11,6 @@ import TourGuide from '../components/TourGuide';
 import { doc, updateDoc } from 'firebase/firestore';
 import { db } from '../services/firebaseConfig';
 
-// --- STREAK MOTIVATION MODAL ---
-const StreakModal: React.FC<{ streak: number; onClose: () => void }> = ({ streak, onClose }) => {
-    const getMessage = () => {
-        if (streak >= 30) return "Thovhele wa Tshivenda! You are a language warrior!";
-        if (streak >= 14) return "Incredible discipline! Two weeks strong!";
-        if (streak >= 7) return "A full week! You're building a real habit!";
-        if (streak >= 3) return "Zwi khou bvelela! You're on fire!";
-        return "Great start! Come back tomorrow to keep the flame alive!";
-    };
-    return (
-        <div className="position-fixed top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center z-3 px-3"
-            style={{ backgroundColor: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(8px)' }}>
-            <div className="text-center p-5 rounded-5 bg-white shadow-lg animate__animated animate__bounceIn" style={{ maxWidth: '400px' }}>
-                <div className="mb-3"><i className="bi bi-fire text-danger" style={{ fontSize: '72px' }}></i></div>
-                <h1 className="fw-bold display-4 mb-1 ls-tight text-dark">{streak}</h1>
-                <p className="fw-bold text-muted ls-1 smallest uppercase mb-3">DAY STREAK</p>
-                <p className="text-muted mb-4" style={{ lineHeight: 1.6 }}>{getMessage()}</p>
-                <button className="btn game-btn-primary w-100 py-3 fw-bold ls-1" onClick={onClose}>
-                    KHA RI YE! (LET'S GO)
-                </button>
-            </div>
-        </div>
-    );
-};
 
 // --- LEVEL UP MOTIVATION ---
 const getLevelMotivation = (level: number, progress: number) => {
@@ -56,7 +31,6 @@ const Home: React.FC = () => {
     const [dailyWord, setDailyWord] = useState<any>(null);
     const [totalMlsCount, setTotalMlsCount] = useState(0);
     const [loading, setLoading] = useState(true);
-    const [showStreakModal, setShowStreakModal] = useState(false);
     const [isTourOpen, setIsTourOpen] = useState(false);
 
     const handleTourComplete = async () => {
@@ -86,15 +60,9 @@ const Home: React.FC = () => {
             if (user) {
                 setIsLoggedIn(true);
                 try {
-                    // Update streak first (must run before fetching user data)
-                    const streakResult = await updateStreak(user.uid);
-                    if (streakResult?.isNewDay) {
-                        setShowStreakModal(true);
-                    }
-
                     // Fetch everything in parallel using the cache layer
                     const [userData, lessons, topLearnersData, dailyWordData] = await Promise.all([
-                        refreshUserData(),      // fresh after streak update
+                        refreshUserData(),
                         fetchLessons(),          // cached across pages
                         fetchTopLearners(),      // cached across pages
                         fetchDailyWord(),        // cached for the day
@@ -178,13 +146,6 @@ const Home: React.FC = () => {
 
     return (
         <div className="bg-white min-vh-100" style={{ overflowX: 'hidden' }}>
-            {/* Streak Popup */}
-            {showStreakModal && (
-                <StreakModal
-                    streak={userData?.streak || 0}
-                    onClose={() => setShowStreakModal(false)}
-                />
-            )}
 
 
             {/* App Tour Guide */}

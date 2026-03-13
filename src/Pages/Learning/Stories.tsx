@@ -41,7 +41,9 @@ const Stories: React.FC = () => {
 
         // 2. Award 15 LP
         const LP_REWARD = 15;
-        const success = await completeStory(id, LP_REWARD);
+        const result = await completeStory(id, LP_REWARD);
+        const success = result.success;
+        const streakResult = result.streakResult;
 
         if (success) {
             setUserCompletedList(prev => [...prev, id]); // Update local state
@@ -52,6 +54,43 @@ const Stories: React.FC = () => {
                 confirmButtonColor: '#0d6efd',
                 customClass: { popup: 'rounded-4' }
             });
+
+            if (streakResult?.isNewDay) {
+                setTimeout(() => {
+                    if (streakResult.freezeUsed) {
+                        Swal.fire({
+                            title: 'Streak Frozen!',
+                            text: `A freeze was used to protect your ${streakResult.streak} day streak!`,
+                            icon: 'info',
+                            imageUrl: 'https://cdn-icons-png.flaticon.com/512/2913/2913524.png',
+                            imageWidth: 80,
+                            confirmButtonColor: '#0EA5E9',
+                            confirmButtonText: 'Whew!',
+                            customClass: { popup: 'rounded-4' }
+                        });
+                    } else if (streakResult.wasReset) {
+                        Swal.fire({
+                            title: 'New Streak!',
+                            text: `Starting fresh today. Keep it up!`,
+                            icon: 'info',
+                            confirmButtonColor: '#64748B',
+                            confirmButtonText: 'Kha ri ye!',
+                            customClass: { popup: 'rounded-4' }
+                        });
+                    } else {
+                        Swal.fire({
+                            title: 'Streak Maintained!',
+                            text: `${streakResult.streak} Days Strong!`,
+                            icon: 'success',
+                            imageUrl: 'https://cdn-icons-png.flaticon.com/512/785/785116.png',
+                            imageWidth: 80,
+                            confirmButtonColor: '#EF4444',
+                            confirmButtonText: 'Kha ri ye!',
+                            customClass: { popup: 'rounded-4' }
+                        });
+                    }
+                }, 1500);
+            }
             setActiveStory(null);
         }
     };

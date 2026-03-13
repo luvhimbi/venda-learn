@@ -333,3 +333,12 @@ html {
     transform: translateY(-2px) !important;
     box-shadow: var(--game-shadow-glow) !important;
 }
+
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+.animate-spin {
+    animation: spin 1s linear infinite;
+}

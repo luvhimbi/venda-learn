@@ -1,7 +1,7 @@
 // src/services/scoringUtils.ts
 // Centralized scoring engine for the GameRoom quiz.
 
-export type Difficulty = 'Easy' | 'Medium' | 'Hard';
+export type Difficulty = 'Beginner' | 'Intermediate' | 'Advanced';
 
 export interface ScoreResult {
     base: number;
@@ -13,9 +13,9 @@ export interface ScoreResult {
 
 // ---- CONSTANTS ----
 const BASE_POINTS: Record<Difficulty, number> = {
-    Easy: 10,
-    Medium: 15,
-    Hard: 20,
+    Beginner: 10,
+    Intermediate: 15,
+    Advanced: 20,
 };
 
 const MAX_SPEED_BONUS = 5;        // extra points for answering fast
@@ -59,7 +59,7 @@ export const calculateScore = (
     streak: number,
     elapsedMs: number,
 ): ScoreResult => {
-    const base = BASE_POINTS[difficulty] ?? BASE_POINTS.Easy;
+    const base = BASE_POINTS[difficulty] ?? BASE_POINTS.Beginner;
     const speedBonus = getSpeedBonus(elapsedMs);
     const streakMultiplier = getStreakMultiplier(streak);
 

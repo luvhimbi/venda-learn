@@ -1,16 +1,16 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { onAuthStateChanged, signOut, type User } from 'firebase/auth';
-import { doc, onSnapshot, collection, query, where } from 'firebase/firestore';
+import { doc, onSnapshot } from 'firebase/firestore';
 import { auth, db } from '../services/firebaseConfig';
 import { invalidateCache } from '../services/dataCache';
 import Swal from 'sweetalert2';
-import { Menu, User as UserIcon, MessageSquare, Settings, LogOut } from 'lucide-react';
+import { Menu, User as UserIcon, Settings, LogOut } from 'lucide-react';
+import { AvatarDisplay } from './AvatarPicker';
 
 const Navbar: React.FC = () => {
     const [user, setUser] = useState<User | null>(null);
-    const [userData, setUserData] = useState<{ username: string, points: number } | null>(null);
-    const [chatCount, setChatCount] = useState(0);
+    const [userData, setUserData] = useState<{ username: string, points: number, avatarId?: string } | null>(null);
     const navigate = useNavigate();
     const location = useLocation();
 
@@ -24,24 +24,17 @@ const Navbar: React.FC = () => {
                     if (docSnap.exists()) {
                         setUserData({
                             username: docSnap.data().username || '',
-                            points: docSnap.data().points || 0
+                            points: docSnap.data().points || 0,
+                            avatarId: docSnap.data().avatarId
                         });
                     }
-                });
-
-                // Chat Count Listener
-                const unsubscribeChats = onSnapshot(
-                    query(collection(db, "chats"), where("participants", "array-contains", currentUser.uid)),
-                    (snap) => setChatCount(snap.docs.length)
-                );
+                }, (err) => console.warn('Navbar user listener error:', err.message));
 
                 return () => {
                     unsubDoc();
-                    unsubscribeChats();
                 };
             } else {
                 setUserData(null);
-                setChatCount(0);
             }
         });
         return () => unsubscribe();
@@ -73,7 +66,7 @@ const Navbar: React.FC = () => {
     const isActive = (path: string) => location.pathname === path;
 
     return (
-        <nav className="navbar navbar-expand-lg sticky-top bg-white border-bottom py-3">
+        <nav className="navbar navbar-expand-lg sticky-top bg-white border-bottom py-2">
             <div className="container" style={{ maxWidth: '1100px' }}>
 
                 {/* BRAND LOGO & SLOGAN */}
@@ -138,16 +131,6 @@ const Navbar: React.FC = () => {
                                 Mitambo
                             </Link>
                         </li>
-                        <li className="nav-item w-100 w-lg-auto text-center">
-                            <Link className={`nav-link nav-custom-link position-relative ${isActive('/practice') ? 'active-link' : ''}`} to="/practice">
-                                Practice
-                                {chatCount > 0 && (
-                                    <span className="position-absolute top-0 start-100 translate-middle p-1 bg-danger border border-light rounded-circle" style={{ width: '8px', height: '8px' }}>
-                                        <span className="visually-hidden">New alerts</span>
-                                    </span>
-                                )}
-                            </Link>
-                        </li>
 
                         {user ? (
                             /* AUTHENTICATED USER DROPDOWN */
@@ -156,18 +139,11 @@ const Navbar: React.FC = () => {
                                     className="nav-link dropdown-toggle d-flex align-items-center justify-content-center gap-3 border-0 bg-transparent p-0 mx-auto shadow-none"
                                     data-bs-toggle="dropdown"
                                 >
-                                    <div
-                                        className="text-dark rounded-circle d-flex align-items-center justify-content-center fw-bold shadow-sm"
-                                        style={{
-                                            width: '38px',
-                                            height: '38px',
-                                            fontSize: '0.8rem',
-                                            backgroundColor: '#FACC15',
-                                            border: '2px solid #111827'
-                                        }}
-                                    >
-                                        {userData?.username.charAt(0).toUpperCase() || 'W'}
-                                    </div>
+                                    <AvatarDisplay
+                                        avatarId={userData?.avatarId || 'adventurer'}
+                                        seed={userData?.username || 'warrior'}
+                                        size={38}
+                                    />
                                     <span className="d-lg-none fw-bold text-dark small text-uppercase ls-1">
                                         {userData?.username || "Warrior"}
                                     </span>
@@ -175,8 +151,17 @@ const Navbar: React.FC = () => {
 
                                 <ul className="dropdown-menu dropdown-menu-end border shadow-lg mt-3 p-0 overflow-hidden rounded-4 mx-auto" style={{ minWidth: '240px' }}>
                                     <li className="px-4 py-4 bg-light border-bottom text-start">
-                                        <p className="smallest fw-bold text-muted mb-1 ls-2 text-uppercase">Warrior Status</p>
-                                        <h6 className="fw-bold text-dark mb-0">{userData?.username || "Learner"}</h6>
+                                        <div className="d-flex align-items-center gap-3">
+                                            <AvatarDisplay
+                                                avatarId={userData?.avatarId || 'adventurer'}
+                                                seed={userData?.username || 'warrior'}
+                                                size={48}
+                                            />
+                                            <div>
+                                                <p className="smallest fw-bold text-muted mb-0 ls-2 text-uppercase">Warrior Status</p>
+                                                <h6 className="fw-bold text-dark mb-0">{userData?.username || "Learner"}</h6>
+                                            </div>
+                                        </div>
                                         <div className="d-flex align-items-center gap-2 mt-2">
                                             <span className="badge bg-dark rounded-pill smallest ls-1">{userData?.points || 0} LP</span>
                                             <span className="smallest text-muted fw-bold">Active</span>
@@ -187,15 +172,6 @@ const Navbar: React.FC = () => {
                                         <Link className="dropdown-item rounded-3 py-2 px-3 d-flex align-items-center gap-3 shadow-none" to="/profile">
                                             <UserIcon size={18} className="text-muted" />
                                             <span className="small fw-bold">Profile</span>
-                                        </Link>
-                                    </li>
-                                    <li className="p-2 pt-0 text-start">
-                                        <Link className="dropdown-item rounded-3 py-2 px-3 d-flex align-items-center gap-3 shadow-none justify-content-between" to="/practice">
-                                            <div className="d-flex align-items-center gap-3">
-                                                <MessageSquare size={18} className="text-muted" />
-                                                <span className="small fw-bold">Practice</span>
-                                            </div>
-                                            {chatCount > 0 && <span className="badge bg-danger rounded-pill smallest-pill">{chatCount}</span>}
                                         </Link>
                                     </li>
                                     <li className="p-2 pt-0 text-start">
