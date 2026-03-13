@@ -1,10 +1,9 @@
 import React, { useState, type FormEvent } from 'react';
-import { Loader2 } from 'lucide-react';
+import { Loader2, Lock } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { signInAnonymously, signInWithEmailAndPassword, signInWithPopup } from 'firebase/auth';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { auth, db, googleProvider } from '../../services/firebaseConfig';
-import { updateStreak } from '../../services/streakUtils';
 
 const Login: React.FC = () => {
     const [email, setEmail] = useState<string>('');
@@ -23,15 +22,28 @@ const Login: React.FC = () => {
             const userCredential = await signInWithEmailAndPassword(auth, email, password);
             const uid = userCredential.user.uid;
 
-            // 1. Update user streak
-            await updateStreak(uid);
-
-            // 2. Check Admin Status (Assuming you store roles in Firestore 'users' collection)
+            // 1. Ensure user document exists (Prevents permission errors in listeners)
             const userDoc = await getDoc(doc(db, 'users', uid));
-            const userData = userDoc.data();
+            if (!userDoc.exists()) {
+                await setDoc(doc(db, 'users', uid), {
+                    username: userCredential.user.displayName || email.split('@')[0],
+                    email: email,
+                    points: 0,
+                    level: 1,
+                    streak: 0,
+                    completedLessons: [],
+                    isNativeSpeaker: false,
+                    tourCompleted: false,
+                    createdAt: new Date().toISOString()
+                });
+            }
+
+
+            // 3. Check Admin Status
+            const userData = userDoc.exists() ? userDoc.data() : { role: 'user' };
             const isAdmin = userData?.role === 'admin';
 
-            // 3. Handle Redirection
+            // 4. Handle Redirection
             if (isAdmin) {
                 navigate('/admin/dashboard');
             } else {
@@ -43,6 +55,9 @@ const Login: React.FC = () => {
                     navigate('/');
                 }
             }
+        } catch (err: any) {
+            console.error("Login Error:", err);
+            setError(err.code === 'auth/user-not-found' ? "User not found." : "Login failed. Please try again.");
         } finally {
             setLoading(false);
         }
@@ -68,15 +83,11 @@ const Login: React.FC = () => {
                     streak: 0,
                     completedLessons: [],
                     isNativeSpeaker: false,
-                    nativeVerificationStatus: 'none',
-                    nativeSpeakerBio: "",
                     tourCompleted: false,
                     createdAt: new Date().toISOString()
                 });
             }
 
-            // 2. Update streak
-            await updateStreak(user.uid);
 
             // 3. Handle Redirection
             const userData = !userDoc.exists() ? null : userDoc.data();
@@ -119,8 +130,12 @@ const Login: React.FC = () => {
         <div className="min-vh-100 d-flex align-items-center justify-content-center bg-white px-3 py-5">
             <div className="w-100" style={{ maxWidth: '400px' }}>
 
-                <div className="text-center mb-4 animate__animated animate__fadeIn">
-                    <h3 className="fw-bold ls-1 text-dark mb-1">SIGN IN</h3>
+                <div className="text-center mb-5 animate__animated animate__fadeInDown">
+                    <div className="d-inline-flex bg-warning bg-opacity-10 text-warning p-3 rounded-circle mb-3 shadow-sm">
+                        <Lock size={32} />
+                    </div>
+                    <h2 className="fw-bold ls-tight text-dark mb-2">Welcome Back!</h2>
+                    <p className="text-muted mb-0">Sign in to continue your language learning journey.</p>
                 </div>
 
                 {error && (

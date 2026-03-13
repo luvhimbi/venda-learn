@@ -4,6 +4,18 @@ import { calculateScore, CONSOLATION_POINTS, type Difficulty, type ScoreResult }
 interface GameLogicOptions {
     difficulty: Difficulty;
     totalQuestions: number;
+    initialState?: {
+        currentQIndex?: number;
+        score?: number;
+        correctCount?: number;
+        streak?: number;
+        scoreBreakdown?: {
+            base: number;
+            speed: number;
+            streakBonus: number;
+            consolation: number;
+        };
+    };
     onFinish: (finalScore: number, finalCorrect: number, totalDuration: number) => void;
     onCorrect?: (result: ScoreResult, newScore: number, newCorrect: number, nextIndex: number) => void;
     onWrong?: () => void;
@@ -13,21 +25,22 @@ interface GameLogicOptions {
 export const useGameLogic = ({
     difficulty,
     totalQuestions,
+    initialState,
     onFinish,
     onCorrect,
     onWrong,
     onConsolation
 }: GameLogicOptions) => {
-    const [currentQIndex, setCurrentQIndex] = useState(0);
-    const [score, setScore] = useState(0);
-    const [correctCount, setCorrectCount] = useState(0);
-    const [streak, setStreak] = useState(0);
+    const [currentQIndex, setCurrentQIndex] = useState(initialState?.currentQIndex ?? 0);
+    const [score, setScore] = useState(initialState?.score ?? 0);
+    const [correctCount, setCorrectCount] = useState(initialState?.correctCount ?? 0);
+    const [streak, setStreak] = useState(initialState?.streak ?? 0);
     const [sessionStartTime] = useState(Date.now());
     const [questionStartTime, setQuestionStartTime] = useState(Date.now());
     const [lastScoreResult, setLastScoreResult] = useState<ScoreResult | null>(null);
     const [answerStatus, setAnswerStatus] = useState<'correct' | 'wrong' | null>(null);
     const [showExplanation, setShowExplanation] = useState(false);
-    const [scoreBreakdown, setScoreBreakdown] = useState({
+    const [scoreBreakdown, setScoreBreakdown] = useState(initialState?.scoreBreakdown ?? {
         base: 0,
         speed: 0,
         streakBonus: 0,
@@ -39,6 +52,32 @@ export const useGameLogic = ({
         setQuestionStartTime(Date.now());
     }, [currentQIndex]);
 
+    const reset = useCallback(() => {
+        setCurrentQIndex(0);
+        setScore(0);
+        setCorrectCount(0);
+        setStreak(0);
+        setAnswerStatus(null);
+        setShowExplanation(false);
+        setScoreBreakdown({ base: 0, speed: 0, streakBonus: 0, consolation: 0 });
+    }, []);
+
+    const moveNext = useCallback((scoreOverride?: number, correctCountOverride?: number) => {
+        setAnswerStatus(null);
+        setShowExplanation(false);
+        setLastScoreResult(null);
+
+        const nextIdx = currentQIndex + 1;
+        if (nextIdx < totalQuestions) {
+            setCurrentQIndex(nextIdx);
+        } else {
+            const totalDuration = Math.floor((Date.now() - sessionStartTime) / 1000);
+            const finalScore = scoreOverride !== undefined ? scoreOverride : score;
+            const finalCorrect = correctCountOverride !== undefined ? correctCountOverride : correctCount;
+            onFinish(finalScore, finalCorrect, totalDuration);
+        }
+    }, [currentQIndex, totalQuestions, score, correctCount, onFinish, sessionStartTime]);
+
     const awardCorrectAnswer = useCallback(() => {
         const elapsed = Date.now() - questionStartTime;
         const result = calculateScore(difficulty, streak, elapsed);
@@ -46,7 +85,6 @@ export const useGameLogic = ({
         const newScore = score + result.total;
         const newCorrect = correctCount + 1;
         const newStreak = streak + 1;
-        const nextIdx = currentQIndex + 1;
 
         setScore(newScore);
         setCorrectCount(newCorrect);
@@ -62,11 +100,11 @@ export const useGameLogic = ({
         }));
 
         if (onCorrect) {
-            onCorrect(result, newScore, newCorrect, nextIdx);
+            onCorrect(result, newScore, newCorrect, currentQIndex + 1);
         }
 
-        setTimeout(() => moveNext(), 1200);
-    }, [difficulty, streak, questionStartTime, score, correctCount, currentQIndex, onCorrect]);
+        setTimeout(() => moveNext(newScore, newCorrect), 1200);
+    }, [difficulty, streak, questionStartTime, score, correctCount, currentQIndex, onCorrect, moveNext]);
 
     const awardConsolation = useCallback(() => {
         const newScore = score + CONSOLATION_POINTS;
@@ -79,6 +117,7 @@ export const useGameLogic = ({
         if (onConsolation) {
             onConsolation(newScore);
         }
+        return newScore;
     }, [score, onConsolation]);
 
     const handleCorrect = useCallback(() => {
@@ -91,30 +130,6 @@ export const useGameLogic = ({
         if (onWrong) onWrong();
         setTimeout(() => setShowExplanation(true), 600);
     }, [onWrong]);
-
-    const moveNext = useCallback(() => {
-        setAnswerStatus(null);
-        setShowExplanation(false);
-        setLastScoreResult(null);
-
-        const nextIdx = currentQIndex + 1;
-        if (nextIdx < totalQuestions) {
-            setCurrentQIndex(nextIdx);
-        } else {
-            const totalDuration = Math.floor((Date.now() - sessionStartTime) / 1000);
-            onFinish(score, correctCount, totalDuration);
-        }
-    }, [currentQIndex, totalQuestions, score, correctCount, onFinish, sessionStartTime]);
-
-    const reset = useCallback(() => {
-        setCurrentQIndex(0);
-        setScore(0);
-        setCorrectCount(0);
-        setStreak(0);
-        setAnswerStatus(null);
-        setShowExplanation(false);
-        setScoreBreakdown({ base: 0, speed: 0, streakBonus: 0, consolation: 0 });
-    }, []);
 
     return {
         currentQIndex,

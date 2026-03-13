@@ -15,64 +15,39 @@ interface HistoryStory {
     imageUrl?: string;
 }
 
-const StoryCard: React.FC<{ story: HistoryStory, navigate: (path: string) => void }> = ({ story, navigate }) => {
-    const [imgError, setImgError] = useState(false);
-
-    return (
-        <div className="col-12">
-            <div
-                className="story-hover transition-all border rounded-4 overflow-hidden d-flex flex-column flex-md-row animate-on-scroll"
-                style={{ cursor: 'pointer', minHeight: '140px' }}
-                onClick={() => navigate(`/history/${story.id}`)}
-            >
-                {/* IMAGE BUCKET */}
-                <div className="bg-light d-flex align-items-center justify-content-center position-relative history-img-container">
-                    {story.imageUrl && !imgError ? (
-                        <img
-                            src={story.imageUrl}
-                            alt={story.title}
-                            className="w-100 h-100 object-fit-cover"
-                            onError={() => setImgError(true)}
-                        />
-                    ) : (
-                        <span className="display-4 opacity-50">{story.thumbnailEmoji || '🏺'}</span>
-                    )}
-                    <div className="position-absolute top-0 start-0 m-2">
-                        <span className="badge bg-white text-dark smallest-print border fw-bold">{story.category}</span>
-                    </div>
-                </div>
-
-                {/* TEXT CONTENT */}
-                <div className="p-4 flex-grow-1 d-flex flex-column justify-content-center text-start">
-                    <div className="d-flex align-items-center gap-2 mb-1">
-                        <span className="smallest-print fw-bold ls-1 text-warning uppercase">{story.era || 'Tradition'}</span>
-                        <span className="smallest-print text-muted">• {story.readTime}</span>
-                    </div>
-                    <h5 className="fw-bold mb-1 text-dark">{story.title}</h5>
-                    <p className="text-muted smallest-print fw-bold uppercase ls-1 mb-0">{story.vendaTitle}</p>
-                </div>
-
-                <div className="d-flex align-items-center pe-4 d-none d-md-flex">
-                    <i className="bi bi-arrow-right-short fs-3 text-muted"></i>
-                </div>
-            </div>
+const CategoryCard: React.FC<{ title: string; count: number; image: string; active: boolean; onClick: () => void }> = ({ title, count, image, active, onClick }) => (
+    <div
+        className={`category-card rounded-4 overflow-hidden position-relative mb-3 transition-all ${active ? 'active-category' : ''}`}
+        style={{ cursor: 'pointer', minWidth: '180px', height: '220px' }}
+        onClick={onClick}
+    >
+        <img src={image} alt={title} className="w-100 h-100 object-fit-cover" />
+        <div className="position-absolute bottom-0 start-0 w-100 p-3 bg-gradient-dark text-white text-center">
+            <h6 className="fw-bold mb-0 small">{title}</h6>
+            <span className="smallest-print opacity-75">{count} stories</span>
         </div>
-    );
-};
+        {active && <div className="active-indicator"></div>}
+    </div>
+);
 
 const HistoryList: React.FC = () => {
     const navigate = useNavigate();
     const [stories, setStories] = useState<HistoryStory[]>([]);
     const [loading, setLoading] = useState(true);
     const [activeFilter, setActiveFilter] = useState<string>('All');
-    const [isLoggedIn, setIsLoggedIn] = useState<boolean | null>(null);
+    const [authInitialized, setAuthInitialized] = useState(false);
 
-    const categories = ['All', 'History', 'Food', 'Dance', 'Attire'];
+    // Initial metadata for known categories
+    const categoryMetadata = [
+        { id: 'History', label: 'History & Origins' },
+        { id: 'Food', label: 'Indigenous Cuisine' },
+        { id: 'Dance', label: 'Music & Dance' },
+        { id: 'Attire', label: 'Traditional Clothing' }
+    ];
 
     useEffect(() => {
-        // Check Auth State
-        const unsubscribe = onAuthStateChanged(auth, (user) => {
-            setIsLoggedIn(!!user);
+        const unsubscribe = onAuthStateChanged(auth, () => {
+            setAuthInitialized(true);
         });
 
         const loadHistory = async () => {
@@ -86,190 +61,195 @@ const HistoryList: React.FC = () => {
             }
         };
 
-        loadHistory();
+        if (authInitialized) {
+            loadHistory();
+        }
+
         return () => unsubscribe();
-    }, []);
+    }, [authInitialized]);
 
-    // Intersection Observer for scroll animations
-    useEffect(() => {
-        if (loading) return;
+    // Derive categories dynamically from stories in the database
+    // This ensures we only show what's actually available "from the db"
+    const categories = Array.from(new Set(stories.map(s => s.category?.toLowerCase()))).map(catId => {
+        if (!catId) return null;
+        const meta = categoryMetadata.find(m => m.id.toLowerCase() === catId) || { id: catId, label: catId };
+        const firstStory = stories.find(s => s.category?.toLowerCase() === catId);
+        return {
+            id: meta.id,
+            label: meta.label,
+            img: firstStory?.imageUrl || "https://images.unsplash.com/photo-1516035069371-29a1b244cc32?auto=format&fit=crop&q=80&w=400",
+            count: stories.filter(s => s.category?.toLowerCase() === catId).length
+        };
+    }).filter(Boolean) as { id: string, label: string, img: string, count: number }[];
 
-        const observer = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    entry.target.classList.add('visible');
-                }
-            });
-        }, { threshold: 0.1 });
+    const filteredStories = stories.filter(s =>
+        (activeFilter === 'All' || s.category?.toLowerCase() === activeFilter.toLowerCase())
+    );
 
-        const animateElements = document.querySelectorAll('.animate-on-scroll');
-        animateElements.forEach(el => observer.observe(el));
-
-        return () => observer.disconnect();
-    }, [loading, stories, activeFilter]);
-
-    const filteredStories = activeFilter === 'All'
-        ? stories
-        : stories.filter(s => s.category === activeFilter);
+    const featuredStory = stories.find(s => s.era === 'Sacred') || stories[0];
 
     if (loading) return (
         <div className="min-vh-100 bg-white d-flex justify-content-center align-items-center">
-            <div className="spinner-border" style={{ color: '#FACC15' }}></div>
+            <div className="spinner-border text-warning"></div>
         </div>
     );
 
-    // --- LOGGED OUT UI ---
-    if (isLoggedIn === false) {
-        return (
-            <div className="bg-white min-vh-100 py-5 d-flex align-items-center">
-                <div className="container" style={{ maxWidth: '600px' }}>
-                    <div className="text-center p-5 rounded-5 shadow-sm border border-light">
-                        <div className="mb-4 display-4">🏺</div>
-                        <h2 className="fw-bold ls-tight mb-3">Venda Heritage</h2>
-                        <p className="text-muted mb-4 small ls-1">
-                            Explore the sacred history, traditional food, and dances of the Vhavenda people.
-                            Please log in to access the full cultural archives.
-                        </p>
-                        <div className="d-grid gap-3">
-                            <button
-                                onClick={() => navigate('/login')}
-                                className="btn game-btn-primary py-3 fw-bold smallest-print ls-2"
+    return (
+        <div className="bg-white min-vh-100 history-redesign">
+            <main className="container py-5">
+                <div className="row g-4 justify-content-center">
+                    <div className="col-lg-10">
+                        {/* HERO FEATURED STORY (FROM DB) */}
+                        {featuredStory && !activeFilter && (
+                            <section
+                                className="featured-hero rounded-4 overflow-hidden position-relative mb-5 shadow-sm group pointer"
+                                onClick={() => navigate(`/history/${featuredStory.id}`)}
                             >
-                                LOG IN TO EXPLORE
-                            </button>
-                            <button
-                                onClick={() => navigate('/register')}
-                                className="btn btn-outline-dark border-2 py-3 fw-bold smallest-print ls-2 rounded-3"
-                            >
-                                CREATE ACCOUNT
-                            </button>
-                        </div>
-                        <button
-                            onClick={() => navigate('/')}
-                            className="btn btn-link mt-4 text-muted smallest-print fw-bold ls-1 text-decoration-none"
-                        >
-                            <i className="bi bi-arrow-left"></i> BACK TO HOME
-                        </button>
+                                <img
+                                    src={featuredStory.imageUrl || "https://images.unsplash.com/photo-1523381210434-271e8be1f52b?auto=format&fit=crop&q=80&w=1200"}
+                                    className="w-100 h-100 object-fit-cover transition-all group-hover-scale"
+                                    alt="Featured"
+                                />
+                                <div className="position-absolute bottom-0 start-0 w-100 p-4 p-md-5 bg-gradient-dark text-white">
+                                    <div className="d-flex align-items-center gap-2 mb-3">
+                                        <span className="badge bg-warning text-dark uppercase smallest-print fw-bold">Featured Story</span>
+                                        <span className="smallest-print opacity-75">{featuredStory.readTime} read</span>
+                                    </div>
+                                    <h1 className="display-5 fw-bold mb-3 ls-tight">{featuredStory.title}</h1>
+                                    <p className="mb-0 opacity-75 fs-5">{featuredStory.vendaTitle}</p>
+                                </div>
+                            </section>
+                        )}
+
+                        {/* EXPLORE TRADITIONS SECTION */}
+                        <section className="mb-5">
+                            <div className="d-flex justify-content-between align-items-center mb-4">
+                                <h3 className="fw-bold mb-0">Explore Traditions</h3>
+                                <button
+                                    className="btn btn-link text-warning fw-bold p-0 text-decoration-none"
+                                    onClick={() => setActiveFilter('All')}
+                                >
+                                    View all stories
+                                </button>
+                            </div>
+
+                            <div className="d-flex gap-3 overflow-auto no-scrollbar pb-3">
+                                {categories.map(cat => (
+                                    <CategoryCard
+                                        key={cat.id}
+                                        title={cat.label}
+                                        count={cat.count}
+                                        image={cat.img}
+                                        active={activeFilter === cat.id}
+                                        onClick={() => setActiveFilter(cat.id === activeFilter ? 'All' : cat.id)}
+                                    />
+                                ))}
+                            </div>
+                        </section>
+
+                        {/* FILTERED FEED */}
+                        <section className="row g-4 mb-5">
+                            <div className="col-12 mb-2">
+                                <h5 className="fw-bold text-muted small uppercase ls-2">
+                                    {activeFilter !== 'All' ? `Discovering ${activeFilter} Stories` : 'All Stories'}
+                                </h5>
+                            </div>
+                            {filteredStories.map(story => (
+                                <div key={story.id} className="col-md-6">
+                                    <div
+                                        className="story-list-item rounded-4 bg-white border overflow-hidden transition-all h-100 pointer shadow-sm"
+                                        onClick={() => navigate(`/history/${story.id}`)}
+                                    >
+                                        <div className="ratio ratio-16x9">
+                                            <img src={story.imageUrl || "https://images.unsplash.com/photo-1523381210434-271e8be1f52b?auto=format&fit=crop&q=80&w=600"} alt="" className="object-fit-cover" />
+                                        </div>
+                                        <div className="p-4">
+                                            <div className="d-flex align-items-center gap-2 mb-2">
+                                                <span className="text-warning fw-bold smallest-print uppercase ls-1">{story.category}</span>
+                                                <span className="text-muted smallest-print">• {story.readTime}</span>
+                                            </div>
+                                            <h5 className="fw-bold mb-1">{story.title}</h5>
+                                            <p className="text-muted smallest-print mb-0 italic">{story.vendaTitle}</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            ))}
+                        </section>
                     </div>
                 </div>
-                <style>{`
-                    .game-btn-primary { 
-                        background-color: #FACC15 !important; 
-                        color: #111827 !important; 
-                        border: none !important; 
-                        border-radius: 12px; 
-                        box-shadow: 0 4px 0 #EAB308 !important; 
-                    }
-                    .game-btn-primary:active { transform: translateY(2px); box-shadow: 0 2px 0 #EAB308 !important; }
-                    .ls-tight { letter-spacing: -1.5px; }
-                    .ls-1 { letter-spacing: 1px; }
-                    .ls-2 { letter-spacing: 2px; }
-                    .smallest-print { font-size: 11px; font-family: 'Poppins', sans-serif; text-transform: uppercase; }
-                `}</style>
-            </div>
-        );
-    }
-
-    // --- LOGGED IN UI ---
-    return (
-        <div className="bg-white min-vh-100 py-5">
-            <div className="container" style={{ maxWidth: '900px' }}>
-
-                {/* NAVIGATION */}
-                <button
-                    className="btn btn-link text-decoration-none p-0 mb-5 d-flex align-items-center gap-2 text-dark fw-bold smallest-print ls-2 uppercase"
-                    onClick={() => navigate('/')}
-                >
-                    <i className="bi bi-arrow-left"></i> Murahu
-                </button>
-
-                {/* HEADER */}
-                <header className="mb-4 animate-on-scroll">
-                    <p className="smallest-print fw-bold text-muted mb-1 ls-2 uppercase">Ḓivhazwakale na Mvelele</p>
-                    <h2 className="fw-bold mb-0 ls-tight">CULTURE & HERITAGE</h2>
-                    <p className="text-muted small mt-2">Explore the rich traditions, flavors, and stories of the Vhavenda.</p>
-                </header>
-
-                {/* CATEGORY FILTER PILLS */}
-                <div className="d-flex gap-2 mb-5 overflow-auto pb-2 no-scrollbar animate-on-scroll">
-                    {categories.map(cat => (
-                        <button
-                            key={cat}
-                            onClick={() => setActiveFilter(cat)}
-                            className={`btn rounded-pill px-3 py-1 fw-bold smallest-print ls-1 uppercase transition-all ${activeFilter === cat ? 'bg-dark text-white' : 'bg-light text-muted'}`}
-                        >
-                            {cat}
-                        </button>
-                    ))}
-                </div>
-
-                {/* CONTENT LIST */}
-                <div className="row g-4">
-                    {filteredStories.length > 0 ? (
-                        filteredStories.map((story) => (
-                            <StoryCard key={story.id} story={story} navigate={navigate} />
-                        ))
-                    ) : (
-                        <div className="text-center py-5">
-                            <p className="text-muted small">No items found in this category.</p>
-                        </div>
-                    )}
-                </div>
-
-                {/* CALL TO ACTION */}
-                <div className="mt-5 p-4 bg-light rounded-4 text-center border-0 animate-on-scroll">
-                    <p className="smallest-print fw-bold text-muted ls-1 uppercase mb-2">Did you know?</p>
-                    <p className="small mb-0 italic" style={{ fontSize: '13px' }}>
-                        "The Domba dance is often referred to as the 'Python Dance' and is a significant part of Vhavenda initiation ceremonies."
-                    </p>
-                </div>
-            </div>
+            </main>
 
             <style>{`
+                @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap');
+
+                .history-redesign {
+                    font-family: 'Outfit', sans-serif !important;
+                    color: #1a1a1a;
+                }
                 .ls-tight { letter-spacing: -1.5px; }
                 .ls-1 { letter-spacing: 1px; }
                 .ls-2 { letter-spacing: 2px; }
-                .smallest-print { font-size: 10px; font-family: 'Poppins', sans-serif; }
                 .uppercase { text-transform: uppercase; }
+                .smallest-print { font-size: 10px; }
+                .bg-gradient-dark {
+                    background: linear-gradient(to top, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.4) 60%, transparent 100%);
+                }
+                .pointer { cursor: pointer; }
                 .no-scrollbar::-webkit-scrollbar { display: none; }
+                .italic { font-style: italic; }
                 
-                .story-hover {
-                    border: 1px solid #eee !important;
-                    background: #fff;
+                .active-nav {
+                    border-bottom: 2px solid #FACC15;
+                    padding-bottom: 2px;
                 }
 
-                .story-hover:hover {
+                /* Category Card */
+                .category-card {
+                    filter: grayscale(0.2);
+                    border: 2px solid transparent;
+                }
+                .category-card:hover {
+                    filter: grayscale(0);
+                    transform: translateY(-5px);
+                }
+                .active-category {
                     border-color: #FACC15 !important;
-                    transform: translateX(5px);
-                    box-shadow: 0 10px 20px rgba(0,0,0,0.05);
+                    filter: grayscale(0);
+                    box-shadow: 0 10px 25px rgba(250, 204, 21, 0.2);
                 }
-                
-                .object-fit-cover { object-fit: cover; }
-                .transition-all { transition: all 0.25s ease-in-out; }
-
-                .animate-on-scroll {
-                    opacity: 0;
-                    transform: translateY(20px);
-                    transition: opacity 0.6s ease-out, transform 0.6s ease-out;
-                }
-                .animate-on-scroll.visible {
-                    opacity: 1;
-                    transform: translateY(0);
+                .active-indicator {
+                    position: absolute;
+                    top: 10px;
+                    right: 10px;
+                    width: 12px;
+                    height: 12px;
+                    background: #FACC15;
+                    border-radius: 50%;
+                    border: 2px solid white;
                 }
 
-                .game-btn-primary:active { transform: translateY(2px); box-shadow: 0 1px 0 #EAB308 !important; }
-                
-                /* Responsive Image Container */
-                .history-img-container {
-                    width: 100%;
-                    height: 200px; /* Fixed height on mobile for consistency */
+                /* Hero Section */
+                .featured-hero { height: 400px; }
+                .group-hover-scale { transition: transform 0.5s ease; }
+                .featured-hero:hover .group-hover-scale { transform: scale(1.05); }
+
+                /* Sidebar */
+                .sidebar-sticky {
+                    position: sticky;
+                    top: 100px;
                 }
-                @media (min-width: 768px) {
-                    .history-img-container {
-                        width: 200px;
-                        height: auto;
-                        min-height: 140px;
-                    }
+                .nugget p { line-height: 1.6; }
+
+                /* List Item */
+                .story-list-item:hover {
+                    border-color: #FACC15 !important;
+                    box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+                }
+                .hover-underline:hover { text-decoration: underline; }
+
+                @media (max-width: 768px) {
+                    .featured-hero { height: 300px; }
+                    .display-6 { font-size: 1.75rem; }
                 }
             `}</style>
         </div>

@@ -51,8 +51,8 @@ const Courses: React.FC = () => {
 
     const getDifficultyStyle = (d: string) => {
         const diff = d?.toLowerCase();
-        if (diff === 'easy') return { color: '#10B981', bg: '#EDFDF5', label: 'MAVHAYI', icon: <Sprout size={14} className="me-1" /> };
-        if (diff === 'medium') return { color: '#F59E0B', bg: '#FFFBEB', label: 'VHUKATI', icon: <Shield size={14} className="me-1" /> };
+        if (diff === 'beginner') return { color: '#10B981', bg: '#EDFDF5', label: 'MAVHAYI', icon: <Sprout size={14} className="me-1" /> };
+        if (diff === 'intermediate') return { color: '#F59E0B', bg: '#FFFBEB', label: 'VHUKATI', icon: <Shield size={14} className="me-1" /> };
         return { color: '#EF4444', bg: '#FEF2F2', label: 'VHUḒU', icon: <Flame size={14} className="me-1" /> };
     };
 

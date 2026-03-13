@@ -2,27 +2,27 @@ import { db } from './firebaseConfig';
 import { doc, collection, writeBatch } from 'firebase/firestore';
 
 export const syllableWords = [
-    { word: "Muthu", syllables: ["Mu", "thu"], translation: "Person", difficulty: "Easy" },
-    { word: "Vhuthu", syllables: ["Vhu", "thu"], translation: "Humanity/Kindness", difficulty: "Easy" },
-    { word: "Nwana", syllables: ["Nwa", "na"], translation: "Child", difficulty: "Easy" },
-    { word: "Shuma", syllables: ["Shu", "ma"], translation: "Work", difficulty: "Easy" },
-    { word: "Lufuno", syllables: ["Lu", "fu", "no"], translation: "Love", difficulty: "Medium" },
-    { word: "Kholomo", syllables: ["Kho", "lo", "mo"], translation: "Cow", difficulty: "Medium" },
-    { word: "Thavha", syllables: ["Tha", "vha"], translation: "Mountain", difficulty: "Easy" },
-    { word: "Mulambo", syllables: ["Mu", "la", "mbo"], translation: "River", difficulty: "Medium" },
-    { word: "Tshikolo", syllables: ["Tshi", "ko", "lo"], translation: "School", difficulty: "Medium" },
-    { word: "Makhulu", syllables: ["Ma", "khu", "lu"], translation: "Grandparent", difficulty: "Medium" },
-    { word: "Mutukana", syllables: ["Mu", "tu", "ka", "na"], translation: "Boy", difficulty: "Hard" },
-    { word: "Musidzana", syllables: ["Mu", "si", "dza", "na"], translation: "Girl", difficulty: "Hard" },
-    { word: "Vho-mme", syllables: ["Vho", "mme"], translation: "Mother (Respectful)", difficulty: "Medium" },
-    { word: "Vho-khotsi", syllables: ["Vho", "khotsi"], translation: "Father (Respectful)", difficulty: "Medium" },
-    { word: "Nndu", syllables: ["N", "ndu"], translation: "House", difficulty: "Easy" },
-    { word: "Madi", syllables: ["Ma", "di"], translation: "Water", difficulty: "Easy" },
-    { word: "Zwilo", syllables: ["Zwi", "lo"], translation: "Food", difficulty: "Easy" },
-    { word: "Duvha", syllables: ["Du", "vha"], translation: "Sun/Day", difficulty: "Easy" },
-    { word: "Nwedzi", syllables: ["Nwe", "dzi"], translation: "Moon/Month", difficulty: "Easy" },
-    { word: "Mvula", syllables: ["Mvu", "la"], translation: "Rain", difficulty: "Easy" },
-    { word: "Vunda", syllables: ["Vu", "na", "nda"], translation: "Break/Harvest", difficulty: "Medium" }
+    { word: "Muthu", syllables: ["Mu", "thu"], translation: "Person", difficulty: "Beginner" },
+    { word: "Vhuthu", syllables: ["Vhu", "thu"], translation: "Humanity/Kindness", difficulty: "Beginner" },
+    { word: "Nwana", syllables: ["Nwa", "na"], translation: "Child", difficulty: "Beginner" },
+    { word: "Shuma", syllables: ["Shu", "ma"], translation: "Work", difficulty: "Beginner" },
+    { word: "Lufuno", syllables: ["Lu", "fu", "no"], translation: "Love", difficulty: "Intermediate" },
+    { word: "Kholomo", syllables: ["Kho", "lo", "mo"], translation: "Cow", difficulty: "Intermediate" },
+    { word: "Thavha", syllables: ["Tha", "vha"], translation: "Mountain", difficulty: "Beginner" },
+    { word: "Mulambo", syllables: ["Mu", "la", "mbo"], translation: "River", difficulty: "Intermediate" },
+    { word: "Tshikolo", syllables: ["Tshi", "ko", "lo"], translation: "School", difficulty: "Intermediate" },
+    { word: "Makhulu", syllables: ["Ma", "khu", "lu"], translation: "Grandparent", difficulty: "Intermediate" },
+    { word: "Mutukana", syllables: ["Mu", "tu", "ka", "na"], translation: "Boy", difficulty: "Advanced" },
+    { word: "Musidzana", syllables: ["Mu", "si", "dza", "na"], translation: "Girl", difficulty: "Advanced" },
+    { word: "Vho-mme", syllables: ["Vho", "mme"], translation: "Mother (Respectful)", difficulty: "Intermediate" },
+    { word: "Vho-khotsi", syllables: ["Vho", "khotsi"], translation: "Father (Respectful)", difficulty: "Intermediate" },
+    { word: "Nndu", syllables: ["N", "ndu"], translation: "House", difficulty: "Beginner" },
+    { word: "Madi", syllables: ["Ma", "di"], translation: "Water", difficulty: "Beginner" },
+    { word: "Zwilo", syllables: ["Zwi", "lo"], translation: "Food", difficulty: "Beginner" },
+    { word: "Duvha", syllables: ["Du", "vha"], translation: "Sun/Day", difficulty: "Beginner" },
+    { word: "Nwedzi", syllables: ["Nwe", "dzi"], translation: "Moon/Month", difficulty: "Beginner" },
+    { word: "Mvula", syllables: ["Mvu", "la"], translation: "Rain", difficulty: "Beginner" },
+    { word: "Vunda", syllables: ["Vu", "na", "nda"], translation: "Break/Harvest", difficulty: "Intermediate" }
 ];
 
 export const seedSyllables = async () => {

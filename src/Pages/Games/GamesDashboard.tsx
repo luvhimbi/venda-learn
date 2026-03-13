@@ -1,9 +1,9 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { warmupGameCache } from '../../services/dataCache';
 import { auth } from '../../services/firebaseConfig';
 import { onAuthStateChanged } from 'firebase/auth';
-import { Puzzle, Image, Layout, FileText, Gamepad2, Calendar } from 'lucide-react';
+import { Puzzle, Image, Layout, FileText, Gamepad2, Calendar, Bomb } from 'lucide-react';
 
 const GamesDashboard: React.FC = () => {
     const navigate = useNavigate();
@@ -71,8 +71,27 @@ const GamesDashboard: React.FC = () => {
             route: '/battle',
             color: 'bg-danger',
             gradient: 'linear-gradient(135deg, #EF4444 0%, #B91C1C 100%)'
+        },
+        {
+            id: 'word-bomb',
+            title: 'Word Bomb 💣',
+            description: 'English words fall from the sky — type the Venda translation before they hit the ground!',
+            icon: <Bomb size={64} />,
+            route: '/word-bomb',
+            color: 'bg-dark',
+            gradient: 'linear-gradient(135deg, #1a1a2e 0%, #e94560 100%)'
         }
     ];
+
+    // Shuffle games on each visit so users discover all games
+    const shuffledGames = useMemo(() => {
+        const arr = [...games];
+        for (let i = arr.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [arr[i], arr[j]] = [arr[j], arr[i]];
+        }
+        return arr;
+    }, []);
 
     if (isLoggedIn === null) {
         return (
@@ -113,7 +132,7 @@ const GamesDashboard: React.FC = () => {
                 </div>
 
                 <div className="row g-4 justify-content-center">
-                    {games.map((game) => (
+                    {shuffledGames.map((game) => (
                         <div key={game.id} className="col-md-6 col-lg-5">
                             <div
                                 className="card border-0 h-100 shadow-sm overflow-hidden game-card"

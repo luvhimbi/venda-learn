@@ -1,7 +1,8 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { fetchHistoryData } from '../../services/dataCache';
 import Swal from 'sweetalert2';
+import Mascot from '../../components/Mascot';
 
 interface StoryData {
     title: string;
@@ -15,6 +16,7 @@ interface StoryData {
 }
 
 import PodcastPlayer from '../../components/PodcastPlayer';
+import { BookOpen, Lightbulb } from 'lucide-react';
 
 const HistoryDetail: React.FC = () => {
     const { storyId } = useParams();
@@ -23,20 +25,31 @@ const HistoryDetail: React.FC = () => {
     const [loading, setLoading] = useState(true);
     const [imgError, setImgError] = useState(false);
     const [scrollProgress, setScrollProgress] = useState(0);
-    const [textSize, setTextSize] = useState<'normal' | 'large'>('normal');
-    const [showScrollTop, setShowScrollTop] = useState(false);
+    const [heroOffset, setHeroOffset] = useState(0);
+
+    // Mascot state
+    const mascotMood = scrollProgress > 75 ? 'excited' : 'happy';
+    const mascotSpeech =
+        scrollProgress < 10
+            ? 'Vhalani!'
+            : scrollProgress < 50
+                ? 'Ni khou ita zwavhuḓi!'
+                : scrollProgress < 80
+                    ? 'Ni tsini!'
+                    : 'Ndi zwone!';
+
+    const handleScroll = useCallback(() => {
+        const totalScroll = document.documentElement.scrollHeight - window.innerHeight;
+        const currentScroll = window.scrollY;
+        const progress = totalScroll > 0 ? (currentScroll / totalScroll) * 100 : 0;
+        setScrollProgress(progress);
+        setHeroOffset(currentScroll * 0.35);
+    }, []);
 
     useEffect(() => {
-        const handleScroll = () => {
-            const totalScroll = document.documentElement.scrollHeight - window.innerHeight;
-            const currentScroll = window.scrollY;
-            setScrollProgress((currentScroll / totalScroll) * 100);
-            setShowScrollTop(currentScroll > 400);
-        };
-
-        window.addEventListener('scroll', handleScroll);
+        window.addEventListener('scroll', handleScroll, { passive: true });
         return () => window.removeEventListener('scroll', handleScroll);
-    }, []);
+    }, [handleScroll]);
 
     // Intersection Observer for scroll animations
     useEffect(() => {
@@ -77,8 +90,20 @@ const HistoryDetail: React.FC = () => {
     }, [storyId, navigate]);
 
     if (loading) return (
-        <div className="min-vh-100 bg-white d-flex justify-content-center align-items-center">
-            <div className="spinner-border text-warning" role="status"></div>
+        <div className="min-vh-100 bg-white d-flex flex-column justify-content-center align-items-center gap-3">
+            <div className="mascot-loader">
+                <Mascot width="120px" height="120px" mood="excited" />
+            </div>
+            <p className="text-muted fw-semibold" style={{ fontFamily: "'Poppins', sans-serif", letterSpacing: '1.5px', fontSize: '12px', textTransform: 'uppercase' }}>
+                Loading story...
+            </p>
+            <style>{`
+                @keyframes loaderFloat {
+                    0%, 100% { transform: translateY(0); }
+                    50% { transform: translateY(-12px); }
+                }
+                .mascot-loader { animation: loaderFloat 1.5s ease-in-out infinite; }
+            `}</style>
         </div>
     );
 
@@ -138,12 +163,13 @@ const HistoryDetail: React.FC = () => {
     };
 
     return (
-        <div className={`bg-white min-vh-100 pb-5 text-size-${textSize}`}>
+        <div className="bg-white min-vh-100 pb-5">
             {/* READING PROGRESS BAR */}
             <div className="reading-progress-container">
                 <div className="reading-progress-bar" style={{ width: `${scrollProgress}%` }}></div>
             </div>
-            {/* ENHANCED IMAGE SECTION */}
+
+            {/* PARALLAX HERO IMAGE */}
             <div className="image-hero-container position-relative w-100 overflow-hidden shadow-sm animate-on-scroll">
                 {!imgError && story.imageUrl ? (
                     <>
@@ -151,11 +177,13 @@ const HistoryDetail: React.FC = () => {
                             src={story.imageUrl}
                             alt="Background Blur"
                             className="img-blur-layer"
+                            style={{ transform: `translateY(${heroOffset * 0.2}px) scale(1.1)` }}
                         />
                         <img
                             src={story.imageUrl}
                             alt={story.title}
                             className="img-main-focus"
+                            style={{ transform: `translateY(${heroOffset * 0.15}px)` }}
                             onError={() => setImgError(true)}
                         />
                         {/* COPYRIGHT SHORT NOTICE */}
@@ -183,14 +211,15 @@ const HistoryDetail: React.FC = () => {
             </div>
 
             <div className="container mt-5" style={{ maxWidth: '750px' }}>
+                {/* STAGGERED HEADER */}
                 <header className="mb-4 animate-on-scroll">
-                    <div className="d-flex align-items-center gap-3 mb-3">
+                    <div className="d-flex align-items-center gap-3 mb-3 stagger-item stagger-1">
                         <span className="meta-tag">{story.era}</span>
                         <div className="dot-separator"></div>
                         <span className="meta-tag">{story.readTime} MINUTES READ</span>
                     </div>
-                    <h1 className="display-5 fw-bold ls-tight mb-2 text-dark">{story.title}</h1>
-                    <p className="venda-subtitle">{story.vendaTitle}</p>
+                    <h1 className="display-5 fw-bold ls-tight mb-2 text-dark stagger-item stagger-2">{story.title}</h1>
+                    <p className="venda-subtitle stagger-item stagger-3">{story.vendaTitle}</p>
                 </header>
 
                 {/* REUSABLE PODCAST PLAYER */}
@@ -204,7 +233,10 @@ const HistoryDetail: React.FC = () => {
                 <article className="article-content">
                     {story.content.split('\n').map((paragraph, idx) => (
                         paragraph && (
-                            <p key={idx} className="content-paragraph animate-on-scroll">
+                            <p
+                                key={idx}
+                                className={`content-paragraph animate-on-scroll para-slide para-slide-${idx % 2 === 0 ? 'left' : 'right'}`}
+                            >
                                 {renderInteractiveContent(paragraph)}
                             </p>
                         )
@@ -212,9 +244,11 @@ const HistoryDetail: React.FC = () => {
                 </article>
 
                 {/* FUN FACT CARD */}
-                <div className="mt-5 p-4 rounded-4 fun-fact-card animate-on-scroll">
+                <div className="mt-5 p-4 rounded-4 fun-fact-card animate-on-scroll fun-fact-glow">
                     <div className="d-flex gap-3">
-                        <div className="fun-fact-icon">💡</div>
+                        <div className="fun-fact-icon text-warning">
+                            <Lightbulb size={24} />
+                        </div>
                         <div>
                             <h6 className="fw-bold smallest-print ls-1 uppercase mb-1 text-warning">Quick Insight</h6>
                             <p className="mb-0 small" style={{ lineHeight: '1.5' }}>
@@ -240,7 +274,9 @@ const HistoryDetail: React.FC = () => {
 
                 <div className="footer-nav mt-5 pt-5 border-top d-flex justify-content-between align-items-center animate-on-scroll">
                     <div className="d-flex align-items-center gap-3">
-                        <div className="cat-icon-small">{story.thumbnailEmoji}</div>
+                        <div className="cat-icon-small">
+                            <BookOpen size={20} className="text-warning" />
+                        </div>
                         <div>
                             <p className="smallest-print text-muted mb-0 uppercase ls-1">Culture Type</p>
                             <h6 className="fw-bold mb-0">{story.category}</h6>
@@ -249,36 +285,21 @@ const HistoryDetail: React.FC = () => {
                 </div>
             </div>
 
-            {/* FLOATING ACTION BAR */}
-            <div className={`floating-bar ${showScrollTop ? 'active' : ''}`}>
-                <div className="floating-bar-content mx-auto shadow-lg">
-                    <button
-                        className={`btn-action ${textSize === 'large' ? 'active' : ''}`}
-                        onClick={() => setTextSize(textSize === 'normal' ? 'large' : 'normal')}
-                        title="Toggle Text Size"
-                    >
-                        <i className="bi bi-fonts fs-5"></i>
-                    </button>
-                    <div className="action-divider"></div>
-                    <button
-                        className="btn-action"
-                        onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-                        title="Scroll to Top"
-                    >
-                        <i className="bi bi-arrow-up-short fs-4"></i>
-                    </button>
-                    <div className="action-divider"></div>
-                    <button
-                        className="btn-action"
-                        onClick={() => navigate('/history')}
-                        title="Back to History"
-                    >
-                        <i className="bi bi-grid fs-5"></i>
-                    </button>
+            {/* FLOATING MASCOT COMPANION */}
+            <div className="mascot-reading-companion">
+                <div className="mascot-speech-bubble">
+                    <span>{mascotSpeech}</span>
                 </div>
+                <Mascot
+                    width="80px"
+                    height="80px"
+                    mood={mascotMood}
+                />
             </div>
 
+
             <style>{`
+                /* ===== READING PROGRESS ===== */
                 .reading-progress-container {
                     position: fixed;
                     top: 0; left: 0; right: 0;
@@ -288,10 +309,12 @@ const HistoryDetail: React.FC = () => {
                 }
                 .reading-progress-bar {
                     height: 100%;
-                    background: #FACC15;
+                    background: linear-gradient(90deg, #FACC15, #F59E0B, #EF4444);
                     transition: width 0.1s ease;
+                    box-shadow: 0 0 8px rgba(250, 204, 21, 0.5);
                 }
 
+                /* ===== HERO IMAGE ===== */
                 .image-hero-container {
                     height: 45vh;
                     min-height: 350px;
@@ -305,6 +328,8 @@ const HistoryDetail: React.FC = () => {
                     filter: blur(20px) brightness(0.6);
                     left: -5%;
                     top: -5%;
+                    transition: transform 0.05s linear;
+                    will-change: transform;
                 }
                 .img-main-focus {
                     position: relative;
@@ -312,6 +337,8 @@ const HistoryDetail: React.FC = () => {
                     height: 100%;
                     object-fit: contain;
                     z-index: 1;
+                    transition: transform 0.05s linear;
+                    will-change: transform;
                 }
                 .img-gradient-overlay {
                     background: linear-gradient(transparent, rgba(0,0,0,0.7));
@@ -338,6 +365,11 @@ const HistoryDetail: React.FC = () => {
                     align-items: center;
                     justify-content: center;
                     z-index: 3;
+                    transition: all 0.3s ease;
+                }
+                .btn-back-blur:hover {
+                    background: rgba(255, 255, 255, 0.35);
+                    transform: scale(1.1);
                 }
                 .badge-venda {
                     background: #FACC15;
@@ -357,8 +389,7 @@ const HistoryDetail: React.FC = () => {
                 
                 .venda-subtitle { font-size: 1.25rem; color: #EAB308; font-weight: 600; }
                 
-                .text-size-large .content-paragraph { font-size: 1.4rem; }
-                .text-size-normal .content-paragraph { font-size: 1.15rem; }
+                .content-paragraph { font-size: 1.15rem; }
 
                 .content-paragraph {
                     line-height: 1.8;
@@ -379,16 +410,60 @@ const HistoryDetail: React.FC = () => {
                     border-bottom-color: #FACC15;
                 }
 
+                /* ===== STAGGERED HEADER ENTRANCE ===== */
+                @keyframes fadeInUp {
+                    from { opacity: 0; transform: translateY(24px); }
+                    to   { opacity: 1; transform: translateY(0); }
+                }
+                .animate-on-scroll.visible .stagger-item {
+                    animation: fadeInUp 0.7s ease-out forwards;
+                    opacity: 0;
+                }
+                .stagger-1 { animation-delay: 0.1s !important; }
+                .stagger-2 { animation-delay: 0.3s !important; }
+                .stagger-3 { animation-delay: 0.5s !important; }
+
+                /* ===== PARAGRAPH SLIDE-IN ===== */
+                @keyframes slideInLeft {
+                    from { opacity: 0; transform: translateX(-40px); }
+                    to   { opacity: 1; transform: translateX(0); }
+                }
+                @keyframes slideInRight {
+                    from { opacity: 0; transform: translateX(40px); }
+                    to   { opacity: 1; transform: translateX(0); }
+                }
+                .para-slide {
+                    opacity: 0;
+                }
+                .para-slide.visible {
+                    opacity: 1;
+                }
+                .para-slide-left.visible {
+                    animation: slideInLeft 0.6s ease-out forwards;
+                }
+                .para-slide-right.visible {
+                    animation: slideInRight 0.6s ease-out forwards;
+                }
+
+                /* ===== FUN FACT GLOW ===== */
                 .fun-fact-card {
                     background: #111827;
                     color: #fff;
                     border: none;
+                    transition: box-shadow 0.4s ease;
                 }
                 .fun-fact-icon {
                     font-size: 24px;
                 }
+                @keyframes pulseGlow {
+                    0%, 100% { box-shadow: 0 0 0 0 rgba(250, 204, 21, 0); }
+                    50%      { box-shadow: 0 0 24px 4px rgba(250, 204, 21, 0.25); }
+                }
+                .fun-fact-glow.visible {
+                    animation: pulseGlow 2.5s ease-in-out 3;
+                }
 
-                /* ANIMATIONS */
+                /* ===== SCROLL REVEAL BASE ===== */
                 .animate-on-scroll {
                     opacity: 0;
                     transform: translateY(20px);
@@ -399,59 +474,87 @@ const HistoryDetail: React.FC = () => {
                     transform: translateY(0);
                 }
 
-                /* FLOATING BAR */
-                .floating-bar {
+                /* ===== FLOATING MASCOT COMPANION ===== */
+                @keyframes mascotFloat {
+                    0%, 100% { transform: translateY(0); }
+                    50%      { transform: translateY(-8px); }
+                }
+                @keyframes speechPop {
+                    0%   { opacity: 0; transform: translateY(6px) scale(0.9); }
+                    100% { opacity: 1; transform: translateY(0) scale(1); }
+                }
+                .mascot-reading-companion {
                     position: fixed;
-                    bottom: 30px;
-                    left: 0; right: 0;
-                    z-index: 1000;
-                    transform: translateY(100px);
-                    transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-                }
-                .floating-bar.active {
-                    transform: translateY(0);
-                }
-                .floating-bar-content {
-                    width: fit-content;
-                    background: rgba(17, 24, 39, 0.95);
-                    backdrop-filter: blur(10px);
-                    padding: 8px 16px;
-                    border-radius: 50px;
+                    bottom: 100px;
+                    right: 20px;
+                    z-index: 999;
                     display: flex;
+                    flex-direction: column;
                     align-items: center;
-                    gap: 15px;
-                    border: 1px solid rgba(255,255,255,0.1);
+                    animation: mascotFloat 3s ease-in-out infinite;
+                    filter: drop-shadow(0 4px 12px rgba(0,0,0,0.12));
                 }
-                .btn-action {
-                    background: none;
-                    border: none;
-                    color: #9ca3af;
-                    padding: 8px;
-                    border-radius: 50%;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    transition: all 0.2s;
+                .mascot-speech-bubble {
+                    background: white;
+                    border: 2px solid #FACC15;
+                    border-radius: 16px;
+                    padding: 6px 14px;
+                    margin-bottom: 6px;
+                    font-size: 12px;
+                    font-weight: 700;
+                    font-family: 'Poppins', sans-serif;
+                    color: #111827;
+                    white-space: nowrap;
+                    box-shadow: 0 4px 16px rgba(250, 204, 21, 0.18);
+                    animation: speechPop 0.4s ease-out;
+                    position: relative;
                 }
-                .btn-action:hover { color: #fff; background: rgba(255,255,255,0.1); }
-                .btn-action.active { color: #FACC15; }
-                .action-divider {
-                    width: 1px;
-                    height: 20px;
-                    background: rgba(255,255,255,0.1);
+                .mascot-speech-bubble::after {
+                    content: '';
+                    position: absolute;
+                    bottom: -7px;
+                    left: 50%;
+                    transform: translateX(-50%);
+                    width: 0; height: 0;
+                    border-left: 7px solid transparent;
+                    border-right: 7px solid transparent;
+                    border-top: 7px solid #FACC15;
                 }
+
 
                 .swal2-venda-style {
                     border-radius: 24px !important;
                     font-family: 'Poppins', sans-serif !important;
                 }
-                
-                /* Player styles removed as they are now in PodcastPlayer component */
+
+                /* ===== MOBILE RESPONSIVE ===== */
+                @media (max-width: 576px) {
+                    .image-hero-container {
+                        height: 30vh;
+                        min-height: 220px;
+                    }
+                    .mascot-reading-companion {
+                        bottom: 80px;
+                        right: 8px;
+                        transform: scale(0.6);
+                        transform-origin: bottom right;
+                    }
+                    .mascot-speech-bubble {
+                        font-size: 9px;
+                        padding: 3px 8px;
+                    }
+                }
+                @media (max-width: 400px) {
+                    .mascot-reading-companion {
+                        bottom: 75px;
+                        right: 5px;
+                        transform: scale(0.5);
+                        transform-origin: bottom right;
+                    }
+                }
             `}</style>
         </div>
     );
 };
 
 export default HistoryDetail;
-
-

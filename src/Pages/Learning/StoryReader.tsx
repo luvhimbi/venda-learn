@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import {
     ChevronLeft, ChevronRight, X, Settings,
-    BookOpen, CheckCircle, ZoomIn, ZoomOut, ChevronDown, Volume2, VolumeX
+    BookOpen, CheckCircle, ZoomIn, ZoomOut, ChevronDown, Volume2, VolumeX,
+    PartyPopper
 } from 'lucide-react';
 
 /* ───── Types ───── */
@@ -146,7 +147,9 @@ const StoryReader: React.FC<Props> = ({ story, onClose, onFinish, alreadyClaimed
             <div className="ngano-root">
                 <div className="ngano-cover-wrap">
                     <div className="ngano-done-card">
-                        <div className="ngano-done-icon">🎉</div>
+                        <div className="ngano-done-icon text-warning">
+                            <PartyPopper size={64} />
+                        </div>
                         <h2 className="ngano-done-title">Zwi vhuya! Well done!</h2>
                         <p className="ngano-done-sub">You finished <strong>{story.title}</strong></p>
 
@@ -243,7 +246,9 @@ const StoryReader: React.FC<Props> = ({ story, onClose, onFinish, alreadyClaimed
                         {/* Vocab */}
                         {story.vocabulary.filter(v => text.toLowerCase().includes(v.word.toLowerCase())).length > 0 && (
                             <div className="ngano-vocab">
-                                <div className="ngano-vocab-hd">📖 Vocabulary</div>
+                                <div className="ngano-vocab-hd d-flex align-items-center gap-2">
+                                    <BookOpen size={14} className="text-muted" /> Vocabulary
+                                </div>
                                 <div className="ngano-vocab-chips">
                                     {story.vocabulary
                                         .filter(v => text.toLowerCase().includes(v.word.toLowerCase()))

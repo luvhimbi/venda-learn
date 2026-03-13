@@ -5,64 +5,64 @@ export interface SentencePuzzle {
     id: string;
     words: string[];
     translation: string;
-    difficulty: 'Easy' | 'Medium' | 'Hard';
+    difficulty: 'Beginner' | 'Intermediate' | 'Advanced';
 }
 
 const sentenceData = [
     {
         words: ["Ndi", "funa", "zwiliwa"],
         translation: "I like food",
-        difficulty: "Easy"
+        difficulty: "Beginner"
     },
     {
         words: ["Ndo", "livhuwa"],
         translation: "Thank you (I possess gratitude)",
-        difficulty: "Easy"
+        difficulty: "Beginner"
     },
     {
         words: ["Ni", "khou", "ita", "mini?"],
         translation: "What are you doing?",
-        difficulty: "Medium"
+        difficulty: "Intermediate"
     },
     {
         words: ["Ndi", "matsheloni", "avhudi"],
         translation: "Good morning (It is a beautiful morning)",
-        difficulty: "Medium"
+        difficulty: "Intermediate"
     },
     {
-        words: ["Muthu", "ndi", "Muthu","nga", "vhathu"],
+        words: ["Muthu", "ndi", "Muthu", "nga", "vhathu"],
         translation: "A person is a person through other people",
-        difficulty: "Hard"
+        difficulty: "Advanced"
     },
     {
-        words: ["Ndina",  "ndala"],
+        words: ["Ndina", "ndala"],
         translation: "I am hungry",
-        difficulty: "Easy"
+        difficulty: "Beginner"
     },
     {
-        words: ["Ni", "Kho u","bva", "gai?"],
+        words: ["Ni", "Kho u", "bva", "gai?"],
         translation: "Where are you from?",
-        difficulty: "Easy"
+        difficulty: "Beginner"
     },
     {
-        words: ["Ni", "Kho uya ","gai"],
+        words: ["Ni", "Kho uya ", "gai"],
         translation: "Where are you going?",
-        difficulty: "Easy"
+        difficulty: "Beginner"
     },
     {
-        words: ["Ni", "do vhuya nga  ","tshifhinga-de"],
+        words: ["Ni", "do vhuya nga  ", "tshifhinga-de"],
         translation: "What time are you coming back?",
-        difficulty: "Easy"
+        difficulty: "Beginner"
     },
     {
-        words: ["Ndi", "ani ","funa"],
+        words: ["Ndi", "ani ", "funa"],
         translation: "I love you",
-        difficulty: "Easy"
+        difficulty: "Beginner"
     },
     {
-        words: ["Ndi ", "Kho uya "," u vhala"],
+        words: ["Ndi ", "Kho uya ", " u vhala"],
         translation: "Am going to study",
-        difficulty: "Easy"
+        difficulty: "Beginner"
     }
 ];
 

@@ -24,9 +24,7 @@ const Register: React.FC = () => {
         username: '',
         email: '',
         password: '',
-        confirmPassword: '',
-        isNativeSpeaker: false,
-        nativeSpeakerBio: ''
+        confirmPassword: ''
     });
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
@@ -36,10 +34,10 @@ const Register: React.FC = () => {
     const referrerId = searchParams.get('ref');
 
     const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
-        const { name, value, type, checked } = e.target;
+        const { name, value } = e.target;
         setFormData(prev => ({
             ...prev,
-            [name]: type === 'checkbox' ? checked : value
+            [name]: value
         }));
     };
 
@@ -47,7 +45,7 @@ const Register: React.FC = () => {
         e.preventDefault();
         setError(null);
         if (formData.password !== formData.confirmPassword) {
-            setError("Phaswidzi dza vhoiwe dzo fhambana!");
+            setError("Passwords do not match!");
             return;
         }
         setLoading(true);
@@ -60,9 +58,7 @@ const Register: React.FC = () => {
                 level: 1,
                 streak: 0,
                 completedLessons: [],
-                isNativeSpeaker: false, // Remains false until verified
-                nativeVerificationStatus: formData.isNativeSpeaker ? 'pending' : 'none',
-                nativeSpeakerBio: formData.isNativeSpeaker ? formData.nativeSpeakerBio : "",
+                isNativeSpeaker: false,
                 tourCompleted: false,
                 createdAt: new Date().toISOString()
             });
@@ -83,7 +79,7 @@ const Register: React.FC = () => {
             }
             navigate('/');
         } catch (err: any) {
-            setError(err.code === 'auth/email-already-in-use' ? "Iyi imeili yo no shumiswa." : err.message);
+            setError(err.code === 'auth/email-already-in-use' ? "This email is already in use." : err.message);
         } finally { setLoading(false); }
     };
 
@@ -107,8 +103,6 @@ const Register: React.FC = () => {
                     streak: 0,
                     completedLessons: [],
                     isNativeSpeaker: false,
-                    nativeVerificationStatus: 'none',
-                    nativeSpeakerBio: "",
                     tourCompleted: false,
                     createdAt: new Date().toISOString()
                 });
@@ -123,7 +117,7 @@ const Register: React.FC = () => {
             navigate('/');
         } catch (err: any) {
             console.error("Google Sign-In Error:", err);
-            setError("Tshivhumbeo tsha Google tsho kundwa. Kha vha dovhe hafhu.");
+            setError("Google sign-in failed. Please try again.");
         } finally {
             setLoading(false);
         }
@@ -133,8 +127,9 @@ const Register: React.FC = () => {
         <div className="min-vh-100 d-flex align-items-center justify-content-center bg-white px-3 py-5">
             <div className="w-100" style={{ maxWidth: '450px' }}>
 
-                <div className="text-center mb-4 animate__animated animate__fadeIn">
-                    <h3 className="fw-bold ls-1 text-dark mb-1">Register</h3>
+                <div className="text-center mb-4 animate__animated animate__fadeInDown">
+                    <h2 className="fw-bold ls-tight text-dark mb-2">Start Your Journey</h2>
+                    <p className="text-muted mb-0">Create an account to track your progress and earn rewards!</p>
                 </div>
 
                 {error && (
@@ -171,45 +166,6 @@ const Register: React.FC = () => {
                             </div>
                         </div>
                     </div>
-
-                    <div className="mb-3 p-2.5 rounded-3 border d-flex align-items-start gap-3 bg-light border-light">
-                        <div className="form-check form-switch pt-1">
-                            <input
-                                className="form-check-input"
-                                type="checkbox"
-                                name="isNativeSpeaker"
-                                id="isNativeSpeaker"
-                                checked={formData.isNativeSpeaker}
-                                onChange={handleChange}
-                                disabled={loading}
-                            />
-                        </div>
-                        <div>
-                            <label className="form-check-label fw-bold d-block mb-1" style={{ fontSize: '12px' }} htmlFor="isNativeSpeaker">
-                                I am a Native Venda Speaker
-                            </label>
-                            <p className="text-muted mb-0" style={{ fontSize: '10px', lineHeight: '1.4' }}>
-                                Your status will be pending until verified by an admin. Once verified, you'll appear in the Practice Hub.
-                            </p>
-                        </div>
-                    </div>
-
-                    {formData.isNativeSpeaker && (
-                        <div className="mb-3 animate__animated animate__fadeIn">
-                            <label className="form-label smallest fw-bold text-uppercase text-muted ls-1">Why do you want to be a native speaker?</label>
-                            <div className="custom-input-group">
-                                <input
-                                    name="nativeSpeakerBio"
-                                    type="text"
-                                    className="form-control border-0 bg-transparent fs-6 px-0"
-                                    onChange={handleChange}
-                                    required={formData.isNativeSpeaker}
-                                    disabled={loading}
-                                />
-                            </div>
-                            <p className="smallest text-muted mt-1">This helps us vet your profile for the Practice Hub.</p>
-                        </div>
-                    )}
 
                     <div className="mb-4 d-flex justify-content-center">
                         <ReCAPTCHA

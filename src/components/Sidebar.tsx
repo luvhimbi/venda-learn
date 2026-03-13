@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { onAuthStateChanged, signOut, type User } from 'firebase/auth';
-import { doc, onSnapshot, collection, query, where } from 'firebase/firestore';
+import { doc, onSnapshot } from 'firebase/firestore';
 import { auth, db } from '../services/firebaseConfig';
 import { invalidateCache } from '../services/dataCache';
 import Mascot from './Mascot';
+import { AvatarDisplay } from './AvatarPicker';
 
 const LogoutModal: React.FC<{ onClose: () => void, onConfirm: () => void }> = ({ onClose, onConfirm }) => (
     <div className="position-fixed top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center bg-black bg-opacity-50" style={{ zIndex: 1050 }}>
@@ -28,8 +29,7 @@ const LogoutModal: React.FC<{ onClose: () => void, onConfirm: () => void }> = ({
 
 const Sidebar: React.FC = () => {
     const [user, setUser] = useState<User | null>(null);
-    const [userData, setUserData] = useState<{ username: string, points: number, role?: string } | null>(null);
-    const [chatCount, setChatCount] = useState(0);
+    const [userData, setUserData] = useState<{ username: string, points: number, avatarId?: string, role?: string } | null>(null);
     const [showLogout, setShowLogout] = useState(false);
     const navigate = useNavigate();
     const location = useLocation();
@@ -44,31 +44,14 @@ const Sidebar: React.FC = () => {
                         setUserData({
                             username: docSnap.data().username || '',
                             points: docSnap.data().points || 0,
+                            avatarId: docSnap.data().avatarId,
                             role: docSnap.data().role
                         });
                     }
-                });
-
-                const unsubscribeChats = onSnapshot(
-                    query(collection(db, "chats"), where("participants", "array-contains", currentUser.uid)),
-                    (snap) => {
-                        let totalUnread = 0;
-                        snap.docs.forEach(doc => {
-                            const data = doc.data();
-                            // Only count if not deleted by current user
-                            const isDeleted = data.deletedBy?.includes(currentUser.uid);
-                            if (!isDeleted) {
-                                const count = data.unreadCount?.[currentUser.uid] || 0;
-                                totalUnread += count;
-                            }
-                        });
-                        setChatCount(totalUnread);
-                    }
-                );
+                }, (err) => console.warn('Sidebar user listener error:', err.message));
 
                 return () => {
                     unsubDoc();
-                    unsubscribeChats();
                 };
             }
         });
@@ -93,9 +76,8 @@ const Sidebar: React.FC = () => {
     const navItems: { path: string, label: string, icon: string, badge?: number, tourClass?: string }[] = [
         { path: '/', label: 'Home', icon: 'bi-house-heart-fill', tourClass: 'tour-sidebar-home' },
         { path: '/courses', label: 'Lessons', icon: 'bi-journal-bookmark-fill', tourClass: 'tour-sidebar-lessons' },
-        { path: '/ngano', label: 'Ngano', icon: 'bi-book-half', tourClass: 'tour-sidebar-ngano' },
+        { path: '/ngano', label: 'Stories', icon: 'bi-book-half', tourClass: 'tour-sidebar-ngano' },
         { path: '/history', label: 'Culture', icon: 'bi-bank2', tourClass: 'tour-sidebar-culture' },
-        { path: '/practice', label: 'Practice', icon: 'bi-chat-heart-fill', badge: chatCount, tourClass: 'tour-sidebar-practice' },
         { path: '/mitambo', label: 'Games', icon: 'bi-controller', tourClass: 'tour-sidebar-games' },
         { path: '/muvhigo', label: 'Progress', icon: 'bi-graph-up-arrow' },
         { path: '/profile', label: 'Profile', icon: 'bi-person-circle', tourClass: 'tour-sidebar-profile' },
@@ -108,26 +90,24 @@ const Sidebar: React.FC = () => {
             {/* MOBILE TOP BAR (Hidden on Desktop) */}
             <div className="d-lg-none mobile-top-bar bg-white border-bottom px-4 d-flex align-items-center justify-content-between sticky-top shadow-sm">
                 <div className="d-flex align-items-center">
-                    <div
-                        className="bg-warning rounded-pill d-flex align-items-center justify-content-center flex-shrink-0"
-                        style={{ width: '32px', height: '32px' }}
-                    >
-                        <span className="fw-bold smallest">V</span>
+                    <div className="text-slate rounded-2 d-flex align-items-center justify-content-center fw-bold flex-shrink-0 bg-warning shadow-sm me-2"
+                        style={{ width: '32px', height: '32px', fontSize: '0.9rem' }}>
+                        V
                     </div>
                     <span
                         className="fw-bold ls-tight mb-0"
-                        style={{ marginLeft: '-4px' }} // Negative margin to pull text closer to the 'V' circle
                     >
                         VENDA<span className="text-warning">LEARN</span>
                     </span>
                 </div>
 
-                {/* Mobile Profile Link */}
+                {/* Mobile Profile Link - Avatar now shows here instead of initial */}
                 <Link to="/profile" className="d-flex align-items-center gap-2 text-decoration-none bg-light rounded-pill pe-3 p-1 border">
-                    <div className="bg-warning rounded-circle d-flex align-items-center justify-content-center fw-bold text-slate border shadow-sm"
-                        style={{ width: '28px', height: '28px', fontSize: '12px' }}>
-                        {userData?.username.charAt(0).toUpperCase() || (user?.isAnonymous ? 'G' : 'W')}
-                    </div>
+                    <AvatarDisplay
+                        avatarId={userData?.avatarId || 'adventurer'}
+                        seed={userData?.username || 'warrior'}
+                        size={28}
+                    />
                     <span className="smallest fw-bold text-muted ls-1">{userData?.points || 0} LP {user?.isAnonymous && <span className="text-secondary">(G)</span>}</span>
                 </Link>
             </div>
@@ -173,10 +153,11 @@ const Sidebar: React.FC = () => {
                 <div className="sidebar-footer p-2 border-top bg-light-subtle">
                     <div className="user-profile-card bg-white border rounded-4 p-2 shadow-sm tour-sidebar-footer">
                         <div className="d-flex align-items-center gap-2 mb-2">
-                            <div className="profile-avatar bg-warning rounded-circle d-flex align-items-center justify-content-center fw-bold text-slate border-0 shadow-sm"
-                                style={{ width: '36px', height: '36px' }}>
-                                {userData?.username.charAt(0).toUpperCase() || 'W'}
-                            </div>
+                            <AvatarDisplay
+                                avatarId={userData?.avatarId || 'adventurer'}
+                                seed={userData?.username || 'warrior'}
+                                size={36}
+                            />
                             <div className="overflow-hidden">
                                 <div className="d-flex align-items-center gap-1">
                                     <h6 className="fw-bold mb-0 text-truncate small">{userData?.username || (user?.isAnonymous ? "Guest Learner" : "Warrior")}</h6>
@@ -193,13 +174,13 @@ const Sidebar: React.FC = () => {
             </aside>
 
             {/* MOBILE BOTTOM NAV (Mobile Only) */}
-            <nav className="mobile-bottom-nav fixed-bottom bg-white border-top d-lg-none d-flex align-items-center px-2 py-1 justify-content-between overflow-x-auto no-scrollbar shadow-lg">
+            <nav className="mobile-bottom-nav fixed-bottom bg-white border-top d-lg-none d-flex align-items-center px-1 py-1 overflow-x-auto no-scrollbar shadow-lg">
                 {navItems.map((item) => (
                     <Link
                         key={item.path}
                         to={item.path}
-                        className={`d-flex flex-column align-items-center justify-content-center p-2 rounded-3 text-decoration-none transition-all flex-grow-1 ${item.tourClass || ''} ${isActive(item.path) ? 'text-primary' : 'text-muted'}`}
-                        style={{ minWidth: '65px' }}
+                        className={`d-flex flex-column align-items-center justify-content-center p-2 rounded-3 text-decoration-none transition-all flex-grow-1 flex-shrink-0 ${item.tourClass || ''} ${isActive(item.path) ? 'text-primary' : 'text-muted'}`}
+                        style={{ minWidth: '70px' }}
                     >
                         <div className={`position-relative mb-1 rounded-circle d-flex align-items-center justify-content-center ${isActive(item.path) ? 'bg-primary-subtle' : ''}`} style={{ width: '32px', height: '32px' }}>
                             <i className={`bi ${item.icon} ${isActive(item.path) ? 'fs-5 text-primary' : 'fs-5'}`}></i>
@@ -209,10 +190,9 @@ const Sidebar: React.FC = () => {
                                 </span>
                             )}
                         </div>
-                        <span className="fw-bold ls-1 d-none d-sm-block" style={{ fontSize: '9px', textTransform: 'uppercase' }}>{item.label}</span>
+                        <span className="fw-bold ls-1" style={{ fontSize: '9px', textTransform: 'uppercase' }}>{item.label}</span>
                     </Link>
                 ))}
-
             </nav>
 
             <style>{`

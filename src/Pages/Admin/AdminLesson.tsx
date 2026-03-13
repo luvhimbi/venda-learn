@@ -150,7 +150,10 @@ const AdminLessons: React.FC = () => {
                                         <div className="row align-items-center">
                                             <div className="col-md-8">
                                                 <div className="d-flex align-items-center gap-3 mb-2">
-                                                    <span className="badge rounded-pill bg-light border text-dark smallest ls-1 fw-bold text-uppercase px-3">
+                                                    <span className={`badge rounded-pill smallest ls-1 fw-bold text-uppercase px-3 ${lesson.difficulty === 'Beginner' ? 'bg-success text-white' :
+                                                            lesson.difficulty === 'Intermediate' ? 'bg-warning text-dark' :
+                                                                'bg-danger text-white'
+                                                        }`}>
                                                         {lesson.difficulty}
                                                     </span>
                                                     <span className="text-muted smallest fw-bold ls-1">ID: {lesson.id}</span>

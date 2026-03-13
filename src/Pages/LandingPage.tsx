@@ -1,7 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import LandingNavbar from '../components/LandingNavbar';
-import LandingFooter from '../components/LandingFooter';
 import Mascot from '../components/Mascot';
 
 const LandingPage: React.FC = () => {
@@ -13,13 +12,9 @@ const LandingPage: React.FC = () => {
 
             {/* --- HERO SECTION --- */}
             <header className="position-relative overflow-hidden pt-5 pb-5" style={{ background: 'linear-gradient(135deg, #FFFBEB 0%, #FEF3C7 100%)' }}>
-                <div className="container position-relative z-1 pt-5 mt-5 mb-5" style={{ maxWidth: '1100px' }}>
+                <div className="container position-relative z-1 pt-5 mt-3 mb-5" style={{ maxWidth: '1100px' }}>
                     <div className="row align-items-center">
                         <div className="col-lg-6 mb-5 mb-lg-0 order-2 order-lg-1 text-center text-lg-start">
-                            <div className="d-inline-flex align-items-center gap-2 px-3 py-1 rounded-pill bg-white shadow-sm mb-4 border border-warning animate__animated animate__fadeInDown">
-                                <span className="badge rounded-pill bg-primary">NEW</span>
-                                <span className="smallest fw-bold text-muted ls-1 uppercase">Native Speaker Chat is Live!</span>
-                            </div>
                             <h1 className="display-4 fw-bold ls-tight mb-4 text-slate animate__animated animate__fadeInUp">
                                 Learn <span className="text-warning">Tshivenda</span><br />
                                 The Fun Way.
@@ -70,24 +65,24 @@ const LandingPage: React.FC = () => {
                 </div>
             </header>
 
-            {/* --- STATS SECTION --- */}
-            <section className="py-5 bg-white">
-                <div className="container" style={{ maxWidth: '1100px' }}>
-                    <div className="row g-4 text-center">
-                        {[
-                            { label: 'Active Learners', val: '10k+' },
-                            { label: 'Interactive Lessons', val: '500+' },
-                            { label: 'Native Speakers', val: '50+' },
-                            { label: 'App Rating', val: '4.9/5' },
-                        ].map((stat, idx) => (
-                            <div key={idx} className="col-6 col-md-3">
-                                <h2 className="fw-bold mb-0 text-slate ls-tight">{stat.val}</h2>
-                                <p className="text-muted smallest uppercase ls-2 fw-bold">{stat.label}</p>
-                            </div>
-                        ))}
-                    </div>
-                </div>
-            </section>
+            {/*/!* --- STATS SECTION --- *!/*/}
+            {/*<section className="py-5 bg-white">*/}
+            {/*    <div className="container" style={{ maxWidth: '1100px' }}>*/}
+            {/*        <div className="row g-4 text-center">*/}
+            {/*            {[*/}
+            {/*                { label: 'Active Learners', val: '10k+' },*/}
+            {/*                { label: 'Interactive Lessons', val: '500+' },*/}
+            {/*                { label: 'Native Speakers', val: '50+' },*/}
+            {/*                { label: 'App Rating', val: '4.9/5' },*/}
+            {/*            ].map((stat, idx) => (*/}
+            {/*                <div key={idx} className="col-6 col-md-3">*/}
+            {/*                    <h2 className="fw-bold mb-0 text-slate ls-tight">{stat.val}</h2>*/}
+            {/*                    <p className="text-muted smallest uppercase ls-2 fw-bold">{stat.label}</p>*/}
+            {/*                </div>*/}
+            {/*            ))}*/}
+            {/*        </div>*/}
+            {/*    </div>*/}
+            {/*</section>*/}
 
             {/* --- FEATURES GRID --- */}
             <section className="py-5 my-5">
@@ -172,7 +167,6 @@ const LandingPage: React.FC = () => {
                 </div>
             </section>
 
-            <LandingFooter />
 
             <style>{`
                 .hover-lift:hover { transform: translateY(-5px); box-shadow: 0 10px 30px rgba(0,0,0,0.1) !important; }

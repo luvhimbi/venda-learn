@@ -4,7 +4,7 @@ import { doc, updateDoc, increment } from 'firebase/firestore';
 import { auth, db } from '../../services/firebaseConfig';
 import Swal from 'sweetalert2';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Delete, Loader2, Lightbulb } from 'lucide-react';
+import { ArrowLeft, Delete, Loader2, Lightbulb, AlertCircle, CheckCircle2 } from 'lucide-react';
 import { useRef } from 'react';
 
 interface PuzzleWord {
@@ -203,7 +203,8 @@ const WordPuzzle: React.FC = () => {
 
                 {/* FEEDBACK MESSAGE */}
                 {message && (
-                    <div className={`alert ${message.type === 'error' ? 'alert-danger' : 'alert-success'} py-2 text-center fw-bold shadow-sm mb-3 animate__animated animate__fadeIn`}>
+                    <div className={`alert ${message.type === 'error' ? 'alert-danger text-danger' : 'alert-success text-success'} py-2 px-3 text-center fw-bold shadow-sm mb-3 animate__animated animate__fadeIn d-flex align-items-center justify-content-center gap-2`}>
+                        {message.type === 'error' ? <AlertCircle size={18} /> : <CheckCircle2 size={18} />}
                         {message.text}
                     </div>
                 )}

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, CheckCircle, XCircle, Trophy, Loader2, ArrowRight } from 'lucide-react';
+import { ArrowLeft, CheckCircle, XCircle, Trophy, Loader2, ArrowRight, Star, BookOpen } from 'lucide-react';
 import MultipleChoiceQuestion from '../../components/Game/MultipleChoiceQuestion';
 import TrueFalseQuestion from '../../components/Game/TrueFalseQuestion';
 import FillBlankQuestion from '../../components/Game/FillBlankQuestion';
@@ -114,10 +114,10 @@ const DailyChallenge: React.FC = () => {
                             style={{ width: `${(score / questions.length) * 100}%` }}>
                         </div>
                     </div>
-                    <p className="small text-muted mb-4">
-                        {score === questions.length ? "Perfect score! 🌟" :
-                            score > questions.length * 0.7 ? "Great job! Keep it up! 💪" :
-                                "Good practice! Come back tomorrow! 📚"}
+                    <p className="small text-muted mb-4 d-flex align-items-center justify-content-center gap-2">
+                        {score === questions.length ? <span><Star size={14} className="text-warning" fill="currentColor" /> Perfect score!</span> :
+                            score > questions.length * 0.7 ? <span><CheckCircle size={14} className="text-success" /> Great job! Keep it up!</span> :
+                                <span><BookOpen size={14} className="text-muted" /> Good practice! Come back tomorrow!</span>}
                     </p>
                     <button onClick={() => navigate('/practice')} className="btn btn-dark btn-lg w-100 rounded-pill fw-bold">
                         Back to Practice Hub
