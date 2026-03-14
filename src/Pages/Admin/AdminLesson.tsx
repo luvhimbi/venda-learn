@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { db } from '../../services/firebaseConfig';
-import { collection, doc, deleteDoc, addDoc, serverTimestamp } from 'firebase/firestore';
+import { collection, doc, deleteDoc, addDoc, updateDoc, serverTimestamp } from 'firebase/firestore';
 import { Link } from 'react-router-dom';
 import AdminNavbar from '../../components/AdminNavbar';
 import { fetchLessons as fetchLessonsFromCache, invalidateCache, getMicroLessons } from '../../services/dataCache';
 import { seedLessons } from '../../services/seedDatabase';
 import Swal from 'sweetalert2';
-import { Trash2, Edit, Plus, RefreshCw, Loader2 } from 'lucide-react';
+import { Trash2, Edit, Plus, RefreshCw, Loader2, Download, ArrowDownUp } from 'lucide-react';
 
 const AdminLessons: React.FC = () => {
     const [lessons, setLessons] = useState<any[]>([]);
@@ -102,6 +102,71 @@ const AdminLessons: React.FC = () => {
         }
     };
 
+    const handleExport = (lesson: any) => {
+        try {
+            // Convert lesson object to formatted JSON string
+            const dataStr = JSON.stringify(lesson, null, 2);
+            // Create a blob and URL
+            const blob = new Blob([dataStr], { type: "application/json" });
+            const url = URL.createObjectURL(blob);
+            // Create temporary link and trigger download
+            const link = document.createElement("a");
+            link.href = url;
+            link.download = `course-${lesson.id}.json`;
+            document.body.appendChild(link);
+            link.click();
+            // Cleanup
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+            
+            createAuditLog("EXPORT", `Exported course data for: ${lesson.id}`, lesson.id);
+        } catch (error) {
+            console.error("Export error:", error);
+            Swal.fire({
+                title: 'Export Failed',
+                text: 'Could not export course data.',
+                icon: 'error',
+                confirmButtonColor: '#DC2626'
+            });
+        }
+    };
+
+    const handleUpdateOrder = async (lessonId: string, currentOrder: number | undefined, newValue: string) => {
+        const newOrder = parseInt(newValue, 10);
+        // If empty or invalid, or hasn't changed, do nothing
+        if (isNaN(newOrder) || newOrder === currentOrder) return;
+
+        try {
+            await updateDoc(doc(db, "lessons", lessonId), {
+                order: newOrder
+            });
+            createAuditLog("UPDATE", `Updated order for course ${lessonId} to ${newOrder}`, lessonId);
+            
+            // Show a non-intrusive toast success
+            Swal.fire({
+                toast: true,
+                position: 'bottom-end',
+                icon: 'success',
+                title: 'Order updated',
+                showConfirmButton: false,
+                timer: 2000
+            });
+            
+            invalidateCache('lessons');
+            loadLessons(); // Reload to reflect new sort
+        } catch (error) {
+            console.error("Error updating order:", error);
+            Swal.fire({
+                toast: true,
+                position: 'bottom-end',
+                icon: 'error',
+                title: 'Failed to update order',
+                showConfirmButton: false,
+                timer: 2000
+            });
+        }
+    };
+
     return (
         <div className="min-vh-100 pb-5 bg-light">
             <AdminNavbar />
@@ -148,8 +213,21 @@ const AdminLessons: React.FC = () => {
                                 <div key={lesson.id} className="col-12">
                                     <div className="admin-lesson-card-light p-4 rounded-4 bg-white border shadow-sm position-relative overflow-hidden">
                                         <div className="row align-items-center">
-                                            <div className="col-md-8">
+                                            <div className="col-md-5">
                                                 <div className="d-flex align-items-center gap-3 mb-2">
+                                                    <div className="d-flex align-items-center bg-light border rounded-pill px-2 py-1 shadow-sm" style={{ width: 'fit-content' }}>
+                                                        <ArrowDownUp size={12} className="text-muted me-1" />
+                                                        <input 
+                                                            type="number" 
+                                                            className="border-0 bg-transparent text-center smallest fw-bold ls-1 p-0 m-0" 
+                                                            style={{ width: '30px', outline: 'none' }}
+                                                            defaultValue={lesson.order || ''}
+                                                            placeholder="—"
+                                                            onBlur={(e) => handleUpdateOrder(lesson.id, lesson.order, e.target.value)}
+                                                            onKeyDown={(e) => { if(e.key === 'Enter') e.currentTarget.blur() }}
+                                                            title="Set course order (1 = first)"
+                                                        />
+                                                    </div>
                                                     <span className={`badge rounded-pill smallest ls-1 fw-bold text-uppercase px-3 ${lesson.difficulty === 'Beginner' ? 'bg-success text-white' :
                                                             lesson.difficulty === 'Intermediate' ? 'bg-warning text-dark' :
                                                                 'bg-danger text-white'
@@ -165,13 +243,20 @@ const AdminLessons: React.FC = () => {
                                                     {getMicroLessons(lesson).length} Micro Lessons • {getMicroLessons(lesson).reduce((acc: number, ml: any) => acc + (ml.slides?.length || 0), 0)} Slides • {getMicroLessons(lesson).reduce((acc: number, ml: any) => acc + (ml.questions?.length || 0), 0)} Questions
                                                 </p>
                                             </div>
-                                            <div className="col-md-4 text-md-end mt-3 mt-md-0 d-flex gap-2 justify-content-md-end">
-                                                <Link
-                                                    to={`/admin/edit-lesson/${lesson.id}`}
-                                                    className="btn btn-outline-secondary fw-bold smallest ls-1 px-4 d-flex align-items-center gap-2"
-                                                >
-                                                    <Edit size={14} /> EDIT
-                                                </Link>
+                                                <div className="col-md-7 text-md-end mt-3 mt-md-0 d-flex gap-2 justify-content-md-end">
+                                                    <button
+                                                        onClick={() => handleExport(lesson)}
+                                                        className="btn btn-outline-primary fw-bold smallest ls-1 px-3 d-flex align-items-center justify-content-center"
+                                                        title="Export Course JSON"
+                                                    >
+                                                        <Download size={16} />
+                                                    </button>
+                                                    <Link
+                                                        to={`/admin/edit-lesson/${lesson.id}`}
+                                                        className="btn btn-outline-secondary fw-bold smallest ls-1 px-4 d-flex align-items-center gap-2"
+                                                    >
+                                                        <Edit size={14} /> EDIT
+                                                    </Link>
                                                 <button
                                                     onClick={() => handleDelete(lesson.id)}
                                                     className="btn btn-outline-danger fw-bold smallest ls-1 px-3 d-flex align-items-center justify-content-center"
@@ -222,6 +307,11 @@ const AdminLessons: React.FC = () => {
                 .ls-1 { letter-spacing: 1px; }
                 .ls-2 { letter-spacing: 2px; }
                 .smallest { font-size: 11px; }
+                /* Hide number input arrows */
+                input[type=number]::-webkit-inner-spin-button, 
+                input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+                input[type=number] { -moz-appearance: textfield; }
+                
                 .admin-lesson-card-light { transition: all 0.2s ease; }
                 .admin-lesson-card-light:hover { transform: translateX(5px); border-color: #FACC15 !important; }
                 .game-btn-yellow { 

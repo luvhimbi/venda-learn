@@ -10,7 +10,7 @@ import LandingPage from './LandingPage';
 import TourGuide from '../components/TourGuide';
 import { doc, updateDoc } from 'firebase/firestore';
 import { db } from '../services/firebaseConfig';
-
+import { useRetentionEngine } from '../hooks/useRetentionEngine';
 
 // --- LEVEL UP MOTIVATION ---
 const getLevelMotivation = (level: number, progress: number) => {
@@ -32,6 +32,9 @@ const Home: React.FC = () => {
     const [totalMlsCount, setTotalMlsCount] = useState(0);
     const [loading, setLoading] = useState(true);
     const [isTourOpen, setIsTourOpen] = useState(false);
+
+    // Retention Engine: Intelligently triggers daily/milestone nudges
+    useRetentionEngine(userData);
 
     const handleTourComplete = async () => {
         setIsTourOpen(false);
