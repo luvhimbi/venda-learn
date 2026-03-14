@@ -63,7 +63,7 @@ const Register: React.FC = () => {
                 createdAt: new Date().toISOString()
             });
             // Send welcome email (best-effort, non-blocking)
-            sendWelcomeEmail(formData.email, formData.username);
+            await sendWelcomeEmail(formData.email, formData.username);
             if (referrerId) {
                 try {
                     await setDoc(doc(db, "invites", `${referrerId}_${userCredential.user.uid}`), {

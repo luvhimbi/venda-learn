@@ -14,7 +14,7 @@ const AdminDashboard: React.FC = () => {
         totalUsers: 0,
         totalLessons: 0,
         totalPoints: 0,
-        difficultyBreakdown: { Beginner: 0, Intermediate: 0, Advanced: 0 }
+        difficultyBreakdown: { Easy: 0, Medium: 0, Hard: 0 }
     });
     const [loading, setLoading] = useState(true);
 
@@ -28,7 +28,7 @@ const AdminDashboard: React.FC = () => {
             });
 
             const lessons = await fetchLessons();
-            const breakdown = { Beginner: 0, Intermediate: 0, Advanced: 0 };
+            const breakdown = { Easy: 0, Medium: 0,Hard: 0 };
             lessons.forEach((l: any) => {
                 const diff = l.difficulty as keyof typeof breakdown;
                 if (breakdown[diff] !== undefined) breakdown[diff]++;
@@ -157,7 +157,7 @@ const AdminDashboard: React.FC = () => {
                                                         className="progress-bar"
                                                         style={{
                                                             width: `${(count / stats.totalLessons) * 100}%`,
-                                                            backgroundColor: level === 'Beginner' ? '#10B981' : level === 'Intermediate' ? '#FACC15' : '#EF4444'
+                                                            backgroundColor: level === 'Easy' ? '#10B981' : level === 'Medium' ? '#FACC15' : '#EF4444'
                                                         }}
                                                     ></div>
                                                 </div>

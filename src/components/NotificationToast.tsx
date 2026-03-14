@@ -12,10 +12,15 @@ interface NotificationToastProps {
 const NotificationToast: React.FC<NotificationToastProps> = ({ title, message, type, duration, onClose }) => {
     const [isVisible, setIsVisible] = useState(false);
 
+    const handleClose = () => {
+        setIsVisible(false);
+        // Wait for exit animation to finish before unmounting
+        setTimeout(onClose, 300);
+    };
+
     useEffect(() => {
         // Trigger entrance animation
         requestAnimationFrame(() => setIsVisible(true));
-
         const timer = setTimeout(() => {
             handleClose();
         }, duration);
@@ -23,11 +28,7 @@ const NotificationToast: React.FC<NotificationToastProps> = ({ title, message, t
         return () => clearTimeout(timer);
     }, [duration]);
 
-    const handleClose = () => {
-        setIsVisible(false);
-        // Wait for exit animation to finish before unmounting
-        setTimeout(onClose, 300);
-    };
+
 
     const getConfig = () => {
         switch (type) {
