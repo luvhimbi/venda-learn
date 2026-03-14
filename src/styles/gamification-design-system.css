@@ -23,6 +23,50 @@
 }
 
 /* ============================================
+   MUNWENDA TRADITIONAL THEME
+   Vibrant Venda Stripes (Yellow, Red, Green, Blue, Black/White)
+   ============================================ */
+.bg-munwenda {
+  background: repeating-linear-gradient(
+    90deg,
+    #FACC15 0px, #FACC15 15px, /* Yellow */
+    #15803D 15px, #15803D 20px, /* Dark Green */
+    #FACC15 20px, #FACC15 25px, /* Yellow */
+    #DC2626 25px, #DC2626 40px, /* Red */
+    #1E3A8A 40px, #1E3A8A 45px, /* Deep Blue */
+    #000000 45px, #000000 55px, /* Black */
+    #FFFFFF 55px, #FFFFFF 58px, /* White Accent */
+    #000000 58px, #000000 68px, /* Black */
+    #1E3A8A 68px, #1E3A8A 73px, /* Deep Blue */
+    #DC2626 73px, #DC2626 88px, /* Red */
+    #FACC15 88px, #FACC15 93px, /* Yellow */
+    #15803D 93px, #15803D 98px, /* Dark Green */
+    #FACC15 98px, #FACC15 113px /* Yellow */
+  );
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2) inset;
+}
+
+/* Vertical Munwenda for side accents */
+.bg-munwenda-vertical {
+  background: repeating-linear-gradient(
+    180deg,
+    #FACC15 0px, #FACC15 15px, 
+    #15803D 15px, #15803D 20px, 
+    #FACC15 20px, #FACC15 25px, 
+    #DC2626 25px, #DC2626 40px, 
+    #1E3A8A 40px, #1E3A8A 45px, 
+    #000000 45px, #000000 55px, 
+    #FFFFFF 55px, #FFFFFF 58px, 
+    #000000 58px, #000000 68px, 
+    #1E3A8A 68px, #1E3A8A 73px, 
+    #DC2626 73px, #DC2626 88px, 
+    #FACC15 88px, #FACC15 93px, 
+    #15803D 93px, #15803D 98px, 
+    #FACC15 98px, #FACC15 113px 
+  );
+}
+
+/* ============================================
    GLOBAL TYPOGRAPHY - Reduced Size
    ============================================ */
 body {

@@ -3,6 +3,7 @@ import { auth } from '../../services/firebaseConfig';
 import { useNavigate } from 'react-router-dom';
 import { onAuthStateChanged } from 'firebase/auth';
 import { fetchHistoryData } from '../../services/dataCache';
+import { Sparkles, X } from 'lucide-react';
 
 interface HistoryStory {
     id: string;
@@ -36,6 +37,8 @@ const HistoryList: React.FC = () => {
     const [loading, setLoading] = useState(true);
     const [activeFilter, setActiveFilter] = useState<string>('All');
     const [authInitialized, setAuthInitialized] = useState(false);
+    const [isGuest, setIsGuest] = useState(false);
+    const [showGuestBanner, setShowGuestBanner] = useState(true);
 
     // Initial metadata for known categories
     const categoryMetadata = [
@@ -46,7 +49,8 @@ const HistoryList: React.FC = () => {
     ];
 
     useEffect(() => {
-        const unsubscribe = onAuthStateChanged(auth, () => {
+        const unsubscribe = onAuthStateChanged(auth, (user) => {
+            setIsGuest(!user || user.isAnonymous);
             setAuthInitialized(true);
         });
 
@@ -147,6 +151,38 @@ const HistoryList: React.FC = () => {
                             </div>
                         </section>
 
+                        {/* GUEST BANNER */}
+                        {isGuest && showGuestBanner && (
+                            <section className="mb-5 animate__animated animate__fadeIn">
+                                <div className="bg-warning bg-opacity-10 border border-warning border-opacity-50 rounded-4 p-4 d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3 position-relative">
+                                    <button 
+                                        onClick={() => setShowGuestBanner(false)} 
+                                        className="btn btn-link text-dark position-absolute top-0 end-0 p-3 opacity-50 hover-opacity-100"
+                                    >
+                                        <X size={20} />
+                                    </button>
+                                    <div className="d-flex align-items-center gap-3">
+                                        <div className="bg-warning text-dark rounded-circle p-2 d-none d-sm-flex align-items-center justify-content-center" style={{ width: '48px', height: '48px' }}>
+                                            <Sparkles size={24} />
+                                        </div>
+                                        <div>
+                                            <h5 className="fw-bold mb-1 d-flex align-items-center gap-2">
+                                                Browsing as Guest
+                                            </h5>
+                                            <p className="mb-0 text-muted small" style={{ maxWidth: '600px' }}>
+                                                You can read a preview of every story. Log in or create a free account to unlock full stories, save your reading progress, and earn Learning Points!
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <div className="d-flex gap-2 shrink-0 z-1">
+                                        <button onClick={() => navigate('/register')} className="btn game-btn-yellow fw-bold py-2 px-4 rounded-pill text-nowrap ls-1 smallest-print">
+                                            SIGN UP FREE
+                                        </button>
+                                    </div>
+                                </div>
+                            </section>
+                        )}
+
                         {/* FILTERED FEED */}
                         <section className="row g-4 mb-5">
                             <div className="col-12 mb-2">
@@ -157,9 +193,10 @@ const HistoryList: React.FC = () => {
                             {filteredStories.map(story => (
                                 <div key={story.id} className="col-md-6">
                                     <div
-                                        className="story-list-item rounded-4 bg-white border overflow-hidden transition-all h-100 pointer shadow-sm"
+                                        className="story-list-item rounded-4 bg-white border overflow-hidden transition-all h-100 pointer shadow-sm position-relative"
                                         onClick={() => navigate(`/history/${story.id}`)}
                                     >
+                                        <div className="bg-munwenda" style={{ height: '4px', width: '100%', position: 'absolute', top: 0, left: 0, zIndex: 2 }}></div>
                                         <div className="ratio ratio-16x9">
                                             <img src={story.imageUrl || "https://images.unsplash.com/photo-1523381210434-271e8be1f52b?auto=format&fit=crop&q=80&w=600"} alt="" className="object-fit-cover" />
                                         </div>
@@ -246,6 +283,14 @@ const HistoryList: React.FC = () => {
                     box-shadow: 0 10px 30px rgba(0,0,0,0.08);
                 }
                 .hover-underline:hover { text-decoration: underline; }
+                .hover-opacity-100:hover { opacity: 1 !important; }
+                .game-btn-yellow { 
+                    background-color: #FACC15 !important; 
+                    color: #000 !important; 
+                    border: none !important; 
+                    box-shadow: 0 4px 0 #A1810B !important; 
+                }
+                .game-btn-yellow:active { transform: translateY(2px); box-shadow: 0 2px 0 #A1810B !important; }
 
                 @media (max-width: 768px) {
                     .featured-hero { height: 300px; }

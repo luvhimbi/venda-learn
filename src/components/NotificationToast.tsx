@@ -67,19 +67,11 @@ const NotificationToast: React.FC<NotificationToastProps> = ({ title, message, t
 
     return (
         <div 
-            className={`position-fixed z-3 shadow-lg rounded-4 overflow-hidden d-flex`}
+            className={`notification-toast-container shadow-lg rounded-4 overflow-hidden d-flex ${isVisible ? 'toast-enter' : 'toast-exit'}`}
             style={{
-                top: '20px',
-                right: '20px',
-                width: '320px',
-                maxWidth: 'calc(100vw - 40px)',
                 background: config.bg,
                 border: `1px solid ${config.border}`,
                 color: 'white',
-                transform: isVisible ? 'translateX(0) translateY(0)' : 'translateX(120%)',
-                opacity: isVisible ? 1 : 0,
-                transition: 'all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)',
-                zIndex: 9999
             }}
         >
             <div className="p-3 d-flex align-items-center justify-content-center" style={{ backgroundColor: config.iconBg }}>
@@ -103,6 +95,36 @@ const NotificationToast: React.FC<NotificationToastProps> = ({ title, message, t
             </div>
 
             <style>{`
+                .notification-toast-container {
+                    position: fixed;
+                    z-index: 9999;
+                    width: 320px;
+                    top: 20px;
+                    right: 20px;
+                    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+                }
+                
+                .toast-enter {
+                    transform: translateX(0) translateY(0);
+                    opacity: 1;
+                }
+                
+                .toast-exit {
+                    transform: translateX(120%);
+                    opacity: 0;
+                }
+
+                @media (max-width: 576px) {
+                    .notification-toast-container {
+                        top: 20px;
+                        right: 16px;
+                        left: 16px;
+                        width: auto;
+                    }
+                    .toast-exit {
+                        transform: translateY(-120%);
+                    }
+                }
                 .hover-opacity-100:hover { opacity: 1 !important; transform: scale(1.1); transition: 0.2s }
             `}</style>
         </div>

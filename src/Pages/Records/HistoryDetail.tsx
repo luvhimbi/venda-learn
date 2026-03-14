@@ -2,7 +2,8 @@ import React, { useEffect, useState, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { fetchHistoryData } from '../../services/dataCache';
 import Swal from 'sweetalert2';
-import Mascot from '../../components/Mascot';
+import { auth } from '../../services/firebaseConfig';
+import { onAuthStateChanged } from 'firebase/auth';
 
 interface StoryData {
     title: string;
@@ -15,8 +16,10 @@ interface StoryData {
     thumbnailEmoji: string;
 }
 
+import Mascot from '../../components/Mascot';
 import PodcastPlayer from '../../components/PodcastPlayer';
-import { BookOpen, Lightbulb } from 'lucide-react';
+import { BookOpen, Lightbulb, Lock, Share2 } from 'lucide-react';
+import SharePreviewModal from '../../components/SharePreviewModal';
 
 const HistoryDetail: React.FC = () => {
     const { storyId } = useParams();
@@ -26,6 +29,15 @@ const HistoryDetail: React.FC = () => {
     const [imgError, setImgError] = useState(false);
     const [scrollProgress, setScrollProgress] = useState(0);
     const [heroOffset, setHeroOffset] = useState(0);
+    const [isGuest, setIsGuest] = useState(false);
+    const [isShareModalOpen, setIsShareModalOpen] = useState(false);
+
+    useEffect(() => {
+        const unsubscribe = onAuthStateChanged(auth, (user) => {
+            setIsGuest(!user || user.isAnonymous);
+        });
+        return () => unsubscribe();
+    }, []);
 
     // Mascot state
     const mascotMood = scrollProgress > 75 ? 'excited' : 'happy';
@@ -205,10 +217,25 @@ const HistoryDetail: React.FC = () => {
                     <i className="bi bi-arrow-left"></i>
                 </button>
 
-                <div className="position-absolute bottom-0 start-0 w-100 p-4 img-gradient-overlay">
+                <div className="position-absolute bottom-0 start-0 w-100 p-4 img-gradient-overlay d-flex justify-content-between align-items-end">
                     <span className="badge-venda">{story.category}</span>
+                    <button 
+                        onClick={() => setIsShareModalOpen(true)}
+                        className="btn btn-warning rounded-circle shadow-lg d-flex align-items-center justify-content-center transition-all hover-lift"
+                        style={{ width: '56px', height: '56px' }}
+                    >
+                        <Share2 size={24} />
+                    </button>
                 </div>
             </div>
+
+            <SharePreviewModal 
+                isOpen={isShareModalOpen}
+                onClose={() => setIsShareModalOpen(false)}
+                title={story.title}
+                image={story.imageUrl || ''}
+                category={story.category}
+            />
 
             <div className="container mt-5" style={{ maxWidth: '750px' }}>
                 {/* STAGGERED HEADER */}
@@ -230,17 +257,59 @@ const HistoryDetail: React.FC = () => {
                     />
                 </div>
 
-                <article className="article-content">
-                    {story.content.split('\n').map((paragraph, idx) => (
-                        paragraph && (
-                            <p
-                                key={idx}
-                                className={`content-paragraph animate-on-scroll para-slide para-slide-${idx % 2 === 0 ? 'left' : 'right'}`}
-                            >
-                                {renderInteractiveContent(paragraph)}
-                            </p>
-                        )
-                    ))}
+                <article className="article-content position-relative">
+                    {story.content.split('\n')
+                        .filter(paragraph => paragraph.trim() !== '')
+                        .map((paragraph, idx) => {
+                            
+                            // If user is a guest, handle masking
+                            if (isGuest) {
+                                if (idx > 2) return null; // Hide completely
+                                
+                                const isBlurred = idx === 2;
+                                
+                                return (
+                                    <div key={idx} className="position-relative">
+                                        <p
+                                            className={`content-paragraph animate-on-scroll para-slide para-slide-${idx % 2 === 0 ? 'left' : 'right'} ${isBlurred ? 'blurred-text pe-none user-select-none' : ''}`}
+                                            style={isBlurred ? { filter: 'blur(6px)', opacity: 0.5 } : {}}
+                                        >
+                                            {renderInteractiveContent(paragraph)}
+                                        </p>
+                                        
+                                        {isBlurred && (
+                                            <div className="guest-lock-overlay d-flex flex-column align-items-center justify-content-center text-center p-4">
+                                                <div className="lock-icon-container mb-3 text-warning bounce-anim">
+                                                    <Lock size={48} />
+                                                </div>
+                                                <h3 className="fw-bold mb-2 text-dark">Continue Reading</h3>
+                                                <p className="text-muted small mb-4 px-3">
+                                                    Log in or create a free account to unlock the full story, earn learning points, and save your progress!
+                                                </p>
+                                                <div className="d-flex flex-column flex-sm-row gap-3 w-100 justify-content-center px-4">
+                                                    <button onClick={() => navigate('/login')} className="btn game-btn-yellow fw-bold ls-1 px-4 py-3 rounded-pill">
+                                                        LOG IN NOW
+                                                    </button>
+                                                    <button onClick={() => navigate('/register')} className="btn btn-dark fw-bold ls-1 px-4 py-3 rounded-pill">
+                                                        CREATE ACCOUNT
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        )}
+                                    </div>
+                                );
+                            }
+
+                            // Normal rendering for logged-in users
+                            return (
+                                <p
+                                    key={idx}
+                                    className={`content-paragraph animate-on-scroll para-slide para-slide-${idx % 2 === 0 ? 'left' : 'right'}`}
+                                >
+                                    {renderInteractiveContent(paragraph)}
+                                </p>
+                            );
+                        })}
                 </article>
 
                 {/* FUN FACT CARD */}
@@ -443,6 +512,26 @@ const HistoryDetail: React.FC = () => {
                 }
                 .para-slide-right.visible {
                     animation: slideInRight 0.6s ease-out forwards;
+                }
+
+                /* ===== GUEST LOCK OVERLAY ===== */
+                .guest-lock-overlay {
+                    position: absolute;
+                    top: 50%;
+                    left: 50%;
+                    transform: translate(-50%, -50%);
+                    width: 100%;
+                    height: 250%;
+                    background: linear-gradient(to bottom, rgba(255,255,255,0) 0%, rgba(255,255,255,0.9) 30%, rgba(255,255,255,1) 100%);
+                    z-index: 10;
+                    border-radius: 16px;
+                }
+                .bounce-anim {
+                    animation: lockBounce 2s infinite ease-in-out;
+                }
+                @keyframes lockBounce {
+                    0%, 100% { transform: translateY(0); }
+                    50% { transform: translateY(-10px); }
                 }
 
                 /* ===== FUN FACT GLOW ===== */

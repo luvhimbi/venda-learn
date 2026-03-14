@@ -3,7 +3,8 @@ import { Link } from 'react-router-dom';
 
 const Footer: React.FC = () => {
     return (
-        <footer className="bg-white border-top py-3">
+        <footer className="bg-white pt-0 pb-3">
+            <div className="bg-munwenda mb-4" style={{ height: '6px', width: '100%' }}></div>
             <div className="container" style={{ maxWidth: '1100px' }}>
                 <div className="d-flex flex-column align-items-center gap-3">
                     {/* CENTERED NAV */}

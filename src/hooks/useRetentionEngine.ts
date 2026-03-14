@@ -12,22 +12,37 @@ export const useRetentionEngine = (userData: any) => {
         const timer = setTimeout(() => {
             evaluateRetentionTriggers(userData);
             hasFired.current = true;
-        }, 2000);
+        }, 1500);
 
         return () => clearTimeout(timer);
     }, [userData]);
 
     const evaluateRetentionTriggers = (data: any) => {
+        // Enforce a 10-minute global cooldown using localStorage
+        const lastShown = localStorage.getItem('vendalearn_last_nudge');
+        if (lastShown) {
+            const timeSince = Date.now() - parseInt(lastShown, 10);
+            if (timeSince < 10 * 60 * 1000) {
+                return; // Skip if less than 10 mins
+            }
+        }
+
         const todayStr = new Date().toISOString().split('T')[0];
         
         // Ensure activityHistory exists to avoid errors
         const history = data.activityHistory || [];
         const activeToday = history.includes(todayStr);
 
+        // Helper to mark fired
+        const fireNotification = (options: any) => {
+            showNotification(options);
+            localStorage.setItem('vendalearn_last_nudge', Date.now().toString());
+        };
+
         // 1. STREAK PROTECTOR (Highest Priority)
         // If they have an active streak, but haven't played today
         if (data.streak && data.streak > 0 && !activeToday) {
-            showNotification({
+            fireNotification({
                 title: "Streak at Risk! 🔥",
                 message: `Don't lose your ${data.streak}-day streak. Complete a quick lesson today!`,
                 type: 'streak',
@@ -50,7 +65,7 @@ export const useRetentionEngine = (userData: any) => {
                 const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)); 
                 
                 if (diffDays > 3) {
-                    showNotification({
+                    fireNotification({
                         title: "We've missed you! 👋",
                         message: "Welcome back to VendaLearn! Ready to pick up where you left off?",
                         type: 'info',
@@ -68,7 +83,7 @@ export const useRetentionEngine = (userData: any) => {
         const distance = nextMilestone - points;
 
         if (distance > 0 && distance <= 50) {
-            showNotification({
+            fireNotification({
                 title: "Almost there! ⭐",
                 message: `You are only ${distance} points away from ${nextMilestone} LP! Keep going!`,
                 type: 'success',
