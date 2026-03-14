@@ -33,8 +33,7 @@ const Home: React.FC = () => {
     const [loading, setLoading] = useState(true);
     const [isTourOpen, setIsTourOpen] = useState(false);
 
-    // Retention Engine: Intelligently triggers daily/milestone nudges
-    useRetentionEngine(userData);
+
 
     const handleTourComplete = async () => {
         setIsTourOpen(false);
@@ -143,6 +142,10 @@ const Home: React.FC = () => {
             }
         }
     }, [isLoggedIn, userData]);
+
+    // Retention Engine: Intelligently triggers daily/milestone nudges
+    // Now delayed if welcome modal is showing to prevent visual clutter
+    useRetentionEngine(userData, showWelcomeModal);
 
     if (loading) return (
         <div className="d-flex justify-content-center align-items-center min-vh-100 bg-white">

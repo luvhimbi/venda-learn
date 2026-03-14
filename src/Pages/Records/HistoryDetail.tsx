@@ -20,6 +20,7 @@ import Mascot from '../../components/Mascot';
 import PodcastPlayer from '../../components/PodcastPlayer';
 import { BookOpen, Lightbulb, Lock, Share2 } from 'lucide-react';
 import SharePreviewModal from '../../components/SharePreviewModal';
+import SEO from '../../components/SEO';
 
 const HistoryDetail: React.FC = () => {
     const { storyId } = useParams();
@@ -176,6 +177,12 @@ const HistoryDetail: React.FC = () => {
 
     return (
         <div className="bg-white min-vh-100 pb-5">
+            <SEO 
+                title={story.title}
+                description={story.vendaTitle || `Learn about ${story.title} on VendaLearn`}
+                image={story.imageUrl || "/images/vendalearn.png"}
+                type="article"
+            />
             {/* READING PROGRESS BAR */}
             <div className="reading-progress-container">
                 <div className="reading-progress-bar" style={{ width: `${scrollProgress}%` }}></div>

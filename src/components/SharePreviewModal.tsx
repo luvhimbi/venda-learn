@@ -41,10 +41,10 @@ const SharePreviewModal: React.FC<SharePreviewModalProps> = ({ isOpen, onClose, 
             ></div>
 
             {/* Modal Content */}
-            <div className="bg-white rounded-5 overflow-hidden shadow-2xl position-relative animate-pop-in" style={{ width: '92%', maxWidth: '360px' }}>
+            <div className="bg-white rounded-5 overflow-hidden shadow-2xl position-relative animate-pop-in" style={{ width: '92%', maxWidth: '340px' }}>
                 
                 {/* PREVIEW CARD (Spotify Style) */}
-                <div id="share-card" className="position-relative overflow-hidden" style={{ aspectRatio: '1/1.2', backgroundColor: '#111827' }}>
+                <div id="share-card" className="position-relative overflow-hidden" style={{ aspectRatio: '1/1', backgroundColor: '#111827' }}>
                     {/* Background Image with Overlay */}
                     <div 
                         className="position-absolute top-0 start-0 w-100 h-100"
@@ -58,17 +58,17 @@ const SharePreviewModal: React.FC<SharePreviewModalProps> = ({ isOpen, onClose, 
                     <div className="position-absolute top-0 start-0 w-100 h-100 bg-gradient-to-t from-black via-transparent to-transparent"></div>
 
                     {/* Content Layer */}
-                    <div className="position-absolute bottom-0 start-0 w-100 p-4 text-start">
+                    <div className="position-absolute bottom-0 start-0 w-100 p-3 text-start">
                         <span className="smallest fw-bold ls-2 text-warning uppercase d-block mb-1">{category}</span>
-                        <h1 className="text-white fw-bold mb-3 ls-tight" style={{ fontSize: '1.75rem', textShadow: '0 2px 4px rgba(0,0,0,0.5)' }}>{title}</h1>
+                        <h1 className="text-white fw-bold mb-2 ls-tight" style={{ fontSize: '1.5rem', textShadow: '0 2px 4px rgba(0,0,0,0.5)' }}>{title}</h1>
                         
-                        <div className="d-flex align-items-center gap-3 pt-3 border-top border-white border-opacity-25">
+                        <div className="d-flex align-items-center gap-2 pt-2 border-top border-white border-opacity-25">
                             <div className="p-1 bg-white rounded-3 shadow-lg">
-                                <Mascot mood="happy" width="32px" height="32px" />
+                                <Mascot mood="happy" width="28px" height="28px" />
                             </div>
                             <div>
-                                <p className="text-white mb-0 fw-bold ls-1" style={{ fontSize: '10px' }}>VENDA LEARN</p>
-                                <p className="text-white text-opacity-75 mb-0" style={{ fontSize: '9px' }}>Learning my heritage</p>
+                                <p className="text-white mb-0 fw-bold ls-1" style={{ fontSize: '8px' }}>VENDA LEARN</p>
+                                <p className="text-white text-opacity-75 mb-0" style={{ fontSize: '8px' }}>Learning my heritage</p>
                             </div>
                         </div>
                     </div>
@@ -81,8 +81,8 @@ const SharePreviewModal: React.FC<SharePreviewModalProps> = ({ isOpen, onClose, 
                 <div className="px-4 py-3 bg-white">
                     <button 
                         onClick={handleNativeShare}
-                        className="btn btn-warning w-100 rounded-pill py-2 fw-bold ls-1 uppercase mb-2 shadow-sm"
-                        style={{ fontSize: '12px' }}
+                        className="btn btn-primary w-100 rounded-pill py-2 fw-bold ls-1 uppercase mb-1 shadow-sm"
+                        style={{ fontSize: '11px' }}
                     >
                         <i className="bi bi-share-fill me-2"></i> Share Now
                     </button>

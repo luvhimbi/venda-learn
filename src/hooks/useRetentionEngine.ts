@@ -1,12 +1,12 @@
 import { useEffect, useRef } from 'react';
 import { useNotification } from '../contexts/NotificationContext';
 
-export const useRetentionEngine = (userData: any) => {
+export const useRetentionEngine = (userData: any, shouldDelay: boolean = false) => {
     const { showNotification } = useNotification();
     const hasFired = useRef(false); // Ensure we only fire once per session/mount
 
     useEffect(() => {
-        if (!userData || hasFired.current) return;
+        if (!userData || hasFired.current || shouldDelay) return;
 
         // Give the UI a moment to load before showing a nudge
         const timer = setTimeout(() => {

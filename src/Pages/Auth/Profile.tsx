@@ -336,7 +336,7 @@ const Profile: React.FC = () => {
                                     <button
                                         type="button"
                                         onClick={(e) => handleUpdate(e as any)}
-                                        className="btn btn-warning btn-sm px-4 py-2 fw-bold ls-1 rounded-pill shadow-sm d-flex d-md-none align-items-center gap-2"
+                                        className="btn btn-primary btn-sm px-4 py-2 fw-bold ls-1 rounded-pill shadow-sm d-flex align-items-center gap-2"
                                         disabled={updateLoading}
                                     >
                                         {updateLoading ? <span className="spinner-border spinner-border-sm"></span> : <><CheckCircle size={16} /> SAVE</>}
