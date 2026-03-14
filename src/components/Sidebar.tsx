@@ -113,7 +113,8 @@ const Sidebar: React.FC = () => {
             </div>
 
             {/* MAIN SIDEBAR (Desktop Only) */}
-            <aside className="sidebar bg-white border-end d-none d-lg-flex flex-column transition-all">
+            <aside className="sidebar bg-white border-end d-none d-lg-flex flex-column transition-all" style={{ paddingLeft: '6px' }}>
+                <div className="bg-munwenda-vertical h-100 position-absolute start-0 top-0" style={{ width: '6px', zIndex: 10 }}></div>
 
                 {/* BRAND */}
                 <div className="sidebar-brand px-4 py-5 d-flex align-items-center gap-2">
@@ -174,7 +175,9 @@ const Sidebar: React.FC = () => {
             </aside>
 
             {/* MOBILE BOTTOM NAV (Mobile Only) */}
-            <nav className="mobile-bottom-nav fixed-bottom bg-white border-top d-lg-none d-flex align-items-center px-1 py-1 overflow-x-auto no-scrollbar shadow-lg">
+            <nav className="mobile-bottom-nav fixed-bottom bg-white border-top d-lg-none d-flex flex-column shadow-lg">
+                <div className="bg-munwenda w-100" style={{ height: '4px' }}></div>
+                <div className="d-flex align-items-center px-1 py-1 overflow-x-auto no-scrollbar w-100">
                 {navItems.map((item) => (
                     <Link
                         key={item.path}
@@ -193,6 +196,7 @@ const Sidebar: React.FC = () => {
                         <span className="fw-bold ls-1" style={{ fontSize: '9px', textTransform: 'uppercase' }}>{item.label}</span>
                     </Link>
                 ))}
+                </div>
             </nav>
 
             <style>{`

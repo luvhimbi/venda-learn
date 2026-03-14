@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { auth } from '../services/firebaseConfig';
 import { onAuthStateChanged } from 'firebase/auth';
 import { getBadgeDetails, getLevelStats } from "../services/levelUtils.ts";
-import { fetchLessons, fetchTopLearners, fetchDailyWord, refreshUserData, getMicroLessons } from '../services/dataCache';
+import { fetchLessons, fetchTopLearners, refreshUserData, getMicroLessons } from '../services/dataCache';
 import InstallBanner from '../components/InstallBanner';
 import Mascot from '../components/Mascot';
 import LandingPage from './LandingPage';
@@ -11,6 +11,7 @@ import TourGuide from '../components/TourGuide';
 import { doc, updateDoc } from 'firebase/firestore';
 import { db } from '../services/firebaseConfig';
 import { useRetentionEngine } from '../hooks/useRetentionEngine';
+import DailyWelcomeModal from '../components/DailyWelcomeModal';
 
 // --- LEVEL UP MOTIVATION ---
 const getLevelMotivation = (level: number, progress: number) => {
@@ -28,7 +29,6 @@ const Home: React.FC = () => {
     const [userData, setUserData] = useState<any>(null);
     const [lastLesson, setLastLesson] = useState<any>(null);
     const [topLearners, setTopLearners] = useState<any[]>([]);
-    const [dailyWord, setDailyWord] = useState<any>(null);
     const [totalMlsCount, setTotalMlsCount] = useState(0);
     const [loading, setLoading] = useState(true);
     const [isTourOpen, setIsTourOpen] = useState(false);
@@ -64,18 +64,16 @@ const Home: React.FC = () => {
                 setIsLoggedIn(true);
                 try {
                     // Fetch everything in parallel using the cache layer
-                    const [userData, lessons, topLearnersData, dailyWordData] = await Promise.all([
+                    const [userData, lessons, topLearnersData] = await Promise.all([
                         refreshUserData(),
                         fetchLessons(),          // cached across pages
                         fetchTopLearners(),      // cached across pages
-                        fetchDailyWord(),        // cached for the day
                     ]);
 
                     if (userData) {
                         setUserData(userData);
                         setTotalMlsCount(lessons.reduce((acc: number, course: any) => acc + getMicroLessons(course).length, 0));
                         setTopLearners(topLearnersData);
-                        setDailyWord(dailyWordData);
 
                         // Resolve last lesson from cached lessons instead of extra Firestore call
                         if (userData.lastLessonId) {
@@ -101,7 +99,6 @@ const Home: React.FC = () => {
                         }
                     }
 
-                    // Auto-start tour if never completed (Tablet/Desktop only)
                     if (userData && userData.tourCompleted === false && window.innerWidth >= 768) {
                         // Check if we've already tried to open it in this session to prevent loops
                         const tourSeenThisSession = sessionStorage.getItem('tour_offered');
@@ -121,6 +118,31 @@ const Home: React.FC = () => {
         });
         return () => unsubscribe();
     }, []);
+
+    // --- EMOTIONAL DESIGN: MASCOT QUOTES ---
+    const [mascotQuote, setMascotQuote] = useState("");
+    const [showWelcomeModal, setShowWelcomeModal] = useState(false);
+
+    useEffect(() => {
+        if (isLoggedIn && userData) {
+            const quotes = [
+                `Vho vuwa hani, ${userData.username || 'Learner'}? Ready to learn?`,
+                "Every word you learn today is a victory! 🏆",
+                "I believe in you! Let's crush some lessons! ✨",
+                "Tshivenda is beautiful, just like your progress! 🌸",
+                "Ready to earn some more LP today? 💎",
+                "Keep going! You're becoming a Venda master! 🦁"
+            ];
+            setMascotQuote(quotes[Math.floor(Math.random() * quotes.length)]);
+
+            // Show daily welcome if not seen today
+            const lastWelcome = localStorage.getItem('vendalearn_last_welcome');
+            const today = new Date().toISOString().split('T')[0];
+            if (lastWelcome !== today) {
+                setShowWelcomeModal(true);
+            }
+        }
+    }, [isLoggedIn, userData]);
 
     if (loading) return (
         <div className="d-flex justify-content-center align-items-center min-vh-100 bg-white">
@@ -150,6 +172,16 @@ const Home: React.FC = () => {
     return (
         <div className="bg-white min-vh-100" style={{ overflowX: 'hidden' }}>
 
+
+            {/* Daily Welcome Experience */}
+            {showWelcomeModal && userData && (
+                <DailyWelcomeModal
+                    username={userData.username || 'Learner'}
+                    streak={userData.streak || 0}
+                    lastLesson={lastLesson}
+                    onClose={() => setShowWelcomeModal(false)}
+                />
+            )}
 
             {/* App Tour Guide */}
             <TourGuide
@@ -190,7 +222,15 @@ const Home: React.FC = () => {
                                 </div>
                             </div>
                         </div>
-                        <div className="col-4 d-flex justify-content-center">
+                        <div className="col-4 d-flex justify-content-center position-relative">
+                            {mascotQuote && (
+                                <div className="mascot-speech-bubble position-absolute bg-white px-3 py-2 rounded-4 shadow-sm border"
+                                    style={{ top: '-10px', right: '10%', maxWidth: '180px', zIndex: 5 }}>
+                                    <p className="mb-0 small fw-bold text-dark lh-sm">{mascotQuote}</p>
+                                    <div className="bubble-tail position-absolute bg-white border-bottom border-end"
+                                        style={{ width: '12px', height: '12px', bottom: '-6px', left: '20px', transform: 'rotate(45deg)' }}></div>
+                                </div>
+                            )}
                             <Mascot width="140px" height="140px" />
                         </div>
                     </div>
@@ -201,23 +241,7 @@ const Home: React.FC = () => {
                 <div className="row g-5">
                     <main className="col-lg-7">
 
-                        {/* DAILY WORD */}
-                        {dailyWord && (
-                            <section className="mb-5">
-                                <div className="p-4 rounded-4 position-relative overflow-hidden"
-                                    style={{ background: 'linear-gradient(135deg, #FFFBEB, #FEF3C7)', border: '1px solid #FDE68A' }}>
-                                    <div className="d-flex align-items-center gap-2 mb-3">
-                                        <i className="bi bi-book-half fs-4 text-warning"></i>
-                                        <span className="smallest fw-bold ls-2 uppercase" style={{ color: '#92400E' }}>WORD OF THE DAY</span>
-                                    </div>
-                                    <h2 className="fw-bold ls-tight mb-1 text-dark">{dailyWord.word}</h2>
-                                    <p className="text-muted fw-bold mb-2">{dailyWord.meaning}</p>
-                                    {dailyWord.example && (
-                                        <p className="fst-italic small mb-0" style={{ color: '#78350F' }}>"{dailyWord.example}"</p>
-                                    )}
-                                </div>
-                            </section>
-                        )}
+
 
                         {/* CONTINUE LEARNING */}
                         <section className="mb-5 text-start">
@@ -343,19 +367,7 @@ const Home: React.FC = () => {
                                 </div>
                             </div>
 
-                            {/* STREAK CARD */}
-                            <div className="mb-4 p-4 rounded-4 border" style={{ backgroundColor: '#FEF2F2', borderColor: '#FECACA' }}>
-                                <div className="d-flex align-items-center justify-content-between mb-2">
-                                    <h6 className="fw-bold smallest ls-2 uppercase text-muted mb-0">Daily Streak</h6>
-                                    <i className="bi bi-fire text-danger fs-3"></i>
-                                </div>
-                                <h2 className="fw-bold text-dark mb-1">{userData?.streak || 0} <span className="fs-6 text-muted">days</span></h2>
-                                <p className="smallest fw-bold ls-1 mb-0" style={{ color: '#DC2626' }}>
-                                    {(userData?.streak || 0) === 0 ? 'Start a streak today!' :
-                                        (userData?.streak || 0) >= 7 ? 'Amazing consistency!' :
-                                            'Come back tomorrow to keep it going!'}
-                                </p>
-                            </div>
+
 
                             {/* TOP LEARNERS */}
                             <div className="p-4 rounded-4 border" style={{ backgroundColor: '#F9FAFB' }}>
@@ -423,6 +435,13 @@ const Home: React.FC = () => {
                 }
                 .text-slate {
                     color: #1e293b !important;
+                }
+                .mascot-speech-bubble {
+                    animation: floatBubble 4s infinite ease-in-out;
+                }
+                @keyframes floatBubble {
+                    0%, 100% { transform: translateY(0); }
+                    50% { transform: translateY(-5px); }
                 }
             `}</style>
         </div>

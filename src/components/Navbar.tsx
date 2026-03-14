@@ -66,8 +66,10 @@ const Navbar: React.FC = () => {
     const isActive = (path: string) => location.pathname === path;
 
     return (
-        <nav className="navbar navbar-expand-lg sticky-top bg-white border-bottom py-2">
-            <div className="container" style={{ maxWidth: '1100px' }}>
+        <>
+            <div className="bg-munwenda" style={{ height: '6px', width: '100%', position: 'fixed', top: 0, zIndex: 1031 }}></div>
+            <nav className="navbar navbar-expand-lg sticky-top bg-white border-bottom py-2" style={{ top: '6px' }}>
+                <div className="container" style={{ maxWidth: '1100px' }}>
 
                 {/* BRAND LOGO & SLOGAN */}
                 <Link className="navbar-brand d-flex align-items-center mb-0 text-decoration-none shadow-none" to="/">
@@ -291,6 +293,7 @@ const Navbar: React.FC = () => {
                 }
             `}</style>
         </nav>
+        </>
     );
 };
 
