@@ -16,7 +16,7 @@ import Mascot from '../../components/Mascot';
 import {
     MessageSquare, Zap, Flame,
     FileText, CheckCircle2, Pencil, Link, Volume2, BookOpen,
-    X, Mic, Square, ArrowLeft, ArrowRight, RefreshCw, Save
+    X, Mic, Square, ArrowLeft, ArrowRight, Save
 } from 'lucide-react';
 import { db, auth } from '../../services/firebaseConfig';
 import { doc, updateDoc, arrayUnion, increment } from 'firebase/firestore';

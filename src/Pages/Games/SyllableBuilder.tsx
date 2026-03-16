@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { fetchSyllables } from '../../services/dataCache';
 import { useNavigate } from 'react-router-dom';
 import { Layout, Star, HelpCircle } from 'lucide-react';
