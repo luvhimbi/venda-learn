@@ -4,12 +4,24 @@ import { onAuthStateChanged, signOut, type User } from 'firebase/auth';
 import { auth } from '../services/firebaseConfig';
 import { invalidateCache } from '../services/dataCache';
 import Swal from 'sweetalert2';
-import { Menu, LogOut } from 'lucide-react';
+import { Menu, LogOut, Database } from 'lucide-react';
+import { seedSyllables } from '../services/seedSyllables';
+import { seedSentences } from '../services/seedSentences';
 
 const AdminNavbar: React.FC = () => {
     const [user, setUser] = useState<User | null>(null);
     const navigate = useNavigate();
     const location = useLocation();
+
+    const handleSeedGames = async () => {
+        const confirm = await Swal.fire({ title: 'Seed Games?', icon: 'warning', showCancelButton: true });
+        if (confirm.isConfirmed) {
+            Swal.showLoading();
+            await seedSyllables();
+            await seedSentences();
+            Swal.fire('Success', 'Game data seeded!', 'success');
+        }
+    };
 
     useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
@@ -49,26 +61,7 @@ const AdminNavbar: React.FC = () => {
 
                 {/* BRAND LOGO - Matches Student UI exactly */}
                 <Link className="navbar-brand d-flex align-items-center mb-0 text-decoration-none shadow-none" to="/admin/dashboard">
-                    <div
-                        className="text-dark rounded-3 me-2 d-flex align-items-center justify-content-center fw-bold flex-shrink-0"
-                        style={{
-                            width: '42px',
-                            height: '42px',
-                            fontSize: '1.2rem',
-                            backgroundColor: '#FACC15',
-                            boxShadow: '0 2px 4px rgba(0,0,0,0.3)'
-                        }}
-                    >
-                        V
-                    </div>
-                    <div className="d-flex flex-column justify-content-center">
-                        <span className="fw-bold  ls-tight lh-1" style={{ fontSize: '1.25rem' }}>
-                            VENDA<span style={{ color: '#FACC15' }}>ADMIN</span>
-                        </span>
-                        <span className="shumela-venda-pulse fw-bold ls-2 text-uppercase">
-                            Management Portal
-                        </span>
-                    </div>
+                    <img src="/images/VendaLearnLogo.png" alt="Venda Learn Logo" height="45" className="object-fit-contain" />
                 </Link>
 
                 {/* MOBILE TOGGLER */}
@@ -95,6 +88,11 @@ const AdminNavbar: React.FC = () => {
                             </Link>
                         </li>
                         <li className="nav-item w-100 w-lg-auto text-center">
+                            <Link className={`nav-link nav-custom-link ${isActive('/admin/visualizer') ? 'active-link' : ''}`} to="/admin/visualizer">
+                                Visualizer
+                            </Link>
+                        </li>
+                        <li className="nav-item w-100 w-lg-auto text-center">
                             <Link className={`nav-link nav-custom-link ${isActive('/admin/users') ? 'active-link' : ''}`} to="/admin/users">
                                 User Records
                             </Link>
@@ -108,6 +106,11 @@ const AdminNavbar: React.FC = () => {
                             <Link className={`nav-link nav-custom-link ${isActive('/admin/history') ? 'active-link' : ''}`} to="/admin/history">
                                 History
                             </Link>
+                        </li>
+                        <li className="nav-item w-100 w-lg-auto text-center">
+                            <button onClick={handleSeedGames} className="btn nav-link nav-custom-link text-warning border-0 bg-transparent">
+                                <Database size={14} className="me-1" /> SEED GAMES
+                            </button>
                         </li>
                         <li className="nav-item w-100 w-lg-auto text-center">
                             <Link className="nav-link nav-custom-link" to="/">

@@ -22,6 +22,7 @@ import Stories from "./Pages/Learning/Stories";
 import HistoryList from "./Pages/Records/HistoryList";
 import AddHistory from "./Pages/Admin/AddHistory";
 import HistoryDetail from "./Pages/Records/HistoryDetail";
+import Achievements from "./Pages/Achievements";
 import InstallBanner from "./components/InstallBanner.tsx";
 import AdminRoute from "./components/AdminRoute.tsx";
 import AdminDashboard from "./Pages/Admin/AdminDashboard";
@@ -42,6 +43,7 @@ import KnowledgeBattle from "./Pages/Games/KnowledgeBattle";
 import DailyChallenge from "./Pages/Games/DailyChallenge";
 import WordBomb from "./Pages/Games/WordBomb";
 import AdminWordBomb from "./Pages/Admin/AdminWordBomb";
+import CourseVisualizer from "./Pages/Admin/CourseVisualizer";
 import NotFound from "./Pages/NotFound";
 import { auth } from './services/firebaseConfig';
 import { onAuthStateChanged } from 'firebase/auth';
@@ -104,6 +106,7 @@ const AppContent: React.FC = () => {
                         <Route path="/courses/:courseId" element={<CourseLessons />} />
                         <Route path="/history/add" element={<AddHistory />} />
                         <Route path="/history/:storyId" element={<HistoryDetail />} />
+                        <Route path="/achievements" element={<Achievements />} />
                         <Route path="/profile" element={<Profile />} />
                         <Route path="/privacy" element={<PrivacyPolicy />} />
                         <Route path="/terms" element={<TermsOfUse />} />
@@ -127,6 +130,16 @@ const AppContent: React.FC = () => {
                             element={
                                 <AdminRoute>
                                     <SystemReset />
+                                </AdminRoute>
+                            }
+                        />
+
+                        {/* Course Visualizer & Designer */}
+                        <Route
+                            path="/admin/visualizer"
+                            element={
+                                <AdminRoute>
+                                    <CourseVisualizer />
                                 </AdminRoute>
                             }
                         />

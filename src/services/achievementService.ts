@@ -10,6 +10,7 @@ export const ALL_TROPHIES: Trophy[] = [
         description: 'Awarded for your first login to VendaLearn! Welcome warrior.',
         icon: 'bi-door-open-fill',
         color: '#10b981', // Emerald
+        rarity: 'bronze',
         requirement: { type: 'login', value: 1 }
     },
     {
@@ -18,6 +19,7 @@ export const ALL_TROPHIES: Trophy[] = [
         description: 'Reach Level 5 to prove your dedication.',
         icon: 'bi-patch-check-fill',
         color: '#4f46e5', // Indigo
+        rarity: 'silver',
         requirement: { type: 'level', value: 5 }
     },
     {
@@ -26,6 +28,7 @@ export const ALL_TROPHIES: Trophy[] = [
         description: 'Earn 1000 LP to show your wisdom in Tshivenda.',
         icon: 'bi-gem',
         color: '#f59e0b', // Amber
+        rarity: 'silver',
         requirement: { type: 'points', value: 1000 }
     },
     {
@@ -34,6 +37,7 @@ export const ALL_TROPHIES: Trophy[] = [
         description: 'Maintain a 3-day learning streak.',
         icon: 'bi-fire',
         color: '#ef4444', // Red
+        rarity: 'bronze',
         requirement: { type: 'streak', value: 3 }
     },
     {
@@ -42,6 +46,7 @@ export const ALL_TROPHIES: Trophy[] = [
         description: 'Complete 5 micro-lessons.',
         icon: 'bi-book-half',
         color: '#8b5cf6', // Violet
+        rarity: 'bronze',
         requirement: { type: 'lessons', value: 5 }
     },
     {
@@ -50,6 +55,7 @@ export const ALL_TROPHIES: Trophy[] = [
         description: 'Earn 5000 LP. You are a true master.',
         icon: 'bi-trophy-fill',
         color: '#facc15', // Yellow
+        rarity: 'gold',
         requirement: { type: 'points', value: 5000 }
     }
 ];

@@ -76,11 +76,10 @@ const Sidebar: React.FC = () => {
     const navItems: { path: string, label: string, icon: string, badge?: number, tourClass?: string }[] = [
         { path: '/', label: 'Home', icon: 'bi-house-heart-fill', tourClass: 'tour-sidebar-home' },
         { path: '/courses', label: 'Lessons', icon: 'bi-journal-bookmark-fill', tourClass: 'tour-sidebar-lessons' },
-        { path: '/ngano', label: 'Stories', icon: 'bi-book-half', tourClass: 'tour-sidebar-ngano' },
+        // { path: '/ngano', label: 'Stories', icon: 'bi-book-half', tourClass: 'tour-sidebar-ngano' },
         { path: '/history', label: 'Culture', icon: 'bi-bank2', tourClass: 'tour-sidebar-culture' },
         { path: '/mitambo', label: 'Games', icon: 'bi-controller', tourClass: 'tour-sidebar-games' },
-        { path: '/muvhigo', label: 'Progress', icon: 'bi-graph-up-arrow' },
-        { path: '/profile', label: 'Profile', icon: 'bi-person-circle', tourClass: 'tour-sidebar-profile' },
+        { path: '/muvhigo', label: 'Progress', icon: 'bi-graph-up-arrow', tourClass: 'tour-sidebar-progress' },
     ];
 
     if (!user) return null;
@@ -89,17 +88,9 @@ const Sidebar: React.FC = () => {
         <>
             {/* MOBILE TOP BAR (Hidden on Desktop) */}
             <div className="d-lg-none mobile-top-bar bg-white border-bottom px-4 d-flex align-items-center justify-content-between sticky-top shadow-sm">
-                <div className="d-flex align-items-center">
-                    <div className="text-slate rounded-2 d-flex align-items-center justify-content-center fw-bold flex-shrink-0 bg-warning shadow-sm me-2"
-                        style={{ width: '32px', height: '32px', fontSize: '0.9rem' }}>
-                        V
-                    </div>
-                    <span
-                        className="fw-bold ls-tight mb-0"
-                    >
-                        VENDA<span className="text-warning">LEARN</span>
-                    </span>
-                </div>
+                <Link className="d-flex align-items-center text-decoration-none" to="/">
+                    <img src="/images/VendaLearnLogo.png" alt="Venda Learn Logo" height="32" className="object-fit-contain" />
+                </Link>
 
                 {/* Mobile Profile Link - Avatar now shows here instead of initial */}
                 <Link to="/profile" className="d-flex align-items-center gap-2 text-decoration-none bg-light rounded-pill pe-3 p-1 border">
@@ -117,16 +108,9 @@ const Sidebar: React.FC = () => {
                 <div className="bg-munwenda-vertical h-100 position-absolute start-0 top-0" style={{ width: '6px', zIndex: 10 }}></div>
 
                 {/* BRAND */}
-                <div className="sidebar-brand px-4 py-5 d-flex align-items-center gap-2">
-                    <div className="text-slate rounded-3 d-flex align-items-center justify-content-center fw-bold flex-shrink-0 bg-warning shadow-sm"
-                        style={{ width: '40px', height: '40px', fontSize: '1.1rem' }}>
-                        V
-                    </div>
-                    <div className="d-flex flex-column">
-                        <span className="fw-bold ls-tight fs-5">VENDA<span className="text-warning">LEARN</span></span>
-                        <span className="smallest text-muted fw-bold ls-2 uppercase">Shumela Venda</span>
-                    </div>
-                </div>
+                <Link className="sidebar-brand px-4 py-5 d-flex align-items-center gap-2 text-decoration-none" to="/">
+                    <img src="/images/VendaLearnLogo.png" alt="Venda Learn Logo" height="45" className="object-fit-contain w-100" style={{ maxWidth: '180px' }} />
+                </Link>
 
                 {/* NAV LINKS */}
                 <nav className="flex-grow-1 px-3 d-flex flex-column gap-2 overflow-auto scrollbar-hide">
@@ -152,8 +136,8 @@ const Sidebar: React.FC = () => {
 
                 {/* USER CARD (Bottom) */}
                 <div className="sidebar-footer p-2 border-top bg-light-subtle">
-                    <div className="user-profile-card bg-white border rounded-4 p-2 shadow-sm tour-sidebar-footer">
-                        <div className="d-flex align-items-center gap-2 mb-2">
+                    <div className="user-profile-card bg-white border rounded-4 p-2 shadow-sm tour-sidebar-footer transition-all">
+                        <Link to="/profile" className="d-flex align-items-center gap-2 mb-2 text-decoration-none p-1 rounded-3 hover-bg-light transition-all">
                             <AvatarDisplay
                                 avatarId={userData?.avatarId || 'adventurer'}
                                 seed={userData?.username || 'warrior'}
@@ -161,12 +145,12 @@ const Sidebar: React.FC = () => {
                             />
                             <div className="overflow-hidden">
                                 <div className="d-flex align-items-center gap-1">
-                                    <h6 className="fw-bold mb-0 text-truncate small">{userData?.username || (user?.isAnonymous ? "Guest Learner" : "Warrior")}</h6>
+                                    <h6 className="fw-bold mb-0 text-truncate small text-dark">{userData?.username || (user?.isAnonymous ? "Guest Learner" : "Warrior")}</h6>
                                     {user?.isAnonymous && <span className="badge bg-secondary rounded-pill fw-bold" style={{ fontSize: '8px', padding: '2px 4px' }}>GUEST</span>}
                                 </div>
                                 <p className="smallest text-muted mb-0 fw-bold ls-1">{userData?.points || 0} LP</p>
                             </div>
-                        </div>
+                        </Link>
                         <button onClick={handleLogout} className="btn btn-outline-danger w-100 rounded-pill py-2 smallest fw-bold ls-2 uppercase border-0 bg-danger-subtle text-danger transition-all tour-sidebar-logout">
                             <i className="bi bi-box-arrow-right me-2 font-bold"></i> Sign Out
                         </button>
@@ -248,6 +232,10 @@ const Sidebar: React.FC = () => {
                 
                 .btn-slate { background-color: #1e293b; color: white; border: none; }
                 .btn-slate:hover { background-color: #334155; color: white; }
+
+                .hover-bg-light:hover {
+                    background-color: #f8fafc !important;
+                }
             `}</style>
             {/* Logout Modal */}
             {showLogout && <LogoutModal onClose={() => setShowLogout(false)} onConfirm={confirmLogout} />}

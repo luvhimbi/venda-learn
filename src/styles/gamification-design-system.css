@@ -27,43 +27,53 @@
    Vibrant Venda Stripes (Yellow, Red, Green, Blue, Black/White)
    ============================================ */
 .bg-munwenda {
-  background: repeating-linear-gradient(
-    90deg,
-    #FACC15 0px, #FACC15 15px, /* Yellow */
-    #15803D 15px, #15803D 20px, /* Dark Green */
-    #FACC15 20px, #FACC15 25px, /* Yellow */
-    #DC2626 25px, #DC2626 40px, /* Red */
-    #1E3A8A 40px, #1E3A8A 45px, /* Deep Blue */
-    #000000 45px, #000000 55px, /* Black */
-    #FFFFFF 55px, #FFFFFF 58px, /* White Accent */
-    #000000 58px, #000000 68px, /* Black */
-    #1E3A8A 68px, #1E3A8A 73px, /* Deep Blue */
-    #DC2626 73px, #DC2626 88px, /* Red */
-    #FACC15 88px, #FACC15 93px, /* Yellow */
-    #15803D 93px, #15803D 98px, /* Dark Green */
-    #FACC15 98px, #FACC15 113px /* Yellow */
-  );
-  box-shadow: 0 2px 4px rgba(0,0,0,0.2) inset;
+  background: repeating-linear-gradient(90deg,
+      #FACC15 0px, #FACC15 15px,
+      /* Yellow */
+      #15803D 15px, #15803D 20px,
+      /* Dark Green */
+      #FACC15 20px, #FACC15 25px,
+      /* Yellow */
+      #DC2626 25px, #DC2626 40px,
+      /* Red */
+      #1E3A8A 40px, #1E3A8A 45px,
+      /* Deep Blue */
+      #000000 45px, #000000 55px,
+      /* Black */
+      #FFFFFF 55px, #FFFFFF 58px,
+      /* White Accent */
+      #000000 58px, #000000 68px,
+      /* Black */
+      #1E3A8A 68px, #1E3A8A 73px,
+      /* Deep Blue */
+      #DC2626 73px, #DC2626 88px,
+      /* Red */
+      #FACC15 88px, #FACC15 93px,
+      /* Yellow */
+      #15803D 93px, #15803D 98px,
+      /* Dark Green */
+      #FACC15 98px, #FACC15 113px
+      /* Yellow */
+    );
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2) inset;
 }
 
 /* Vertical Munwenda for side accents */
 .bg-munwenda-vertical {
-  background: repeating-linear-gradient(
-    180deg,
-    #FACC15 0px, #FACC15 15px, 
-    #15803D 15px, #15803D 20px, 
-    #FACC15 20px, #FACC15 25px, 
-    #DC2626 25px, #DC2626 40px, 
-    #1E3A8A 40px, #1E3A8A 45px, 
-    #000000 45px, #000000 55px, 
-    #FFFFFF 55px, #FFFFFF 58px, 
-    #000000 58px, #000000 68px, 
-    #1E3A8A 68px, #1E3A8A 73px, 
-    #DC2626 73px, #DC2626 88px, 
-    #FACC15 88px, #FACC15 93px, 
-    #15803D 93px, #15803D 98px, 
-    #FACC15 98px, #FACC15 113px 
-  );
+  background: repeating-linear-gradient(180deg,
+      #FACC15 0px, #FACC15 15px,
+      #15803D 15px, #15803D 20px,
+      #FACC15 20px, #FACC15 25px,
+      #DC2626 25px, #DC2626 40px,
+      #1E3A8A 40px, #1E3A8A 45px,
+      #000000 45px, #000000 55px,
+      #FFFFFF 55px, #FFFFFF 58px,
+      #000000 58px, #000000 68px,
+      #1E3A8A 68px, #1E3A8A 73px,
+      #DC2626 73px, #DC2626 88px,
+      #FACC15 88px, #FACC15 93px,
+      #15803D 93px, #15803D 98px,
+      #FACC15 98px, #FACC15 113px);
 }
 
 /* ============================================
@@ -71,7 +81,8 @@
    ============================================ */
 body {
   font-family: var(--game-font-family);
-  font-size: 14px; /* Reduced from default 16px */
+  font-size: 14px;
+  /* Reduced from default 16px */
   background-color: var(--game-bg-primary);
   color: var(--game-text-light);
   line-height: 1.5;
@@ -90,7 +101,8 @@ body {
 
   /* Compact Padding */
   padding: 0.5rem 1.1rem;
-  font-size: 0.75rem; /* Small, sharp text */
+  font-size: 0.75rem;
+  /* Small, sharp text */
 
   transition: all 0.15s ease-in-out;
   cursor: pointer;
@@ -168,13 +180,15 @@ body {
   font-weight: 700;
   color: #10b981;
 }
+
 /* Customizing the SweetAlert2 Container */
 .swal2-popup {
   font-family: 'Outfit', sans-serif !important;
   border-radius: 20px !important;
   padding: 2rem !important;
   background: #ffffff !important;
-  border: 3px solid #111827 !important; /* Coal border */
+  border: 3px solid #111827 !important;
+  /* Coal border */
 }
 
 /* Customizing the Title */
@@ -196,13 +210,18 @@ body {
 .swal2-icon.swal2-success {
   border-color: #10B981 !important;
 }
+
 .swal2-icon.swal2-success [class^='swal2-success-line'] {
   background-color: #10B981 !important;
 }
+
 .swal2-backdrop-show {
-  background: rgba(15, 23, 42, 0.8) !important; /* Dark Slate transparent */
-  backdrop-filter: blur(4px); /* Modern blur effect */
+  background: rgba(15, 23, 42, 0.8) !important;
+  /* Dark Slate transparent */
+  backdrop-filter: blur(4px);
+  /* Modern blur effect */
 }
+
 /* Customizing the Confirm Button to match your Game Buttons */
 .swal2-confirm {
   background-color: #FACC15 !important;
@@ -213,7 +232,8 @@ body {
   font-size: 11px !important;
   border-radius: 10px !important;
   padding: 12px 30px !important;
-  box-shadow: 0 4px 0 #EAB308 !important; /* 3D effect */
+  box-shadow: 0 4px 0 #EAB308 !important;
+  /* 3D effect */
   border: none !important;
 }
 
@@ -227,7 +247,26 @@ body {
 }
 
 /* Small Headings */
-h1, .h1 { font-size: 1.75rem; font-weight: 800; }
-h2, .h2 { font-size: 1.5rem; font-weight: 700; }
-h3, .h3 { font-size: 1.25rem; font-weight: 700; }
-h4, .h4 { font-size: 1rem; font-weight: 700; }
+h1,
+.h1 {
+  font-size: 1.75rem;
+  font-weight: 800;
+}
+
+h2,
+.h2 {
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+
+h3,
+.h3 {
+  font-size: 1.25rem;
+  font-weight: 700;
+}
+
+h4,
+.h4 {
+  font-size: 1rem;
+  font-weight: 700;
+}

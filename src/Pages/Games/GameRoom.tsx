@@ -70,7 +70,6 @@ const GameRoom: React.FC = () => {
         initialPersistentState?.gameState === 'SCENE' ? initialPersistentState.currentSceneIndex : 0
     );
     const [isFirstTime, setIsFirstTime] = useState(true);
-    const [isFlipped, setIsFlipped] = useState(false);
 
     const { isRecording, audioUrl, isPlayingAudio, speakVenda, startRecording, stopRecording, setAudioUrl } = useAudio();
     const [studyStartTime, setStudyStartTime] = useState(initialPersistentState?.studyStartTime || Date.now());
@@ -256,6 +255,12 @@ const GameRoom: React.FC = () => {
     }, [gameState, resetGameLogic, startIdx, startType, setCurrentQIndex, getSavedState]);
 
     useEffect(() => {
+        // Prevent state leak between questions
+        setSelectedOption(null);
+        setSelectedTF(null);
+    }, [currentQIndex]);
+
+    useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth, async (user) => {
             if (user && lessonId) {
                 const lessons = await fetchLessons();
@@ -377,30 +382,25 @@ const GameRoom: React.FC = () => {
                     <div className="flex-grow-1 px-3 d-flex align-items-center" style={{ marginTop: '-30px' }}>
                         <div className="container" style={{ maxWidth: '700px' }}>
                             <div key={currentSlide} className="animate__animated animate__fadeIn animate__faster">
-                                <div className={`flashcard-container ${isFlipped ? 'is-flipped' : ''}`} onClick={() => setIsFlipped(!isFlipped)}>
-                                    <div className="flashcard-inner">
-                                        <div className="flashcard-front">
-                                            <div className="d-flex justify-content-center gap-1 mb-5" style={{ position: 'absolute', top: '25px' }}>
-                                                {lesson.slides.map((_: any, i: number) => (
-                                                    <div key={i} style={{ width: i === currentSlide ? 20 : 6, height: 6, borderRadius: 10, backgroundColor: i === currentSlide ? '#FACC15' : (i < currentSlide ? '#10B981' : '#E2E8F0'), transition: 'all 0.3s' }}></div>
-                                                ))}
-                                            </div>
-                                            <h1 className="fw-bold ls-tight mb-4" style={{ fontSize: 'clamp(2.5rem, 10vw, 4rem)', color: '#111827' }}>{slide.venda}</h1>
-                                            <button className="btn rounded-circle d-inline-flex align-items-center justify-content-center mb-5" onClick={(e) => { e.stopPropagation(); speakVenda(slide.venda); }} style={{ width: 64, height: 64, backgroundColor: isPlayingAudio ? '#FEF3C7' : '#F9FBFF', border: isPlayingAudio ? '2px solid #FACC15' : '2px solid #E2E8F0', boxShadow: '0 4px 12px rgba(0,0,0,0.05)', transition: 'all 0.2s' }}>
-                                                <Volume2 className="fs-4" />
-                                            </button>
-                                            <div className="flip-hint"><RefreshCw size={12} /> TAP TO REVEAL ENGLISH</div>
-                                        </div>
-                                        <div className="flashcard-back">
-                                            <p className="smallest fw-bold text-muted ls-2 text-uppercase mb-4">DEFINITION</p>
-                                            <h2 className="fw-bold mb-4" style={{ color: '#111827', fontSize: '2rem' }}>{slide.english}</h2>
-                                            <div className="mx-auto my-4" style={{ width: '40px', height: '2px', backgroundColor: '#E2E8F0' }}></div>
-                                            <div className="p-3 rounded-4 w-100" style={{ backgroundColor: '#FFFBEB', border: '1px solid #FDE68A' }}>
-                                                <p className="smallest fw-bold mb-2 ls-2 text-uppercase" style={{ color: '#92400E' }}>Context</p>
-                                                <p className="mb-0 small fst-italic" style={{ color: '#78350F', lineHeight: 1.5 }}>"{slide.context}"</p>
-                                            </div>
-                                            <div className="flip-hint"><RefreshCw size={12} /> TAP TO SEE VENDA</div>
-                                        </div>
+                                <div className="study-card bg-white rounded-4 p-4 p-md-5 d-flex flex-column align-items-center text-center shadow-sm w-100" style={{ border: '1px solid #E5E7EB', position: 'relative' }}>
+                                    <div className="d-flex justify-content-center gap-1 mb-4">
+                                        {lesson.slides.map((_: any, i: number) => (
+                                            <div key={i} style={{ width: i === currentSlide ? 20 : 6, height: 6, borderRadius: 10, backgroundColor: i === currentSlide ? '#FACC15' : (i < currentSlide ? '#10B981' : '#E2E8F0'), transition: 'all 0.3s' }}></div>
+                                        ))}
+                                    </div>
+                                    <h1 className="fw-bold ls-tight mb-4" style={{ fontSize: 'clamp(2.5rem, 10vw, 4rem)', color: '#111827' }}>{slide.venda}</h1>
+                                    <button className="btn rounded-circle d-inline-flex align-items-center justify-content-center mb-4" onClick={(e) => { e.stopPropagation(); speakVenda(slide.venda); }} style={{ width: 64, height: 64, backgroundColor: isPlayingAudio ? '#FEF3C7' : '#F9FBFF', border: isPlayingAudio ? '2px solid #FACC15' : '2px solid #E2E8F0', boxShadow: '0 4px 12px rgba(0,0,0,0.05)', transition: 'all 0.2s' }}>
+                                        <Volume2 className="fs-4" />
+                                    </button>
+                                    
+                                    <div className="w-100 mt-2 mb-4" style={{ height: '1px', backgroundColor: '#E2E8F0' }}></div>
+                                    
+                                    <p className="smallest fw-bold text-muted ls-2 text-uppercase mb-3">DEFINITION</p>
+                                    <h2 className="fw-bold mb-4" style={{ color: '#111827', fontSize: 'clamp(1.5rem, 6vw, 2rem)' }}>{slide.english}</h2>
+                                    
+                                    <div className="p-3 rounded-4 w-100 text-start" style={{ backgroundColor: '#FFFBEB', border: '1px solid #FDE68A' }}>
+                                        <p className="smallest fw-bold mb-2 ls-2 text-uppercase" style={{ color: '#92400E' }}>Context</p>
+                                        <p className="mb-0 small fst-italic" style={{ color: '#78350F', lineHeight: 1.5 }}>"{slide.context}"</p>
                                     </div>
                                 </div>
 
@@ -425,11 +425,11 @@ const GameRoom: React.FC = () => {
                     </div>
 
                     <div className="d-flex gap-3 pb-4 container mt-auto" style={{ maxWidth: '700px' }}>
-                        <button className="btn btn-outline-dark border-2 w-50 py-3 fw-bold ls-1 rounded-3 d-flex align-items-center justify-content-center gap-2" disabled={currentSlide === 0} onClick={() => { setIsFlipped(false); setAudioUrl(null); const prev = currentSlide - 1; setCurrentSlide(prev); saveProgress(prev, 'STUDY'); }}>
+                        <button className="btn btn-outline-dark border-2 w-50 py-3 fw-bold ls-1 rounded-3 d-flex align-items-center justify-content-center gap-2" disabled={currentSlide === 0} onClick={() => { setAudioUrl(null); const prev = currentSlide - 1; setCurrentSlide(prev); saveProgress(prev, 'STUDY'); }}>
                             <ArrowLeft size={18} /> MURAHU
                         </button>
                         {!isLastSlide ? (
-                            <button className="btn game-btn-primary w-50 py-3 fw-bold ls-1 d-flex align-items-center justify-content-center gap-2" onClick={() => { setIsFlipped(false); setAudioUrl(null); const next = currentSlide + 1; setCurrentSlide(next); saveProgress(next, 'STUDY'); }}>
+                            <button className="btn game-btn-primary w-50 py-3 fw-bold ls-1 d-flex align-items-center justify-content-center gap-2" onClick={() => { setAudioUrl(null); const next = currentSlide + 1; setCurrentSlide(next); saveProgress(next, 'STUDY'); }}>
                                 PHANDA <ArrowRight size={18} />
                             </button>
                         ) : (
@@ -599,16 +599,11 @@ const GameRoom: React.FC = () => {
                 .game-btn-primary { background-color: #FACC15 !important; color: #111827 !important; border: none !important; border-radius: 12px; box-shadow: 0 4px 0 #EAB308 !important; transition: all 0.2s; }
                 .game-btn-primary:active { transform: translateY(2px); box-shadow: 0 2px 0 #EAB308 !important; }
                 .game-btn-primary:disabled { opacity: 0.5; }
-                .flashcard-container { perspective: 1000px; width: 100%; max-width: 500px; margin: 0 auto; height: 400px; cursor: pointer; position: relative; z-index: 10; }
-                .flashcard-inner { position: relative; width: 100%; height: 100%; text-align: center; transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1); transform-style: preserve-3d; }
-                .flashcard-container.is-flipped .flashcard-inner { transform: rotateY(180deg); }
-                .flashcard-front, .flashcard-back { position: absolute; inset: 0; width: 100%; height: 100%; backface-visibility: hidden; display: flex; flex-direction: column; align-items: center; justify-content: center; border-radius: 28px; padding: 2.5rem; box-shadow: 0 15px 35px rgba(0, 0, 0, 0.12); background-color: white !important; border: 1px solid #E5E7EB; }
-                .flashcard-back { transform: rotateY(180deg); background-color: #F8FAFC !important; }
-                @keyframes cheerPopIn { 0% { opacity: 0; transform: translateY(40px) scale(0.7); } 50% { opacity: 1; transform: translateY(-8px) scale(1.05); } 100% { opacity: 1; transform: translateY(0) scale(1); } }
-                .mascot-cheer-overlay { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); z-index: 60; display: flex; flex-direction: column; align-items: center; animation: cheerPopIn 0.4s ease-out forwards; pointer-events: none; filter: drop-shadow(0 6px 20px rgba(0,0,0,0.15)); }
+                .study-card { max-width: 500px; margin: 0 auto; transition: transform 0.2s; }
+                @keyframes cheerPopIn { 0% { opacity: 0; transform: translateX(-50%) translateY(40px) scale(0.7); } 50% { opacity: 1; transform: translateX(-50%) translateY(-8px) scale(1.05); } 100% { opacity: 1; transform: translateX(-50%) translateY(0) scale(1); } }
+                .mascot-cheer-overlay { position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%); z-index: 9999; display: flex; flex-direction: column; align-items: center; animation: cheerPopIn 0.4s ease-out forwards; pointer-events: none; filter: drop-shadow(0 6px 20px rgba(0,0,0,0.15)); }
                 .mascot-cheer-bubble { background: #111827; color: #FACC15; font-size: 14px; font-weight: 800; font-family: 'Poppins', sans-serif; letter-spacing: 0.5px; padding: 8px 20px; border-radius: 20px; margin-bottom: 6px; white-space: nowrap; box-shadow: 0 4px 16px rgba(250, 204, 21, 0.25); position: relative; }
                 .mascot-cheer-bubble::after { content: ''; position: absolute; bottom: -6px; left: 50%; transform: translateX(-50%); width: 0; height: 0; border-left: 6px solid transparent; border-right: 6px solid transparent; border-top: 6px solid #111827; }
-                .flip-hint { position: absolute; bottom: 25px; left: 0; right: 0; color: #94A3B8; font-size: 0.75rem; font-weight: 600; letter-spacing: 1px; display: flex; align-items: center; justify-content: center; gap: 8px; text-transform: uppercase; }
             `}</style>
         </div>
     );

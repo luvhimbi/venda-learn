@@ -8,6 +8,7 @@ export interface Trophy {
     description: string;
     icon: string;
     color: string;
+    rarity?: 'bronze' | 'silver' | 'gold' | 'special';
     requirement: {
         type: RequirementType;
         value: number;
