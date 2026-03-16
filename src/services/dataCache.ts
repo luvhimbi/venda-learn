@@ -3,7 +3,7 @@
 // Data is fetched once per session and shared between Home, Courses, GameRoom, etc.
 
 import { db, auth } from './firebaseConfig';
-import { collection, getDocs, doc, getDoc, query, orderBy, limit } from 'firebase/firestore';
+import { collection, getDocs, doc, getDoc, setDoc, query, orderBy, limit } from 'firebase/firestore';
 
 
 interface CacheEntry<T> {
@@ -432,3 +432,32 @@ export const warmupGameCache = async () => {
         console.error("Error warming up game cache:", error);
     }
 };
+
+// ----- THEME SETTINGS -----
+export const fetchThemeSettings = async (): Promise<any | null> => {
+    const cached = getCached<any>('theme_settings');
+    if (cached) return cached;
+
+    try {
+        const snap = await getDoc(doc(db, "settings", "theme"));
+        if (!snap.exists()) return null;
+
+        const data = snap.data();
+        setCache('theme_settings', data);
+        return data;
+    } catch (e) {
+        console.error("fetchThemeSettings error:", e);
+        return null;
+    }
+};
+
+export const saveThemeSettings = async (settings: any): Promise<void> => {
+    try {
+        await setDoc(doc(db, "settings", "theme"), settings, { merge: true });
+        setCache('theme_settings', settings);
+    } catch (e) {
+        console.error("saveThemeSettings error:", e);
+        throw e;
+    }
+};
+

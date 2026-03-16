@@ -73,26 +73,7 @@ const Navbar: React.FC = () => {
 
                 {/* BRAND LOGO & SLOGAN */}
                 <Link className="navbar-brand d-flex align-items-center mb-0 text-decoration-none shadow-none" to="/">
-                    <div
-                        className="text-dark rounded-3 me-2 d-flex align-items-center justify-content-center fw-bold flex-shrink-0"
-                        style={{
-                            width: '42px',
-                            height: '42px',
-                            fontSize: '1.2rem',
-                            backgroundColor: '#FACC15',
-                            boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
-                        }}
-                    >
-                        V
-                    </div>
-                    <div className="d-flex flex-column justify-content-center">
-                        <span className="fw-bold text-dark ls-tight lh-1" style={{ fontSize: '1.25rem' }}>
-                            VENDA<span style={{ color: '#FACC15' }}>LEARN</span>
-                        </span>
-                        <span className="shumela-venda-pulse fw-bold ls-2 text-uppercase">
-                            Shumela Venda
-                        </span>
-                    </div>
+                    <img src="/images/VendaLearnLogo.png" alt="Venda Learn Logo" height="45" className="object-fit-contain" />
                 </Link>
 
                 {/* MOBILE TOGGLER */}

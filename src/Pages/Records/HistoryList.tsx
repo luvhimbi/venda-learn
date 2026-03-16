@@ -1,9 +1,9 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { auth } from '../../services/firebaseConfig';
 import { useNavigate } from 'react-router-dom';
 import { onAuthStateChanged } from 'firebase/auth';
 import { fetchHistoryData } from '../../services/dataCache';
-import { Sparkles, X } from 'lucide-react';
+import { Sparkles, X, ChevronLeft, ChevronRight } from 'lucide-react';
 
 interface HistoryStory {
     id: string;
@@ -18,8 +18,8 @@ interface HistoryStory {
 
 const CategoryCard: React.FC<{ title: string; count: number; image: string; active: boolean; onClick: () => void }> = ({ title, count, image, active, onClick }) => (
     <div
-        className={`category-card rounded-4 overflow-hidden position-relative mb-3 transition-all ${active ? 'active-category' : ''}`}
-        style={{ cursor: 'pointer', minWidth: '180px', height: '220px' }}
+        className={`category-card rounded-4 overflow-hidden position-relative mb-3 transition-all scroll-snap-align-start ${active ? 'active-category' : ''}`}
+        style={{ cursor: 'pointer', minWidth: '180px', height: '220px', flex: '0 0 auto' }}
         onClick={onClick}
     >
         <img src={image} alt={title} className="w-100 h-100 object-fit-cover" />
@@ -33,12 +33,23 @@ const CategoryCard: React.FC<{ title: string; count: number; image: string; acti
 
 const HistoryList: React.FC = () => {
     const navigate = useNavigate();
+    const scrollContainerRef = useRef<HTMLDivElement>(null);
     const [stories, setStories] = useState<HistoryStory[]>([]);
     const [loading, setLoading] = useState(true);
     const [activeFilter, setActiveFilter] = useState<string>('All');
     const [authInitialized, setAuthInitialized] = useState(false);
     const [isGuest, setIsGuest] = useState(false);
     const [showGuestBanner, setShowGuestBanner] = useState(true);
+
+    const scroll = (direction: 'left' | 'right') => {
+        if (scrollContainerRef.current) {
+            const scrollAmount = 200;
+            scrollContainerRef.current.scrollBy({
+                left: direction === 'left' ? -scrollAmount : scrollAmount,
+                behavior: 'smooth'
+            });
+        }
+    };
 
     // Initial metadata for known categories
     const categoryMetadata = [
@@ -126,18 +137,39 @@ const HistoryList: React.FC = () => {
                         )}
 
                         {/* EXPLORE TRADITIONS SECTION */}
-                        <section className="mb-5">
+                        <section className="mb-5 position-relative">
                             <div className="d-flex justify-content-between align-items-center mb-4">
                                 <h3 className="fw-bold mb-0">Explore Traditions</h3>
-                                <button
-                                    className="btn btn-link text-warning fw-bold p-0 text-decoration-none"
-                                    onClick={() => setActiveFilter('All')}
-                                >
-                                    View all stories
-                                </button>
+                                <div className="d-flex align-items-center gap-2">
+                                    <div className="d-flex gap-1 me-2">
+                                        <button 
+                                            onClick={() => scroll('left')}
+                                            className="btn btn-sm btn-outline-warning rounded-circle d-flex align-items-center justify-content-center"
+                                            style={{ width: '32px', height: '32px' }}
+                                        >
+                                            <ChevronLeft size={18} />
+                                        </button>
+                                        <button 
+                                            onClick={() => scroll('right')}
+                                            className="btn btn-sm btn-outline-warning rounded-circle d-flex align-items-center justify-content-center"
+                                            style={{ width: '32px', height: '32px' }}
+                                        >
+                                            <ChevronRight size={18} />
+                                        </button>
+                                    </div>
+                                    <button
+                                        className="btn btn-link text-warning fw-bold p-0 text-decoration-none smallest-print uppercase ls-1"
+                                        onClick={() => setActiveFilter('All')}
+                                    >
+                                        View all
+                                    </button>
+                                </div>
                             </div>
 
-                            <div className="d-flex gap-3 overflow-auto no-scrollbar pb-3">
+                            <div 
+                                ref={scrollContainerRef}
+                                className="d-flex gap-3 overflow-auto no-scrollbar pb-3 scroll-snap-x-mandatory"
+                            >
                                 {categories.map(cat => (
                                     <CategoryCard
                                         key={cat.id}
@@ -233,6 +265,13 @@ const HistoryList: React.FC = () => {
                 }
                 .pointer { cursor: pointer; }
                 .no-scrollbar::-webkit-scrollbar { display: none; }
+                .scroll-snap-x-mandatory {
+                    scroll-snap-type: x mandatory;
+                    -webkit-overflow-scrolling: touch;
+                }
+                .scroll-snap-align-start {
+                    scroll-snap-align: start;
+                }
                 .italic { font-style: italic; }
                 
                 .active-nav {

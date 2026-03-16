@@ -144,5 +144,11 @@ service cloud.firestore {
       allow create: if request.auth != null;
       allow read: if isAdmin();
     }
+
+    // --- SYSTEM SETTINGS (THEMES) ---
+    match /settings/{docId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
   }
 }

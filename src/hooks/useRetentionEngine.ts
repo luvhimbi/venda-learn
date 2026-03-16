@@ -14,8 +14,18 @@ export const useRetentionEngine = (userData: any, shouldDelay: boolean = false) 
             hasFired.current = true;
         }, 1500);
 
-        return () => clearTimeout(timer);
-    }, [userData]);
+        // For Scheduled Reminders: Check every minute if they are still on the page
+        const interval = setInterval(() => {
+            if (userData?.reminderEnabled) {
+                evaluateRetentionTriggers(userData);
+            }
+        }, 60000); // 1 minute
+
+        return () => {
+            clearTimeout(timer);
+            clearInterval(interval);
+        };
+    }, [userData, shouldDelay]);
 
     const evaluateRetentionTriggers = (data: any) => {
         // Enforce a 10-minute global cooldown using localStorage
@@ -90,6 +100,29 @@ export const useRetentionEngine = (userData: any, shouldDelay: boolean = false) 
                 duration: 6000
             });
             return;
+        }
+
+        // 4. SCHEDULED REMINDER (Time-based)
+        if (data.reminderEnabled && data.reminderTime && !activeToday) {
+            const now = new Date();
+            const [remHour, remMin] = data.reminderTime.split(':').map(Number);
+            
+            // Check if we are within the reminder hour/minute block
+            const isMatch = now.getHours() === remHour && now.getMinutes() === remMin;
+            
+            if (isMatch) {
+                // Check if we already fired a reminder today to avoid multiple notifications in the same minute
+                const lastReminderDate = localStorage.getItem('vendalearn_last_reminder_date');
+                if (lastReminderDate !== todayStr) {
+                    fireNotification({
+                        title: "Time to Learn! 📚",
+                        message: "It's your scheduled time for Tshivenda! Ready for a quick lesson?",
+                        type: 'info',
+                        duration: 8000
+                    });
+                    localStorage.setItem('vendalearn_last_reminder_date', todayStr);
+                }
+            }
         }
     };
 };

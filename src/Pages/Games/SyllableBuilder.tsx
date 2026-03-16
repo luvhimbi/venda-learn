@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { fetchSyllables } from '../../services/dataCache';
 import { useNavigate } from 'react-router-dom';
 import { Layout, Star, HelpCircle } from 'lucide-react';
@@ -33,11 +33,12 @@ const MASCOT_CHEERS = [
 
 const SyllableBuilder: React.FC = () => {
     const navigate = useNavigate();
-    const [loading, setLoading] = useState(true);
+    const [loading, setLoading] = useState(false);
     const [puzzles, setPuzzles] = useState<SyllablePuzzle[]>([]);
     const [currentPuzzle, setCurrentPuzzle] = useState<SyllablePuzzle | null>(null);
     const [currentIndex, setCurrentIndex] = useState(0);
     const [showRules, setShowRules] = useState(false);
+    const [selectedLevel, setSelectedLevel] = useState<string | null>(null);
 
     const [pool, setPool] = useState<{ id: string, text: string, colorIdx: number }[]>([]);
     const [placed, setPlaced] = useState<{ id: string, text: string, colorIdx: number }[]>([]);
@@ -49,23 +50,27 @@ const SyllableBuilder: React.FC = () => {
     const [showMascotCheer, setShowMascotCheer] = useState(false);
     const [mascotCheerText, setMascotCheerText] = useState(MASCOT_CHEERS[0]);
 
-    useEffect(() => { loadGame(); }, []);
+    // We don't auto-load the game into Playing state anymore
+    // useEffect(() => { loadGameData(); }, []);
 
-    const loadGame = async () => {
+    const startLevel = async (level: string) => {
+        setSelectedLevel(level);
         setLoading(true);
         try {
             const data = await fetchSyllables();
-            const shuffled = [...data].sort(() => 0.5 - Math.random());
+            const filtered = data.filter(d => d.difficulty === level);
+            const shuffled = [...filtered].sort(() => 0.5 - Math.random());
             setPuzzles(shuffled);
             if (shuffled.length > 0) {
                 setupRound(shuffled[0], 0);
             } else {
-                Swal.fire('Info', 'No syllable puzzles found.', 'info');
-                navigate('/mitambo');
+                Swal.fire('Info', `No puzzles found for ${level}.`, 'info');
+                setSelectedLevel(null);
             }
         } catch (error) {
             console.error("Error loading syllables:", error);
             Swal.fire('Error', 'Failed to load game.', 'error');
+            setSelectedLevel(null);
         } finally {
             setLoading(false);
         }
@@ -145,6 +150,59 @@ const SyllableBuilder: React.FC = () => {
             <p className="text-white-50 mt-3 fw-bold" style={{ fontSize: '12px', letterSpacing: '2px', textTransform: 'uppercase' }}>Loading puzzles...</p>
         </div>
     );
+
+    if (!selectedLevel) {
+        return (
+            <div className="min-vh-100 d-flex flex-column" style={{ background: 'linear-gradient(180deg, #111827 0%, #1F2937 100%)' }}>
+                <div className="container d-flex flex-column align-items-center justify-content-center flex-grow-1 px-3" style={{ maxWidth: '500px' }}>
+                    
+                    <button onClick={() => navigate('/mitambo')} className="btn btn-link text-decoration-none p-0 text-white-50 position-absolute top-0 start-0 m-4 fw-bold" style={{ fontSize: '11px', letterSpacing: '2px' }}>
+                        <i className="bi bi-x-lg me-2"></i>EXIT
+                    </button>
+
+                    <div className="text-center mb-5">
+                        <div className="d-inline-flex justify-content-center align-items-center mb-3" style={{ width: '80px', height: '80px', background: 'rgba(250, 204, 21, 0.1)', borderRadius: '24px' }}>
+                            <Layout size={40} color="#FACC15" />
+                        </div>
+                        <h1 className="fw-bold text-white mb-2">Syllable Builder</h1>
+                        <p className="text-white-50 mb-0">Select a difficulty level to begin</p>
+                    </div>
+
+                    <div className="w-100 d-flex flex-column gap-3">
+                        <button onClick={() => startLevel('Beginner')} className="btn btn-dark border-secondary p-4 rounded-4 text-start position-relative overflow-hidden level-btn text-white">
+                            <h5 className="fw-bold mb-1" style={{ color: '#34D399' }}>Beginner</h5>
+                            <span className="text-white-50 small">Basic syllables and simple words</span>
+                        </button>
+                        
+                        <button onClick={() => startLevel('Intermediate')} className="btn btn-dark border-secondary p-4 rounded-4 text-start position-relative overflow-hidden level-btn text-white">
+                            <h5 className="fw-bold mb-1" style={{ color: '#FCD34D' }}>Intermediate</h5>
+                            <span className="text-white-50 small">Longer words and prefixes</span>
+                        </button>
+                        
+                        <button onClick={() => startLevel('Advanced')} className="btn btn-dark border-secondary p-4 rounded-4 text-start position-relative overflow-hidden level-btn text-white">
+                            <h5 className="fw-bold mb-1" style={{ color: '#F87171' }}>Advanced</h5>
+                            <span className="text-white-50 small">Complex syllable structures</span>
+                        </button>
+                    </div>
+                </div>
+
+                <style>{`
+                    .level-btn {
+                        transition: all 0.2s ease;
+                        background: #1F2937 !important;
+                    }
+                    .level-btn:hover {
+                        transform: translateY(-2px);
+                        border-color: #FACC15 !important;
+                        background: #374151 !important;
+                    }
+                    .level-btn:active {
+                        transform: translateY(0);
+                    }
+                `}</style>
+            </div>
+        );
+    }
 
     const expectedSlots = currentPuzzle?.syllables.length || 0;
 

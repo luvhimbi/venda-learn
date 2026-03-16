@@ -10,6 +10,9 @@ import { useNavigate } from "react-router-dom";
 import { MessageCircle, Book, Flame, Gem, Gift, Edit3, Compass, LogOut, CheckCircle, Info, Shield, Users, Camera } from 'lucide-react';
 import AvatarPicker, { AvatarDisplay } from '../../components/AvatarPicker';
 import StreakCalendar from '../../components/StreakCalendar';
+import TrophyIcon from '../../components/TrophyIcon';
+import { updateReminderSettings, requestNotificationPermission } from '../../services/reminderService';
+import { Bell, Clock } from 'lucide-react';
 
 interface UserProfile {
     username: string;
@@ -25,6 +28,8 @@ interface UserProfile {
     trophies?: string[];
     streakFreezes?: number;
     activityHistory?: string[];
+    reminderEnabled?: boolean;
+    reminderTime?: string;
 }
 
 interface LearnedStats {
@@ -46,6 +51,9 @@ const Profile: React.FC = () => {
     const [editUsername, setEditUsername] = useState('');
     const [editAvatarId, setEditAvatarId] = useState('user');
     const [unclaimedInvites, setUnclaimedInvites] = useState<any[]>([]);
+    const [activeTab, setActiveTab] = useState<'overview' | 'mastery' | 'gear'>('overview');
+    const [reminderEnabled, setReminderEnabled] = useState(false);
+    const [reminderTime, setReminderTime] = useState('09:00');
     const navigate = useNavigate();
     const inviteLink = `${window.location.origin}/register?ref=${auth.currentUser?.uid}`;
 
@@ -69,6 +77,8 @@ const Profile: React.FC = () => {
                     setUserData(normalizedProfile);
                     setEditUsername(profile.username || '');
                     setEditAvatarId(profile.avatarId || 'adventurer');
+                    setReminderEnabled(profile.reminderEnabled || false);
+                    setReminderTime(profile.reminderTime || '09:00');
 
                     // Check for new achievements (including 1st Login)
                     const newTrophies = checkAchievements(normalizedProfile, profile.trophies || []);
@@ -394,238 +404,366 @@ const Profile: React.FC = () => {
                     </div>
                 </header>
 
-                {/* MY PROGRESS JOURNEY SECTION */}
-                <section className="mb-5">
-                    <div className="d-flex justify-content-between align-items-end mb-4">
-                        <div>
-                            {/* TROPHY CASE */}
-                            <div className="mb-5 animate__animated animate__fadeInUp">
-                                <div className="d-flex justify-content-between align-items-center mb-3">
-                                    <h5 className="fw-bold mb-0 text-uppercase ls-2 smallest text-muted">Trophy Case</h5>
-                                    <span className="smallest fw-bold text-muted">{userData?.trophies?.length || 0} / {ALL_TROPHIES.length} EARNED</span>
+                {/* TABS NAVIGATION */}
+                <div className="d-flex justify-content-center mb-4 mb-md-5 tour-profile-tabs">
+                    <div className="nav nav-pills bg-light p-1 rounded-pill shadow-sm border border-white flex-nowrap overflow-auto hide-scrollbar" style={{ maxWidth: '100%' }}>
+                        <button 
+                            onClick={() => setActiveTab('overview')}
+                            className={`nav-link rounded-pill px-2 px-sm-4 py-2 fw-bold ls-1 smallest d-flex align-items-center justify-content-center transition-all ${activeTab === 'overview' ? 'bg-dark text-white active shadow-sm' : 'text-muted'}`}
+                            style={{ minWidth: 'fit-content' }}
+                        >
+                            <Gem size={14} className="me-1 me-sm-2" /> <span className="d-none d-sm-inline">OVERVIEW</span><span className="d-inline d-sm-none">STATS</span>
+                        </button>
+                        <button 
+                            onClick={() => setActiveTab('mastery')}
+                            className={`nav-link rounded-pill px-2 px-sm-4 py-2 fw-bold ls-1 smallest d-flex align-items-center justify-content-center transition-all ${activeTab === 'mastery' ? 'bg-dark text-white active shadow-sm' : 'text-muted'}`}
+                            style={{ minWidth: 'fit-content' }}
+                        >
+                            <Compass size={14} className="me-1 me-sm-2" /> <span className="d-none d-sm-inline">MASTERY</span><span className="d-inline d-sm-none">PATH</span>
+                        </button>
+                        <button 
+                            onClick={() => setActiveTab('gear')}
+                            className={`nav-link rounded-pill px-2 px-sm-4 py-2 fw-bold ls-1 smallest d-flex align-items-center justify-content-center transition-all tour-gear-tab ${activeTab === 'gear' ? 'bg-dark text-white active shadow-sm' : 'text-muted'}`}
+                            style={{ minWidth: 'fit-content' }}
+                        >
+                            <Bell size={14} className="me-1 me-sm-2" /> GEAR
+                        </button>
+                    </div>
+                </div>
+
+                {activeTab === 'overview' && (
+                    <div className="animate__animated animate__fadeIn">
+                        {/* MY PROGRESS JOURNEY SECTION */}
+                        <section className="mb-5">
+                            <div className="d-flex justify-content-between align-items-end mb-4">
+                                <div>
+                                    {/* TROPHY CASE */}
+                                    <div className="mb-4">
+                                        <div className="d-flex justify-content-between align-items-center mb-3">
+                                            <div>
+                                                <h5 className="fw-bold mb-0 text-uppercase ls-2 smallest text-muted">Trophy Case</h5>
+                                                <h4 className="fw-bold text-dark mt-1">ACHIEVEMENTS</h4>
+                                            </div>
+                                            <button 
+                                                onClick={() => navigate('/achievements')}
+                                                className="btn btn-link text-warning fw-bold smallest text-uppercase ls-1 p-0 text-decoration-none"
+                                            >
+                                                View All <i className="bi bi-arrow-right ms-1"></i>
+                                            </button>
+                                        </div>
+                                        <div className="row g-2">
+                                            {ALL_TROPHIES.slice(0, 6).map(trophy => {
+                                                const isEarned = (userData?.trophies || []).includes(trophy.id);
+                                                return (
+                                                    <div key={trophy.id} className="col-4 col-md-2">
+                                                        <div 
+                                                            className="d-flex flex-column align-items-center gap-2"
+                                                            title={trophy.description}
+                                                            style={{ cursor: 'pointer' }}
+                                                            onClick={() => navigate('/achievements')}
+                                                        >
+                                                            <div className={`p-2 rounded-4 transition-all ${isEarned ? 'bg-white shadow-sm border border-warning' : 'opacity-25 bg-light grayscale border-dashed border-2'}`}>
+                                                                <TrophyIcon 
+                                                                    rarity={isEarned ? trophy.rarity as any : 'locked'} 
+                                                                    size={48} 
+                                                                    animate={isEarned}
+                                                                    color={trophy.color}
+                                                                />
+                                                            </div>
+                                                            <p className={`smallest fw-bold mb-0 text-truncate text-center w-100 ${isEarned ? 'text-dark' : 'text-muted'}`}>
+                                                                {trophy.title.split(' (')[0]}
+                                                            </p>
+                                                        </div>
+                                                    </div>
+                                                );
+                                            })}
+                                        </div>
+                                    </div>
+
+                                    <p className="smallest fw-bold text-warning mb-1 ls-2 text-uppercase">Journey Overview</p>
+                                    <h2 className="fw-bold mb-0 ls-tight">MY PROGRESS JOURNEY</h2>
                                 </div>
-                                <div className="row g-3">
-                                    {ALL_TROPHIES.map(trophy => {
-                                        const isEarned = (userData?.trophies || []).includes(trophy.id);
+                            </div>
+
+                            <div className="row g-4 mb-5">
+                                {/* Summary Cards */}
+                                <div className="col-6 col-md-3">
+                                    <div className="p-4 rounded-4 bg-light text-center h-100 shadow-sm border border-white hover-up transition-all">
+                                        <MessageCircle className="mx-auto mb-2 text-primary" size={32} />
+                                        <h3 className="fw-bold mb-0">{stats?.wordsCount || 0}</h3>
+                                        <p className="smallest fw-bold text-muted text-uppercase ls-1">Words Learned</p>
+                                    </div>
+                                </div>
+                                <div className="col-6 col-md-3">
+                                    <div className="p-4 rounded-4 bg-light text-center h-100 shadow-sm border border-white hover-up transition-all">
+                                        <Book className="mx-auto mb-2 text-success" size={32} />
+                                        <h3 className="fw-bold mb-0">{stats?.lessonsCount || 0}</h3>
+                                        <p className="smallest fw-bold text-muted text-uppercase ls-1">Lessons Done</p>
+                                    </div>
+                                </div>
+                                <div className="col-6 col-md-3">
+                                    <div className="p-4 rounded-4 bg-light text-center h-100 shadow-sm border border-white hover-up transition-all">
+                                        <Flame className="mx-auto mb-2 text-danger" size={32} />
+                                        <h3 className="fw-bold mb-0">{stats?.streak || 0}</h3>
+                                        <p className="smallest fw-bold text-muted text-uppercase ls-1">Day Streak</p>
+                                    </div>
+                                </div>
+                                <div className="col-6 col-md-3">
+                                    <div className="p-4 rounded-4 bg-light text-center h-100 shadow-sm border border-white hover-up transition-all">
+                                        <Gem className="mx-auto mb-2 text-warning" size={32} />
+                                        <h3 className="fw-bold mb-0">{stats?.points || 0}</h3>
+                                        <p className="smallest fw-bold text-muted text-uppercase ls-1">Total XP</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Progress Bar & Badges */}
+                            <div className="card border-0 shadow-sm rounded-4 p-4 p-md-5 mb-0 overflow-hidden position-relative" style={{ backgroundColor: '#111827', color: 'white' }}>
+                                <div className="position-relative z-1">
+                                    <div className="d-flex justify-content-between align-items-center mb-4">
+                                        <div>
+                                            <h4 className="fw-bold mb-1">Rank Progress</h4>
+                                            <p className="smallest fw-bold text-warning ls-1 uppercase">{getBadgeDetails(levelStats.level).name} (LEVEL {levelStats.level})</p>
+                                        </div>
+                                        <div className="text-end">
+                                            <h2 className="fw-bold mb-0 text-warning">{levelStats.progress}%</h2>
+                                            <p className="smallest fw-bold opacity-50 ls-1">TO NEXT RANK</p>
+                                        </div>
+                                    </div>
+
+                                    <div className="progress mb-4" style={{ height: '12px', borderRadius: '10px', backgroundColor: 'rgba(255,255,255,0.1)' }}>
+                                        <div
+                                            className="progress-bar progress-bar-striped progress-bar-animated bg-warning"
+                                            style={{ width: `${levelStats.progress}%`, borderRadius: '10px' }}
+                                        ></div>
+                                    </div>
+
+                                    <p className="small text-muted mb-0 d-flex align-items-center gap-2">
+                                        <Info size={14} />
+                                        Earn {levelStats.pointsForNextLevel - levelStats.pointsInCurrentLevel} more LP to reach Level {levelStats.level + 1}
+                                    </p>
+                                </div>
+                                <div className="position-absolute end-0 bottom-0 opacity-10 display-1 p-4"><Shield size={120} strokeWidth={1} /></div>
+                            </div>
+                        </section>
+                    </div>
+                )}
+
+                {activeTab === 'mastery' && (
+                    <div className="animate__animated animate__fadeIn">
+                        {/* MASTERY PATH - High Fidelity Zigzag Map */}
+                        <div className="card border-0 shadow-sm rounded-4 p-4 p-md-5 mb-5 bg-white overflow-hidden">
+                            <div className="text-center mb-5">
+                                <h5 className="fw-bold mb-1 text-uppercase ls-2 smallest text-muted">Venda Mastery Path</h5>
+                                <h3 className="fw-bold text-dark">Your Journey to Fluency</h3>
+                            </div>
+
+                            <div className="mastery-path position-relative py-5">
+                                {/* The connecting path line - Zigzag dynamic path */}
+                                <svg className="position-absolute start-0 top-0 w-100 h-100" style={{ zIndex: 0, overflow: 'visible' }}>
+                                    <path
+                                        d={milestones.map((_, idx) => {
+                                            const isRightStagger = idx % 2 === 0;
+                                            const x = isRightStagger ? '25%' : '75%';
+                                            const y = `${(idx * 100) / (milestones.length - 1)}%`;
+                                            return `${idx === 0 ? 'M' : 'L'} ${x} ${y}`;
+                                        }).reverse().join(' ')}
+                                        stroke="url(#pathGradient)"
+                                        strokeWidth="6"
+                                        strokeDasharray="12 12"
+                                        fill="none"
+                                        className="path-animation"
+                                        strokeLinecap="round"
+                                    />
+                                    <defs>
+                                        <linearGradient id="pathGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                                            <stop offset="0%" stopColor="#FACC15" stopOpacity="1" />
+                                            <stop offset="100%" stopColor="#111827" stopOpacity="0.3" />
+                                        </linearGradient>
+                                    </defs>
+                                </svg>
+
+                                <div className="d-flex flex-column gap-5 position-relative z-1">
+                                    {[...milestones].reverse().map((m, idx) => {
+                                        const isReached = levelStats.level >= m.level;
+                                        const isCurrent = levelStats.level >= m.level && (idx === 0 || levelStats.level < [...milestones].reverse()[idx - 1].level);
+                                        const badge = getBadgeDetails(m.level);
+                                        const isRight = idx % 2 === 0;
+
                                         return (
-                                            <div key={trophy.id} className="col-4 col-md-2 text-center">
-                                                <div
-                                                    className={`p-3 rounded-4 transition-all mb-2 ${isEarned ? 'bg-white shadow-sm border border-warning hover-up' : 'opacity-25 bg-light border-dashed border-2'}`}
-                                                    title={trophy.description}
-                                                    style={{ cursor: isEarned ? 'pointer' : 'default' }}
-                                                    onClick={() => isEarned && Swal.fire({
-                                                        title: trophy.title,
-                                                        text: trophy.description,
-                                                        iconHtml: `<i class="bi ${trophy.icon}"></i>`,
-                                                        customClass: { icon: 'border-0', popup: 'rounded-4' },
-                                                        confirmButtonColor: '#111827'
-                                                    })}
-                                                >
-                                                    <i className={`bi ${trophy.icon} display-6`} style={{ color: isEarned ? trophy.color : '#999' }}></i>
+                                            <div key={m.level} className={`path-node d-flex align-items-center justify-content-center w-100 gap-4 ${isReached ? 'reached' : 'locked'} ${isCurrent ? 'current' : ''}`}>
+                                                <div className={`node-content d-flex align-items-center gap-3 ${isRight ? 'flex-row' : 'flex-row-reverse text-end'}`} style={{ width: '100%', maxWidth: '500px' }}>
+
+                                                    <div className="flex-grow-1 d-none d-md-block" style={{ width: '150px' }}>
+                                                        <h6 className={`fw-bold mb-0 ${isReached ? 'text-dark' : 'text-muted'}`}>{badge.name}</h6>
+                                                        <span className="smallest text-muted uppercase ls-1">{m.label}</span>
+                                                    </div>
+
+                                                    <div className="node-icon-wrapper position-relative">
+                                                        <div className={`milestone-circle shadow-lg d-flex align-items-center justify-content-center rounded-circle transition-all ${isReached ? 'heartbeat-sm' : ''}`}
+                                                            style={{
+                                                                width: isCurrent ? '85px' : '70px',
+                                                                height: isCurrent ? '85px' : '70px',
+                                                                backgroundColor: isReached ? badge.color : '#f1f5f9',
+                                                                border: isCurrent ? `4px solid #111827` : isReached ? `2px solid white` : '2px dashed #cbd5e1',
+                                                                fontSize: isCurrent ? '1.8rem' : '1.5rem',
+                                                                color: isReached ? 'white' : '#94a3b8',
+                                                                zIndex: isCurrent ? 10 : 1,
+                                                                boxShadow: isCurrent ? `0 0 20px ${badge.color}66` : 'none'
+                                                            }}>
+                                                            <i className={`bi ${badge.icon}`}></i>
+                                                        </div>
+                                                        {isReached && !isCurrent && (
+                                                            <div className="position-absolute top-0 end-0 bg-success text-white rounded-circle d-flex align-items-center justify-content-center shadow-sm" style={{ width: 22, height: 22, border: '2px solid white' }}>
+                                                                <CheckCircle size={12} fill="currentColor" />
+                                                            </div>
+                                                        )}
+                                                    </div>
+
+                                                    <div className="flex-grow-1" style={{ width: '150px' }}>
+                                                        <span className="smallest fw-bold text-muted ls-1 uppercase d-block">LEVEL {m.level}</span>
+                                                        {isReached ? (
+                                                            <span className="badge bg-success-subtle text-success border border-success-subtle rounded-pill smallest px-2">UNLOCKED</span>
+                                                        ) : (
+                                                            <span className="badge bg-light text-muted border border-light-subtle rounded-pill smallest px-2">LOCKED</span>
+                                                        )}
+                                                    </div>
                                                 </div>
-                                                <p className={`smallest fw-bold mb-0 text-truncate ${isEarned ? 'text-dark' : 'text-muted'}`}>{trophy.title.split(' (')[0]}</p>
                                             </div>
                                         );
                                     })}
                                 </div>
                             </div>
 
-                            <p className="smallest fw-bold text-warning mb-1 ls-2 text-uppercase">Journey Overview</p>
-                            <h2 className="fw-bold mb-0 ls-tight">MY PROGRESS JOURNEY</h2>
-                        </div>
-                    </div>
-
-                    <div className="row g-4 mb-5">
-                        {/* Summary Cards */}
-                        <div className="col-6 col-md-3">
-                            <div className="p-4 rounded-4 bg-light text-center h-100 shadow-sm border border-white hover-up transition-all">
-                                <MessageCircle className="mx-auto mb-2 text-primary" size={32} />
-                                <h3 className="fw-bold mb-0">{stats?.wordsCount || 0}</h3>
-                                <p className="smallest fw-bold text-muted text-uppercase ls-1">Words Learned</p>
-                            </div>
-                        </div>
-                        <div className="col-6 col-md-3">
-                            <div className="p-4 rounded-4 bg-light text-center h-100 shadow-sm border border-white hover-up transition-all">
-                                <Book className="mx-auto mb-2 text-success" size={32} />
-                                <h3 className="fw-bold mb-0">{stats?.lessonsCount || 0}</h3>
-                                <p className="smallest fw-bold text-muted text-uppercase ls-1">Lessons Done</p>
-                            </div>
-                        </div>
-                        <div className="col-6 col-md-3">
-                            <div className="p-4 rounded-4 bg-light text-center h-100 shadow-sm border border-white hover-up transition-all">
-                                <Flame className="mx-auto mb-2 text-danger" size={32} />
-                                <h3 className="fw-bold mb-0">{stats?.streak || 0}</h3>
-                                <p className="smallest fw-bold text-muted text-uppercase ls-1">Day Streak</p>
-                            </div>
-                        </div>
-                        <div className="col-6 col-md-3">
-                            <div className="p-4 rounded-4 bg-light text-center h-100 shadow-sm border border-white hover-up transition-all">
-                                <Gem className="mx-auto mb-2 text-warning" size={32} />
-                                <h3 className="fw-bold mb-0">{stats?.points || 0}</h3>
-                                <p className="smallest fw-bold text-muted text-uppercase ls-1">Total XP</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* Progress Bar & Badges */}
-                    <div className="card border-0 shadow-sm rounded-4 p-4 p-md-5 mb-5 overflow-hidden position-relative" style={{ backgroundColor: '#111827', color: 'white' }}>
-                        <div className="position-relative z-1">
-                            <div className="d-flex justify-content-between align-items-center mb-4">
-                                <div>
-                                    <h4 className="fw-bold mb-1">Rank Progress</h4>
-                                    <p className="smallest fw-bold text-warning ls-1 uppercase">{getBadgeDetails(levelStats.level).name} (LEVEL {levelStats.level})</p>
-                                </div>
-                                <div className="text-end">
-                                    <h2 className="fw-bold mb-0 text-warning">{levelStats.progress}%</h2>
-                                    <p className="smallest fw-bold opacity-50 ls-1">TO NEXT RANK</p>
-                                </div>
-                            </div>
-
-                            <div className="progress mb-4" style={{ height: '12px', borderRadius: '10px', backgroundColor: 'rgba(255,255,255,0.1)' }}>
-                                <div
-                                    className="progress-bar progress-bar-striped progress-bar-animated bg-warning"
-                                    style={{ width: `${levelStats.progress}%`, borderRadius: '10px' }}
-                                ></div>
-                            </div>
-
-                            <p className="small text-muted mb-0 d-flex align-items-center gap-2">
-                                <Info size={14} />
-                                Earn {levelStats.pointsForNextLevel - levelStats.pointsInCurrentLevel} more LP to reach Level {levelStats.level + 1}
-                            </p>
-                        </div>
-                        <div className="position-absolute end-0 bottom-0 opacity-10 display-1 p-4"><Shield size={120} strokeWidth={1} /></div>
-                    </div>
-
-                    {/* MASTERY PATH - High Fidelity Zigzag Map */}
-                    <div className="card border-0 shadow-sm rounded-4 p-4 p-md-5 mb-5 bg-white overflow-hidden">
-                        <div className="text-center mb-5">
-                            <h5 className="fw-bold mb-1 text-uppercase ls-2 smallest text-muted">Venda Mastery Path</h5>
-                            <h3 className="fw-bold text-dark">Your Journey to Fluency</h3>
-                        </div>
-
-                        <div className="mastery-path position-relative py-5">
-                            {/* The connecting path line - Zigzag dynamic path */}
-                            <svg className="position-absolute start-0 top-0 w-100 h-100" style={{ zIndex: 0, overflow: 'visible' }}>
-                                <path
-                                    d={milestones.map((_, idx) => {
-                                        const isRightStagger = idx % 2 === 0;
-                                        const x = isRightStagger ? '25%' : '75%';
-                                        const y = `${(idx * 100) / (milestones.length - 1)}%`;
-                                        return `${idx === 0 ? 'M' : 'L'} ${x} ${y}`;
-                                    }).reverse().join(' ')}
-                                    stroke="url(#pathGradient)"
-                                    strokeWidth="6"
-                                    strokeDasharray="12 12"
-                                    fill="none"
-                                    className="path-animation"
-                                    strokeLinecap="round"
+                            <div className="mt-5 pt-5 border-top">
+                                <StreakCalendar
+                                    activityHistory={userData?.activityHistory || []}
+                                    streakFreezes={userData?.streakFreezes || 0}
+                                    points={userData?.points || 0}
+                                    onBuyFreeze={handleBuyFreeze}
                                 />
-                                <defs>
-                                    <linearGradient id="pathGradient" x1="0%" y1="0%" x2="0%" y2="100%">
-                                        <stop offset="0%" stopColor="#FACC15" stopOpacity="1" />
-                                        <stop offset="100%" stopColor="#111827" stopOpacity="0.3" />
-                                    </linearGradient>
-                                </defs>
-                            </svg>
+                            </div>
+                        </div>
+                    </div>
+                )}
 
-                            <div className="d-flex flex-column gap-5 position-relative z-1">
-                                {[...milestones].reverse().map((m, idx) => {
-                                    const isReached = levelStats.level >= m.level;
-                                    const isCurrent = levelStats.level >= m.level && (idx === 0 || levelStats.level < [...milestones].reverse()[idx - 1].level);
-                                    const badge = getBadgeDetails(m.level);
-                                    const isRight = idx % 2 === 0;
+                {activeTab === 'gear' && (
+                    <div className="animate__animated animate__fadeIn">
+                        {/* NOTIFICATION PREFERENCES */}
+                        <section className="mb-5">
+                            <div className="card border-0 shadow-sm rounded-4 p-4 bg-white overflow-hidden position-relative mb-4">
+                                <div className="d-flex align-items-center gap-2 mb-4">
+                                    <div className="bg-warning bg-opacity-10 p-2 rounded-3 text-warning">
+                                        <Bell size={20} />
+                                    </div>
+                                    <h5 className="fw-bold mb-0 text-dark">Learning Reminders</h5>
+                                </div>
 
-                                    return (
-                                        <div key={m.level} className={`path-node d-flex align-items-center justify-content-center w-100 gap-4 ${isReached ? 'reached' : 'locked'} ${isCurrent ? 'current' : ''}`}>
-                                            <div className={`node-content d-flex align-items-center gap-3 ${isRight ? 'flex-row' : 'flex-row-reverse text-end'}`} style={{ width: '100%', maxWidth: '500px' }}>
-
-                                                <div className="flex-grow-1 d-none d-md-block" style={{ width: '150px' }}>
-                                                    <h6 className={`fw-bold mb-0 ${isReached ? 'text-dark' : 'text-muted'}`}>{badge.name}</h6>
-                                                    <span className="smallest text-muted uppercase ls-1">{m.label}</span>
-                                                </div>
-
-                                                <div className="node-icon-wrapper position-relative">
-                                                    <div className={`milestone-circle shadow-lg d-flex align-items-center justify-content-center rounded-circle transition-all ${isReached ? 'heartbeat-sm' : ''}`}
-                                                        style={{
-                                                            width: isCurrent ? '85px' : '70px',
-                                                            height: isCurrent ? '85px' : '70px',
-                                                            backgroundColor: isReached ? badge.color : '#f1f5f9',
-                                                            border: isCurrent ? `4px solid #111827` : isReached ? `2px solid white` : '2px dashed #cbd5e1',
-                                                            fontSize: isCurrent ? '1.8rem' : '1.5rem',
-                                                            color: isReached ? 'white' : '#94a3b8',
-                                                            zIndex: isCurrent ? 10 : 1,
-                                                            boxShadow: isCurrent ? `0 0 20px ${badge.color}66` : 'none'
-                                                        }}>
-                                                        <i className={`bi ${badge.icon}`}></i>
-                                                    </div>
-                                                    {isReached && !isCurrent && (
-                                                        <div className="position-absolute top-0 end-0 bg-success text-white rounded-circle d-flex align-items-center justify-content-center shadow-sm" style={{ width: 22, height: 22, border: '2px solid white' }}>
-                                                            <CheckCircle size={12} fill="currentColor" />
-                                                        </div>
-                                                    )}
-                                                </div>
-
-                                                <div className="flex-grow-1" style={{ width: '150px' }}>
-                                                    <span className="smallest fw-bold text-muted ls-1 uppercase d-block">LEVEL {m.level}</span>
-                                                    {isReached ? (
-                                                        <span className="badge bg-success-subtle text-success border border-success-subtle rounded-pill smallest px-2">UNLOCKED</span>
-                                                    ) : (
-                                                        <span className="badge bg-light text-muted border border-light-subtle rounded-pill smallest px-2">LOCKED</span>
-                                                    )}
-                                                </div>
+                                <div className="row align-items-center g-4">
+                                    <div className="col-md-7">
+                                        <p className="small text-muted mb-0">
+                                            Set a daily reminder to keep your streak alive and make steady progress in your Tshivenda journey.
+                                        </p>
+                                    </div>
+                                    <div className="col-md-5">
+                                        <div className="d-flex flex-column gap-3">
+                                            <div className="form-check form-switch d-flex align-items-center gap-3 ps-0 mb-0">
+                                                <input 
+                                                    className="form-check-input ms-0" 
+                                                    type="checkbox" 
+                                                    role="switch" 
+                                                    id="reminderSwitch"
+                                                    checked={reminderEnabled}
+                                                    onChange={async (e) => {
+                                                        const enabled = e.target.checked;
+                                                        if (enabled) {
+                                                            const granted = await requestNotificationPermission();
+                                                            if (!granted) {
+                                                                Swal.fire({
+                                                                    title: 'Permission Required',
+                                                                    text: 'Please enable notifications in your browser to receive reminders.',
+                                                                    icon: 'info',
+                                                                    confirmButtonColor: '#111827'
+                                                                });
+                                                                return;
+                                                            }
+                                                        }
+                                                        setReminderEnabled(enabled);
+                                                        await updateReminderSettings({ 
+                                                            reminderEnabled: enabled, 
+                                                            reminderTime 
+                                                        });
+                                                    }}
+                                                    style={{ width: '45px', height: '24px', cursor: 'pointer' }}
+                                                />
+                                                <label className="form-check-label small fw-bold text-dark cursor-pointer" htmlFor="reminderSwitch">
+                                                    {reminderEnabled ? 'Daily Reminders On' : 'Daily Reminders Off'}
+                                                </label>
                                             </div>
+
+                                            {reminderEnabled && (
+                                                <div className="d-flex align-items-center gap-2 animate__animated animate__fadeIn">
+                                                    <div className="bg-light p-2 rounded-3 text-muted">
+                                                        <Clock size={16} />
+                                                    </div>
+                                                    <input 
+                                                        type="time" 
+                                                        className="form-control form-control-sm border-0 bg-light p-2 rounded-3 fw-bold"
+                                                        style={{ width: '120px' }}
+                                                        value={reminderTime}
+                                                        onChange={async (e) => {
+                                                            const time = e.target.value;
+                                                            setReminderTime(time);
+                                                            await updateReminderSettings({ 
+                                                                reminderEnabled, 
+                                                                reminderTime: time 
+                                                            });
+                                                        }}
+                                                    />
+                                                    <span className="smallest fw-bold text-muted text-uppercase ls-1">Daily</span>
+                                                </div>
+                                            )}
                                         </div>
-                                    );
-                                })}
+                                    </div>
+                                </div>
                             </div>
-                        </div>
 
-                        {/* STREAK CALENDAR & FREEZES MOVED TO A MORE PROMINENT SPOT WITHIN LEARNING PATH OR AFTER */}
-                        <div className="mt-5 pt-5 border-top">
-                            <StreakCalendar
-                                activityHistory={userData?.activityHistory || []}
-                                streakFreezes={userData?.streakFreezes || 0}
-                                points={userData?.points || 0}
-                                onBuyFreeze={handleBuyFreeze}
-                            />
-                        </div>
+                            {/* REFERRAL / INVITE SECTION */}
+                            <div className="bg-dark text-white p-5 rounded-4 position-relative overflow-hidden shadow-lg mb-4">
+                                <div className="position-relative z-1">
+                                    <p className="smallest fw-bold ls-2 text-uppercase mb-2" style={{ color: '#FACC15' }}>Referral Rewards</p>
+                                    <h2 className="fw-bold mb-3">Invite & Earn 500 LP</h2>
+                                    <p className="small opacity-75 mb-4 pe-lg-5">
+                                        Ramba vhangana vhavho! Spread the language. You'll receive 500 Learning Points for every warrior who joins through your link.
+                                    </p>
+
+                                    {unclaimedInvites.length > 0 && (
+                                        <div className="mb-4 animate__animated animate__pulse animate__infinite">
+                                            <button
+                                                onClick={handleClaimRewards}
+                                                disabled={claimLoading}
+                                                className="btn btn-warning w-100 py-3 fw-bold ls-1 shadow-lg text-dark d-flex align-items-center justify-content-center gap-2"
+                                                style={{ border: '2px solid #000' }}
+                                            >
+                                                {claimLoading ? 'CLAIMING...' : <><Gift size={20} /> CLAIM {unclaimedInvites.length * 500} LP REWARDS</>}
+                                            </button>
+                                        </div>
+                                    )}
+
+                                    <div className="d-flex flex-column flex-md-row gap-2">
+                                        <div className="flex-grow-1 bg-white bg-opacity-10 rounded-3 p-3 small text-truncate border border-secondary border-opacity-25">
+                                            {inviteLink}
+                                        </div>
+                                        <button className="btn game-btn-primary px-4 py-2 fw-bold ls-1" onClick={handleCopyLink}>
+                                            COPY LINK
+                                        </button>
+                                    </div>
+                                </div>
+                                <div className="position-absolute end-0 bottom-0 opacity-10 display-1 p-4"><Users size={120} strokeWidth={1} /></div>
+                            </div>
+                        </section>
                     </div>
-                </section>
-
-                {/* REFERRAL / INVITE SECTION */}
-                <section className="bg-dark text-white p-5 rounded-4 position-relative overflow-hidden shadow-lg mb-5">
-                    <div className="position-relative z-1">
-                        <p className="smallest fw-bold ls-2 text-uppercase mb-2" style={{ color: '#FACC15' }}>Referral Rewards</p>
-                        <h2 className="fw-bold mb-3">Invite & Earn 500 LP</h2>
-                        <p className="small opacity-75 mb-4 pe-lg-5">
-                            Ramba vhangana vhavho! Spread the language. You'll receive 500 Learning Points for every warrior who joins through your link.
-                        </p>
-
-                        {unclaimedInvites.length > 0 && (
-                            <div className="mb-4 animate__animated animate__pulse animate__infinite">
-                                <button
-                                    onClick={handleClaimRewards}
-                                    disabled={claimLoading}
-                                    className="btn btn-warning w-100 py-3 fw-bold ls-1 shadow-lg text-dark d-flex align-items-center justify-content-center gap-2"
-                                    style={{ border: '2px solid #000' }}
-                                >
-                                    {claimLoading ? 'CLAIMING...' : <><Gift size={20} /> CLAIM {unclaimedInvites.length * 500} LP REWARDS</>}
-                                </button>
-                            </div>
-                        )}
-
-                        <div className="d-flex flex-column flex-md-row gap-2">
-                            <div className="flex-grow-1 bg-white bg-opacity-10 rounded-3 p-3 small text-truncate border border-secondary border-opacity-25">
-                                {inviteLink}
-                            </div>
-                            <button className="btn game-btn-primary px-4 py-2 fw-bold ls-1" onClick={handleCopyLink}>
-                                COPY LINK
-                            </button>
-                        </div>
-                    </div>
-                    {/* Background decoration */}
-                    <div className="position-absolute top-0 end-0 opacity-10 display-1 p-4"><Users size={120} strokeWidth={1} /></div>
-                </section>
+                )}
 
 
             </div>
@@ -695,6 +833,14 @@ const Profile: React.FC = () => {
 
                 @keyframes dash {
                     to { stroke-dashoffset: 0; }
+                }
+
+                .hide-scrollbar::-webkit-scrollbar {
+                    display: none;
+                }
+                .hide-scrollbar {
+                    -ms-overflow-style: none;
+                    scrollbar-width: none;
                 }
             `}</style>
         </div>

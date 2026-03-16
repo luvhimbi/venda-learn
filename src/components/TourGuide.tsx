@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import Mascot from './Mascot';
 import { tourSteps } from '../config/tourSteps';
 
@@ -10,60 +11,71 @@ interface TourGuideProps {
 
 const TourGuide: React.FC<TourGuideProps> = ({ isOpen, onClose, onComplete }) => {
     const [currentStepIndex, setCurrentStepIndex] = useState(0);
-    const [position, setPosition] = useState<{ top: number, left: number, width: number, height: number } | null>(null);
+    const [rect, setRect] = useState<{ x: number, y: number, width: number, height: number } | null>(null);
+    const navigate = useNavigate();
+    const location = useLocation();
 
     const currentStep = tourSteps[currentStepIndex];
 
+    // Update position more aggressively
     useEffect(() => {
         if (!isOpen) return;
 
-        // Force scroll to top on center steps
-        if (currentStep.target === 'body') {
-            window.scrollTo({ top: 0, behavior: 'smooth' });
+        // Multi-page navigation check
+        if (currentStep.path && location.pathname !== currentStep.path) {
+            navigate(currentStep.path);
+            return; 
+        }
+
+        // Auto-switch tabs in Profile
+        if (location.pathname === '/profile' && currentStep.target.includes('gear')) {
+            const gearTab = Array.from(document.querySelectorAll('button')).find(btn => btn.className.includes('tour-gear-tab'));
+            if (gearTab) (gearTab as HTMLElement).click();
         }
 
         const updatePosition = () => {
             if (currentStep.target === 'body') {
-                setPosition(null);
+                setRect(null);
+                window.scrollTo({ top: 0, behavior: 'smooth' });
                 return;
             }
 
-            // Find the visible element (handles desktop vs mobile nav)
+            // Find all potential targets
             const elements = document.querySelectorAll(currentStep.target);
+            
+            // Filter for the visible one (e.g. Desktop vs Mobile nav)
             const element = Array.from(elements).find(el => {
                 const rect = el.getBoundingClientRect();
                 const style = window.getComputedStyle(el);
-                return style.display !== 'none' &&
-                    style.visibility !== 'hidden' &&
-                    (rect.width > 0 || rect.height > 0);
+                return style.display !== 'none' && 
+                       style.visibility !== 'hidden' && 
+                       (rect.width > 0 || rect.height > 0);
             }) as HTMLElement;
 
             if (element) {
-                const rect = element.getBoundingClientRect();
-                setPosition({
-                    top: rect.top,
-                    left: rect.left,
-                    width: rect.width,
-                    height: rect.height
+                const bcr = element.getBoundingClientRect();
+                setRect({
+                    x: bcr.left,
+                    y: bcr.top,
+                    width: bcr.width,
+                    height: bcr.height
                 });
-
-                // Scroll the element into view. 
-                // nearest scrollable parent (e.g. Sidebar) will handle internal scrolling.
-                element.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                element.scrollIntoView({ behavior: 'smooth', block: 'center' });
             } else {
-                console.warn(`Tour target not found or hidden: ${currentStep.target}`);
-                setPosition(null);
+                setRect(null);
             }
         };
 
-        // Delay to allow DOM/layout to settle
-        const timer = setTimeout(updatePosition, 300);
+        const timer = setTimeout(updatePosition, 600); // Wait for navigation/animations
         window.addEventListener('resize', updatePosition);
+        window.addEventListener('scroll', updatePosition);
+        
         return () => {
             clearTimeout(timer);
             window.removeEventListener('resize', updatePosition);
+            window.removeEventListener('scroll', updatePosition);
         };
-    }, [currentStepIndex, isOpen, currentStep]);
+    }, [currentStepIndex, isOpen, currentStep, location.pathname, navigate]);
 
     const handleNext = (e?: React.MouseEvent) => {
         e?.stopPropagation();
@@ -79,175 +91,118 @@ const TourGuide: React.FC<TourGuideProps> = ({ isOpen, onClose, onComplete }) =>
         onClose();
     };
 
-    if (!isOpen || window.innerWidth < 768) return null;
+    if (!isOpen) return null;
 
-    // Viewport-safe coordinates
-    const getCoords = () => {
-        const vw = window.innerWidth;
-        const vh = window.innerHeight;
-        const isMobile = vw < 768;
+    // Viewport dimensions
+    const vw = window.innerWidth;
+    const vh = window.innerHeight;
 
-        if (!position) return {
-            top: isMobile ? '50%' : '30%',
-            left: '50%',
-            transform: 'translate(-50%, -50%)'
-        };
+    // Overlay SVG Path for "Hole Punch"
+    const getMaskPath = () => {
+        if (!rect) return `M 0 0 h ${vw} v ${vh} h -${vw} Z`; // Full screen mask
+        
+        const padding = 10;
+        const x = rect.x - padding;
+        const y = rect.y - padding;
+        const w = rect.width + padding * 2;
+        const h = rect.height + padding * 2;
+        const r = 12; // corner radius
 
-        let top = position.top;
-        let left = position.left;
+        // Outer rect (clockwise) and Inner hole (counter-clockwise)
+        return `M 0 0 h ${vw} v ${vh} h -${vw} Z 
+                M ${x + r} ${y} 
+                h ${w - r * 2} a ${r} ${r} 0 0 1 ${r} ${r} 
+                v ${h - r * 2} a ${r} ${r} 0 0 1 -${r} ${r} 
+                h -${w - r * 2} a ${r} ${r} 0 0 1 -${r} -${r} 
+                v -${h - r * 2} a ${r} ${r} 0 0 1 ${r} -${r} Z`;
+    };
 
-        if (isMobile) {
-            // On mobile, just center horizontally
-            left = 0; // Will be overridden by '50%' in return if we decide, or keep it as pixels.
-            // Actually, returning a string is better for transform
+    // Bubble positioning
+    const getBubbleStyles = (): React.CSSProperties => {
+        if (!rect) return { top: '50%', left: '50%', transform: 'translate(-50%, -50%)' };
 
-            if (position.top > vh * 0.45) {
-                top = position.top - (isMobile ? 320 : 380); // Appear above
-            } else {
-                top = position.top + position.height + 24; // Appear below
-            }
+        let top = rect.y;
+        let left = rect.x;
 
-            // For mobile, we explicitly want it centered on screen
-            return {
-                top: `${Math.max(20, Math.min(top, vh - 400))}px`,
-                left: '50%',
-                transform: 'translateX(-50%)'
-            };
-        } else {
-            // Original Desktop Positioning Logic
-            if (currentStep.position === 'bottom') {
-                top = position.top + position.height + 20;
-                left = position.left + position.width / 2 - 160;
-            } else if (currentStep.position === 'top') {
-                top = position.top - 320;
-                left = position.left + position.width / 2 - 160;
-            } else if (currentStep.position === 'right') {
-                top = position.top + position.height / 2 - 150;
-                left = position.left + position.width + 20;
-            } else if (currentStep.position === 'left') {
-                top = position.top + position.height / 2 - 150;
-                left = position.left - 340;
-            }
+        if (currentStep.position === 'bottom') {
+            top = rect.y + rect.height + 30;
+            left = rect.x + rect.width / 2 - 170;
+        } else if (currentStep.position === 'top') {
+            top = rect.y - 420;
+            left = rect.x + rect.width / 2 - 170;
+        } else if (currentStep.position === 'right') {
+            top = rect.y + rect.height / 2 - 200;
+            left = rect.x + rect.width + 40;
+        } else if (currentStep.position === 'left') {
+            top = rect.y + rect.height / 2 - 200;
+            left = rect.x - 380;
         }
 
-        // Clamp to viewport (Desktop only now)
-        const bubbleWidth = 320;
-        const bubbleHeight = 450;
-
-        if (top + bubbleHeight > vh) top = vh - bubbleHeight - 20;
-        if (top < 20) top = 20;
-
-        if (left + bubbleWidth > vw) {
-            left = vw - bubbleWidth - 20;
-        }
-        if (left < 20) {
-            left = 20;
-        }
+        // Clamp
+        top = Math.max(20, Math.min(top, vh - 450));
+        left = Math.max(20, Math.min(left, vw - 360));
 
         return { top: `${top}px`, left: `${left}px`, transform: 'none' };
     };
 
-    const coords = getCoords();
-
     return (
-        <div className="fixed-top w-100 h-100" style={{ zIndex: 1070 }}>
-            {/* Dark Backdrop (No blur to fix "blurry steps" issue) */}
-            <div
-                className="position-absolute top-0 start-0 w-100 h-100 bg-black bg-opacity-75"
-                style={{ transition: 'all 0.5s' }}
-                onClick={() => handleSkip()}
-            ></div>
+        <div className="fixed-top w-100 h-100" style={{ zIndex: 2000 }}>
+            {/* SVG OVERLAY MASK (The Hole Punch) */}
+            <svg className="position-absolute top-0 start-0 w-100 h-100" style={{ pointerEvents: 'none' }}>
+                <path 
+                    d={getMaskPath()} 
+                    fill="rgba(0, 0, 0, 0.75)" 
+                    fillRule="evenodd" 
+                    className="transition-all"
+                    style={{ transition: 'd 0.5s ease', pointerEvents: 'auto' }}
+                    onClick={() => handleSkip()}
+                />
+            </svg>
 
-            {/* Content Container */}
+            {/* BUBBLE AND MASCOT */}
             <div
-                className="position-absolute d-flex flex-column align-items-center transition-all animate__animated animate__fadeInUp"
+                className="position-absolute d-flex flex-column align-items-center animate__animated animate__fadeIn"
                 style={{
-                    zIndex: 1080,
-                    top: coords.top,
-                    left: coords.left,
-                    transform: coords.transform,
-                    width: 'calc(100vw - 40px)',
-                    maxWidth: '340px',
-                    pointerEvents: 'auto'
+                    width: '340px',
+                    pointerEvents: 'auto',
+                    ...getBubbleStyles(),
+                    transition: 'all 0.5s cubic-bezier(0.18, 0.89, 0.32, 1.28)'
                 }}
             >
                 {/* Speech Bubble */}
                 <div
-                    className="bg-white p-4 rounded-4 shadow-lg mb-3 position-relative animate__animated animate__bounceIn w-100"
-                    style={{ border: '2px solid #FACC15', boxShadow: '0 15px 35px rgba(0,0,0,0.3)' }}
+                    className="bg-white p-4 rounded-4 shadow-lg mb-3 position-relative border border-3 border-warning"
+                    style={{ boxShadow: '0 25px 60px rgba(0,0,0,0.5)' }}
                 >
-                    <p className="mb-4 fw-bold text-slate ls-tight" style={{ fontSize: '1.05rem', lineHeight: '1.5' }}>
+                    <h5 className="fw-bold text-dark mb-2">{currentStep.title}</h5>
+                    <p className="text-muted fw-bold ls-tight mb-4" style={{ fontSize: '1.05rem', lineHeight: '1.5' }}>
                         {currentStep.content}
                     </p>
 
-                    <div className="d-flex justify-content-between align-items-center border-top pt-3">
-                        <span className="text-muted smallest fw-bold uppercase ls-1">Step {currentStepIndex + 1}/{tourSteps.length}</span>
-                        <div className="d-flex align-items-center gap-3">
-                            <button
-                                className="btn btn-link text-muted text-decoration-none fw-bold smallest uppercase p-0"
-                                onClick={(e) => handleSkip(e)}
-                            >
-                                Skip
-                            </button>
-                            <button
-                                className="btn btn-warning rounded-pill px-4 py-2 fw-bold shadow-sm pulse-orange"
-                                style={{ minWidth: '100px' }}
-                                onClick={(e) => handleNext(e)}
-                            >
-                                {currentStepIndex === tourSteps.length - 1 ? 'Finish!' : 'Next →'}
-                            </button>
+                    <div className="d-flex justify-content-between align-items-center pt-3 border-top">
+                        <div className="d-flex gap-1">
+                            {tourSteps.map((_, i) => (
+                                <div key={i} className={`rounded-pill transition-all ${i === currentStepIndex ? 'bg-warning w-3' : 'bg-light w-1'}`} style={{ height: '6px', width: i === currentStepIndex ? '20px' : '6px' }}></div>
+                            ))}
+                        </div>
+                        <div className="d-flex gap-2">
+                             <button className="btn btn-link text-muted text-decoration-none fw-bold smallest uppercase p-0 px-2" onClick={(e) => handleSkip(e)}>Skip</button>
+                             <button className="btn btn-warning rounded-pill px-4 py-2 fw-bold shadow-sm" onClick={(e) => handleNext(e)}>
+                                {currentStepIndex === tourSteps.length - 1 ? 'GO!' : 'NEXT'}
+                             </button>
                         </div>
                     </div>
-
-                    {/* Triangle pointer */}
-                    <div className="position-absolute bg-white"
-                        style={{
-                            width: '20px', height: '20px',
-                            bottom: '-10px', left: '50%',
-                            transform: 'translateX(-50%) rotate(45deg)',
-                            borderBottom: '2px solid #FACC15',
-                            borderRight: '2px solid #FACC15',
-                            zIndex: 1
-                        }}></div>
                 </div>
 
                 {/* Mascot */}
-                <div className="filter-drop-shadow animate__animated animate__pulse animate__infinite">
-                    <Mascot
-                        mood={currentStep.mood || 'happy'}
-                        width={window.innerWidth < 768 ? "100px" : "140px"}
-                        height={window.innerWidth < 768 ? "100px" : "140px"}
-                    />
+                <div className="animate__animated animate__bounceIn">
+                    <Mascot mood={currentStep.mood || 'happy'} width="140px" height="140px" />
                 </div>
             </div>
 
-            {/* Highlight Box */}
-            {position && (
-                <div
-                    className="position-absolute border border-warning border-3 rounded-3 transition-all"
-                    style={{
-                        top: position.top - 8,
-                        left: position.left - 8,
-                        width: position.width + 16,
-                        height: position.height + 16,
-                        zIndex: 1071,
-                        pointerEvents: 'none',
-                        boxShadow: '0 0 0 9999px rgba(0, 0, 0, 0.75)',
-                        transition: 'all 0.3s ease-out'
-                    }}
-                ></div>
-            )}
-
             <style>{`
-                .pulse-orange {
-                    animation: pulse-orange 2s infinite;
-                }
-                @keyframes pulse-orange {
-                    0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(250, 204, 21, 0.7); }
-                    70% { transform: scale(1.05); box-shadow: 0 0 0 10px rgba(250, 204, 21, 0); }
-                    100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(250, 204, 21, 0); }
-                }
-                .filter-drop-shadow { filter: drop-shadow(0 10px 20px rgba(0,0,0,0.3)); }
+                .ls-tight { letter-spacing: -0.5px; }
+                .transition-all { transition: all 0.5s ease-in-out; }
             `}</style>
         </div>
     );

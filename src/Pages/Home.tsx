@@ -12,6 +12,8 @@ import { doc, updateDoc } from 'firebase/firestore';
 import { db } from '../services/firebaseConfig';
 import { useRetentionEngine } from '../hooks/useRetentionEngine';
 import DailyWelcomeModal from '../components/DailyWelcomeModal';
+import { ALL_TROPHIES } from '../services/achievementService';
+import TrophyIcon from '../components/TrophyIcon';
 
 // --- LEVEL UP MOTIVATION ---
 const getLevelMotivation = (level: number, progress: number) => {
@@ -226,7 +228,7 @@ const Home: React.FC = () => {
                             </div>
                         </div>
                         <div className="col-4 d-flex justify-content-center position-relative">
-                            {mascotQuote && (
+                            {mascotQuote && !isTourOpen && (
                                 <div className="mascot-speech-bubble position-absolute bg-white px-3 py-2 rounded-4 shadow-sm border"
                                     style={{ top: '-10px', right: '10%', maxWidth: '180px', zIndex: 5 }}>
                                     <p className="mb-0 small fw-bold text-dark lh-sm">{mascotQuote}</p>
@@ -280,6 +282,36 @@ const Home: React.FC = () => {
                                     </button>
                                 </div>
                             )}
+                        </section>
+
+                        {/* ACHIEVEMENTS PREVIEW */}
+                        <section className="mb-5 text-start">
+                            <div className="d-flex justify-content-between align-items-end mb-4">
+                                <h6 className="fw-bold text-uppercase text-muted smallest ls-2 mb-0">Mastery Collection</h6>
+                                <Link to="/achievements" className="smallest fw-bold text-warning text-decoration-none ls-1">VIEW ALL <i className="bi bi-arrow-right"></i></Link>
+                            </div>
+                            <div className="row g-3">
+                                {ALL_TROPHIES.slice(0, 3).map(trophy => {
+                                    const isEarned = (userData?.trophies || []).includes(trophy.id);
+                                    return (
+                                        <div key={trophy.id} className="col-4">
+                                            <div 
+                                                onClick={() => navigate('/achievements')}
+                                                className={`p-3 rounded-4 text-center transition-all hover-lift ${isEarned ? 'bg-white shadow-sm border border-warning' : 'bg-light grayscale border-dashed border-2'}`}
+                                                style={{ cursor: 'pointer' }}
+                                            >
+                                                <TrophyIcon 
+                                                    rarity={isEarned ? trophy.rarity as any : 'locked'} 
+                                                    size={42} 
+                                                    animate={isEarned}
+                                                    color={trophy.color}
+                                                />
+                                                <p className={`smallest fw-bold mb-0 mt-2 text-truncate ${isEarned ? 'text-dark' : 'text-muted'}`}>{trophy.title.split(' (')[0]}</p>
+                                            </div>
+                                        </div>
+                                    );
+                                })}
+                            </div>
                         </section>
 
                         {/* FOCUS AREAS */}
