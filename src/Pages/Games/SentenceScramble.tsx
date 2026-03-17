@@ -3,8 +3,12 @@ import { fetchSentences } from '../../services/dataCache';
 import { useNavigate } from 'react-router-dom';
 import Swal from 'sweetalert2';
 import { auth, db } from '../../services/firebaseConfig';
-import { doc, updateDoc, increment } from 'firebase/firestore';
+import { doc, updateDoc, increment, getDoc } from 'firebase/firestore';
 import Mascot from '../../components/Mascot';
+import confetti from 'canvas-confetti';
+import { updateStreak } from "../../services/streakUtils.ts";
+import { useVisualJuice } from '../../hooks/useVisualJuice';
+import { Flame, ArrowLeft, ChevronRight, Hash } from 'lucide-react';
 
 interface SentencePuzzle {
     id: string;
@@ -23,10 +27,7 @@ const CHIP_COLORS = [
     { bg: '#F0FDFA', border: '#5EEAD4', shadow: '#14B8A6', text: '#134E4A' },
 ];
 
-const MASCOT_CHEERS = [
-    'Zwavhuḓi! 🎉', 'Ndi zwone! ✨', 'Hu ḓo luga! 💪',
-    'Wa ḓivha! 🌟', 'Ṱhonifhani! 🔥',
-];
+
 
 const DIFFICULTY_COLORS: Record<string, { bg: string, text: string }> = {
     'Easy': { bg: '#ECFDF5', text: '#065F46' },
@@ -47,11 +48,11 @@ const SentenceScramble: React.FC = () => {
     const [answerZone, setAnswerZone] = useState<{ id: string, text: string, colorIdx: number }[]>([]);
     const [status, setStatus] = useState<'playing' | 'correct' | 'wrong'>('playing');
     const [score, setScore] = useState(0);
+    const [streak, setStreak] = useState(0);
     const [sessionStartTime, setSessionStartTime] = useState(Date.now());
+    const { playCorrect, playWrong, playClick, triggerShake } = useVisualJuice();
 
-    // Mascot
-    const [showMascotCheer, setShowMascotCheer] = useState(false);
-    const [mascotCheerText, setMascotCheerText] = useState(MASCOT_CHEERS[0]);
+
 
     // We don't auto-load the game into Playing state anymore
     // useEffect(() => { loadGameData(); }, []);
@@ -91,9 +92,17 @@ const SentenceScramble: React.FC = () => {
             colorIdx: i % CHIP_COLORS.length
         }));
         setScrambledWords([...wordsWithIds].sort(() => 0.5 - Math.random()));
+
+        // Fetch streak for UI
+        if (auth.currentUser) {
+            getDoc(doc(db, "users", auth.currentUser.uid)).then(snap => {
+                if (snap.exists()) setStreak(snap.data().streak || 0);
+            });
+        }
     };
 
     const handleWordClick = (item: typeof scrambledWords[0], from: 'pool' | 'answer') => {
+        playClick();
         if (status !== 'playing') return;
         if (from === 'pool') {
             setScrambledWords(prev => prev.filter(w => w.id !== item.id));
@@ -117,12 +126,21 @@ const SentenceScramble: React.FC = () => {
         }
 
         if (currentSentence === correctSentence) {
+            playCorrect();
             const totalDuration = Math.floor((Date.now() - sessionStartTime) / 1000);
             setStatus('correct');
 
-            setMascotCheerText(MASCOT_CHEERS[Math.floor(Math.random() * MASCOT_CHEERS.length)]);
-            setShowMascotCheer(true);
-            setTimeout(() => setShowMascotCheer(false), 1200);
+
+            
+            // CONFETTI!
+            confetti({
+                particleCount: 120,
+                spread: 80,
+                origin: { y: 0.6 },
+                colors: ['#FACC15', '#FFD700', '#3B82F6', '#FFFFFF']
+            });
+
+
 
             const user = auth.currentUser;
             if (user) {
@@ -135,11 +153,14 @@ const SentenceScramble: React.FC = () => {
                         timestamp: new Date().toISOString()
                     }
                 });
+                await updateStreak(user.uid);
             }
             setScore(prev => prev + 10);
             setTimeout(() => nextRound(), 1500);
         } else {
             setStatus('wrong');
+            playWrong();
+            triggerShake('scr-answer-zone');
             setTimeout(() => setStatus('playing'), 1000);
         }
     };
@@ -160,51 +181,50 @@ const SentenceScramble: React.FC = () => {
 
     if (!selectedLevel) {
         return (
-            <div className="min-vh-100 d-flex flex-column" style={{ background: 'linear-gradient(180deg, #111827 0%, #1F2937 100%)' }}>
-                <div className="container d-flex flex-column align-items-center justify-content-center flex-grow-1 px-3" style={{ maxWidth: '500px' }}>
-                    
-                    <button onClick={() => navigate('/mitambo')} className="btn btn-link text-decoration-none p-0 text-white-50 position-absolute top-0 start-0 m-4 fw-bold" style={{ fontSize: '11px', letterSpacing: '2px' }}>
-                        <i className="bi bi-x-lg me-2"></i>EXIT
-                    </button>
-
-                    <div className="text-center mb-5">
-                        <div className="d-inline-flex justify-content-center align-items-center mb-3" style={{ width: '80px', height: '80px', background: 'rgba(250, 204, 21, 0.1)', borderRadius: '24px' }}>
-                            <span style={{ fontSize: '32px' }}>🔀</span>
-                        </div>
-                        <h1 className="fw-bold text-white mb-2">Sentence Scramble</h1>
-                        <p className="text-white-50 mb-0">Select a difficulty level to begin</p>
+            <div className="min-vh-100 p-4 d-flex flex-column align-items-center justify-content-center" style={{ backgroundColor: '#ffffff' }}>
+                <div className="container d-flex flex-column align-items-center" style={{ maxWidth: '600px' }}>
+                    <div className="w-100 d-flex justify-content-start mb-4">
+                        <button onClick={() => navigate('/mitambo')} className="btn btn-link text-decoration-none p-0 text-dark">
+                            <ArrowLeft size={24} />
+                        </button>
                     </div>
 
-                    <div className="w-100 d-flex flex-column gap-3">
-                        <button onClick={() => startLevel('Beginner')} className="btn btn-dark border-secondary p-4 rounded-4 text-start position-relative overflow-hidden level-btn text-white">
-                            <h5 className="fw-bold mb-1" style={{ color: '#34D399' }}>Beginner</h5>
-                            <span className="text-white-50 small">Short and simple everyday sentences</span>
-                        </button>
-                        
-                        <button onClick={() => startLevel('Intermediate')} className="btn btn-dark border-secondary p-4 rounded-4 text-start position-relative overflow-hidden level-btn text-white">
-                            <h5 className="fw-bold mb-1" style={{ color: '#FCD34D' }}>Intermediate</h5>
-                            <span className="text-white-50 small">Longer phrases and questions</span>
-                        </button>
-                        
-                        <button onClick={() => startLevel('Advanced')} className="btn btn-dark border-secondary p-4 rounded-4 text-start position-relative overflow-hidden level-btn text-white">
-                            <h5 className="fw-bold mb-1" style={{ color: '#F87171' }}>Advanced</h5>
-                            <span className="text-white-50 small">Complex proverbs and expressions</span>
-                        </button>
+                    <div className="text-center mb-5 d-flex flex-column align-items-center">
+                        <div className="rounded-circle d-flex align-items-center justify-content-center mb-3 shadow-sm" style={{ width: '80px', height: '80px', backgroundColor: '#FFFBEB', border: '2px solid #FEF3C7', flexShrink: 0 }}>
+                            <Hash size={40} className="text-warning" />
+                        </div>
+                        <h1 className="fw-bold mb-2 text-dark">Sentence Scramble</h1>
+                        <p className="text-muted">Master Tshivenda sentence structures!</p>
+                    </div>
+
+                    <div className="d-flex flex-column gap-3 w-100">
+                        {['Beginner', 'Intermediate', 'Advanced'].map((lvl) => (
+                            <button
+                                key={lvl}
+                                onClick={() => startLevel(lvl)}
+                                className="level-btn w-100 p-4 rounded-4 border-2 text-start transition-all"
+                                style={{ backgroundColor: '#ffffff', border: '2px solid #f3f4f6', color: '#111827' }}
+                            >
+                                <div className="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h2 className="h5 fw-bold mb-1 text-capitalize">{lvl}</h2>
+                                        <p className="text-muted small mb-0">
+                                            {lvl === 'Beginner' ? 'Short everyday sentences' : lvl === 'Intermediate' ? 'Longer phrases & questions' : 'Complex proverbs & expressions'}
+                                        </p>
+                                    </div>
+                                    <ChevronRight className="text-muted" />
+                                </div>
+                            </button>
+                        ))}
                     </div>
                 </div>
 
                 <style>{`
-                    .level-btn {
-                        transition: all 0.2s ease;
-                        background: #1F2937 !important;
-                    }
                     .level-btn:hover {
                         transform: translateY(-2px);
                         border-color: #FACC15 !important;
-                        background: #374151 !important;
-                    }
-                    .level-btn:active {
-                        transform: translateY(0);
+                        background-color: #FFFDF5 !important;
+                        box-shadow: 0 4px 12px rgba(0,0,0,0.05);
                     }
                 `}</style>
             </div>
@@ -224,9 +244,18 @@ const SentenceScramble: React.FC = () => {
                         <button onClick={() => navigate('/mitambo')} className="btn btn-link text-decoration-none p-0 text-white fw-bold" style={{ fontSize: '11px', letterSpacing: '2px' }}>
                             <i className="bi bi-x-lg me-2"></i>EXIT
                         </button>
-                        <span className="fw-bold" style={{ color: '#FACC15', fontSize: '11px', letterSpacing: '1px' }}>
-                            🔀 SENTENCE SCRAMBLE
-                        </span>
+                        <div className="d-flex align-items-center gap-3">
+                            {streak > 0 && (
+                                <div className="d-flex align-items-center gap-1 glow-pulse" title="Daily Streak">
+                                    <Flame size={18} color="#EF4444" fill="#EF4444" />
+                                    <span className="fw-bold small text-white">{streak}</span>
+                                </div>
+                            )}
+                            <Mascot width="45px" height="45px" mood={status === 'correct' ? 'excited' : status === 'wrong' ? 'sad' : 'happy'} />
+                            <span className="fw-bold" style={{ color: '#FACC15', fontSize: '11px', letterSpacing: '1px' }}>
+                                🔀 SENTENCE SCRAMBLE
+                            </span>
+                        </div>
                     </div>
                     <div className="d-flex align-items-center justify-content-between">
                         <span style={{ color: 'rgba(255,255,255,0.5)', fontSize: '11px', fontWeight: 700, letterSpacing: '1px' }}>
@@ -289,9 +318,9 @@ const SentenceScramble: React.FC = () => {
                     </div>
 
                     {/* ANSWER ZONE */}
-                    <div className={`rounded-4 p-4 mb-4 d-flex flex-wrap justify-content-center gap-2 align-items-center transition-all
+                    <div id="scr-answer-zone" className={`rounded-4 p-4 mb-4 d-flex flex-wrap justify-content-center gap-2 align-items-center transition-all
                         ${status === 'correct' ? 'scr-zone-correct' : ''}
-                        ${status === 'wrong' ? 'scr-zone-wrong animate__animated animate__shakeX' : ''}
+                        ${status === 'wrong' ? 'scr-zone-wrong' : ''}
                         ${status === 'playing' ? 'scr-zone-default' : ''}
                     `} style={{ minHeight: '100px' }}>
                         {answerZone.length === 0 ? (
@@ -359,13 +388,7 @@ const SentenceScramble: React.FC = () => {
                 </div>
             </div>
 
-            {/* MASCOT */}
-            {showMascotCheer && (
-                <div className="mascot-cheer-overlay">
-                    <div className="mascot-cheer-bubble">{mascotCheerText}</div>
-                    <Mascot width="80px" height="80px" mood="excited" />
-                </div>
-            )}
+
 
             <style>{`
                 .transition-all { transition: all 0.3s ease; }
@@ -408,7 +431,13 @@ const SentenceScramble: React.FC = () => {
                 .scr-zone-correct {
                     background: #ECFDF5;
                     border: 2px solid #34D399;
-                    box-shadow: 0 0 20px rgba(52, 211, 153, 0.2);
+                    box-shadow: 0 0 30px rgba(52, 211, 153, 0.4);
+                    animation: successPulseScramble 1.5s infinite;
+                }
+                @keyframes successPulseScramble {
+                    0% { box-shadow: 0 0 20px rgba(52, 211, 153, 0.2); }
+                    50% { box-shadow: 0 0 40px rgba(52, 211, 153, 0.5); }
+                    100% { box-shadow: 0 0 20px rgba(52, 211, 153, 0.2); }
                 }
                 .scr-zone-wrong {
                     background: #FEF2F2;

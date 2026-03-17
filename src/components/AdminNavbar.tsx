@@ -3,10 +3,11 @@ import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { onAuthStateChanged, signOut, type User } from 'firebase/auth';
 import { auth } from '../services/firebaseConfig';
 import { invalidateCache } from '../services/dataCache';
-import Swal from 'sweetalert2';
+import { popupService } from '../services/popupService';
 import { Menu, LogOut, Database } from 'lucide-react';
 import { seedSyllables } from '../services/seedSyllables';
 import { seedSentences } from '../services/seedSentences';
+import { seedPicturePuzzles } from '../services/seedPicturePuzzles';
 
 const AdminNavbar: React.FC = () => {
     const [user, setUser] = useState<User | null>(null);
@@ -14,12 +15,13 @@ const AdminNavbar: React.FC = () => {
     const location = useLocation();
 
     const handleSeedGames = async () => {
-        const confirm = await Swal.fire({ title: 'Seed Games?', icon: 'warning', showCancelButton: true });
+        const confirm = await popupService.confirm('Seed Games?', 'Vha khou ṱoḓa u vusulusa data ya mitambo?');
         if (confirm.isConfirmed) {
-            Swal.showLoading();
+            popupService.showLoading();
             await seedSyllables();
             await seedSentences();
-            Swal.fire('Success', 'Game data seeded!', 'success');
+            await seedPicturePuzzles();
+            popupService.innerSuccess('Success', 'Game data seeded!');
         }
     };
 
@@ -31,20 +33,12 @@ const AdminNavbar: React.FC = () => {
     }, []);
 
     const handleLogout = async () => {
-        Swal.fire({
-            title: 'Admin Logout',
-            text: "Vho khwaṱha uri vha khou bva kha admin dashboard?",
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonColor: '#FACC15',
-            cancelButtonColor: '#111827',
-            confirmButtonText: 'Yes, Logout',
-            cancelButtonText: 'Stay',
-            customClass: {
-                popup: 'rounded-4 border-0 shadow-none',
-                confirmButton: 'text-dark fw-bold'
-            }
-        }).then(async (result) => {
+        popupService.confirm(
+            'Admin Logout',
+            'Vho khwaṱha uri vha khou bva kha admin dashboard?',
+            'Yes, Logout',
+            'Stay'
+        ).then(async (result) => {
             if (result.isConfirmed) {
                 await signOut(auth);
                 invalidateCache(); // Clear session data

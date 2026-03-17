@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import type { Firestore } from 'firebase/firestore';
 import { db } from '../../services/firebaseConfig';
 import { doc, setDoc, addDoc, collection, serverTimestamp } from 'firebase/firestore';
 import { useNavigate } from 'react-router-dom';
@@ -244,7 +245,7 @@ const AddLesson: React.FC = () => {
             const courseRef = course.id.toLowerCase().replace(/\s+/g, '-');
             const microLessons = generateMlIds(courseRef);
 
-            await setDoc(doc(db, "lessons", courseRef), {
+            await setDoc(doc(db as Firestore, "lessons", courseRef), {
                 id: courseRef,
                 title: course.title,
                 vendaTitle: course.vendaTitle,
@@ -252,7 +253,7 @@ const AddLesson: React.FC = () => {
                 microLessons
             });
 
-            await addDoc(collection(db, "logs"), {
+            await addDoc(collection(db as Firestore, "logs"), {
                 action: "CREATE",
                 details: `Created new course: ${course.title} (${courseRef}) with ${microLessons.length} micro lessons`,
                 adminEmail: "Admin",
@@ -865,5 +866,6 @@ const AddLesson: React.FC = () => {
     );
 };
 export default AddLesson;
+
 
 

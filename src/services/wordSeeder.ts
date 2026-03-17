@@ -1,13 +1,14 @@
 import { db } from './firebaseConfig';
+import type { Firestore } from 'firebase/firestore';
 import { doc, writeBatch, collection, getDocs } from 'firebase/firestore';
 import wordsData from '../data/vendaWords.json'; // Import your JSON list
 
 export const seedDailyWords = async () => {
-    const batch = writeBatch(db);
+    const batch = writeBatch(db as Firestore);
     const startDate = new Date();
 
     // Safety check: Don't overwrite if already populated for today
-    const existingWords = await getDocs(collection(db, "dailyWords"));
+    const existingWords = await getDocs(collection(db as Firestore, "dailyWords"));
     if (existingWords.size > 50) {
         console.log("Database already has enough words.");
         return;
@@ -19,7 +20,7 @@ export const seedDailyWords = async () => {
         targetDate.setDate(startDate.getDate() + index);
         const dateId = targetDate.toISOString().split('T')[0];
 
-        const wordRef = doc(db, "dailyWords", dateId);
+        const wordRef = doc(db as Firestore, "dailyWords", dateId);
 
         batch.set(wordRef, {
             ...wordEntry,
@@ -34,3 +35,4 @@ export const seedDailyWords = async () => {
         console.error("❌ Seeding failed:", error);
     }
 };
+

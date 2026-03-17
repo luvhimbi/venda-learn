@@ -1,4 +1,5 @@
 import { db } from './firebaseConfig';
+import type { Firestore } from 'firebase/firestore';
 import { collection, writeBatch, doc } from 'firebase/firestore';
 
 const dailyWordsData = [
@@ -15,8 +16,8 @@ const dailyWordsData = [
 export const seedDailyWords = async () => {
     try {
         console.log("Starting seed for Daily Words...");
-        const batch = writeBatch(db);
-        const collectionRef = collection(db, "dailyWords");
+        const batch = writeBatch(db as Firestore);
+        const collectionRef = collection(db as Firestore, "dailyWords");
 
         // Check if exists to avoid duplicates is a bit hard with random IDs, 
         // but for now we will just add them. In production, use IDs.
@@ -34,3 +35,5 @@ export const seedDailyWords = async () => {
         return { success: false, message: "Failed to seed daily words." };
     }
 };
+
+

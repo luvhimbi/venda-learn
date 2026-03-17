@@ -1,12 +1,13 @@
 // src/services/achievementService.ts
 import { db } from './firebaseConfig';
+import type { Firestore } from 'firebase/firestore';
 import { doc, updateDoc, arrayUnion } from 'firebase/firestore';
 import type { Trophy } from '../types/achievements';
 
 export const ALL_TROPHIES: Trophy[] = [
     {
         id: 'first_login',
-        title: 'Dzhina (Enter)',
+        title: 'Welcome In',
         description: 'Awarded for your first login to VendaLearn! Welcome warrior.',
         icon: 'bi-door-open-fill',
         color: '#10b981', // Emerald
@@ -15,7 +16,7 @@ export const ALL_TROPHIES: Trophy[] = [
     },
     {
         id: 'level_5',
-        title: 'Muhali (Warrior)',
+        title: 'Language Warrior',
         description: 'Reach Level 5 to prove your dedication.',
         icon: 'bi-patch-check-fill',
         color: '#4f46e5', // Indigo
@@ -24,7 +25,7 @@ export const ALL_TROPHIES: Trophy[] = [
     },
     {
         id: 'points_1000',
-        title: 'Vhatali (Wise)',
+        title: 'Knowledge Seeker',
         description: 'Earn 1000 LP to show your wisdom in Tshivenda.',
         icon: 'bi-gem',
         color: '#f59e0b', // Amber
@@ -33,7 +34,7 @@ export const ALL_TROPHIES: Trophy[] = [
     },
     {
         id: 'streak_3',
-        title: 'Vhudambudzi (Progress)',
+        title: 'Consistent Learner',
         description: 'Maintain a 3-day learning streak.',
         icon: 'bi-fire',
         color: '#ef4444', // Red
@@ -42,7 +43,7 @@ export const ALL_TROPHIES: Trophy[] = [
     },
     {
         id: 'lessons_5',
-        title: 'Muthu (Person)',
+        title: 'Culture Explorer',
         description: 'Complete 5 micro-lessons.',
         icon: 'bi-book-half',
         color: '#8b5cf6', // Violet
@@ -51,7 +52,7 @@ export const ALL_TROPHIES: Trophy[] = [
     },
     {
         id: 'points_5000',
-        title: 'Thovhele (King)',
+        title: 'Venda Master',
         description: 'Earn 5000 LP. You are a true master.',
         icon: 'bi-trophy-fill',
         color: '#facc15', // Yellow
@@ -96,7 +97,7 @@ export const awardTrophies = async (uid: string, trophyIds: string[]) => {
     if (!uid || trophyIds.length === 0) return;
 
     try {
-        const userRef = doc(db, "users", uid);
+        const userRef = doc(db as Firestore, "users", uid);
         await updateDoc(userRef, {
             trophies: arrayUnion(...trophyIds)
         });
@@ -106,3 +107,5 @@ export const awardTrophies = async (uid: string, trophyIds: string[]) => {
         return false;
     }
 };
+
+

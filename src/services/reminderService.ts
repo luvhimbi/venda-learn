@@ -1,5 +1,7 @@
-import { db, auth } from './firebaseConfig';
-import { doc, updateDoc } from 'firebase/firestore';
+import { db, auth, messaging } from './firebaseConfig';
+import type { Firestore } from 'firebase/firestore';
+import { doc, updateDoc, arrayUnion } from 'firebase/firestore';
+import { getToken } from 'firebase/messaging';
 
 export interface ReminderSettings {
     reminderEnabled: boolean;
@@ -10,16 +12,47 @@ export const updateReminderSettings = async (settings: ReminderSettings) => {
     if (!auth.currentUser) return;
     
     try {
-        const userRef = doc(db, "users", auth.currentUser.uid);
+        const userRef = doc(db as Firestore, "users", auth.currentUser.uid);
         await updateDoc(userRef, {
             reminderEnabled: settings.reminderEnabled,
             reminderTime: settings.reminderTime
         });
+
+        // If enabled, also ensure we have a push token
+        if (settings.reminderEnabled) {
+            await registerForPushNotifications();
+        }
+
         return true;
     } catch (error) {
         console.error("Error updating reminder settings:", error);
         return false;
     }
+};
+
+export const registerForPushNotifications = async () => {
+    if (!auth.currentUser) return;
+
+    try {
+        const hasPermission = await requestNotificationPermission();
+        if (!hasPermission) return false;
+
+        const token = await getToken(messaging, {
+            vapidKey: import.meta.env.VITE_FIREBASE_VAPID_KEY
+        });
+
+        if (token) {
+            console.log("FCM Token earned:", token);
+            const userRef = doc(db as Firestore, "users", auth.currentUser.uid);
+            await updateDoc(userRef, {
+                fcmTokens: arrayUnion(token)
+            });
+            return true;
+        }
+    } catch (error) {
+        console.error("Error registering for push notifications:", error);
+    }
+    return false;
 };
 
 export const requestNotificationPermission = async () => {
@@ -39,3 +72,5 @@ export const requestNotificationPermission = async () => {
 
     return false;
 };
+
+

@@ -1,11 +1,13 @@
-import React, { useState, useEffect } from 'react';
-import { fetchPuzzles, refreshUserData } from '../../services/dataCache';
-import { doc, updateDoc, increment } from 'firebase/firestore';
-import { auth, db } from '../../services/firebaseConfig';
-import Swal from 'sweetalert2';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Delete, Loader2, Lightbulb, AlertCircle, CheckCircle2 } from 'lucide-react';
-import { useRef } from 'react';
+import { doc, updateDoc, increment, getDoc, type Firestore } from 'firebase/firestore';
+import { auth, db } from '../../services/firebaseConfig';
+import { fetchPuzzles, refreshUserData } from '../../services/dataCache';
+import { ArrowLeft, Delete, Lightbulb, AlertCircle, CheckCircle2, Flame } from 'lucide-react';
+import Swal from 'sweetalert2';
+import Mascot from '../../components/Mascot';
+import { useVisualJuice } from '../../hooks/useVisualJuice';
+import { updateStreak } from '../../services/streakUtils';
 
 interface PuzzleWord {
     id: string;
@@ -29,6 +31,8 @@ const WordPuzzle: React.FC = () => {
     const [message, setMessage] = useState<{ text: string, type: 'error' | 'success' } | null>(null);
     const [checkedGuess, setCheckedGuess] = useState<string | null>(null);
     const [sessionStartTime, setSessionStartTime] = useState(Date.now());
+    const [streak, setStreak] = useState(0);
+    const { playCorrect, playWrong, playClick, triggerShake } = useVisualJuice();
     const inputRef = useRef<HTMLInputElement>(null);
 
     useEffect(() => {
@@ -65,6 +69,10 @@ const WordPuzzle: React.FC = () => {
                 const random = validPuzzles[Math.floor(Math.random() * validPuzzles.length)];
                 setTargetPuzzle(random);
             }
+            if (auth.currentUser) {
+                const snap = await getDoc(doc(db as Firestore, "users", auth.currentUser.uid));
+                if (snap.exists()) setStreak(snap.data().streak || 0);
+            }
         } catch (error) {
             console.error("Error loading puzzle:", error);
         } finally {
@@ -95,6 +103,8 @@ const WordPuzzle: React.FC = () => {
     const submitGuess = async () => {
         if (currentGuess.length !== WORD_LENGTH) {
             setShake(true);
+            playWrong();
+            triggerShake('uvumba-grid');
             setMessage({ text: "Nwalani mailede othe! (Complete the word)", type: 'error' });
             setTimeout(() => { setShake(false); setMessage(null); }, 2000);
             return;
@@ -105,6 +115,7 @@ const WordPuzzle: React.FC = () => {
             setGuesses(newGuesses);
             setCurrentGuess('');
             setGameStatus('won');
+            playCorrect();
             setMessage({ text: "Ndi zwone! (Correct!)", type: 'success' });
             await handleWin();
         } else {
@@ -113,6 +124,8 @@ const WordPuzzle: React.FC = () => {
             // Just show feedback and let them fix it
             setCheckedGuess(currentGuess);
             setShake(true);
+            playWrong();
+            triggerShake('uvumba-grid');
             setMessage({ text: "A si zwone! (That's not correct - Fix your mistake)", type: 'error' });
             setTimeout(() => { setShake(false); setMessage(null); }, 3000);
         }
@@ -122,7 +135,7 @@ const WordPuzzle: React.FC = () => {
         const totalDuration = Math.floor((Date.now() - sessionStartTime) / 1000);
         const user = auth.currentUser;
         if (user) {
-            const userRef = doc(db, 'users', user.uid);
+            const userRef = doc(db as Firestore, 'users', user.uid);
             await updateDoc(userRef, {
                 points: increment(10),
                 puzzlesSolved: increment(1),
@@ -132,6 +145,7 @@ const WordPuzzle: React.FC = () => {
                     timestamp: new Date().toISOString()
                 }
             });
+            await updateStreak(user.uid);
             await refreshUserData();
         }
         Swal.fire({
@@ -185,8 +199,9 @@ const WordPuzzle: React.FC = () => {
     };
 
     if (loading) return (
-        <div className="min-vh-100 d-flex justify-content-center align-items-center">
-            <Loader2 className="animate-spin text-warning" size={48} />
+        <div className="min-vh-100 bg-white d-flex flex-column justify-content-center align-items-center">
+            <Mascot width="100px" height="100px" mood="excited" />
+            <p className="text-muted mt-3 fw-bold" style={{ fontSize: '12px', letterSpacing: '2px', textTransform: 'uppercase' }}>Loading puzzle...</p>
         </div>
     );
 
@@ -194,11 +209,18 @@ const WordPuzzle: React.FC = () => {
         <div className="min-vh-100 bg-light py-4 d-flex flex-column align-items-center">
             <div className="container" style={{ maxWidth: '500px' }}>
                 <div className="d-flex justify-content-between align-items-center mb-4">
-                    <button onClick={() => navigate('/')} className="btn btn-outline-dark btn-sm rounded-circle d-flex align-items-center justify-content-center" style={{ width: 32, height: 32 }}>
+                    <button onClick={() => navigate('/mitambo')} className="btn btn-outline-dark btn-sm rounded-circle d-flex align-items-center justify-content-center" style={{ width: 32, height: 32 }}>
                         <ArrowLeft size={18} />
                     </button>
                     <h4 className="fw-bold mb-0 text-uppercase ls-1">U Vumba</h4>
-                    <div style={{ width: 32 }}></div>
+                    <div className="d-flex align-items-center gap-2">
+                         {streak > 0 && (
+                            <div className="d-flex align-items-center gap-1 glow-pulse" title="Daily Streak">
+                                <Flame size={18} color="#EF4444" fill="#EF4444" />
+                                <span className="fw-bold small text-dark">{streak}</span>
+                            </div>
+                        )}
+                    </div>
                 </div>
 
                 {/* FEEDBACK MESSAGE */}
@@ -234,7 +256,7 @@ const WordPuzzle: React.FC = () => {
                 />
 
                 {/* GAME GRID */}
-                <div className="d-flex flex-column gap-2 mb-5" onClick={triggerMobileKeyboard} style={{ cursor: 'pointer' }}>
+                <div id="uvumba-grid" className="d-flex flex-column gap-2 mb-5" onClick={triggerMobileKeyboard} style={{ cursor: 'pointer' }}>
                     {/* Previous Guesses */}
                     {guesses.map((guess, i) => (
                         <div key={i} className="d-flex gap-2 justify-content-center">
@@ -306,7 +328,7 @@ const WordPuzzle: React.FC = () => {
                                 return (
                                     <button
                                         key={key}
-                                        onClick={() => handleKeyPress(key)}
+                                        onClick={() => { playClick(); handleKeyPress(key); }}
                                         className={`btn ${btnClass} fw-bold shadow-sm key-btn`}
                                         style={{
                                             flex: key === 'ENTER' || key === 'BACKSPACE' ? '1.5' : '1',
@@ -368,6 +390,7 @@ const WordPuzzle: React.FC = () => {
 };
 
 export default WordPuzzle;
+
 
 
 

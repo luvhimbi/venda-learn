@@ -1,18 +1,18 @@
 import React, { useEffect, useState } from 'react';
-import { auth, db } from '../../services/firebaseConfig';
-import { doc, setDoc, updateDoc, collection, query, where, getDocs, writeBatch, increment } from 'firebase/firestore';
+import { db, auth } from '../../services/firebaseConfig';
+import { doc, updateDoc, writeBatch, collection, query, where, getDocs, setDoc, increment } from 'firebase/firestore';
 import { onAuthStateChanged, signOut } from 'firebase/auth';
-import { fetchUserData, invalidateCache, refreshUserData, fetchLearnedStats } from '../../services/dataCache';
-import { getLevelStats, getBadgeDetails } from '../../services/levelUtils';
+import { Camera, Flame, Gift, Users, Bell, MessageCircle, Book, Gem, Edit3, Compass, LogOut, CheckCircle, Info, Shield, Clock } from 'lucide-react';
 import { checkAchievements, awardTrophies, ALL_TROPHIES } from '../../services/achievementService';
-import Swal from 'sweetalert2';
-import { useNavigate } from "react-router-dom";
-import { MessageCircle, Book, Flame, Gem, Gift, Edit3, Compass, LogOut, CheckCircle, Info, Shield, Users, Camera } from 'lucide-react';
+import TrophyIcon from '../../components/TrophyIcon';
 import AvatarPicker, { AvatarDisplay } from '../../components/AvatarPicker';
 import StreakCalendar from '../../components/StreakCalendar';
-import TrophyIcon from '../../components/TrophyIcon';
+import JuicyButton from '../../components/JuicyButton';
+import { invalidateCache, refreshUserData, fetchUserData, fetchLearnedStats } from '../../services/dataCache';
+import { getLevelStats, getBadgeDetails } from '../../services/levelUtils';
 import { updateReminderSettings, requestNotificationPermission } from '../../services/reminderService';
-import { Bell, Clock } from 'lucide-react';
+import Swal from 'sweetalert2';
+import { useNavigate } from "react-router-dom";
 
 interface UserProfile {
     username: string;
@@ -30,6 +30,8 @@ interface UserProfile {
     activityHistory?: string[];
     reminderEnabled?: boolean;
     reminderTime?: string;
+    soundEnabled?: boolean;
+    hapticEnabled?: boolean;
 }
 
 interface LearnedStats {
@@ -49,11 +51,13 @@ const Profile: React.FC = () => {
     const [updateLoading, setUpdateLoading] = useState(false);
     const [claimLoading, setClaimLoading] = useState(false);
     const [editUsername, setEditUsername] = useState('');
-    const [editAvatarId, setEditAvatarId] = useState('user');
+    const [editAvatarId, setEditAvatarId] = useState('adventurer');
     const [unclaimedInvites, setUnclaimedInvites] = useState<any[]>([]);
     const [activeTab, setActiveTab] = useState<'overview' | 'mastery' | 'gear'>('overview');
     const [reminderEnabled, setReminderEnabled] = useState(false);
     const [reminderTime, setReminderTime] = useState('09:00');
+    const [soundEnabled, setSoundEnabled] = useState(true);
+    const [hapticEnabled, setHapticEnabled] = useState(true);
     const navigate = useNavigate();
     const inviteLink = `${window.location.origin}/register?ref=${auth.currentUser?.uid}`;
 
@@ -79,6 +83,8 @@ const Profile: React.FC = () => {
                     setEditAvatarId(profile.avatarId || 'adventurer');
                     setReminderEnabled(profile.reminderEnabled || false);
                     setReminderTime(profile.reminderTime || '09:00');
+                    setSoundEnabled(profile.soundEnabled !== false);
+                    setHapticEnabled(profile.hapticEnabled !== false);
 
                     // Check for new achievements (including 1st Login)
                     const newTrophies = checkAchievements(normalizedProfile, profile.trophies || []);
@@ -192,7 +198,9 @@ const Profile: React.FC = () => {
             await setDoc(userRef, {
                 username: editUsername,
                 email: auth.currentUser.email,
-                avatarId: editAvatarId
+                avatarId: editAvatarId,
+                soundEnabled: soundEnabled,
+                hapticEnabled: hapticEnabled
             }, { merge: true });
 
             setUserData(prev => prev ? {
@@ -386,13 +394,13 @@ const Profile: React.FC = () => {
                                         </div>
 
                                         <div className="d-flex gap-2 justify-content-center justify-content-md-start mt-2">
-                                            <button type="submit" className="btn btn-warning btn-lg px-5 py-3 fw-bold ls-1 rounded-pill shadow" disabled={updateLoading}>
+                                            <JuicyButton type="submit" className="btn btn-warning btn-lg px-5 py-3 fw-bold ls-1 rounded-pill shadow" disabled={updateLoading}>
                                                 {updateLoading ? (
                                                     <span className="spinner-border spinner-border-sm me-2"></span>
                                                 ) : (
                                                     <><CheckCircle size={18} className="me-2" /> SAVE CHANGES</>
                                                 )}
-                                            </button>
+                                            </JuicyButton>
                                             <button type="button" onClick={() => setIsEditing(false)} className="btn btn-light btn-lg px-4 py-3 fw-bold ls-1 rounded-pill">
                                                 CANCEL
                                             </button>
@@ -407,21 +415,21 @@ const Profile: React.FC = () => {
                 {/* TABS NAVIGATION */}
                 <div className="d-flex justify-content-center mb-4 mb-md-5 tour-profile-tabs">
                     <div className="nav nav-pills bg-light p-1 rounded-pill shadow-sm border border-white flex-nowrap overflow-auto hide-scrollbar" style={{ maxWidth: '100%' }}>
-                        <button 
+                        <button
                             onClick={() => setActiveTab('overview')}
                             className={`nav-link rounded-pill px-2 px-sm-4 py-2 fw-bold ls-1 smallest d-flex align-items-center justify-content-center transition-all ${activeTab === 'overview' ? 'bg-dark text-white active shadow-sm' : 'text-muted'}`}
                             style={{ minWidth: 'fit-content' }}
                         >
                             <Gem size={14} className="me-1 me-sm-2" /> <span className="d-none d-sm-inline">OVERVIEW</span><span className="d-inline d-sm-none">STATS</span>
                         </button>
-                        <button 
+                        <button
                             onClick={() => setActiveTab('mastery')}
                             className={`nav-link rounded-pill px-2 px-sm-4 py-2 fw-bold ls-1 smallest d-flex align-items-center justify-content-center transition-all ${activeTab === 'mastery' ? 'bg-dark text-white active shadow-sm' : 'text-muted'}`}
                             style={{ minWidth: 'fit-content' }}
                         >
                             <Compass size={14} className="me-1 me-sm-2" /> <span className="d-none d-sm-inline">MASTERY</span><span className="d-inline d-sm-none">PATH</span>
                         </button>
-                        <button 
+                        <button
                             onClick={() => setActiveTab('gear')}
                             className={`nav-link rounded-pill px-2 px-sm-4 py-2 fw-bold ls-1 smallest d-flex align-items-center justify-content-center transition-all tour-gear-tab ${activeTab === 'gear' ? 'bg-dark text-white active shadow-sm' : 'text-muted'}`}
                             style={{ minWidth: 'fit-content' }}
@@ -444,7 +452,7 @@ const Profile: React.FC = () => {
                                                 <h5 className="fw-bold mb-0 text-uppercase ls-2 smallest text-muted">Trophy Case</h5>
                                                 <h4 className="fw-bold text-dark mt-1">ACHIEVEMENTS</h4>
                                             </div>
-                                            <button 
+                                            <button
                                                 onClick={() => navigate('/achievements')}
                                                 className="btn btn-link text-warning fw-bold smallest text-uppercase ls-1 p-0 text-decoration-none"
                                             >
@@ -456,16 +464,16 @@ const Profile: React.FC = () => {
                                                 const isEarned = (userData?.trophies || []).includes(trophy.id);
                                                 return (
                                                     <div key={trophy.id} className="col-4 col-md-2">
-                                                        <div 
+                                                        <div
                                                             className="d-flex flex-column align-items-center gap-2"
                                                             title={trophy.description}
                                                             style={{ cursor: 'pointer' }}
                                                             onClick={() => navigate('/achievements')}
                                                         >
                                                             <div className={`p-2 rounded-4 transition-all ${isEarned ? 'bg-white shadow-sm border border-warning' : 'opacity-25 bg-light grayscale border-dashed border-2'}`}>
-                                                                <TrophyIcon 
-                                                                    rarity={isEarned ? trophy.rarity as any : 'locked'} 
-                                                                    size={48} 
+                                                                <TrophyIcon
+                                                                    rarity={isEarned ? trophy.rarity as any : 'locked'}
+                                                                    size={48}
                                                                     animate={isEarned}
                                                                     color={trophy.color}
                                                                 />
@@ -668,10 +676,10 @@ const Profile: React.FC = () => {
                                     <div className="col-md-5">
                                         <div className="d-flex flex-column gap-3">
                                             <div className="form-check form-switch d-flex align-items-center gap-3 ps-0 mb-0">
-                                                <input 
-                                                    className="form-check-input ms-0" 
-                                                    type="checkbox" 
-                                                    role="switch" 
+                                                <input
+                                                    className="form-check-input ms-0"
+                                                    type="checkbox"
+                                                    role="switch"
                                                     id="reminderSwitch"
                                                     checked={reminderEnabled}
                                                     onChange={async (e) => {
@@ -689,10 +697,21 @@ const Profile: React.FC = () => {
                                                             }
                                                         }
                                                         setReminderEnabled(enabled);
-                                                        await updateReminderSettings({ 
-                                                            reminderEnabled: enabled, 
-                                                            reminderTime 
+                                                        await updateReminderSettings({
+                                                            reminderEnabled: enabled,
+                                                            reminderTime
                                                         });
+                                                        if (enabled) {
+                                                            Swal.fire({
+                                                                title: 'Push Alerts Enabled!',
+                                                                text: 'You will now receive external notifications for your reminders.',
+                                                                icon: 'success',
+                                                                toast: true,
+                                                                position: 'top-end',
+                                                                timer: 3000,
+                                                                showConfirmButton: false
+                                                            });
+                                                        }
                                                     }}
                                                     style={{ width: '45px', height: '24px', cursor: 'pointer' }}
                                                 />
@@ -706,17 +725,17 @@ const Profile: React.FC = () => {
                                                     <div className="bg-light p-2 rounded-3 text-muted">
                                                         <Clock size={16} />
                                                     </div>
-                                                    <input 
-                                                        type="time" 
+                                                    <input
+                                                        type="time"
                                                         className="form-control form-control-sm border-0 bg-light p-2 rounded-3 fw-bold"
                                                         style={{ width: '120px' }}
                                                         value={reminderTime}
                                                         onChange={async (e) => {
                                                             const time = e.target.value;
                                                             setReminderTime(time);
-                                                            await updateReminderSettings({ 
-                                                                reminderEnabled, 
-                                                                reminderTime: time 
+                                                            await updateReminderSettings({
+                                                                reminderEnabled,
+                                                                reminderTime: time
                                                             });
                                                         }}
                                                     />
@@ -724,6 +743,66 @@ const Profile: React.FC = () => {
                                                 </div>
                                             )}
                                         </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* AUDIO & TACTILE PREFERENCES */}
+                            <div className="card border-0 shadow-sm rounded-4 p-4 bg-white overflow-hidden position-relative mb-4">
+                                <div className="d-flex align-items-center gap-2 mb-4">
+                                    <div className="bg-primary bg-opacity-10 p-2 rounded-3 text-primary">
+                                        <Flame size={20} />
+                                    </div>
+                                    <h5 className="fw-bold mb-0 text-dark">Audio & Tactile Feedback</h5>
+                                </div>
+
+                                <div className="row g-4">
+                                    <div className="col-md-6">
+                                        <div className="form-check form-switch d-flex align-items-center gap-3 ps-0 mb-3">
+                                            <input
+                                                className="form-check-input ms-0"
+                                                type="checkbox"
+                                                role="switch"
+                                                id="soundSwitch"
+                                                checked={soundEnabled}
+                                                onChange={async (e) => {
+                                                    const enabled = e.target.checked;
+                                                    setSoundEnabled(enabled);
+                                                    const userRef = doc(db, "users", auth.currentUser!.uid);
+                                                    await updateDoc(userRef, { soundEnabled: enabled });
+                                                    invalidateCache(`user_${auth.currentUser!.uid}`);
+                                                }}
+                                                style={{ width: '45px', height: '24px', cursor: 'pointer' }}
+                                            />
+                                            <label className="form-check-label small fw-bold text-dark cursor-pointer" htmlFor="soundSwitch">
+                                                Sound Effects {soundEnabled ? 'On' : 'Off'}
+                                            </label>
+                                        </div>
+                                        <p className="smallest text-muted mb-0 ps-5 ms-3">Play subtle sounds during navigation and games.</p>
+                                    </div>
+
+                                    <div className="col-md-6">
+                                        <div className="form-check form-switch d-flex align-items-center gap-3 ps-0 mb-3">
+                                            <input
+                                                className="form-check-input ms-0"
+                                                type="checkbox"
+                                                role="switch"
+                                                id="hapticSwitch"
+                                                checked={hapticEnabled}
+                                                onChange={async (e) => {
+                                                    const enabled = e.target.checked;
+                                                    setHapticEnabled(enabled);
+                                                    const userRef = doc(db, "users", auth.currentUser!.uid);
+                                                    await updateDoc(userRef, { hapticEnabled: enabled });
+                                                    invalidateCache(`user_${auth.currentUser!.uid}`);
+                                                }}
+                                                style={{ width: '45px', height: '24px', cursor: 'pointer' }}
+                                            />
+                                            <label className="form-check-label small fw-bold text-dark cursor-pointer" htmlFor="hapticSwitch">
+                                                Haptic Feedback {hapticEnabled ? 'On' : 'Off'}
+                                            </label>
+                                        </div>
+                                        <p className="smallest text-muted mb-0 ps-5 ms-3">Feel subtle vibrations on your mobile device.</p>
                                     </div>
                                 </div>
                             </div>
@@ -739,14 +818,14 @@ const Profile: React.FC = () => {
 
                                     {unclaimedInvites.length > 0 && (
                                         <div className="mb-4 animate__animated animate__pulse animate__infinite">
-                                            <button
+                                            <JuicyButton
                                                 onClick={handleClaimRewards}
                                                 disabled={claimLoading}
-                                                className="btn btn-warning w-100 py-3 fw-bold ls-1 shadow-lg text-dark d-flex align-items-center justify-content-center gap-2"
+                                                className="w-100 py-3 fw-bold ls-1 shadow-lg text-dark d-flex align-items-center justify-content-center gap-2"
                                                 style={{ border: '2px solid #000' }}
                                             >
                                                 {claimLoading ? 'CLAIMING...' : <><Gift size={20} /> CLAIM {unclaimedInvites.length * 500} LP REWARDS</>}
-                                            </button>
+                                            </JuicyButton>
                                         </div>
                                     )}
 
@@ -754,9 +833,9 @@ const Profile: React.FC = () => {
                                         <div className="flex-grow-1 bg-white bg-opacity-10 rounded-3 p-3 small text-truncate border border-secondary border-opacity-25">
                                             {inviteLink}
                                         </div>
-                                        <button className="btn game-btn-primary px-4 py-2 fw-bold ls-1" onClick={handleCopyLink}>
+                                        <JuicyButton className="btn game-btn-primary px-4 py-2 fw-bold ls-1" onClick={handleCopyLink}>
                                             COPY LINK
-                                        </button>
+                                        </JuicyButton>
                                     </div>
                                 </div>
                                 <div className="position-absolute end-0 bottom-0 opacity-10 display-1 p-4"><Users size={120} strokeWidth={1} /></div>

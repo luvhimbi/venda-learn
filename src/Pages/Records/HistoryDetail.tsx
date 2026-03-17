@@ -1,9 +1,11 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { fetchHistoryData } from '../../services/dataCache';
-import Swal from 'sweetalert2';
 import { auth } from '../../services/firebaseConfig';
 import { onAuthStateChanged } from 'firebase/auth';
+import confetti from 'canvas-confetti';
+import { useVisualJuice } from '../../hooks/useVisualJuice';
+import { popupService } from '../../services/popupService';
 
 interface StoryData {
     title: string;
@@ -32,6 +34,8 @@ const HistoryDetail: React.FC = () => {
     const [heroOffset, setHeroOffset] = useState(0);
     const [isGuest, setIsGuest] = useState(false);
     const [isShareModalOpen, setIsShareModalOpen] = useState(false);
+    const [hasCelebrated, setHasCelebrated] = useState(false);
+    const { playClick, playCorrect} = useVisualJuice();
 
     useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth, (user) => {
@@ -57,7 +61,29 @@ const HistoryDetail: React.FC = () => {
         const progress = totalScroll > 0 ? (currentScroll / totalScroll) * 100 : 0;
         setScrollProgress(progress);
         setHeroOffset(currentScroll * 0.35);
-    }, []);
+
+        // Milestone: 50% Cheer
+        if (progress > 50 && progress < 55) {
+            if (navigator.vibrate) navigator.vibrate(50);
+        }
+
+        // Completion celebration
+        if (progress > 98 && !hasCelebrated) {
+            setHasCelebrated(true);
+            if (navigator.vibrate) navigator.vibrate([100, 50, 100]);
+            playCorrect();
+            confetti({
+                particleCount: 150,
+                spread: 70,
+                origin: { y: 0.6 },
+                colors: ['#FACC15', '#000000', '#FFFFFF']
+            });
+            popupService.innerSuccess(
+                'Ndi zwavhuḓi!',
+                `Congratulations! You've mastered: <b>${story?.title}</b>. <br/>+10 Learning Points added!`
+            );
+        }
+    }, [hasCelebrated, story, playCorrect]);
 
     useEffect(() => {
         window.addEventListener('scroll', handleScroll, { passive: true });
@@ -127,18 +153,29 @@ const HistoryDetail: React.FC = () => {
     // Interactive word dictionary
     const vocabulary: Record<string, string> = {
         'Vhavenda': 'The Venda people of South Africa.',
+        'Muvenda': 'A person belonging to the Venda people.',
         'Domba': 'Traditional Venda dance, often called the python dance.',
         'Python Dance': 'The famous Domba dance performed during initiation.',
         'Zwiambaro': 'Traditional Venda clothing.',
         'Mvelele': 'Culture and heritage.',
         'Ḓivhazwakale': 'History.',
-        'Tshivenda': 'The language of the Venda people.'
+        'Tshivenda': 'The language of the Venda people.',
+        'Tshidzimba': 'Traditional Venda dish made of maize and beans.',
+        'Vhuswa': 'Staple maize meal porridge, known as pap elsewhere.',
+        'Dzata': 'The ancient capital of the Venda Kingdom.',
+        'Mapungubwe': 'Ancient Iron Age kingdom and World Heritage site associated with Venda origins.',
+        'Khosi': 'A King or senior Chief in Venda tradition.',
+        'Makhadzi': 'A highly influential paternal aunt in Venda royal and family structures.',
+        'Thohoyandou': 'Famous Venda king meaning "Head of the Elephant".'
     };
 
     const renderInteractiveContent = (text: string) => {
         let parts: any[] = [text];
 
-        Object.keys(vocabulary).forEach(word => {
+        // Sort keywords by length descending to prevent shorter patterns from matching inside longer ones
+        const sortedKeywords = Object.keys(vocabulary).sort((a, b) => b.length - a.length);
+
+        sortedKeywords.forEach(word => {
             const newParts: any[] = [];
             parts.forEach(part => {
                 if (typeof part !== 'string') {
@@ -147,25 +184,23 @@ const HistoryDetail: React.FC = () => {
                 }
                 const regex = new RegExp(`(${word})`, 'gi');
                 const subParts = part.split(regex);
-                subParts.forEach(sub => {
+                subParts.forEach((sub, idx) => {
                     if (sub.toLowerCase() === word.toLowerCase()) {
                         newParts.push(
                             <span
-                                key={`${word}-${Math.random()}`}
+                                key={`${word}-${idx}-${Math.random()}`} // Better prefix, and idx to stabilize
                                 className="interactive-word"
-                                onClick={() => Swal.fire({
-                                    title: sub,
-                                    text: vocabulary[word],
-                                    confirmButtonColor: '#FACC15',
-                                    icon: 'info',
-                                    customClass: { popup: 'swal2-venda-style' }
-                                })}
+                                onClick={() => {
+                                    if (navigator.vibrate) navigator.vibrate(20);
+                                    playClick();
+                                    popupService.meaning(sub, vocabulary[word]);
+                                }}
                             >
                                 {sub}
                             </span>
                         );
                     } else {
-                        newParts.push(sub);
+                        if (sub !== '') newParts.push(sub);
                     }
                 });
             });
@@ -177,7 +212,7 @@ const HistoryDetail: React.FC = () => {
 
     return (
         <div className="bg-white min-vh-100 pb-5">
-            <SEO 
+            <SEO
                 title={story.title}
                 description={story.vendaTitle || `Learn about ${story.title} on VendaLearn`}
                 image={story.imageUrl || "/images/vendalearn.png"}
@@ -226,7 +261,7 @@ const HistoryDetail: React.FC = () => {
 
                 <div className="position-absolute bottom-0 start-0 w-100 p-4 img-gradient-overlay d-flex justify-content-between align-items-end">
                     <span className="badge-venda">{story.category}</span>
-                    <button 
+                    <button
                         onClick={() => setIsShareModalOpen(true)}
                         className="btn btn-warning rounded-circle shadow-lg d-flex align-items-center justify-content-center transition-all hover-lift"
                         style={{ width: '56px', height: '56px' }}
@@ -236,7 +271,7 @@ const HistoryDetail: React.FC = () => {
                 </div>
             </div>
 
-            <SharePreviewModal 
+            <SharePreviewModal
                 isOpen={isShareModalOpen}
                 onClose={() => setIsShareModalOpen(false)}
                 title={story.title}
@@ -257,24 +292,30 @@ const HistoryDetail: React.FC = () => {
                 </header>
 
                 {/* REUSABLE PODCAST PLAYER */}
-                <div className="mb-5 animate-on-scroll">
+                <div className="mb-4 animate-on-scroll">
                     <PodcastPlayer
                         title="Listen to Story"
                         textToRead={textToRead}
                     />
                 </div>
 
-                <article className="article-content position-relative">
+                {/* INTERACTIVE HINT */}
+                <div className="d-flex align-items-center gap-2 mb-4 px-3 py-2 bg-light rounded-pill border-start border-4 border-warning animate-on-scroll" style={{ width: 'fit-content' }}>
+                    <Lightbulb size={16} className="text-warning" />
+                    <span className="smallest-print fw-bold text-muted uppercase ls-1">Tip: Click on golden words to learn their meaning!</span>
+                </div>
+
+                <article className="article-content position-relative p-4 rounded-4 munwenda-bg-container">
                     {story.content.split('\n')
                         .filter(paragraph => paragraph.trim() !== '')
                         .map((paragraph, idx) => {
-                            
+
                             // If user is a guest, handle masking
                             if (isGuest) {
                                 if (idx > 2) return null; // Hide completely
-                                
+
                                 const isBlurred = idx === 2;
-                                
+
                                 return (
                                     <div key={idx} className="position-relative">
                                         <p
@@ -283,7 +324,7 @@ const HistoryDetail: React.FC = () => {
                                         >
                                             {renderInteractiveContent(paragraph)}
                                         </p>
-                                        
+
                                         {isBlurred && (
                                             <div className="guest-lock-overlay d-flex flex-column align-items-center justify-content-center text-center p-4">
                                                 <div className="lock-icon-container mb-3 text-warning bounce-anim">
@@ -462,6 +503,25 @@ const HistoryDetail: React.FC = () => {
                 .ls-1 { letter-spacing: 1px; }
                 .smallest-print { font-size: 11px; font-family: 'Poppins', sans-serif; }
                 .uppercase { text-transform: uppercase; }
+
+                .munwenda-bg-container {
+                    position: relative;
+                    background-color: #fff;
+                    overflow: visible;
+                }
+                .munwenda-bg-container::before {
+                    content: '';
+                    position: absolute;
+                    top: -10px;
+                    left: -10px;
+                    right: -10px;
+                    bottom: -10px;
+                    background-image: radial-gradient(#FACC15 0.5px, transparent 0.5px);
+                    background-size: 20px 20px;
+                    opacity: 0.1;
+                    z-index: -1;
+                    pointer-events: none;
+                }
                 
                 .venda-subtitle { font-size: 1.25rem; color: #EAB308; font-weight: 600; }
                 
@@ -654,3 +714,4 @@ const HistoryDetail: React.FC = () => {
 };
 
 export default HistoryDetail;
+

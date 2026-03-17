@@ -39,15 +39,18 @@ import GamesDashboard from "./Pages/Games/GamesDashboard";
 import PicturePuzzle from "./Pages/Games/PicturePuzzle";
 import SyllableBuilder from "./Pages/Games/SyllableBuilder";
 import SentenceScramble from "./Pages/Games/SentenceScramble";
-import KnowledgeBattle from "./Pages/Games/KnowledgeBattle";
+// import KnowledgeBattle from "./Pages/Games/KnowledgeBattle";
 import DailyChallenge from "./Pages/Games/DailyChallenge";
 import WordBomb from "./Pages/Games/WordBomb";
 import AdminWordBomb from "./Pages/Admin/AdminWordBomb";
+import AdminPicturePuzzle from "./Pages/Admin/AdminPicturePuzzle";
 import CourseVisualizer from "./Pages/Admin/CourseVisualizer";
 import NotFound from "./Pages/NotFound";
-import { auth } from './services/firebaseConfig';
+import { auth, messaging } from './services/firebaseConfig';
 import { onAuthStateChanged } from 'firebase/auth';
+import { onMessage } from 'firebase/messaging';
 import { NotificationProvider } from './contexts/NotificationContext';
+import Swal from 'sweetalert2';
 
 /**
  * AppContent handles the conditional rendering of the UI.
@@ -63,6 +66,27 @@ const AppContent: React.FC = () => {
         const unsubscribe = onAuthStateChanged(auth, (u) => {
             setUser(u);
         });
+        return () => unsubscribe();
+    }, []);
+
+    // Foreground Push Notification Listener
+    useEffect(() => {
+        const unsubscribe = onMessage(messaging, (payload) => {
+            console.log('Foreground message received:', payload);
+            if (payload.notification) {
+                Swal.fire({
+                    title: payload.notification.title,
+                    text: payload.notification.body,
+                    icon: 'info',
+                    toast: true,
+                    position: 'top-end',
+                    showConfirmButton: false,
+                    timer: 5000,
+                    timerProgressBar: true
+                });
+            }
+        });
+
         return () => unsubscribe();
     }, []);
 
@@ -100,7 +124,7 @@ const AppContent: React.FC = () => {
                         <Route path="/picture-puzzle" element={<PicturePuzzle />} />
                         <Route path="/syllable-builder" element={<SyllableBuilder />} />
                         <Route path="/game/scramble" element={<SentenceScramble />} />
-                        <Route path="/battle" element={<KnowledgeBattle />} />
+                        {/* <Route path="/battle" element={<KnowledgeBattle />} /> */}
                         <Route path="/history" element={<HistoryList />} />
                         <Route path="/courses" element={<Courses />} />
                         <Route path="/courses/:courseId" element={<CourseLessons />} />
@@ -122,6 +146,14 @@ const AppContent: React.FC = () => {
                             element={
                                 <AdminRoute>
                                     <AdminDashboard />
+                                </AdminRoute>
+                            }
+                        />
+                        <Route
+                            path="/admin/picture-puzzles"
+                            element={
+                                <AdminRoute>
+                                    <AdminPicturePuzzle />
                                 </AdminRoute>
                             }
                         />

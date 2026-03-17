@@ -1,10 +1,13 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { fetchWordBombWords, refreshUserData } from '../../services/dataCache';
-import { doc, updateDoc, increment } from 'firebase/firestore';
+import { doc, updateDoc, increment, getDoc, type Firestore } from 'firebase/firestore';
+import { ArrowLeft, Loader2, Heart, Bomb, Zap } from 'lucide-react';
 import { auth, db } from '../../services/firebaseConfig';
-import Swal from 'sweetalert2';
-import { ArrowLeft, Loader2, Heart, Bomb, Zap, Trophy } from 'lucide-react';
+import { fetchWordBombWords, refreshUserData } from '../../services/dataCache';
+import { useVisualJuice } from '../../hooks/useVisualJuice';
+import { updateStreak } from '../../services/streakUtils';
+import { popupService } from '../../services/popupService';
+import Mascot, { type MascotMood } from '../../components/Mascot';
 
 interface WordBombWord {
     id: string;
@@ -28,6 +31,13 @@ const SPEED_INCREMENT = 0.04;
 const SPAWN_INTERVAL_MS = 2500;
 const MAX_ACTIVE_WORDS = 5;
 
+interface ScoreHighlight {
+    id: number;
+    x: number;
+    y: number;
+    text: string;
+}
+
 const WordBomb: React.FC = () => {
     const navigate = useNavigate();
     const [allWords, setAllWords] = useState<WordBombWord[]>([]);
@@ -38,11 +48,14 @@ const WordBomb: React.FC = () => {
     const [gameStatus, setGameStatus] = useState<'loading' | 'ready' | 'playing' | 'over'>('loading');
     const [combo, setCombo] = useState(0);
     const [speedLevel, setSpeedLevel] = useState(1);
+    const [highlights, setHighlights] = useState<ScoreHighlight[]>([]);
+    const [mascotMood, setMascotMood] = useState<MascotMood>('happy');
     const [correctFlash, setCorrectFlash] = useState<string | null>(null);
     const [missFlash, setMissFlash] = useState(false);
     const [sessionStartTime, setSessionStartTime] = useState(Date.now());
     const [isMobile, setIsMobile] = useState(window.innerWidth < 576);
     const [paletteOptions, setPaletteOptions] = useState<WordBombWord[]>([]);
+    const { playCorrect, playWrong, playClick, triggerShake } = useVisualJuice();
 
     const inputRef = useRef<HTMLInputElement>(null);
     const gameLoopRef = useRef<number | null>(null);
@@ -91,6 +104,10 @@ const WordBomb: React.FC = () => {
                 if (words && Array.isArray(words)) {
                     setAllWords(words as WordBombWord[]);
                     setGameStatus('ready');
+                }
+                if (auth.currentUser) {
+                    await getDoc(doc(db as Firestore, "users", auth.currentUser.uid));
+                    // streak state removed as it was unused in render
                 }
             } catch (err) {
                 console.error("Failed to load Word Bomb words:", err);
@@ -160,7 +177,7 @@ const WordBomb: React.FC = () => {
         const user = auth.currentUser;
         if (user) {
             try {
-                const userRef = doc(db, 'users', user.uid);
+                const userRef = doc(db as Firestore, 'users', user.uid);
                 await updateDoc(userRef, {
                     points: increment(finalScore),
                     [`gamePerformance.wordBomb.lastPlayed`]: {
@@ -169,28 +186,20 @@ const WordBomb: React.FC = () => {
                         timestamp: new Date().toISOString()
                     }
                 });
+                await updateStreak(user.uid);
                 await refreshUserData();
             } catch (err) {
                 console.error("Error saving score:", err);
             }
         }
 
-        Swal.fire({
-            title: '💣 Game Over!',
-            html: `
-                <div style="font-size:1.1rem">
-                    <p><strong>Score:</strong> ${finalScore} LP</p>
-                    <p><strong>Time:</strong> ${totalDuration}s</p>
-                </div>
-            `,
-            icon: 'info',
-            confirmButtonText: 'Play Again',
-            confirmButtonColor: '#FACC15',
-            showCancelButton: true,
-            cancelButtonText: 'Back to Games'
-        }).then((result) => {
+        popupService.innerSuccess(
+            'Game Over!',
+            `<p style="font-size:14px;color:#666">Great job!</p><h2 style="color:#FACC15;font-weight:800">+${finalScore} XP</h2>`,
+            'Play Again'
+        ).then((result) => {
             if (result.isConfirmed) {
-                startGame();
+                startGame(); // Changed from resetGame to startGame
             } else {
                 navigate('/mitambo');
             }
@@ -227,8 +236,15 @@ const WordBomb: React.FC = () => {
         if (missedCount > 0) {
             const newLives = Math.max(0, livesRef.current - missedCount);
             livesRef.current = newLives;
-            setLives(newLives);
+            setLives(prev => {
+                const updatedLives = prev - missedCount;
+                if (updatedLives <= 1) setMascotMood('sad');
+                return updatedLives;
+            });
             setCombo(0);
+            setMascotMood('happy'); // Reset mascot if was excited
+            playWrong();
+            triggerShake('wb-arena-shake');
             setMissFlash(true);
             setTimeout(() => setMissFlash(false), 500);
 
@@ -245,7 +261,7 @@ const WordBomb: React.FC = () => {
         }
 
         gameLoopRef.current = requestAnimationFrame(gameLoop);
-    }, [handleGameOver]);
+    }, [handleGameOver, isMobile, updatePalette]);
 
     // Defined startGame after gameLoop to avoid reference issues
     const startGame = useCallback(() => {
@@ -262,6 +278,7 @@ const WordBomb: React.FC = () => {
         isPlayingRef.current = true;
         setSessionStartTime(Date.now());
         usedWordIds.current.clear();
+        setMascotMood('happy'); // Reset mascot mood
 
         // Start game loop
         gameLoopRef.current = requestAnimationFrame(gameLoop);
@@ -303,13 +320,53 @@ const WordBomb: React.FC = () => {
 
             const newCombo = comboRef.current + 1;
             const points = 10 + Math.floor(newCombo / 3) * 5;
+
+            // Add floating point highlight
+            const newHighlight = {
+                id: Date.now(),
+                x: match.x,
+                y: match.y,
+                text: `+${points}`
+            };
+            setHighlights(prev => [...prev, newHighlight]);
+            setTimeout(() => {
+                setHighlights(prev => prev.filter(h => h.id !== newHighlight.id));
+            }, 1000);
+
             setScore(prev => prev + points);
             setCombo(newCombo);
+            // Update mascot mood based on combo
+            if (newCombo >= 5) setMascotMood('excited');
+            playCorrect();
 
             // Increase speed every 5 correct answers
             if (newCombo % 5 === 0) {
                 setSpeedLevel(prev => prev + 1);
             }
+            // Add Visual Juice: Confetti for correct answer
+            const canvas = document.createElement('canvas');
+            canvas.style.position = 'fixed';
+            canvas.style.top = '0';
+            canvas.style.left = '0';
+            canvas.style.width = '100%';
+            canvas.style.height = '100%';
+            canvas.style.pointerEvents = 'none';
+            canvas.style.zIndex = '9999';
+            document.body.appendChild(canvas);
+
+            import('canvas-confetti').then((confetti) => {
+                const myConfetti = confetti.create(canvas, { resize: true });
+                myConfetti({
+                    particleCount: 40,
+                    spread: 70,
+                    origin: { y: 0.6 },
+                    colors: ['#FACC15', '#F59E0B', '#34D399']
+                });
+                setTimeout(() => document.body.removeChild(canvas), 3000);
+            });
+        } else {
+            playWrong();
+            triggerShake('wb-input-zone');
         }
 
         setUserInput('');
@@ -331,8 +388,23 @@ const WordBomb: React.FC = () => {
 
             const newCombo = comboRef.current + 1;
             const points = 10 + Math.floor(newCombo / 3) * 5;
+
+            // Add floating point highlight
+            const newHighlight = {
+                id: Date.now(),
+                x: match.x,
+                y: match.y,
+                text: `+${points}`
+            };
+            setHighlights(prev => [...prev, newHighlight]);
+            setTimeout(() => {
+                setHighlights(prev => prev.filter(h => h.id !== newHighlight.id));
+            }, 1000);
+
             setScore(prev => prev + points);
             setCombo(newCombo);
+            if (newCombo >= 5) setMascotMood('excited');
+            playCorrect();
 
             if (newCombo % 5 === 0) {
                 setSpeedLevel(prev => prev + 1);
@@ -344,82 +416,150 @@ const WordBomb: React.FC = () => {
         }
     };
 
-    // Loading state
     if (gameStatus === 'loading') {
         return (
-            <div className="min-vh-100 d-flex justify-content-center align-items-center bg-dark">
+            <div className="min-vh-100 d-flex justify-content-center align-items-center bg-white">
                 <Loader2 className="animate-spin text-warning" size={48} />
+            </div>
+        );
+    }
+
+    if (gameStatus === 'ready') {
+        return (
+            <div className="flex-grow-1 d-flex flex-column align-items-center justify-content-center p-4" style={{ backgroundColor: '#ffffff', minHeight: '80vh' }}>
+                <button onClick={() => navigate('/mitambo')} className="btn btn-link text-decoration-none p-0 text-dark position-absolute top-0 start-0 m-4">
+                    <ArrowLeft size={24} />
+                </button>
+
+                <div className="text-center mb-5 d-flex flex-column align-items-center">
+                    <div className="mb-4">
+                        <Mascot width="140px" height="140px" mood="excited" />
+                    </div>
+                    <div className="rounded-circle d-flex align-items-center justify-content-center mb-3 shadow-sm bg-game-warning" style={{ width: '80px', height: '80px', border: '2px solid #FEF3C7', flexShrink: 0 }}>
+                        <Bomb size={40} className="text-warning wb-pulse" />
+                    </div>
+                    <h1 className="fw-bold mb-2 text-dark" style={{ fontSize: '2.5rem' }}>Word Bomb</h1>
+                    <p className="text-muted mb-0" style={{ maxWidth: '300px', fontSize: '1.1rem' }}>English words fall from the sky. Type the Venda translation!</p>
+                </div>
+
+                <div className="d-flex flex-column gap-3 w-100 mt-4" style={{ maxWidth: '400px' }}>
+                    <button
+                        onClick={startGame}
+                        className="btn-game btn-game-primary w-100 p-4 rounded-4 fw-bold shadow-lg transition-all"
+                        style={{ fontSize: '1.4rem', letterSpacing: '2px', padding: '20px !important' }}
+                    >
+                        START GAME
+                    </button>
+                    <p className="text-center text-muted small mt-3">Ready to test your speed?</p>
+                </div>
+
+                <style>{`
+                    .wb-pulse { animation: bombPulse 2s infinite; }
+                    @keyframes bombPulse {
+                        0%, 100% { transform: scale(1); }
+                        50% { transform: scale(1.1); }
+                    }
+                    .btn-game-primary {
+                        background-color: #f59e0b !important;
+                        color: #111827 !important;
+                        box-shadow: 0 6px 0 #d97706 !important;
+                    }
+                    .btn-game-primary:hover {
+                        transform: translateY(-2px);
+                        box-shadow: 0 8px 0 #d97706 !important;
+                    }
+                    .btn-game-primary:active {
+                        transform: translateY(4px);
+                        box-shadow: 0 2px 0 #d97706 !important;
+                    }
+                `}</style>
+            </div>
+        );
+    }
+
+    if (gameStatus === 'over') {
+        return (
+            <div className="min-vh-100 d-flex flex-column align-items-center justify-content-center p-4" style={{ backgroundColor: '#ffffff' }}>
+                <div className="text-center mb-5 d-flex flex-column align-items-center">
+                    <Mascot width="160px" height="160px" mood="sad" className="mb-4" />
+                    <h1 className="display-4 fw-bold mb-2 text-dark">Game Over!</h1>
+                    <p className="lead text-muted mb-4">You scored {score} points</p>
+                    <div className="display-1 fw-bold text-warning mb-5">{score}</div>
+                </div>
+
+                <div className="d-flex flex-column gap-3 w-100" style={{ maxWidth: '400px' }}>
+                    <button
+                        onClick={() => {
+                            setScore(0);
+                            setLives(INITIAL_LIVES);
+                            setCombo(0);
+                            setGameStatus('ready');
+                        }}
+                        className="btn-game btn-game-primary w-100 p-4 rounded-4 fw-bold shadow-lg text-dark"
+                        style={{ fontSize: '1.2rem' }}
+                    >
+                        PLAY AGAIN
+                    </button>
+                    <button
+                        onClick={() => navigate('/mitambo')}
+                        className="btn btn-outline-dark w-100 p-4 rounded-4 fw-bold"
+                    >
+                        QUIT GAME
+                    </button>
+                </div>
             </div>
         );
     }
 
     return (
         <div className="min-vh-100 d-flex flex-column wb-bg" onClick={() => inputRef.current?.focus()}>
-            {/* HEADER BAR */}
-            <div className="wb-header d-flex justify-content-between align-items-center px-3 py-2">
-                <button onClick={() => navigate('/mitambo')} className="btn btn-sm btn-outline-light rounded-circle d-flex align-items-center justify-content-center" style={{ width: 36, height: 36 }}>
-                    <ArrowLeft size={18} />
-                </button>
-
-                <div className="d-flex align-items-center gap-2 gap-md-4">
-                    {/* LIVES */}
-                    <div className="d-flex align-items-center gap-1">
-                        {isMobile ? (
-                            <div className="d-flex align-items-center gap-2 px-2 py-1 rounded-pill bg-danger bg-opacity-10 border border-danger border-opacity-25 shadow-sm">
-                                <Heart size={16} fill="#EF4444" color="#EF4444" className="wb-heart-pulse" />
-                                <span className="text-white fw-bold smallest">x {lives}</span>
+            {/* GAME HUD / HEADER */}
+            {gameStatus === 'playing' && (
+                <div className={`position-absolute top-0 start-0 ${isMobile ? 'p-2' : 'p-4'} w-100 d-flex justify-content-between align-items-center`} style={{ zIndex: 50 }}>
+                    <div className="d-flex align-items-center gap-2 gap-md-3">
+                        <Mascot width={isMobile ? "60px" : "80px"} height={isMobile ? "60px" : "80px"} mood={mascotMood} className="shadow-sm rounded-circle bg-white p-1" />
+                        <div className={`${isMobile ? 'p-2' : 'p-3'} bg-dark bg-opacity-75 text-white rounded-4 shadow-lg backdrop-blur border border-warning border-opacity-25`}>
+                            <h5 className={`mb-0 fw-bold ls-1 ${isMobile ? 'small' : ''}`}>SCORE: {score}</h5>
+                            <div className="d-flex align-items-center gap-2">
+                                <small className="text-warning fw-bold" style={{ fontSize: isMobile ? '10px' : '' }}>COMBO: {combo}</small>
+                                <small className="text-white-50" style={{ fontSize: isMobile ? '10px' : '' }}>SPD: {speedLevel}</small>
                             </div>
-                        ) : (
-                            <div className="d-flex align-items-center gap-1">
-                                {[...Array(INITIAL_LIVES)].map((_, i) => (
-                                    <Heart
-                                        key={i}
-                                        size={18}
-                                        fill={i < lives ? '#EF4444' : 'transparent'}
-                                        color={i < lives ? '#EF4444' : '#555'}
-                                    />
-                                ))}
-                            </div>
-                        )}
-                    </div>
-
-                    {/* SCORE */}
-                    <div className="d-flex align-items-center gap-1 text-warning fw-bold">
-                        <Trophy size={16} />
-                        <span className="small">{score}</span>
-                    </div>
-
-                    {/* COMBO */}
-                    {combo >= 2 && (
-                        <div className="d-flex align-items-center gap-1 wb-combo-badge">
-                            <Zap size={14} />
-                            <span className="fw-bold smallest">{combo}</span>
                         </div>
-                    )}
+                    </div>
+                    <div className={`${isMobile ? 'p-2' : 'p-3'} bg-dark bg-opacity-75 text-white rounded-4 shadow-lg backdrop-blur border border-danger border-opacity-25`}>
+                        <div className="d-flex gap-1 gap-md-2">
+                            {[...Array(INITIAL_LIVES)].map((_, i) => (
+                                <Heart
+                                    key={i}
+                                    size={isMobile ? 16 : 24}
+                                    fill={i < lives ? "#ef4444" : "none"}
+                                    className={i < lives ? "text-danger animate__animated animate__pulse animate__infinite" : "text-white opacity-25"}
+                                />
+                            ))}
+                        </div>
+                    </div>
                 </div>
-
-                <div className="text-white-50 smallest fw-bold ls-1">
-                    SPD {speedLevel}
-                </div>
-            </div>
+            )}
 
             {/* GAME ARENA */}
-            <div className="flex-grow-1 position-relative wb-arena overflow-hidden">
-                {/* Ready Screen */}
-                {gameStatus === 'ready' && (
-                    <div className="position-absolute top-50 start-50 translate-middle text-center wb-ready-overlay">
-                        <div className="mb-4">
-                            <Bomb size={80} className="text-warning wb-pulse" />
-                        </div>
-                        <h2 className="fw-bold text-white mb-2">Word Bomb</h2>
-                        <p className="text-white-50 mb-1">English words fall from the sky</p>
-                        <p className="text-warning fw-bold mb-4">Type the Venda translation!</p>
-                        <button onClick={startGame} className="btn wb-start-btn fw-bold px-5 py-3 rounded-pill shadow">
-                            <Bomb size={18} className="me-2" />
-                            START GAME
-                        </button>
+            <div id="wb-arena-shake" className="flex-grow-1 position-relative wb-arena overflow-hidden">
+                {/* Floating Score Highlights */}
+                {highlights.map(h => (
+                    <div
+                        key={h.id}
+                        className="position-absolute animate__animated animate__fadeOutUp fw-bold text-warning"
+                        style={{
+                            left: `${h.x}%`,
+                            top: `${h.y}%`,
+                            fontSize: '1.5rem',
+                            pointerEvents: 'none',
+                            zIndex: 100,
+                            textShadow: '0 2px 4px rgba(0,0,0,0.5)'
+                        }}
+                    >
+                        {h.text}
                     </div>
-                )}
+                ))}
 
                 {/* Falling Words */}
                 {gameStatus === 'playing' && fallingWords.filter(fw => fw.active).map((fw) => (
@@ -453,7 +593,7 @@ const WordBomb: React.FC = () => {
                                 <button
                                     key={opt.id}
                                     className="wb-palette-btn"
-                                    onClick={() => handlePaletteSelection(opt.venda)}
+                                    onClick={() => { playClick(); handlePaletteSelection(opt.venda); }}
                                 >
                                     {opt.venda}
                                 </button>
@@ -461,7 +601,7 @@ const WordBomb: React.FC = () => {
                         </div>
                     </div>
                 ) : (
-                    <form onSubmit={handleSubmit} className="wb-input-bar d-flex gap-2 p-3">
+                    <form id="wb-input-zone" onSubmit={handleSubmit} className="wb-input-bar d-flex gap-2 p-3">
                         <input
                             ref={inputRef}
                             type="text"
@@ -480,22 +620,7 @@ const WordBomb: React.FC = () => {
                 )
             )}
 
-            {/* Game Over Overlay */}
-            {gameStatus === 'over' && (
-                <div className="position-absolute top-50 start-50 translate-middle text-center wb-ready-overlay">
-                    <Bomb size={64} className="text-danger mb-3" />
-                    <h2 className="fw-bold text-white mb-3">BOOM!</h2>
-                    <p className="text-white-50">Final Score: <span className="text-warning fw-bold fs-4">{score} LP</span></p>
-                    <div className="d-flex gap-3 justify-content-center mt-4">
-                        <button onClick={startGame} className="btn wb-start-btn fw-bold px-4 py-2 rounded-pill">
-                            Play Again
-                        </button>
-                        <button onClick={() => navigate('/mitambo')} className="btn btn-outline-light fw-bold px-4 py-2 rounded-pill">
-                            Back
-                        </button>
-                    </div>
-                </div>
-            )}
+            {/* Game Over logic handled via early return above */}
 
             <style>{`
                 .wb-bg {
@@ -686,3 +811,4 @@ const WordBomb: React.FC = () => {
 };
 
 export default WordBomb;
+

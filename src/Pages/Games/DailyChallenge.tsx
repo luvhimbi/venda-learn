@@ -8,7 +8,8 @@ import MatchPairsQuestion from '../../components/Game/MatchPairsQuestion';
 import ListenChooseQuestion from '../../components/Game/ListenChooseQuestion';
 import { fetchDailyChallenge } from '../../services/dataCache';
 import type { Question } from '../../types/game';
-// import confetti from 'canvas-confetti'; // Removed dependency
+import { useVisualJuice } from '../../hooks/useVisualJuice';
+import Mascot from '../../components/Mascot';
 
 const DailyChallenge: React.FC = () => {
     const navigate = useNavigate();
@@ -19,6 +20,7 @@ const DailyChallenge: React.FC = () => {
     const [selectedAnswer, setSelectedAnswer] = useState<any>(null);
     const [status, setStatus] = useState<'correct' | 'wrong' | null>(null);
     const [isFinished, setIsFinished] = useState(false);
+    const { playCorrect, playWrong, triggerShake } = useVisualJuice();
 
     useEffect(() => {
         loadQuestions();
@@ -65,14 +67,12 @@ const DailyChallenge: React.FC = () => {
         }
 
         setStatus(isCorrect ? 'correct' : 'wrong');
-        if (isCorrect) setScore(s => s + 1);
-
         if (isCorrect) {
-            const audio = new Audio('/sounds/correct.mp3');
-            audio.play().catch(() => { });
+            setScore(s => s + 1);
+            playCorrect();
         } else {
-            const audio = new Audio('/sounds/wrong.mp3');
-            audio.play().catch(() => { });
+            playWrong();
+            triggerShake('dc-card-container');
         }
     };
 
@@ -88,7 +88,28 @@ const DailyChallenge: React.FC = () => {
 
     const finishGame = () => {
         setIsFinished(true);
-        // confetty removed to avoid dependency issues if not installed
+        if (score > questions.length * 0.5) {
+            const canvas = document.createElement('canvas');
+            canvas.style.position = 'fixed';
+            canvas.style.top = '0';
+            canvas.style.left = '0';
+            canvas.style.width = '100vw';
+            canvas.style.height = '100vh';
+            canvas.style.pointerEvents = 'none';
+            canvas.style.zIndex = '9999';
+            document.body.appendChild(canvas);
+
+            import('canvas-confetti').then(confetti => {
+                const myConfetti = confetti.create(canvas, { resize: true });
+                myConfetti({
+                    particleCount: 150,
+                    spread: 70,
+                    origin: { y: 0.6 },
+                    colors: ['#f59e0b', '#fbbf24', '#34d399']
+                });
+                setTimeout(() => document.body.removeChild(canvas), 5000);
+            });
+        }
     };
 
     if (loading) {
@@ -119,8 +140,8 @@ const DailyChallenge: React.FC = () => {
                             score > questions.length * 0.7 ? <span><CheckCircle size={14} className="text-success" /> Great job! Keep it up!</span> :
                                 <span><BookOpen size={14} className="text-muted" /> Good practice! Come back tomorrow!</span>}
                     </p>
-                    <button onClick={() => navigate('/practice')} className="btn btn-dark btn-lg w-100 rounded-pill fw-bold">
-                        Back to Practice Hub
+                    <button onClick={() => navigate('/mitambo')} className="btn-game btn-game-primary w-100 p-4 rounded-4 fw-bold shadow-lg" style={{ fontSize: '1.2rem' }}>
+                        Back to Games Hub
                     </button>
                 </div>
             </div>
@@ -138,8 +159,6 @@ const DailyChallenge: React.FC = () => {
     }
 
     const currentQ = questions[currentIndex];
-    const progress = ((currentIndex + 1) / questions.length) * 100;
-
     return (
         <div className="min-vh-100 bg-light d-flex flex-column">
             {/* Header */}
@@ -148,11 +167,8 @@ const DailyChallenge: React.FC = () => {
                     <button onClick={() => navigate(-1)} className="btn btn-link text-dark p-0">
                         <ArrowLeft size={24} />
                     </button>
-                    <div className="flex-grow-1 mx-4">
-                        <h6 className="text-center fw-bold mb-1 ls-1 small text-uppercase text-muted">Daily Challenge</h6>
-                        <div className="progress bg-light" style={{ height: '8px', borderRadius: '4px' }}>
-                            <div className="progress-bar bg-warning transition-all rounded" style={{ width: `${progress}%` }}></div>
-                        </div>
+                    <div className="flex-grow-1 mx-4 text-center">
+                        <h6 className="fw-bold mb-0 ls-1 small text-uppercase text-muted">Daily Challenge</h6>
                     </div>
                     <div className="badge bg-warning text-dark pill px-3 py-2 fw-bold shadow-sm">
                         {currentIndex + 1}/{questions.length}
@@ -163,8 +179,11 @@ const DailyChallenge: React.FC = () => {
             {/* Game Content */}
             <main className="flex-grow-1 d-flex flex-column justify-content-center p-3 p-md-4">
                 <div className="container" style={{ maxWidth: '768px' }}>
-                    <div className="card border-0 shadow-lg rounded-4 overflow-hidden animate__animated animate__fadeIn">
+                    <div id="dc-card-container" className="card border-0 shadow-lg rounded-4 overflow-hidden animate__animated animate__fadeIn">
                         <div className="card-body p-4 p-md-5">
+                            <div className="text-center mb-4">
+                                <Mascot width="100px" height="100px" mood={status === 'correct' ? 'excited' : status === 'wrong' ? 'sad' : 'happy'} />
+                            </div>
                             <h4 className="fw-bold mb-4 text-center">{currentQ.question}</h4>
 
                             <div className="mb-4" key={currentIndex}>
@@ -213,9 +232,20 @@ const DailyChallenge: React.FC = () => {
                                 <div className={`alert ${status === 'correct' ? 'alert-success' : 'alert-danger'} d-flex align-items-center gap-3 rounded-4 mb-0 animate__animated animate__fadeInUp`}>
                                     {status === 'correct' ? <CheckCircle size={24} /> : <XCircle size={24} />}
                                     <div>
-                                        <h6 className="fw-bold mb-0">{status === 'correct' ? 'Correct!' : 'Incorrect'}</h6>
-                                        {status === 'wrong' && (currentQ as any).explanation && (
-                                            <p className="small mb-0 mt-1 opacity-75">{(currentQ as any).explanation}</p>
+                                        <h6 className="fw-bold mb-0">{status === 'correct' ? 'Excellent!' : 'So Close!'}</h6>
+                                        {status === 'wrong' && (
+                                            <div className="mt-2 p-2 bg-white bg-opacity-50 rounded-3">
+                                                <p className="small fw-bold mb-1 text-dark border-bottom pb-1">
+                                                    Correct answer: <span className="text-success">{
+                                                        currentQ.type === 'true-false' 
+                                                            ? ((currentQ as any).correctAnswer === true ? 'NGOHO (TRUE)' : 'MAZWIFHI (FALSE)')
+                                                            : (currentQ as any).correctAnswer
+                                                    }</span>
+                                                </p>
+                                                {(currentQ as any).explanation && (
+                                                    <p className="small mb-0 text-secondary" style={{ lineHeight: '1.4' }}>{(currentQ as any).explanation}</p>
+                                                )}
+                                            </div>
                                         )}
                                     </div>
                                 </div>

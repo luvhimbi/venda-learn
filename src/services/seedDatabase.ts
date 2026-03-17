@@ -1,4 +1,5 @@
 import { db } from './firebaseConfig';
+import type { Firestore } from 'firebase/firestore';
 import { doc, setDoc } from 'firebase/firestore';
 
 const lessonsData = [
@@ -258,7 +259,7 @@ export const seedLessons = async () => {
     try {
         console.log("Starting seed with micro lessons structure...");
         for (const lesson of lessonsData) {
-            const lessonRef = doc(db, "lessons", lesson.id);
+            const lessonRef = doc(db as Firestore, "lessons", lesson.id);
             await setDoc(lessonRef, {
                 title: lesson.title,
                 vendaTitle: lesson.vendaTitle,
@@ -272,3 +273,4 @@ export const seedLessons = async () => {
         alert("Failed to seed database.");
     }
 };
+

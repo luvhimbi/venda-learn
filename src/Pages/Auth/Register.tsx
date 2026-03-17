@@ -1,10 +1,11 @@
 import React, { useState, type FormEvent, type ChangeEvent } from 'react';
-import { Loader2 } from 'lucide-react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
+import { doc, setDoc, getDoc, type Firestore } from 'firebase/firestore';
 import { createUserWithEmailAndPassword, signInWithPopup } from 'firebase/auth';
-import { doc, setDoc, getDoc } from 'firebase/firestore';
-import { auth, db, googleProvider } from '../../services/firebaseConfig';
+import { Loader2 } from 'lucide-react';
 import ReCAPTCHA from 'react-google-recaptcha';
+import { auth, db, googleProvider } from '../../services/firebaseConfig';
+import BaobabAuthHeader from '../../components/BaobabAuthHeader';
 
 // Best-effort welcome email — never blocks registration
 const sendWelcomeEmail = async (email: string, username: string) => {
@@ -51,7 +52,7 @@ const Register: React.FC = () => {
         setLoading(true);
         try {
             const userCredential = await createUserWithEmailAndPassword(auth, formData.email, formData.password);
-            await setDoc(doc(db, "users", userCredential.user.uid), {
+            await setDoc(doc(db as Firestore, "users", userCredential.user.uid), {
                 username: formData.username,
                 email: formData.email,
                 points: 0,
@@ -66,7 +67,7 @@ const Register: React.FC = () => {
             await sendWelcomeEmail(formData.email, formData.username);
             if (referrerId) {
                 try {
-                    await setDoc(doc(db, "invites", `${referrerId}_${userCredential.user.uid}`), {
+                    await setDoc(doc(db as Firestore, "invites", `${referrerId}_${userCredential.user.uid}`), {
                         inviterId: referrerId,
                         inviteeId: userCredential.user.uid,
                         inviteeName: formData.username,
@@ -91,11 +92,11 @@ const Register: React.FC = () => {
             const user = result.user;
 
             // 1. Check if user exists in Firestore
-            const userDoc = await getDoc(doc(db, 'users', user.uid));
+            const userDoc = await getDoc(doc(db as Firestore, 'users', user.uid));
 
             if (!userDoc.exists()) {
                 // Create user profile for new Google users
-                await setDoc(doc(db, 'users', user.uid), {
+                await setDoc(doc(db as Firestore, 'users', user.uid), {
                     username: user.displayName || 'Learner',
                     email: user.email,
                     points: 0,
@@ -127,9 +128,11 @@ const Register: React.FC = () => {
         <div className="min-vh-100 d-flex align-items-center justify-content-center bg-white px-3 py-5">
             <div className="w-100" style={{ maxWidth: '450px' }}>
 
+                <BaobabAuthHeader />
+
                 <div className="text-center mb-4 animate__animated animate__fadeInDown">
                     <h2 className="fw-bold ls-tight text-dark mb-2">Start Your Journey</h2>
-                    <p className="text-muted mb-0">Create an account to track your progress and earn rewards!</p>
+                    <p className="text-muted mb-0 small">Create an account to track your progress and earn rewards!</p>
                 </div>
 
                 {error && (
@@ -232,5 +235,6 @@ const Register: React.FC = () => {
 };
 
 export default Register;
+
 
 

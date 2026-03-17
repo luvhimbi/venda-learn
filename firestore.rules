@@ -82,6 +82,12 @@ service cloud.firestore {
         allow write: if isAdmin() || request.auth != null;
     }
 
+    // --- PICTURE PUZZLES ---
+    match /picturePuzzles/{puzzleId} {
+        allow read: if true; // Allow guests to play
+        allow write: if isAdmin() || request.auth != null;
+    }
+
     // --- WORD BOMB ---
     match /wordBombWords/{wordId} {
         allow read: if request.auth != null;

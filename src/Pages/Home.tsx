@@ -1,20 +1,19 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { auth } from '../services/firebaseConfig';
+import { doc, updateDoc, type Firestore } from 'firebase/firestore';
 import { onAuthStateChanged } from 'firebase/auth';
+import { auth, db } from '../services/firebaseConfig';
 import { getBadgeDetails, getLevelStats } from "../services/levelUtils.ts";
 import { fetchLessons, fetchTopLearners, refreshUserData, getMicroLessons } from '../services/dataCache';
-import InstallBanner from '../components/InstallBanner';
+import { useRetentionEngine } from '../hooks/useRetentionEngine';
+import { ALL_TROPHIES } from '../services/achievementService';
 import Mascot from '../components/Mascot';
 import LandingPage from './LandingPage';
+import InstallBanner from '../components/InstallBanner';
 import TourGuide from '../components/TourGuide';
-import { doc, updateDoc } from 'firebase/firestore';
-import { db } from '../services/firebaseConfig';
-import { useRetentionEngine } from '../hooks/useRetentionEngine';
 import DailyWelcomeModal from '../components/DailyWelcomeModal';
-import { ALL_TROPHIES } from '../services/achievementService';
 import TrophyIcon from '../components/TrophyIcon';
-
+import JuicyButton from '../components/JuicyButton';
 // --- LEVEL UP MOTIVATION ---
 const getLevelMotivation = (level: number, progress: number) => {
     if (progress >= 80) return { msg: "Almost there! Push through for the next level!", color: "#F59E0B" };
@@ -31,7 +30,6 @@ const Home: React.FC = () => {
     const [userData, setUserData] = useState<any>(null);
     const [lastLesson, setLastLesson] = useState<any>(null);
     const [topLearners, setTopLearners] = useState<any[]>([]);
-    const [totalMlsCount, setTotalMlsCount] = useState(0);
     const [loading, setLoading] = useState(true);
     const [isTourOpen, setIsTourOpen] = useState(false);
 
@@ -41,7 +39,7 @@ const Home: React.FC = () => {
         setIsTourOpen(false);
         if (auth.currentUser) {
             try {
-                const userRef = doc(db, "users", auth.currentUser.uid);
+                const userRef = doc(db as Firestore, "users", auth.currentUser.uid);
                 await updateDoc(userRef, { tourCompleted: true });
                 // We don't necessarily need to refresh everything, just set local state if needed
                 setUserData((prev: any) => ({ ...prev, tourCompleted: true }));
@@ -73,7 +71,6 @@ const Home: React.FC = () => {
 
                     if (userData) {
                         setUserData(userData);
-                        setTotalMlsCount(lessons.reduce((acc: number, course: any) => acc + getMicroLessons(course).length, 0));
                         setTopLearners(topLearnersData);
 
                         // Resolve last lesson from cached lessons instead of extra Firestore call
@@ -128,11 +125,11 @@ const Home: React.FC = () => {
         if (isLoggedIn && userData) {
             const quotes = [
                 `Vho vuwa hani, ${userData.username || 'Learner'}? Ready to learn?`,
-                "Every word you learn today is a victory! 🏆",
-                "I believe in you! Let's crush some lessons! ✨",
-                "Tshivenda is beautiful, just like your progress! 🌸",
-                "Ready to earn some more LP today? 💎",
-                "Keep going! You're becoming a Venda master! 🦁"
+                "Every word you learn today is a victory!",
+                "I believe in you! Let's crush some lessons!",
+                "Tshivenda is beautiful, just like your progress!",
+                "Ready to earn some more LP today?",
+                "Keep going! You're becoming a Venda master!"
             ];
             setMascotQuote(quotes[Math.floor(Math.random() * quotes.length)]);
 
@@ -164,14 +161,6 @@ const Home: React.FC = () => {
 
     const stats = getLevelStats(userData?.points || 0);
     const badge = getBadgeDetails(stats.level);
-
-    // Correct progress calculation for micro-lessons architecture
-    const completedMlsCount = userData?.completedLessons?.length || 0;
-
-    const overallProgressPercentage = totalMlsCount > 0
-        ? Math.round((completedMlsCount / totalMlsCount) * 100)
-        : 0;
-
     const motivation = getLevelMotivation(stats.level, stats.progress);
 
     return (
@@ -264,12 +253,12 @@ const Home: React.FC = () => {
                                         <h3 className="fw-bold mb-1 text-dark">{lastLesson.title}</h3>
                                         <p className="text-muted small mb-0">{lastLesson.courseTitle}</p>
                                         <div className="mb-4"></div>
-                                        <button
+                                        <JuicyButton
                                             onClick={() => navigate(`/game/${lastLesson.id}/${lastLesson.microLessonId}?start=${lastLesson.savedIndex}&type=${lastLesson.savedType?.toUpperCase()}`)}
                                             className="btn game-btn-primary px-4 py-2 fw-bold smallest ls-1"
                                         >
-                                            ▶ RESUME NOW
-                                        </button>
+                                            <i className="bi bi-play-fill me-1"></i> RESUME NOW
+                                        </JuicyButton>
                                     </div>
                                     <i className="bi bi-play-fill position-absolute end-0 bottom-0 opacity-5" style={{ fontSize: '120px', transform: 'translate(20%, 20%)', color: '#111827' }}></i>
                                 </div>
@@ -277,9 +266,9 @@ const Home: React.FC = () => {
                                 <div className="py-5 text-center rounded-4" style={{ backgroundColor: '#F9FAFB', border: '1px dashed #D1D5DB' }}>
                                     <div className="mb-3"><i className="bi bi-mortarboard-fill text-muted" style={{ fontSize: '40px' }}></i></div>
                                     <p className="text-muted smallest fw-bold uppercase ls-1 mb-3">No active lesson found</p>
-                                    <button onClick={() => navigate('/courses')} className="btn btn-slate rounded-3 px-4 py-2 fw-bold smallest ls-1">
+                                    <JuicyButton onClick={() => navigate('/courses')} className="btn btn-slate rounded-3 px-4 py-2 fw-bold smallest ls-1">
                                         EXPLORE LESSONS
-                                    </button>
+                                    </JuicyButton>
                                 </div>
                             )}
                         </section>
@@ -295,14 +284,14 @@ const Home: React.FC = () => {
                                     const isEarned = (userData?.trophies || []).includes(trophy.id);
                                     return (
                                         <div key={trophy.id} className="col-4">
-                                            <div 
+                                            <div
                                                 onClick={() => navigate('/achievements')}
                                                 className={`p-3 rounded-4 text-center transition-all hover-lift ${isEarned ? 'bg-white shadow-sm border border-warning' : 'bg-light grayscale border-dashed border-2'}`}
                                                 style={{ cursor: 'pointer' }}
                                             >
-                                                <TrophyIcon 
-                                                    rarity={isEarned ? trophy.rarity as any : 'locked'} 
-                                                    size={42} 
+                                                <TrophyIcon
+                                                    rarity={isEarned ? trophy.rarity as any : 'locked'}
+                                                    size={42}
                                                     animate={isEarned}
                                                     color={trophy.color}
                                                 />
@@ -360,10 +349,10 @@ const Home: React.FC = () => {
                                     </div>
                                 </div>
 
-                                {/* XP Progress */}
+                                {/* LP Progress */}
                                 <div className="mb-3">
                                     <div className="d-flex justify-content-between mb-2">
-                                        <span className="smallest fw-bold ls-1 text-muted">XP PROGRESS</span>
+                                        <span className="smallest fw-bold ls-1 text-muted">LP PROGRESS</span>
                                         <span className="smallest fw-bold ls-1 text-warning">{stats.progress}%</span>
                                     </div>
                                     <div style={{ height: 8, borderRadius: 10, backgroundColor: '#F1F5F9' }}>
@@ -374,27 +363,11 @@ const Home: React.FC = () => {
                                         }}></div>
                                     </div>
                                     <p className="smallest mt-2 mb-0 text-muted">
-                                        {stats.pointsInCurrentLevel} / {stats.pointsForNextLevel} XP to Level {stats.level + 1}
+                                        {stats.pointsInCurrentLevel} / {stats.pointsForNextLevel} LP to Level {stats.level + 1}
                                     </p>
                                 </div>
 
-                                {/* Course Progress */}
-                                <div className="pt-3" style={{ borderTop: '1px solid #F1F5F9' }}>
-                                    <div className="d-flex justify-content-between mb-2">
-                                        <span className="smallest fw-bold ls-1 text-muted">LANGUAGE PROGRESS</span>
-                                        <span className="smallest fw-bold ls-1 text-slate">{overallProgressPercentage}%</span>
-                                    </div>
-                                    <div style={{ height: 8, borderRadius: 10, backgroundColor: '#F1F5F9' }}>
-                                        <div style={{
-                                            width: `${overallProgressPercentage}%`, height: '100%', borderRadius: 10,
-                                            backgroundColor: '#10B981',
-                                            transition: 'width 0.8s ease'
-                                        }}></div>
-                                    </div>
-                                    <p className="smallest mt-2 mb-0 text-muted">
-                                        {completedMlsCount} / {totalMlsCount} micro-lessons completed
-                                    </p>
-                                </div>
+
 
                                 {/* Motivation message */}
                                 <div className="mt-4 p-3 rounded-3" style={{ backgroundColor: '#F8FAFC' }}>
@@ -424,9 +397,12 @@ const Home: React.FC = () => {
                                         </div>
                                     ))}
                                 </div>
-                                <Link to="/muvhigo" className="btn btn-outline-slate w-100 py-2 fw-bold ls-1 smallest uppercase rounded-3">
+                                <JuicyButton 
+                                    onClick={() => navigate('/muvhigo')} 
+                                    className="btn btn-outline-slate w-100 py-2 fw-bold ls-1 smallest uppercase rounded-3"
+                                >
                                     FULL LEADERBOARD
-                                </Link>
+                                </JuicyButton>
                             </div>
                         </div>
                     </aside>

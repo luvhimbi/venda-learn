@@ -52,9 +52,9 @@ const DailyWelcomeModal: React.FC<DailyWelcomeModalProps> = ({ username, streak,
     };
 
     const getMotivation = () => {
-        if (streak >= 7) return `Your ${streak}-day flame is blazing! 🔥`;
-        if (streak > 0) return `You're on a ${streak}-day streak! ⭐`;
-        return `Start your Venda journey today! ✨`;
+        if (streak >= 7) return `Your ${streak}-day flame is blazing!`;
+        if (streak > 0) return `You're on a ${streak}-day streak!`;
+        return `Start your Venda journey today!`;
     };
 
     const greeting = getGreeting();

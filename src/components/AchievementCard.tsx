@@ -9,15 +9,18 @@ interface AchievementCardProps {
     isEarned: boolean;
     progress?: number; // 0 to 100
     rarity?: 'bronze' | 'silver' | 'gold' | 'special';
+    onShare?: (id: string) => void;
 }
 
 const AchievementCard: React.FC<AchievementCardProps> = ({ 
+    id,
     title, 
     description, 
     color, 
     isEarned, 
     progress = 0,
-    rarity = 'bronze'
+    rarity = 'bronze',
+    onShare
 }) => {
     
     // Determine rarity color for the shadow/glow
@@ -50,10 +53,20 @@ const AchievementCard: React.FC<AchievementCardProps> = ({
                     {isEarned && (
                         <div 
                             className="position-absolute bg-success rounded-circle d-flex align-items-center justify-content-center border border-white"
-                            style={{ width: 24, height: 24, bottom: 0, right: 0 }}
+                            style={{ width: 24, height: 24, bottom: 0, right: -5 }}
                         >
                             <i className="bi bi-check text-white fw-bold"></i>
                         </div>
+                    )}
+                    {isEarned && onShare && (
+                        <button 
+                            onClick={(e) => { e.stopPropagation(); onShare(id); }}
+                            className="position-absolute btn btn-warning rounded-circle d-flex align-items-center justify-content-center border border-white shadow-sm share-badge transition-all"
+                            style={{ width: 32, height: 32, top: -10, right: -15, zIndex: 5 }}
+                            title="Share Achievement"
+                        >
+                            <i className="bi bi-share-fill smallest text-dark"></i>
+                        </button>
                     )}
                 </div>
 
@@ -103,6 +116,13 @@ const AchievementCard: React.FC<AchievementCardProps> = ({
                     opacity: 1;
                     background-color: #fff !important;
                     border-style: solid;
+                }
+                .share-badge:hover {
+                    transform: scale(1.1);
+                    background-color: #111827 !important;
+                }
+                .share-badge:hover i {
+                    color: #FACC15 !important;
                 }
                 .smallest { font-size: 11px; }
                 .ls-1 { letter-spacing: 1px; }
