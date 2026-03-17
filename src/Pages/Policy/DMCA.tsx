@@ -24,8 +24,8 @@ const DMCA: React.FC = () => {
         4. Designated Copyright Agent.
         Please send your DMCA Notice to:
         Designated Agent: Venda Learn Legal Team
-        Email: legal@vendalearn.com
-        Address: [Your Business Address Here]
+        Email: yonalisa514@gmail.com
+        Address: South Africa Gauteng
 
         5. Counter-Notification.
         If you receive a notification that your content has been removed due to a copyright complaint, you may file a counter-notification by sending a written communication to our Designated Copyright Agent that includes:

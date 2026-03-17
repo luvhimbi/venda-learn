@@ -1,4 +1,5 @@
 import { db } from './firebaseConfig';
+import type { Firestore } from 'firebase/firestore';
 import { doc, collection, writeBatch } from 'firebase/firestore';
 
 export const syllableWords = [
@@ -39,8 +40,8 @@ export const syllableWords = [
 
 export const seedSyllables = async () => {
     try {
-        const batch = writeBatch(db);
-        const collectionRef = collection(db, "syllablePuzzles");
+        const batch = writeBatch(db as Firestore);
+        const collectionRef = collection(db as Firestore, "syllablePuzzles");
 
         syllableWords.forEach((item) => {
             const docRef = doc(collectionRef, item.word.toLowerCase());
@@ -54,3 +55,5 @@ export const seedSyllables = async () => {
         alert("Failed to seed syllables.");
     }
 };
+
+

@@ -8,6 +8,8 @@ import { seedSyllables } from '../../services/seedSyllables';
 import { seedDailyWords } from '../../services/seedDailyWords';
 import { seedSentences } from '../../services/seedSentences';
 import { seedWordBomb } from '../../services/seedWordBomb';
+import { seedPicturePuzzles } from '../../services/seedPicturePuzzles';
+import { popupService } from '../../services/popupService';
 
 const AdminDashboard: React.FC = () => {
     const [stats, setStats] = useState({
@@ -86,25 +88,43 @@ const AdminDashboard: React.FC = () => {
                                     Seed Syllables
                                 </button>
                                 <button onClick={async () => {
-                                    if (window.confirm("Seed Daily Words?")) {
+                                    const confirm = await popupService.confirm("Seed Daily Words?", "Vha khou ṱoḓa u vusulusa maipfi a ḓuvha na ḓuvha?");
+                                    if (confirm.isConfirmed) {
+                                        popupService.showLoading();
                                         const res = await seedDailyWords();
-                                        alert(res.message);
+                                        popupService.innerSuccess('Success', res.message);
                                     }
                                 }} className="btn btn-outline-success btn-sm w-100 fw-bold mb-2">
                                     Seed Daily Words
                                 </button>
                                 <button onClick={async () => {
-                                    const res = await seedSentences();
-                                    alert(res.message);
+                                    const confirm = await popupService.confirm("Seed Sentences?", "Vha khou ṱoḓa u vusulusa fhungo?");
+                                    if (confirm.isConfirmed) {
+                                        popupService.showLoading();
+                                        const res = await seedSentences();
+                                        popupService.innerSuccess('Success', res.message);
+                                    }
                                 }} className="btn btn-outline-primary btn-sm w-100 fw-bold mb-2">
                                     Seed Sentences
                                 </button>
                                 <button onClick={async () => {
-                                    if (window.confirm("Seed Word Bomb words?")) {
-                                        const res = await seedWordBomb();
-                                        alert(res.message);
+                                    const confirm = await popupService.confirm("Seed Picture Puzzles?", "This will overwrite existing standalone data.");
+                                    if (confirm.isConfirmed) {
+                                        popupService.showLoading();
+                                        const res = await seedPicturePuzzles();
+                                        popupService.innerSuccess('Success', res.message);
                                     }
-                                }} className="btn btn-outline-danger btn-sm w-100 fw-bold">
+                                }} className="btn btn-outline-danger btn-sm w-100 fw-bold mb-2">
+                                    Seed Picture Puzzles
+                                </button>
+                                <button onClick={async () => {
+                                    const confirm = await popupService.confirm("Seed Word Bomb words?", "Vha khou ṱoḓa u vusulusa maipfi a Word Bomb?");
+                                    if (confirm.isConfirmed) {
+                                        popupService.showLoading();
+                                        const res = await seedWordBomb();
+                                        popupService.innerSuccess('Success', res.message);
+                                    }
+                                }} className="btn btn-outline-dark btn-sm w-100 fw-bold mb-2">
                                     Seed Word Bomb
                                 </button>
                             </div>
@@ -201,5 +221,6 @@ const AdminDashboard: React.FC = () => {
 };
 
 export default AdminDashboard;
+
 
 

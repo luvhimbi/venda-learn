@@ -1,25 +1,34 @@
 import React from 'react';
 import Mascot from './Mascot';
+import TrophyIcon from './TrophyIcon';
 
 interface SharePreviewModalProps {
     isOpen: boolean;
     onClose: () => void;
     title: string;
-    image: string;
+    image?: string;
     category: string;
+    trophy?: {
+        rarity: 'bronze' | 'silver' | 'gold' | 'special';
+        color: string;
+    } | null;
 }
 
-const SharePreviewModal: React.FC<SharePreviewModalProps> = ({ isOpen, onClose, title, image, category }) => {
+const SharePreviewModal: React.FC<SharePreviewModalProps> = ({ isOpen, onClose, title, image, category, trophy }) => {
     if (!isOpen) return null;
 
     const shareUrl = window.location.href;
 
     const handleNativeShare = async () => {
+        const shareText = trophy 
+            ? `I just earned the "${title}" trophy on Venda Learn! 🏅`
+            : `I just learned about ${title} on Venda Learn!`;
+
         if (navigator.share) {
             try {
                 await navigator.share({
-                    title: `Check out this story on Venda Learn: ${title}`,
-                    text: `I just learned about ${title} on Venda Learn! 🦁`,
+                    title: trophy ? 'My Achievement' : 'Venda Learn Story',
+                    text: shareText,
                     url: shareUrl,
                 });
             } catch (err) {
@@ -44,21 +53,32 @@ const SharePreviewModal: React.FC<SharePreviewModalProps> = ({ isOpen, onClose, 
             <div className="bg-white rounded-5 overflow-hidden shadow-2xl position-relative animate-pop-in" style={{ width: '92%', maxWidth: '340px' }}>
                 
                 {/* PREVIEW CARD (Spotify Style) */}
-                <div id="share-card" className="position-relative overflow-hidden" style={{ aspectRatio: '1/1', backgroundColor: '#111827' }}>
+                <div id="share-card" className="position-relative overflow-hidden d-flex flex-column align-items-center justify-content-center" style={{ aspectRatio: '1/1', backgroundColor: trophy ? '#1e293b' : '#111827' }}>
                     {/* Background Image with Overlay */}
-                    <div 
-                        className="position-absolute top-0 start-0 w-100 h-100"
-                        style={{ 
-                            backgroundImage: `url(${image})`, 
-                            backgroundSize: 'cover', 
-                            backgroundPosition: 'center',
-                            filter: 'brightness(0.6) saturate(1.2)' 
-                        }}
-                    ></div>
-                    <div className="position-absolute top-0 start-0 w-100 h-100 bg-gradient-to-t from-black via-transparent to-transparent"></div>
+                    {!trophy && image && (
+                        <>
+                            <div 
+                                className="position-absolute top-0 start-0 w-100 h-100"
+                                style={{ 
+                                    backgroundImage: `url(${image})`, 
+                                    backgroundSize: 'cover', 
+                                    backgroundPosition: 'center',
+                                    filter: 'brightness(0.6) saturate(1.2)' 
+                                }}
+                            ></div>
+                            <div className="position-absolute top-0 start-0 w-100 h-100 bg-gradient-to-t from-black via-transparent to-transparent"></div>
+                        </>
+                    )}
+
+                    {/* Trophy Preview Layer */}
+                    {trophy && (
+                        <div className="position-relative z-1 mb-5 pb-3">
+                            <TrophyIcon rarity={trophy.rarity} color={trophy.color} size={150} animate />
+                        </div>
+                    )}
 
                     {/* Content Layer */}
-                    <div className="position-absolute bottom-0 start-0 w-100 p-3 text-start">
+                    <div className="position-absolute bottom-0 start-0 w-100 p-3 text-start z-1">
                         <span className="smallest fw-bold ls-2 text-warning uppercase d-block mb-1">{category}</span>
                         <h1 className="text-white fw-bold mb-2 ls-tight" style={{ fontSize: '1.5rem', textShadow: '0 2px 4px rgba(0,0,0,0.5)' }}>{title}</h1>
                         

@@ -2,6 +2,7 @@
 // Real-time Knowledge Battle service using Firestore
 
 import { db, auth } from './firebaseConfig';
+import type { Firestore } from 'firebase/firestore';
 import {
     collection, doc, addDoc, getDoc, getDocs, updateDoc,
     query, where, onSnapshot, serverTimestamp
@@ -80,7 +81,7 @@ export const createBattle = async (
             .slice(0, 10), // Limit battles to 10 questions max for speed/fairness
     };
 
-    const docRef = await addDoc(collection(db, BATTLES_COL), battleData);
+    const docRef = await addDoc(collection(db as Firestore, BATTLES_COL), battleData);
     return docRef.id;
 };
 
@@ -100,7 +101,7 @@ export const fetchOpenBattles = async (completedLessonIds: string[]): Promise<Ba
     const all: Battle[] = [];
     for (const chunk of chunks) {
         const q = query(
-            collection(db, BATTLES_COL),
+            collection(db as Firestore, BATTLES_COL),
             where('status', '==', 'waiting'),
             where('lessonId', 'in', chunk)
         );
@@ -133,13 +134,13 @@ export const fetchMyBattles = async (): Promise<Battle[]> => {
 
     // Get battles where user is challenger
     const q1 = query(
-        collection(db, BATTLES_COL),
+        collection(db as Firestore, BATTLES_COL),
         where('challengerId', '==', user.uid)
     );
 
     // Get battles where user is opponent
     const q2 = query(
-        collection(db, BATTLES_COL),
+        collection(db as Firestore, BATTLES_COL),
         where('opponentId', '==', user.uid)
     );
 
@@ -172,7 +173,7 @@ export const joinBattle = async (battleId: string): Promise<void> => {
     const user = auth.currentUser;
     if (!user) throw new Error('Must be logged in');
 
-    const ref = doc(db, BATTLES_COL, battleId);
+    const ref = doc(db as Firestore, BATTLES_COL, battleId);
     await updateDoc(ref, {
         opponentId: user.uid,
         opponentName: user.displayName || 'Player 2',
@@ -191,7 +192,7 @@ export const subscribeToBattle = (
     battleId: string,
     callback: (battle: Battle) => void
 ): (() => void) => {
-    const ref = doc(db, BATTLES_COL, battleId);
+    const ref = doc(db as Firestore, BATTLES_COL, battleId);
     return onSnapshot(ref, (snap) => {
         if (snap.exists()) {
             callback({ id: snap.id, ...snap.data() } as Battle);
@@ -210,7 +211,7 @@ export const updateBattleProgress = async (
     progress: number,
     finished: boolean
 ): Promise<void> => {
-    const ref = doc(db, BATTLES_COL, battleId);
+    const ref = doc(db as Firestore, BATTLES_COL, battleId);
     const prefix = role === 'challenger' ? 'challenger' : 'opponent';
 
     await updateDoc(ref, {
@@ -225,7 +226,7 @@ export const updateBattleProgress = async (
 //  FINALIZE BATTLE (determine winner)
 // =============================================
 export const finalizeBattle = async (battleId: string): Promise<void> => {
-    const ref = doc(db, BATTLES_COL, battleId);
+    const ref = doc(db as Firestore, BATTLES_COL, battleId);
     const snap = await getDoc(ref);
     if (!snap.exists()) return;
 
@@ -253,8 +254,10 @@ export const finalizeBattle = async (battleId: string): Promise<void> => {
 //  FETCH SINGLE BATTLE
 // =============================================
 export const fetchBattleById = async (battleId: string): Promise<Battle | null> => {
-    const ref = doc(db, BATTLES_COL, battleId);
+    const ref = doc(db as Firestore, BATTLES_COL, battleId);
     const snap = await getDoc(ref);
     if (!snap.exists()) return null;
     return { id: snap.id, ...snap.data() } as Battle;
 };
+
+

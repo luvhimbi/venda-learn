@@ -1,11 +1,16 @@
 import React, { useState } from 'react';
 import { fetchSyllables } from '../../services/dataCache';
 import { useNavigate } from 'react-router-dom';
-import { Layout, Star, HelpCircle } from 'lucide-react';
+import { Layout, Star, HelpCircle, ArrowLeft, ChevronRight } from 'lucide-react';
 import Swal from 'sweetalert2';
 import { auth, db } from '../../services/firebaseConfig';
-import { doc, updateDoc, increment } from 'firebase/firestore';
+import {doc, updateDoc, increment, getDoc, type Firestore} from 'firebase/firestore';
 import Mascot from '../../components/Mascot';
+import confetti from 'canvas-confetti';
+import { updateStreak } from "../../services/streakUtils.ts";
+import { useVisualJuice } from '../../hooks/useVisualJuice';
+import { Flame } from 'lucide-react';
+
 
 interface SyllablePuzzle {
     id: string;
@@ -23,13 +28,7 @@ const BLOCK_COLORS = [
     { bg: '#FFF7ED', border: '#FDBA74', shadow: '#F97316', text: '#9A3412' },
 ];
 
-const MASCOT_CHEERS = [
-    'Zwavhuḓi!',
-    'Ndi zwone!',
-    'Hu ḓo luga!',
-    'Wa ḓivha!',
-    'Ṱhonifhani!',
-];
+
 
 const SyllableBuilder: React.FC = () => {
     const navigate = useNavigate();
@@ -44,11 +43,11 @@ const SyllableBuilder: React.FC = () => {
     const [placed, setPlaced] = useState<{ id: string, text: string, colorIdx: number }[]>([]);
     const [status, setStatus] = useState<'playing' | 'correct' | 'wrong'>('playing');
     const [score, setScore] = useState(0);
+    const [streak, setStreak] = useState(0);
     const [sessionStartTime, setSessionStartTime] = useState(Date.now());
+    const { playCorrect, playWrong, playClick, triggerShake } = useVisualJuice();
 
-    // Mascot
-    const [showMascotCheer, setShowMascotCheer] = useState(false);
-    const [mascotCheerText, setMascotCheerText] = useState(MASCOT_CHEERS[0]);
+
 
     // We don't auto-load the game into Playing state anymore
     // useEffect(() => { loadGameData(); }, []);
@@ -88,15 +87,24 @@ const SyllableBuilder: React.FC = () => {
             colorIdx: i % BLOCK_COLORS.length
         }));
         setPool(poolItems.sort(() => 0.5 - Math.random()));
+
+        // Fetch streak for UI
+        if (auth.currentUser) {
+            getDoc(doc(db as Firestore, "users", auth.currentUser.uid)).then(snap => {
+                if (snap.exists()) setStreak(snap.data().streak || 0);
+            });
+        }
     };
 
     const handlePoolClick = (item: typeof pool[0]) => {
+        playClick();
         if (status !== 'playing') return;
         setPool(prev => prev.filter(p => p.id !== item.id));
         setPlaced(prev => [...prev, item]);
     };
 
     const handlePlacedClick = (item: typeof pool[0]) => {
+        playClick();
         if (status !== 'playing') return;
         setPlaced(prev => prev.filter(p => p.id !== item.id));
         setPool(prev => [...prev, item]);
@@ -110,16 +118,24 @@ const SyllableBuilder: React.FC = () => {
 
         if (currentWord === targetWord) {
             setStatus('correct');
+            playCorrect();
             const totalDuration = Math.floor((Date.now() - sessionStartTime) / 1000);
 
-            // Mascot cheer
-            setMascotCheerText(MASCOT_CHEERS[Math.floor(Math.random() * MASCOT_CHEERS.length)]);
-            setShowMascotCheer(true);
-            setTimeout(() => setShowMascotCheer(false), 1200);
+
+            
+            // CONFETTI!
+            confetti({
+                particleCount: 100,
+                spread: 70,
+                origin: { y: 0.6 },
+                colors: ['#FACC15', '#FFD700', '#FFFFFF']
+            });
+
+
 
             const user = auth.currentUser;
             if (user) {
-                const userRef = doc(db, 'users', user.uid);
+                const userRef = doc(db as Firestore, 'users', user.uid);
                 await updateDoc(userRef, {
                     points: increment(5),
                     [`gamePerformance.syllableBuilder.${currentPuzzle.id}`]: {
@@ -128,11 +144,14 @@ const SyllableBuilder: React.FC = () => {
                         timestamp: new Date().toISOString()
                     }
                 });
+                await updateStreak(user.uid);
             }
             setScore(prev => prev + 5);
             setTimeout(() => nextRound(), 1500);
         } else {
             setStatus('wrong');
+            playWrong();
+            triggerShake('game-answer-zone');
             setTimeout(() => setStatus('playing'), 1000);
         }
     };
@@ -153,51 +172,50 @@ const SyllableBuilder: React.FC = () => {
 
     if (!selectedLevel) {
         return (
-            <div className="min-vh-100 d-flex flex-column" style={{ background: 'linear-gradient(180deg, #111827 0%, #1F2937 100%)' }}>
-                <div className="container d-flex flex-column align-items-center justify-content-center flex-grow-1 px-3" style={{ maxWidth: '500px' }}>
-                    
-                    <button onClick={() => navigate('/mitambo')} className="btn btn-link text-decoration-none p-0 text-white-50 position-absolute top-0 start-0 m-4 fw-bold" style={{ fontSize: '11px', letterSpacing: '2px' }}>
-                        <i className="bi bi-x-lg me-2"></i>EXIT
-                    </button>
-
-                    <div className="text-center mb-5">
-                        <div className="d-inline-flex justify-content-center align-items-center mb-3" style={{ width: '80px', height: '80px', background: 'rgba(250, 204, 21, 0.1)', borderRadius: '24px' }}>
-                            <Layout size={40} color="#FACC15" />
-                        </div>
-                        <h1 className="fw-bold text-white mb-2">Syllable Builder</h1>
-                        <p className="text-white-50 mb-0">Select a difficulty level to begin</p>
+            <div className="min-vh-100 p-4 d-flex flex-column align-items-center justify-content-center" style={{ backgroundColor: '#ffffff', minHeight: '100vh' }}>
+                <div className="container d-flex flex-column align-items-center" style={{ maxWidth: '600px' }}>
+                    <div className="w-100 d-flex justify-content-start mb-4">
+                        <button onClick={() => navigate('/mitambo')} className="btn btn-link text-decoration-none p-0 text-dark">
+                            <ArrowLeft size={24} />
+                        </button>
                     </div>
 
-                    <div className="w-100 d-flex flex-column gap-3">
-                        <button onClick={() => startLevel('Beginner')} className="btn btn-dark border-secondary p-4 rounded-4 text-start position-relative overflow-hidden level-btn text-white">
-                            <h5 className="fw-bold mb-1" style={{ color: '#34D399' }}>Beginner</h5>
-                            <span className="text-white-50 small">Basic syllables and simple words</span>
-                        </button>
-                        
-                        <button onClick={() => startLevel('Intermediate')} className="btn btn-dark border-secondary p-4 rounded-4 text-start position-relative overflow-hidden level-btn text-white">
-                            <h5 className="fw-bold mb-1" style={{ color: '#FCD34D' }}>Intermediate</h5>
-                            <span className="text-white-50 small">Longer words and prefixes</span>
-                        </button>
-                        
-                        <button onClick={() => startLevel('Advanced')} className="btn btn-dark border-secondary p-4 rounded-4 text-start position-relative overflow-hidden level-btn text-white">
-                            <h5 className="fw-bold mb-1" style={{ color: '#F87171' }}>Advanced</h5>
-                            <span className="text-white-50 small">Complex syllable structures</span>
-                        </button>
+                    <div className="text-center mb-5 d-flex flex-column align-items-center">
+                        <div className="rounded-circle d-flex align-items-center justify-content-center mb-3 shadow-sm" style={{ width: '80px', height: '80px', backgroundColor: '#FFFBEB', border: '2px solid #FEF3C7', flexShrink: 0 }}>
+                            <Layout size={40} className="text-warning" />
+                        </div>
+                        <h1 className="fw-bold mb-2 text-dark">Syllable Builder</h1>
+                        <p className="text-muted">Pick a difficulty to start building words!</p>
+                    </div>
+
+                    <div className="d-flex flex-column gap-3 w-100">
+                        {['easy', 'medium', 'hard'].map((lvl) => (
+                            <button
+                                key={lvl}
+                                onClick={() => startLevel(lvl)}
+                                className="level-btn w-100 p-4 rounded-4 border-2 text-start transition-all"
+                                style={{ backgroundColor: '#ffffff', border: '2px solid #f3f4f6', color: '#111827' }}
+                            >
+                                <div className="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h2 className="h5 fw-bold mb-1 text-capitalize">{lvl}</h2>
+                                        <p className="text-muted small mb-0">
+                                            {lvl === 'easy' ? 'Simple 2-syllable words' : lvl === 'medium' ? 'Common 3-syllable words' : 'Complex Tshivenda structures'}
+                                        </p>
+                                    </div>
+                                    <ChevronRight className="text-muted" />
+                                </div>
+                            </button>
+                        ))}
                     </div>
                 </div>
 
                 <style>{`
-                    .level-btn {
-                        transition: all 0.2s ease;
-                        background: #1F2937 !important;
-                    }
                     .level-btn:hover {
                         transform: translateY(-2px);
                         border-color: #FACC15 !important;
-                        background: #374151 !important;
-                    }
-                    .level-btn:active {
-                        transform: translateY(0);
+                        background-color: #FFFDF5 !important;
+                        box-shadow: 0 4px 12px rgba(0,0,0,0.05);
                     }
                 `}</style>
             </div>
@@ -216,7 +234,14 @@ const SyllableBuilder: React.FC = () => {
                         <button onClick={() => navigate('/mitambo')} className="btn btn-link text-decoration-none p-0 text-white fw-bold" style={{ fontSize: '11px', letterSpacing: '2px' }}>
                             <i className="bi bi-x-lg me-2"></i>EXIT
                         </button>
-                        <div className="d-flex align-items-center gap-2">
+                        <div className="d-flex align-items-center gap-3">
+                            {streak > 0 && (
+                                <div className="d-flex align-items-center gap-1 glow-pulse" title="Daily Streak">
+                                    <Flame size={18} color="#EF4444" fill="#EF4444" />
+                                    <span className="fw-bold small text-white">{streak}</span>
+                                </div>
+                            )}
+                            <Mascot width="45px" height="45px" mood={status === 'correct' ? 'excited' : status === 'wrong' ? 'sad' : 'happy'} />
                             <span className="fw-bold d-flex align-items-center gap-2" style={{ color: '#FACC15', fontSize: '11px', letterSpacing: '1px' }}>
                                 <Layout size={14} /> SYLLABLE BUILDER
                             </span>
@@ -276,9 +301,9 @@ const SyllableBuilder: React.FC = () => {
                     </div>
 
                     {/* ANSWER SLOTS */}
-                    <div className={`rounded-4 p-4 mb-4 d-flex flex-wrap justify-content-center gap-3 align-items-center transition-all
+                    <div id="game-answer-zone" className={`rounded-4 p-4 mb-4 d-flex flex-wrap justify-content-center gap-3 align-items-center transition-all
                         ${status === 'correct' ? 'syl-zone-correct' : ''}
-                        ${status === 'wrong' ? 'syl-zone-wrong animate__animated animate__shakeX' : ''}
+                        ${status === 'wrong' ? 'syl-zone-wrong' : ''}
                         ${status === 'playing' ? 'syl-zone-default' : ''}
                     `} style={{ minHeight: '130px' }}>
                         {placed.length === 0 ? (
@@ -352,13 +377,7 @@ const SyllableBuilder: React.FC = () => {
                 </div>
             </div>
 
-            {/* MASCOT */}
-            {showMascotCheer && (
-                <div className="mascot-cheer-overlay">
-                    <div className="mascot-cheer-bubble">{mascotCheerText}</div>
-                    <Mascot width="80px" height="80px" mood="excited" />
-                </div>
-            )}
+
 
             <style>{`
                 .transition-all { transition: all 0.3s ease; }
@@ -408,7 +427,13 @@ const SyllableBuilder: React.FC = () => {
                 .syl-zone-correct {
                     background: #ECFDF5;
                     border: 2px solid #34D399;
-                    box-shadow: 0 0 20px rgba(52, 211, 153, 0.2);
+                    box-shadow: 0 0 30px rgba(52, 211, 153, 0.4);
+                    animation: successPulse 1.5s infinite;
+                }
+                @keyframes successPulse {
+                    0% { box-shadow: 0 0 20px rgba(52, 211, 153, 0.2); }
+                    50% { box-shadow: 0 0 40px rgba(52, 211, 153, 0.5); }
+                    100% { box-shadow: 0 0 20px rgba(52, 211, 153, 0.2); }
                 }
                 .syl-zone-wrong {
                     background: #FEF2F2;
@@ -493,3 +518,4 @@ const SyllableBuilder: React.FC = () => {
 };
 
 export default SyllableBuilder;
+

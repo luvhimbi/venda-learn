@@ -11,7 +11,7 @@ export interface TourStep {
 export const tourSteps: TourStep[] = [
     {
         target: 'body',
-        title: "Ndaa! 🦁",
+        title: "Ndaa!",
         content: "Welcome to Venda Learn! I'm Ndou, your guide. Let's get you ready for your journey to becoming a Venda Master!",
         position: 'center',
         mood: 'excited',

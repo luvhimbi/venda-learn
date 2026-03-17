@@ -4,6 +4,7 @@ import { onAuthStateChanged } from 'firebase/auth';
 import { useNavigate, Link } from 'react-router-dom';
 import { fetchLessons, fetchUserData, getMicroLessons } from '../../services/dataCache';
 import { Sprout, Shield, Flame, Key, BookOpen, CheckCircle } from 'lucide-react';
+import JuicyButton from '../../components/JuicyButton';
 
 const Courses: React.FC = () => {
     const navigate = useNavigate();
@@ -88,12 +89,12 @@ const Courses: React.FC = () => {
             <div className="container" style={{ maxWidth: '800px' }}>
 
                 {/* NAVIGATION */}
-                <button
+                <JuicyButton
                     className="btn btn-link text-decoration-none p-0 mb-5 d-flex align-items-center gap-2 text-dark fw-bold smallest ls-1 text-uppercase"
                     onClick={() => navigate('/')}
                 >
                     <i className="bi bi-arrow-left"></i> Murahu
-                </button>
+                </JuicyButton>
 
                 {/* HEADER */}
                 <header className="mb-5 pb-4">
@@ -215,30 +216,30 @@ const Courses: React.FC = () => {
                         {/* PAGINATION */}
                         {totalPages > 1 && (
                             <div className="d-flex justify-content-center align-items-center gap-2 mt-5">
-                                <button
+                                <JuicyButton
                                     className="btn btn-outline-dark border-2 px-3 py-2 fw-bold smallest ls-1 rounded-3"
                                     disabled={currentPage === 1}
                                     onClick={() => setCurrentPage(p => p - 1)}
                                 >
                                     ← PREV
-                                </button>
+                                </JuicyButton>
                                 {[...Array(totalPages)].map((_, i) => (
-                                    <button
+                                    <JuicyButton
                                         key={i}
                                         className={`btn px-3 py-2 fw-bold smallest ls-1 rounded-3 ${currentPage === i + 1 ? 'text-dark' : 'btn-outline-secondary'}`}
                                         style={currentPage === i + 1 ? { backgroundColor: '#FACC15', border: 'none', boxShadow: '0 2px 0 #EAB308' } : {}}
                                         onClick={() => setCurrentPage(i + 1)}
                                     >
                                         {i + 1}
-                                    </button>
+                                    </JuicyButton>
                                 ))}
-                                <button
+                                <JuicyButton
                                     className="btn btn-outline-dark border-2 px-3 py-2 fw-bold smallest ls-1 rounded-3"
                                     disabled={currentPage === totalPages}
                                     onClick={() => setCurrentPage(p => p + 1)}
                                 >
                                     NEXT →
-                                </button>
+                                </JuicyButton>
                             </div>
                         )}
                     </>);
@@ -259,9 +260,9 @@ const Courses: React.FC = () => {
                 {!isLoggedIn && (
                     <footer className="mt-5 pt-5 text-center">
                         <p className="text-muted small mb-4">You are browsing as a guest. Your progress will not be saved.</p>
-                        <button onClick={() => navigate('/login')} className="btn btn-dark rounded-pill px-5 py-2 fw-bold smallest ls-1">
+                        <JuicyButton onClick={() => navigate('/login')} className="btn btn-dark rounded-pill px-5 py-2 fw-bold smallest ls-1">
                             SIGN IN NOW
-                        </button>
+                        </JuicyButton>
                     </footer>
                 )}
             </div>

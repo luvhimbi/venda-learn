@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { onAuthStateChanged } from 'firebase/auth';
 import { fetchHistoryData } from '../../services/dataCache';
 import { Sparkles, X, ChevronLeft, ChevronRight } from 'lucide-react';
+import Mascot from '../../components/Mascot';
 
 interface HistoryStory {
     id: string;
@@ -111,6 +112,28 @@ const HistoryList: React.FC = () => {
 
     return (
         <div className="bg-white min-vh-100 history-redesign">
+            <header className="bg-white border-bottom py-4 animate__animated animate__fadeIn">
+                <div className="container" style={{ maxWidth: '1100px' }}>
+                    <div className="d-flex align-items-center justify-content-between px-3">
+                        <div>
+                            <span className="fw-bold ls-2 text-uppercase smallest d-block mb-1 text-warning">Cultural Heritage</span>
+                            <h1 className="fw-bold ls-tight mb-0 text-dark">
+                                Venda <span style={{ color: '#FACC15' }}>History</span>
+                            </h1>
+                        </div>
+                        <div className="d-flex align-items-center gap-3">
+                            <div className="text-end d-none d-md-block">
+                                <p className="mb-0 fw-bold small text-muted">Vhalani!</p>
+                                <p className="smallest-print text-muted mb-0">Learn our shared story</p>
+                            </div>
+                            <Mascot width="70px" height="70px" mood="excited" />
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <div className="munwenda-divider"></div>
+
             <main className="container py-5">
                 <div className="row g-4 justify-content-center">
                     <div className="col-lg-10">
@@ -279,6 +302,21 @@ const HistoryList: React.FC = () => {
                     padding-bottom: 2px;
                 }
 
+                .munwenda-divider {
+                    height: 8px;
+                    background-image: repeating-linear-gradient(
+                        45deg,
+                        #FACC15 0px,
+                        #FACC15 10px,
+                        #000 10px,
+                        #000 20px,
+                        #FFF 20px,
+                        #FFF 30px
+                    );
+                    width: 100%;
+                    opacity: 0.8;
+                }
+
                 /* Category Card */
                 .category-card {
                     filter: grayscale(0.2);
@@ -286,12 +324,13 @@ const HistoryList: React.FC = () => {
                 }
                 .category-card:hover {
                     filter: grayscale(0);
-                    transform: translateY(-5px);
+                    transform: translateY(-8px) scale(1.02);
+                    box-shadow: 0 15px 35px rgba(250, 204, 21, 0.15);
                 }
                 .active-category {
                     border-color: #FACC15 !important;
                     filter: grayscale(0);
-                    box-shadow: 0 10px 25px rgba(250, 204, 21, 0.2);
+                    box-shadow: 0 15px 40px rgba(250, 204, 21, 0.3);
                 }
                 .active-indicator {
                     position: absolute;

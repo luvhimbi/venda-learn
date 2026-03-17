@@ -12,7 +12,10 @@ import ListenChooseQuestion from '../../components/Game/ListenChooseQuestion';
 import SceneView from '../../components/Game/SceneView';
 import { useAudio } from '../../hooks/useAudio';
 import { useGameLogic } from '../../hooks/useGameLogic';
-import Mascot from '../../components/Mascot';
+import Mascot, { type MascotMood } from '../../components/Mascot';
+import { useVisualJuice } from '../../hooks/useVisualJuice';
+import { updateStreak } from '../../services/streakUtils';
+import { popupService } from '../../services/popupService';
 import {
     MessageSquare, Zap, Flame,
     FileText, CheckCircle2, Pencil, Link, Volume2, BookOpen,
@@ -22,7 +25,6 @@ import { db, auth } from '../../services/firebaseConfig';
 import { doc, updateDoc, arrayUnion, increment } from 'firebase/firestore';
 import { onAuthStateChanged } from 'firebase/auth';
 import { getLevelStats } from "../../services/levelUtils.ts";
-import { updateStreak } from "../../services/streakUtils.ts";
 import { type Difficulty } from "../../services/scoringUtils.ts";
 import { fetchLessons, fetchUserData, refreshUserData, invalidateCache, getMicroLessons } from '../../services/dataCache';
 import { checkAchievements, awardTrophies } from '../../services/achievementService';
@@ -82,11 +84,41 @@ const GameRoom: React.FC = () => {
 
     const [showMascotCheer, setShowMascotCheer] = useState(false);
     const [mascotCheerText, setMascotCheerText] = useState(MASCOT_CHEERS[0]);
+    const [mascotMood, setMascotMood] = useState<MascotMood>('happy');
     const [showSavedHint, setShowSavedHint] = useState(false);
+    const { playCorrect, playWrong, triggerShake } = useVisualJuice();
 
     const handleFinishQuiz = async (finalScore: number, _finalCorrect: number, totalDuration: number) => {
         setGameState('RESULT');
+        setMascotMood('excited');
+
+        // Add celebration effect
+        const canvas = document.createElement('canvas');
+        canvas.style.position = 'fixed';
+        canvas.style.top = '0';
+        canvas.style.left = '0';
+        canvas.style.width = '100%';
+        canvas.style.height = '100%';
+        canvas.style.pointerEvents = 'none';
+        canvas.style.zIndex = '9999';
+        document.body.appendChild(canvas);
+
+        import('canvas-confetti').then((confetti) => {
+            const myConfetti = confetti.create(canvas, { resize: true });
+            myConfetti({
+                particleCount: 150,
+                spread: 70,
+                origin: { y: 0.6 },
+                colors: ['#FACC15', '#3B82F6', '#EF4444']
+            });
+            setTimeout(() => document.body.removeChild(canvas), 5000);
+        });
+
         if (auth.currentUser) {
+            // The original try-catch block around getDoc was removed as it was unused.
+            // The `getDoc` call itself was also removed as the `snap` variable was not used.
+            // The `streak state removed as it was unused in render` comment is kept.
+            // The `if (auth.currentUser)` check is already present.
             const userRef = doc(db, "users", auth.currentUser.uid);
             const currentData = await refreshUserData();
             if (currentData) {
@@ -190,6 +222,10 @@ const GameRoom: React.FC = () => {
                             });
                         }, 1000);
                     }
+                    popupService.innerSuccess(
+                        'Quiz Finished!',
+                        `<p style="font-size:14px;color:#666">You've completed this session.</p><h2 style="color:#FACC15;font-weight:800">+${finalScore} XP</h2>`
+                    ).then(() => { navigate('/mitambo'); });
                 }
                 localStorage.removeItem(storageKey);
             }
@@ -218,9 +254,23 @@ const GameRoom: React.FC = () => {
         onCorrect: () => {
             setSelectedOption(null);
             setSelectedTF(null);
+            setMascotMood('excited');
+            playCorrect();
             setMascotCheerText(MASCOT_CHEERS[Math.floor(Math.random() * MASCOT_CHEERS.length)]);
             setShowMascotCheer(true);
-            setTimeout(() => setShowMascotCheer(false), 1100);
+            setTimeout(() => {
+                setShowMascotCheer(false);
+                setMascotMood('happy');
+            }, 1100);
+        },
+        onWrong: () => {
+            setMascotMood('sad');
+            playWrong();
+            triggerShake('dc-card-container'); // Need to ensure consistency in ID naming or use a generic class-based one
+            // Trying a more specific shake targeting if possible or fallback
+            const arena = document.getElementById('wb-arena-shake');
+            if (arena) triggerShake('wb-arena-shake');
+            else triggerShake('quiz-container');
         }
     });
 
@@ -392,12 +442,12 @@ const GameRoom: React.FC = () => {
                                     <button className="btn rounded-circle d-inline-flex align-items-center justify-content-center mb-4" onClick={(e) => { e.stopPropagation(); speakVenda(slide.venda); }} style={{ width: 64, height: 64, backgroundColor: isPlayingAudio ? '#FEF3C7' : '#F9FBFF', border: isPlayingAudio ? '2px solid #FACC15' : '2px solid #E2E8F0', boxShadow: '0 4px 12px rgba(0,0,0,0.05)', transition: 'all 0.2s' }}>
                                         <Volume2 className="fs-4" />
                                     </button>
-                                    
+
                                     <div className="w-100 mt-2 mb-4" style={{ height: '1px', backgroundColor: '#E2E8F0' }}></div>
-                                    
+
                                     <p className="smallest fw-bold text-muted ls-2 text-uppercase mb-3">DEFINITION</p>
                                     <h2 className="fw-bold mb-4" style={{ color: '#111827', fontSize: 'clamp(1.5rem, 6vw, 2rem)' }}>{slide.english}</h2>
-                                    
+
                                     <div className="p-3 rounded-4 w-100 text-start" style={{ backgroundColor: '#FFFBEB', border: '1px solid #FDE68A' }}>
                                         <p className="smallest fw-bold mb-2 ls-2 text-uppercase" style={{ color: '#92400E' }}>Context</p>
                                         <p className="mb-0 small fst-italic" style={{ color: '#78350F', lineHeight: 1.5 }}>"{slide.context}"</p>
@@ -502,7 +552,7 @@ const GameRoom: React.FC = () => {
                     {showMascotCheer && (
                         <div className="mascot-cheer-overlay">
                             <div className="mascot-cheer-bubble">{mascotCheerText}</div>
-                            <Mascot width="90px" height="90px" mood="excited" />
+                            <Mascot width="90px" height="90px" mood={mascotMood} />
                         </div>
                     )}
                     <div className="container" style={{ maxWidth: '700px' }}>
@@ -520,13 +570,27 @@ const GameRoom: React.FC = () => {
                                 {currentLabel.icon} {currentLabel.label}
                             </span>
                         </div>
+                        <div className="text-center mb-4">
+                            <Mascot width="100px" height="100px" mood={mascotMood} />
+                        </div>
                         <div className="py-4 text-center">
                             <h2 className="fw-bold text-dark mb-5 ls-tight">{q.question}</h2>
                             {!showExplanation ? renderQuestion() : (
                                 <div className="text-start animate__animated animate__fadeIn">
-                                    <div className="p-4 border-start border-4 border-danger bg-light mb-4">
-                                        <h5 className="fw-bold text-danger mb-2">Pfarelo (Oops!)</h5>
-                                        <p className="text-secondary mb-0">{q.explanation}</p>
+                                    <div className="p-4 border-start border-4 border-danger bg-light mb-4 rounded-end-4 shadow-sm">
+                                        <h5 className="fw-bold text-danger mb-3">Pfarelo (Oops!)</h5>
+                                        <div className="p-3 bg-white rounded-3 border mb-3">
+                                            <p className="smallest fw-bold mb-1 text-muted ls-2 text-uppercase">Correct Answer</p>
+                                            <p className="fs-4 fw-bold mb-0 text-success">
+                                                {
+                                                    q.type === 'true-false'
+                                                        ? ((q as any).correctAnswer === true ? 'NGOHO (TRUE)' : 'MAZWIFHI (FALSE)')
+                                                        : (q as any).correctAnswer
+                                                }
+                                            </p>
+                                        </div>
+                                        <p className="smallest fw-bold mb-1 text-muted ls-2 text-uppercase">Why?</p>
+                                        <p className="text-secondary mb-0" style={{ lineHeight: '1.5' }}>{q.explanation}</p>
                                     </div>
                                     <button className="btn game-btn-primary w-100 py-3 fw-bold ls-1" onClick={() => {
                                         const newScore = isFirstTime ? awardConsolation() : score;
@@ -545,7 +609,7 @@ const GameRoom: React.FC = () => {
                 {showLevelUp && <LevelUpModal level={newLevelReached} onClose={() => setShowLevelUp(false)} />}
                 <div className="text-center w-100" style={{ maxWidth: '500px' }}>
                     <div className="d-flex justify-content-center mb-4">
-                        <Mascot mood="excited" width="150px" height="150px" />
+                        <Mascot mood={mascotMood} width="150px" height="150px" />
                     </div>
                     <h1 className="fw-bold display-4 text-dark mb-2 ls-tight">{isFirstTime ? 'Ro Fhedza!' : 'Review Done!'}</h1>
                     <p className="text-muted mb-4 ls-1">{isFirstTime ? "You've mastered this lesson." : "Great job refreshing your knowledge."}</p>

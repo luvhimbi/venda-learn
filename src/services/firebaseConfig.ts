@@ -1,11 +1,14 @@
 // src/services/firebaseConfig.ts
-import { initializeApp } from "firebase/app";
-import { getAuth } from "firebase/auth";
+import { initializeApp, getApp, getApps } from "firebase/app";
+import { getAuth, GoogleAuthProvider } from "firebase/auth";
 import {
     initializeFirestore,
     persistentLocalCache,
-    persistentMultipleTabManager
+    persistentMultipleTabManager,
+    getFirestore,
+    type Firestore // Import the type
 } from "firebase/firestore";
+import { getMessaging } from "firebase/messaging";
 
 const firebaseConfig = {
     apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
@@ -16,18 +19,26 @@ const firebaseConfig = {
     appId: import.meta.env.VITE_FIREBASE_APP_ID,
 };
 
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
+// Initialize Firebase (Singleton pattern for HMR)
+const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
 
 // Initialize Firestore with Persistent Caching
-// Multi-tab manager allows the cache to work across different browser tabs
-export const db = initializeFirestore(app, {
-    localCache: persistentLocalCache({
-        tabManager: persistentMultipleTabManager()
-    })
-});
+const initDb = (): Firestore => {
+    try {
+        return initializeFirestore(app, {
+            localCache: persistentLocalCache({
+                tabManager: persistentMultipleTabManager()
+            })
+        });
+    } catch (e) {
+        // If already initialized during HMR, get the existing instance
+        return getFirestore(app);
+    }
+};
 
-// Export Auth
-import { GoogleAuthProvider } from "firebase/auth";
+export const db: Firestore = initDb();
+
+// Export Auth & Messaging
 export const auth = getAuth(app);
 export const googleProvider = new GoogleAuthProvider();
+export const messaging = getMessaging(app);

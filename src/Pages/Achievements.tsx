@@ -3,12 +3,15 @@ import { useNavigate } from 'react-router-dom';
 import { ALL_TROPHIES } from '../services/achievementService';
 import { fetchUserData } from '../services/dataCache';
 import AchievementCard from '../components/AchievementCard';
+import SharePreviewModal from '../components/SharePreviewModal';
 import { ArrowLeft, Info, Trophy as TrophyIconLucide } from 'lucide-react';
 import SEO from '../components/SEO';
 
 const Achievements: React.FC = () => {
     const [userData, setUserData] = useState<any>(null);
     const [loading, setLoading] = useState(true);
+    const [selectedTrophy, setSelectedTrophy] = useState<any>(null);
+    const [isShareModalOpen, setIsShareModalOpen] = useState(false);
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -36,6 +39,14 @@ const Achievements: React.FC = () => {
 
         const percentage = Math.min(Math.round((current / value) * 100), 100);
         return percentage;
+    };
+
+    const handleShare = (trophyId: string) => {
+        const trophy = ALL_TROPHIES.find(t => t.id === trophyId);
+        if (trophy) {
+            setSelectedTrophy(trophy);
+            setIsShareModalOpen(true);
+        }
     };
 
     if (loading) return (
@@ -110,6 +121,7 @@ const Achievements: React.FC = () => {
                                     isEarned={isEarned}
                                     progress={progress}
                                     rarity={trophy.rarity as any}
+                                    onShare={handleShare}
                                 />
                             </div>
                         );
@@ -122,6 +134,18 @@ const Achievements: React.FC = () => {
                     </p>
                 </div>
             </div>
+
+            {/* SHARED MODAL */}
+            <SharePreviewModal 
+                isOpen={isShareModalOpen}
+                onClose={() => setIsShareModalOpen(false)}
+                title={selectedTrophy?.title}
+                category="ACHIEVEMENT EARNED"
+                trophy={selectedTrophy ? {
+                    rarity: selectedTrophy.rarity,
+                    color: selectedTrophy.color
+                } : null}
+            />
 
             <style>{`
                 .ls-tight { letter-spacing: -1px; }

@@ -4,10 +4,22 @@ import { warmupGameCache } from '../../services/dataCache';
 import { auth } from '../../services/firebaseConfig';
 import { onAuthStateChanged } from 'firebase/auth';
 import { Puzzle, Image, Layout, FileText, Gamepad2, Calendar, Bomb } from 'lucide-react';
+import { popupService } from '../../services/popupService';
 
 const GamesDashboard: React.FC = () => {
     const navigate = useNavigate();
     const [isLoggedIn, setIsLoggedIn] = useState<boolean | null>(null);
+
+    const handleLoginNagger = () => {
+        popupService.confirm(
+            'Luvha (Log In Required)',
+            'Log in to track your scores, earn XP, and climb the leaderboard while mastering Tshivenda.',
+            'LOG IN',
+            'NOT NOW'
+        ).then((res) => {
+            if (res.isConfirmed) navigate('/login');
+        });
+    };
 
     useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth, (user) => {
@@ -62,15 +74,6 @@ const GamesDashboard: React.FC = () => {
             route: '/daily-challenge',
             color: 'bg-indigo',
             gradient: 'linear-gradient(135deg, #6366f1 0%, #4338ca 100%)'
-        },
-        {
-            id: 'knowledge-battle',
-            title: 'Battle each other',
-            description: 'Challenge others who completed the same lessons to a live quiz showdown!',
-            icon: <i className="bi bi-lightning-charge-fill text-warning"></i>,
-            route: '/battle',
-            color: 'bg-danger',
-            gradient: 'linear-gradient(135deg, #EF4444 0%, #B91C1C 100%)'
         },
         {
             id: 'word-bomb',
@@ -136,7 +139,10 @@ const GamesDashboard: React.FC = () => {
                         <div key={game.id} className="col-md-6 col-lg-5">
                             <div
                                 className="card border-0 h-100 shadow-sm overflow-hidden game-card"
-                                onClick={() => navigate(game.route)}
+                                onClick={() => {
+                                    if (isLoggedIn) navigate(game.route);
+                                    else handleLoginNagger();
+                                }}
                                 style={{ cursor: 'pointer', transition: 'transform 0.2s' }}
                             >
                                 <div className="card-body p-0 d-flex flex-column">

@@ -1,15 +1,18 @@
 import React, { useState, type FormEvent } from 'react';
-import { Loader2, Lock } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
+import { doc, getDoc, setDoc, type Firestore } from 'firebase/firestore';
 import { signInAnonymously, signInWithEmailAndPassword, signInWithPopup } from 'firebase/auth';
-import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { auth, db, googleProvider } from '../../services/firebaseConfig';
+import { Loader2 } from 'lucide-react';
+import ReCAPTCHA from 'react-google-recaptcha';
+import BaobabAuthHeader from '../../components/BaobabAuthHeader';
 
 const Login: React.FC = () => {
     const [email, setEmail] = useState<string>('');
     const [password, setPassword] = useState<string>('');
     const [loading, setLoading] = useState<boolean>(false);
     const [error, setError] = useState<string | null>(null);
+    const [captchaValue, setCaptchaValue] = useState<string | null>(null);
 
     const navigate = useNavigate();
 
@@ -23,9 +26,9 @@ const Login: React.FC = () => {
             const uid = userCredential.user.uid;
 
             // 1. Ensure user document exists (Prevents permission errors in listeners)
-            const userDoc = await getDoc(doc(db, 'users', uid));
+            const userDoc = await getDoc(doc(db as Firestore, 'users', uid));
             if (!userDoc.exists()) {
-                await setDoc(doc(db, 'users', uid), {
+                await setDoc(doc(db as Firestore, 'users', uid), {
                     username: userCredential.user.displayName || email.split('@')[0],
                     email: email,
                     points: 0,
@@ -71,11 +74,11 @@ const Login: React.FC = () => {
             const user = result.user;
 
             // 1. Check if user exists in Firestore
-            const userDoc = await getDoc(doc(db, 'users', user.uid));
+            const userDoc = await getDoc(doc(db as Firestore, 'users', user.uid));
 
             if (!userDoc.exists()) {
                 // Create user profile for new Google users
-                await setDoc(doc(db, 'users', user.uid), {
+                await setDoc(doc(db as Firestore, 'users', user.uid), {
                     username: user.displayName || 'Learner',
                     email: user.email,
                     points: 0,
@@ -130,12 +133,11 @@ const Login: React.FC = () => {
         <div className="min-vh-100 d-flex align-items-center justify-content-center bg-white px-3 py-5">
             <div className="w-100" style={{ maxWidth: '400px' }}>
 
+                <BaobabAuthHeader />
+
                 <div className="text-center mb-5 animate__animated animate__fadeInDown">
-                    <div className="d-inline-flex bg-warning bg-opacity-10 text-warning p-3 rounded-circle mb-3 shadow-sm">
-                        <Lock size={32} />
-                    </div>
                     <h2 className="fw-bold ls-tight text-dark mb-2">Welcome Back!</h2>
-                    <p className="text-muted mb-0">Sign in to continue your language learning journey.</p>
+                    <p className="text-muted mb-0 small">Sign in to continue your language learning journey.</p>
                 </div>
 
                 {error && (
@@ -181,7 +183,18 @@ const Login: React.FC = () => {
                         </div>
                     </div>
 
-                    <button type="submit" className="btn w-100 fw-bold py-2.5 mb-2 game-btn-primary d-flex align-items-center justify-content-center" disabled={loading}>
+                    <div className="mb-4 d-flex justify-content-center">
+                        <ReCAPTCHA
+                            sitekey="6LeKx2ssAAAAAHk2f6trCWqsFxx7OkbceJFsGsFW" // Test key
+                            onChange={(value) => setCaptchaValue(value)}
+                        />
+                    </div>
+
+                    <button 
+                        type="submit" 
+                        className="btn w-100 fw-bold py-2.5 mb-2 game-btn-primary d-flex align-items-center justify-content-center" 
+                        disabled={loading || !captchaValue}
+                    >
                         {loading ? <Loader2 className="animate-spin me-2" size={18} /> : 'SIGN IN'}
                     </button>
                 </form>
@@ -248,5 +261,6 @@ const Login: React.FC = () => {
 };
 
 export default Login;
+
 
 

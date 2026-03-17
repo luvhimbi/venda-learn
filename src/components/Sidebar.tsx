@@ -162,24 +162,24 @@ const Sidebar: React.FC = () => {
             <nav className="mobile-bottom-nav fixed-bottom bg-white border-top d-lg-none d-flex flex-column shadow-lg">
                 <div className="bg-munwenda w-100" style={{ height: '4px' }}></div>
                 <div className="d-flex align-items-center px-1 py-1 overflow-x-auto no-scrollbar w-100">
-                {navItems.map((item) => (
-                    <Link
-                        key={item.path}
-                        to={item.path}
-                        className={`d-flex flex-column align-items-center justify-content-center p-2 rounded-3 text-decoration-none transition-all flex-grow-1 flex-shrink-0 ${item.tourClass || ''} ${isActive(item.path) ? 'text-primary' : 'text-muted'}`}
-                        style={{ minWidth: '70px' }}
-                    >
-                        <div className={`position-relative mb-1 rounded-circle d-flex align-items-center justify-content-center ${isActive(item.path) ? 'bg-primary-subtle' : ''}`} style={{ width: '32px', height: '32px' }}>
-                            <i className={`bi ${item.icon} ${isActive(item.path) ? 'fs-5 text-primary' : 'fs-5'}`}></i>
-                            {item.badge !== undefined && item.badge > 0 && (
-                                <span className="position-absolute top-0 start-100 translate-middle badge rounded-circle bg-danger p-1 border border-light">
-                                    <span className="visually-hidden">unread messages</span>
-                                </span>
-                            )}
-                        </div>
-                        <span className="fw-bold ls-1" style={{ fontSize: '9px', textTransform: 'uppercase' }}>{item.label}</span>
-                    </Link>
-                ))}
+                    {navItems.map((item) => (
+                        <Link
+                            key={item.path}
+                            to={item.path}
+                            className={`d-flex flex-column align-items-center justify-content-center p-2 rounded-3 text-decoration-none transition-all flex-grow-1 flex-shrink-0 ${item.tourClass || ''} ${isActive(item.path) ? 'text-primary' : 'text-muted'}`}
+                            style={{ minWidth: '70px' }}
+                        >
+                            <div className={`position-relative mb-1 rounded-circle d-flex align-items-center justify-content-center ${isActive(item.path) ? 'bg-primary-subtle' : ''}`} style={{ width: '32px', height: '32px' }}>
+                                <i className={`bi ${item.icon} ${isActive(item.path) ? 'fs-5 text-primary' : 'fs-5'}`}></i>
+                                {item.badge !== undefined && item.badge > 0 && (
+                                    <span className="position-absolute top-0 start-100 translate-middle badge rounded-circle bg-danger p-1 border border-light">
+                                        <span className="visually-hidden">unread messages</span>
+                                    </span>
+                                )}
+                            </div>
+                            <span className="fw-bold ls-1" style={{ fontSize: '9px', textTransform: 'uppercase' }}>{item.label}</span>
+                        </Link>
+                    ))}
                 </div>
             </nav>
 

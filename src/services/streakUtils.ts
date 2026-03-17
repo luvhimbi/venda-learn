@@ -1,5 +1,6 @@
 // src/services/streakUtils.ts
 import { doc, getDoc, updateDoc } from 'firebase/firestore';
+import type { Firestore } from 'firebase/firestore';
 import { db } from './firebaseConfig';
 
 /**
@@ -33,7 +34,7 @@ export const updateStreak = async (uid: string): Promise<{
     wasReset: boolean;
 }> => {
     try {
-        const userRef = doc(db, "users", uid);
+        const userRef = doc(db as Firestore, "users", uid);
         const userSnap = await getDoc(userRef);
 
         if (!userSnap.exists()) {
@@ -112,3 +113,5 @@ export const updateStreak = async (uid: string): Promise<{
         return { streak: 0, isNewDay: false, freezeUsed: false, wasReset: false };
     }
 };
+
+

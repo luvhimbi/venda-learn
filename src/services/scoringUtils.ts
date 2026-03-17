@@ -68,8 +68,8 @@ export const calculateScore = (
 
     // Build a human‑readable label
     const parts: string[] = [`+${total}`];
-    if (speedBonus > 0) parts.push('⚡');
-    if (streakMultiplier > 1) parts.push(`🔥×${streakMultiplier}`);
+    if (speedBonus > 0) parts.push('SPEED');
+    if (streakMultiplier > 1) parts.push(`STREAK x${streakMultiplier}`);
     const label = parts.join(' ');
 
     return { base, speedBonus, streakMultiplier, total, label };

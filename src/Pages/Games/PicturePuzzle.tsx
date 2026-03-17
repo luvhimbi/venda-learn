@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import type { Firestore } from 'firebase/firestore';
 import {
     Star, Image as ImageIcon,
     Smile, Heart, Hand, User, Users, Crown, GraduationCap, Stethoscope,
@@ -14,8 +15,11 @@ import { fetchPicturePuzzles } from '../../services/dataCache';
 import { useNavigate } from 'react-router-dom';
 import Swal from 'sweetalert2';
 import { auth, db } from '../../services/firebaseConfig';
-import { doc, updateDoc, increment } from 'firebase/firestore';
+import { doc, updateDoc, increment, getDoc } from 'firebase/firestore';
 import Mascot from '../../components/Mascot';
+import { useVisualJuice } from '../../hooks/useVisualJuice';
+import { updateStreak } from '../../services/streakUtils';
+import {popupService} from "../../services/popupService.ts";
 
 interface GameSlide {
     imageUrl: string;
@@ -91,6 +95,8 @@ const PicturePuzzle: React.FC = () => {
     const [answerStatus, setAnswerStatus] = useState<'correct' | 'wrong' | null>(null);
     const [cardBg, setCardBg] = useState(CARD_BGNDS[0]);
     const [roundCount, setRoundCount] = useState(0);
+    const [streak, setStreak] = useState(0);
+    const { playCorrect, playWrong, playClick, triggerShake } = useVisualJuice();
     const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
     // Mascot
@@ -131,8 +137,12 @@ const PicturePuzzle: React.FC = () => {
                 setGameActive(true);
                 setupRound(shuffled[0], shuffled, 0);
             } else {
-                Swal.fire('Error', 'No puzzles found!', 'error');
+                popupService.error('Musi wo fhela', 'No puzzles found! Vha khou humbelwa u lingedza hafhu.');
                 navigate('/mitambo');
+            }
+            if (auth.currentUser) {
+                const snap = await getDoc(doc(db as Firestore, "users", auth.currentUser.uid));
+                if (snap.exists()) setStreak(snap.data().streak || 0);
             }
         } catch (error) {
             console.error("Error loading picture puzzle:", error);
@@ -169,6 +179,7 @@ const PicturePuzzle: React.FC = () => {
 
             setMascotCheerText(MASCOT_CHEERS[Math.floor(Math.random() * MASCOT_CHEERS.length)]);
             setShowMascotCheer(true);
+            playCorrect();
             setTimeout(() => setShowMascotCheer(false), 900);
 
             setTimeout(() => {
@@ -178,6 +189,8 @@ const PicturePuzzle: React.FC = () => {
             }, 800);
         } else {
             setAnswerStatus('wrong');
+            playWrong();
+            triggerShake('pzl-game-arena');
             setTimeout(() => {
                 setSelectedAnswer(null);
                 setAnswerStatus(null);
@@ -193,7 +206,7 @@ const PicturePuzzle: React.FC = () => {
         const user = auth.currentUser;
         if (user && score > 0) {
             try {
-                const userRef = doc(db, 'users', user.uid);
+                const userRef = doc(db as Firestore, 'users', user.uid);
                 await updateDoc(userRef, {
                     points: increment(score),
                     [`gamePerformance.pictureRace.lastSession`]: {
@@ -202,6 +215,7 @@ const PicturePuzzle: React.FC = () => {
                         timestamp: new Date().toISOString()
                     }
                 });
+                await updateStreak(user.uid);
             } catch (e) {
                 console.error("Error saving score:", e);
             }
@@ -232,9 +246,9 @@ const PicturePuzzle: React.FC = () => {
     };
 
     if (loading) return (
-        <div className="min-vh-100 d-flex flex-column justify-content-center align-items-center" style={{ background: 'linear-gradient(180deg, #111827, #1F2937)' }}>
+        <div className="min-vh-100 d-flex flex-column justify-content-center align-items-center bg-white">
             <Mascot width="100px" height="100px" mood="excited" />
-            <p className="text-white-50 mt-3 fw-bold" style={{ fontSize: '12px', letterSpacing: '2px', textTransform: 'uppercase' }}>Loading game...</p>
+            <p className="text-muted mt-3 fw-bold" style={{ fontSize: '12px', letterSpacing: '2px', textTransform: 'uppercase' }}>Loading game...</p>
         </div>
     );
 
@@ -255,6 +269,14 @@ const PicturePuzzle: React.FC = () => {
                         <span className="fw-bold d-flex align-items-center gap-2" style={{ color: '#FACC15', fontSize: '11px', letterSpacing: '1px' }}>
                             <ImageIcon size={14} /> TSHIFANISO RACE
                         </span>
+                        <div className="d-flex align-items-center gap-3">
+                            {streak > 0 && (
+                                <div className="d-flex align-items-center gap-1 glow-pulse" title="Daily Streak">
+                                    <Flame size={18} color="#EF4444" fill="#EF4444" />
+                                    <span className="fw-bold small text-white">{streak}</span>
+                                </div>
+                            )}
+                        </div>
                     </div>
                     <div className="d-flex align-items-center justify-content-between">
                         {/* TIMER */}
@@ -273,7 +295,7 @@ const PicturePuzzle: React.FC = () => {
             </div>
 
             {/* MAIN CONTENT */}
-            <div className="flex-grow-1 px-3" style={{ marginTop: '-20px' }}>
+            <div id="pzl-game-arena" className="flex-grow-1 px-3" style={{ marginTop: '-20px' }}>
                 <div className="container" style={{ maxWidth: '600px' }}>
 
                     {/* ENGLISH WORD PROMPT CARD */}
@@ -299,7 +321,7 @@ const PicturePuzzle: React.FC = () => {
                             return (
                                 <div key={`${opt}-${i}`} className="col-6">
                                     <button
-                                        onClick={() => handleAnswer(opt)}
+                                        onClick={() => { playClick(); handleAnswer(opt); }}
                                         disabled={!!selectedAnswer && answerStatus === 'correct'}
                                         className={`btn w-100 p-3 fw-bold text-uppercase rounded-4 pzl-option transition-all
                                             ${isCorrect ? 'pzl-opt-correct' : ''}
@@ -420,3 +442,4 @@ const PicturePuzzle: React.FC = () => {
 };
 
 export default PicturePuzzle;
+

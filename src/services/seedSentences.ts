@@ -1,4 +1,5 @@
 import { db } from './firebaseConfig';
+import type { Firestore } from 'firebase/firestore';
 import { collection, writeBatch, doc } from 'firebase/firestore';
 
 export interface SentencePuzzle {
@@ -39,8 +40,8 @@ const sentenceData = [
 export const seedSentences = async () => {
     try {
         console.log("Starting seed for Sentence Scramble...");
-        const batch = writeBatch(db);
-        const collectionRef = collection(db, "sentencePuzzles");
+        const batch = writeBatch(db as Firestore);
+        const collectionRef = collection(db as Firestore, "sentencePuzzles");
 
         for (const item of sentenceData) {
             const newDocRef = doc(collectionRef);
@@ -57,3 +58,5 @@ export const seedSentences = async () => {
         return { success: false, message: "Failed to seed sentences." };
     }
 };
+
+

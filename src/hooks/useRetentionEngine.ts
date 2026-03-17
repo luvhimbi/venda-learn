@@ -52,13 +52,17 @@ export const useRetentionEngine = (userData: any, shouldDelay: boolean = false) 
         // 1. STREAK PROTECTOR (Highest Priority)
         // If they have an active streak, but haven't played today
         if (data.streak && data.streak > 0 && !activeToday) {
-            fireNotification({
-                title: "Streak at Risk! 🔥",
-                message: `Don't lose your ${data.streak}-day streak. Complete a quick lesson today!`,
-                type: 'streak',
-                duration: 8000
-            });
-            return; // Only show one notification at a time
+            const lastStreakNudge = localStorage.getItem('vendalearn_last_streak_risk_date');
+            if (lastStreakNudge !== todayStr) {
+                fireNotification({
+                    title: "Streak at Risk!",
+                    message: `Don't lose your ${data.streak}-day streak. Complete a quick lesson today!`,
+                    type: 'streak',
+                    duration: 8000
+                });
+                localStorage.setItem('vendalearn_last_streak_risk_date', todayStr);
+                return; // Only show one notification at a time
+            }
         }
 
         // 2. WELCOME BACK (Re-engagement)

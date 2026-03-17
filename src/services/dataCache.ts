@@ -3,6 +3,7 @@
 // Data is fetched once per session and shared between Home, Courses, GameRoom, etc.
 
 import { db, auth } from './firebaseConfig';
+import type { Firestore } from 'firebase/firestore';
 import { collection, getDocs, doc, getDoc, setDoc, query, orderBy, limit } from 'firebase/firestore';
 
 
@@ -85,7 +86,7 @@ export const fetchLessons = async (): Promise<any[]> => {
     const cached = getCached<any[]>('lessons');
     if (cached) return cached;
 
-    const snap = await getDocs(collection(db, "lessons"));
+    const snap = await getDocs(collection(db as Firestore, "lessons"));
     const lessons = snap.docs.map(d => ({ id: d.id, ...d.data() }));
 
     // Sort client-side: by order if present, else alphabetically
@@ -127,7 +128,7 @@ export const fetchUserData = async (): Promise<any | null> => {
     const cached = getCached<any>(`user_${user.uid}`);
     if (cached) return cached;
 
-    const snap = await getDoc(doc(db, "users", user.uid));
+    const snap = await getDoc(doc(db as Firestore, "users", user.uid));
     if (!snap.exists()) return null;
 
     const data = { ...snap.data(), uid: user.uid };
@@ -148,7 +149,7 @@ export const fetchTopLearners = async (count = 5): Promise<any[]> => {
     const cached = getCached<any[]>(cacheKey);
     if (cached) return cached;
 
-    const q = query(collection(db, "users"), orderBy("points", "desc"), limit(count));
+    const q = query(collection(db as Firestore, "users"), orderBy("points", "desc"), limit(count));
     const snap = await getDocs(q);
     const learners = snap.docs.map(d => ({
         id: d.id,
@@ -172,7 +173,7 @@ export const fetchDailyWord = async (): Promise<any> => {
     // 2. Fetch all available words from cache or Firestore
     let allWords = getCached<any[]>('allDailyWords');
     if (!allWords) {
-        const snap = await getDocs(collection(db, "dailyWords"));
+        const snap = await getDocs(collection(db as Firestore, "dailyWords"));
         allWords = snap.docs.map(d => ({ id: d.id, ...d.data() }));
         setCache('allDailyWords', allWords);
     }
@@ -208,7 +209,7 @@ export const fetchHistoryData = async (): Promise<any[]> => {
     const cached = getCached<any[]>('history');
     if (cached) return cached;
 
-    const q = query(collection(db, "history"), orderBy("order", "asc"));
+    const q = query(collection(db as Firestore, "history"), orderBy("order", "asc"));
     const snap = await getDocs(q);
     const data = snap.docs.map(d => ({ id: d.id, ...d.data() }));
 
@@ -220,7 +221,7 @@ export const fetchAllUsers = async (): Promise<any[]> => {
     const cached = getCached<any[]>('allUsers');
     if (cached) return cached;
 
-    const snap = await getDocs(collection(db, "users"));
+    const snap = await getDocs(collection(db as Firestore, "users"));
     const users = snap.docs.map(d => ({ id: d.id, ...d.data() }));
 
     setCache('allUsers', users);
@@ -231,7 +232,7 @@ export const fetchAuditLogs = async (): Promise<any[]> => {
     const cached = getCached<any[]>('auditLogs');
     if (cached) return cached;
 
-    const q = query(collection(db, "logs"), orderBy("timestamp", "desc"));
+    const q = query(collection(db as Firestore, "logs"), orderBy("timestamp", "desc"));
     const snap = await getDocs(q);
     const logs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
 
@@ -243,7 +244,7 @@ export const fetchPuzzles = async (): Promise<any[]> => {
     const cached = getCached<any[]>('puzzles');
     if (cached) return cached;
 
-    const snap = await getDocs(collection(db, "puzzleWords"));
+    const snap = await getDocs(collection(db as Firestore, "puzzleWords"));
     const puzzles = snap.docs.map(d => ({ id: d.id, ...d.data() }));
 
     setCache('puzzles', puzzles);
@@ -256,7 +257,7 @@ export const fetchSyllables = async (): Promise<any[]> => {
 
     console.log("Fetching syllables from Firestore...");
     try {
-        const snap = await getDocs(collection(db, "syllablePuzzles"));
+        const snap = await getDocs(collection(db as Firestore, "syllablePuzzles"));
         const puzzles = snap.docs.map(d => ({ id: d.id, ...d.data() }));
         console.log(`Fetched ${puzzles.length} syllables.`);
 
@@ -273,7 +274,7 @@ export const fetchSentences = async (): Promise<any[]> => {
     const cached = getCached<any[]>('sentencePuzzles');
     if (cached) return cached;
 
-    const snap = await getDocs(collection(db, "sentencePuzzles"));
+    const snap = await getDocs(collection(db as Firestore, "sentencePuzzles"));
     const puzzles = snap.docs.map(d => ({ id: d.id, ...d.data() }));
 
     setCache('sentencePuzzles', puzzles);
@@ -284,7 +285,7 @@ export const fetchWordBombWords = async (): Promise<any[]> => {
     const cached = getCached<any[]>('wordBombWords');
     if (cached) return cached;
 
-    const snap = await getDocs(collection(db, "wordBombWords"));
+    const snap = await getDocs(collection(db as Firestore, "wordBombWords"));
     const words = snap.docs.map(d => ({ id: d.id, ...d.data() }));
 
     setCache('wordBombWords', words);
@@ -296,7 +297,7 @@ export const fetchChatMetadata = async (chatId: string): Promise<any | null> => 
     const cached = getCached<any>(cacheKey);
     if (cached) return cached;
 
-    const snap = await getDoc(doc(db, "chats", chatId));
+    const snap = await getDoc(doc(db as Firestore, "chats", chatId));
     if (!snap.exists()) return null;
 
     const data = { id: snap.id, ...snap.data() };
@@ -310,8 +311,27 @@ export const fetchPicturePuzzles = async (): Promise<any[]> => {
     const cached = getCached<any[]>('picturePuzzles');
     if (cached) return cached;
 
-    const courses = await fetchLessons();
     const slides: any[] = [];
+
+    // 1. Fetch from standalone picturePuzzles collection
+    try {
+        const snap = await getDocs(collection(db as Firestore, "picturePuzzles"));
+        snap.docs.forEach(d => {
+            const data = d.data();
+            if (data.imageUrl && data.venda) {
+                slides.push({
+                    imageUrl: data.imageUrl,
+                    venda: data.venda,
+                    english: data.english || ''
+                });
+            }
+        });
+    } catch (e) {
+        console.error("Error fetching standalone picture puzzles:", e);
+    }
+
+    // 2. Derive from lesson slides (backwards compatibility)
+    const courses = await fetchLessons();
     courses.forEach((course: any) => {
         const mls = getMicroLessons(course);
         mls.forEach((ml: any) => {
@@ -321,7 +341,7 @@ export const fetchPicturePuzzles = async (): Promise<any[]> => {
                         slides.push({
                             imageUrl: slide.imageUrl,
                             venda: slide.venda,
-                            english: slide.english
+                            english: slide.english || ''
                         });
                     }
                 });
@@ -439,7 +459,7 @@ export const fetchThemeSettings = async (): Promise<any | null> => {
     if (cached) return cached;
 
     try {
-        const snap = await getDoc(doc(db, "settings", "theme"));
+        const snap = await getDoc(doc(db as Firestore, "settings", "theme"));
         if (!snap.exists()) return null;
 
         const data = snap.data();
@@ -453,11 +473,13 @@ export const fetchThemeSettings = async (): Promise<any | null> => {
 
 export const saveThemeSettings = async (settings: any): Promise<void> => {
     try {
-        await setDoc(doc(db, "settings", "theme"), settings, { merge: true });
+        await setDoc(doc(db as Firestore, "settings", "theme"), settings, { merge: true });
         setCache('theme_settings', settings);
     } catch (e) {
         console.error("saveThemeSettings error:", e);
         throw e;
     }
 };
+
+
 

@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import type { Firestore } from 'firebase/firestore';
 import { db } from '../../services/firebaseConfig';
 import { doc, updateDoc, addDoc, collection, serverTimestamp } from 'firebase/firestore';
 import { useNavigate, useParams } from 'react-router-dom';
@@ -251,14 +252,14 @@ const EditLesson: React.FC = () => {
                 id: ml.id || `${id}__ml_${i}`
             }));
 
-            await updateDoc(doc(db, "lessons", id!), {
+            await updateDoc(doc(db as Firestore, "lessons", id!), {
                 title: course.title,
                 vendaTitle: course.vendaTitle,
                 difficulty: course.difficulty,
                 microLessons
             });
 
-            await addDoc(collection(db, "logs"), {
+            await addDoc(collection(db as Firestore, "logs"), {
                 action: "UPDATE",
                 details: `Updated course: ${course.title} (${id}) with ${microLessons.length} micro lessons`,
                 adminEmail: "Admin",
@@ -867,5 +868,6 @@ const EditLesson: React.FC = () => {
 };
 
 export default EditLesson;
+
 
 

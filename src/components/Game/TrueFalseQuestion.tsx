@@ -14,7 +14,7 @@ const TrueFalseQuestion: React.FC<Props> = ({ q, selected, status, onSelect }) =
         const isSelected = selected === val;
         let cls = 'btn-outline-dark border-2';
         if (isSelected) cls = isCorrect ? 'btn-success border-success text-white' : 'btn-danger border-danger text-white';
-        else if (selected !== null && isCorrect && status === 'wrong') cls = 'btn-success border-success text-white opacity-75';
+        else if (selected !== null && isCorrect && status === 'wrong') cls = 'btn-success border-success text-white';
         return (
             <button className={`btn btn-lg py-4 fw-bold rounded-pill flex-fill ${cls}`}
                 onClick={(e) => { e.stopPropagation(); onSelect(val); }} disabled={selected !== null}>
