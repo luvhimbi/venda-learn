@@ -23,6 +23,7 @@ import HistoryList from "./Pages/Records/HistoryList";
 import AddHistory from "./Pages/Admin/AddHistory";
 import HistoryDetail from "./Pages/Records/HistoryDetail";
 import Achievements from "./Pages/Achievements";
+import OfflineBanner from "./components/OfflineBanner";
 import InstallBanner from "./components/InstallBanner.tsx";
 import AdminRoute from "./components/AdminRoute.tsx";
 import AdminDashboard from "./Pages/Admin/AdminDashboard";
@@ -107,6 +108,7 @@ const AppContent: React.FC = () => {
                     </div>
                 )}
 
+                <OfflineBanner />
                 <InstallBanner />
 
                 <main className="flex-grow-1">
