@@ -1,10 +1,11 @@
 // VendaLearn Service Worker — Network-First with Cache Fallback
-const CACHE_NAME = 'venda-learn-v2';
+const CACHE_NAME = 'venda-learn-v4';
 
-// Pre-cache these on install
+// Pre-cache these on install (app shell)
 const PRECACHE_URLS = [
     '/',
-    '/images/vendalearn.png'
+    '/images/ven.png',
+    '/images/VendaLearnLogo.png'
 ];
 
 // Install: pre-cache shell
@@ -37,7 +38,7 @@ self.addEventListener('fetch', (event) => {
     // Skip non-GET requests
     if (request.method !== 'GET') return;
 
-    // Skip Firebase/API requests — always go to network
+    // Skip Firebase/API requests — Firestore SDK handles its own offline caching
     if (request.url.includes('firestore.googleapis.com') ||
         request.url.includes('firebase') ||
         request.url.includes('googleapis.com/identitytoolkit') ||
@@ -45,10 +46,64 @@ self.addEventListener('fetch', (event) => {
         return;
     }
 
+    // For navigation requests (page loads), always serve index.html from cache if offline
+    if (request.mode === 'navigate') {
+        event.respondWith(
+            fetch(request)
+                .then((response) => {
+                    // Cache the latest index.html
+                    const responseClone = response.clone();
+                    caches.open(CACHE_NAME).then((cache) => {
+                        cache.put('/', responseClone);
+                    });
+                    return response;
+                })
+                .catch(() => {
+                    return caches.match('/').then((cached) => {
+                        return cached || new Response('Offline', { status: 503 });
+                    });
+                })
+        );
+        return;
+    }
+
+    // For static assets (JS, CSS, images, fonts) — cache-first for speed
+    if (request.url.match(/\.(js|css|woff2?|ttf|eot|svg|png|jpg|jpeg|webp|ico)(\?.*)?$/)) {
+        event.respondWith(
+            caches.match(request).then((cached) => {
+                if (cached) {
+                    // Return cache immediately, but update in background
+                    fetch(request).then((response) => {
+                        if (response.ok) {
+                            caches.open(CACHE_NAME).then((cache) => {
+                                cache.put(request, response);
+                            });
+                        }
+                    }).catch(() => {}); // Ignore network errors
+                    return cached;
+                }
+
+                // Not cached yet — fetch and cache
+                return fetch(request).then((response) => {
+                    if (response.ok) {
+                        const responseClone = response.clone();
+                        caches.open(CACHE_NAME).then((cache) => {
+                            cache.put(request, responseClone);
+                        });
+                    }
+                    return response;
+                }).catch(() => {
+                    return new Response('', { status: 503, statusText: 'Offline' });
+                });
+            })
+        );
+        return;
+    }
+
+    // Default: network-first with cache fallback
     event.respondWith(
         fetch(request)
             .then((response) => {
-                // Cache successful responses
                 if (response.ok) {
                     const responseClone = response.clone();
                     caches.open(CACHE_NAME).then((cache) => {
@@ -58,15 +113,8 @@ self.addEventListener('fetch', (event) => {
                 return response;
             })
             .catch(() => {
-                // Network failed — try cache
                 return caches.match(request).then((cached) => {
                     if (cached) return cached;
-
-                    // For navigation requests, return cached index
-                    if (request.mode === 'navigate') {
-                        return caches.match('/');
-                    }
-
                     return new Response('Offline', { status: 503, statusText: 'Offline' });
                 });
             })

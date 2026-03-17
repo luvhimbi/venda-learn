@@ -13,7 +13,7 @@ interface CacheEntry<T> {
 }
 
 const cache = new Map<string, CacheEntry<any>>();
-const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
+const CACHE_TTL = 24 * 60 * 60 * 1000; // 24 hours for offline resilience
 const STORAGE_PREFIX = 'venda_cache_';
 
 const getCached = <T>(key: string): T | null => {
@@ -23,19 +23,19 @@ const getCached = <T>(key: string): T | null => {
         if (Date.now() - entry.timestamp > CACHE_TTL) {
             cache.delete(key);
             // Also invalidate storage if expired
-            try { sessionStorage.removeItem(STORAGE_PREFIX + key); } catch (e) { }
+            try { localStorage.removeItem(STORAGE_PREFIX + key); } catch (e) { }
             return null;
         }
         return entry.data as T;
     }
 
-    // 2. Check SessionStorage
+    // 2. Check localStorage (persists across sessions for offline support)
     try {
-        const stored = sessionStorage.getItem(STORAGE_PREFIX + key);
+        const stored = localStorage.getItem(STORAGE_PREFIX + key);
         if (stored) {
             const parsed = JSON.parse(stored) as CacheEntry<T>;
             if (Date.now() - parsed.timestamp > CACHE_TTL) {
-                sessionStorage.removeItem(STORAGE_PREFIX + key);
+                localStorage.removeItem(STORAGE_PREFIX + key);
                 return null;
             }
             // Hydrate in-memory cache
@@ -43,7 +43,7 @@ const getCached = <T>(key: string): T | null => {
             return parsed.data;
         }
     } catch (e) {
-        console.warn("SessionStorage read error:", e);
+        console.warn("localStorage read error:", e);
     }
 
     return null;
@@ -55,12 +55,18 @@ const setCache = <T>(key: string, data: T): void => {
     // 1. Write to in-memory
     cache.set(key, entry);
 
-    // 2. Write to SessionStorage
+    // 2. Write to localStorage (persists for offline access)
     try {
-        sessionStorage.setItem(STORAGE_PREFIX + key, JSON.stringify(entry));
+        localStorage.setItem(STORAGE_PREFIX + key, JSON.stringify(entry));
     } catch (e) {
-        console.warn("SessionStorage write failed (quota exceeded?):", e);
-        // Optional: clear old entries to make space
+        console.warn("localStorage write failed (quota exceeded?):", e);
+        // Clear old cache entries to make space
+        try {
+            Object.keys(localStorage).forEach(k => {
+                if (k.startsWith(STORAGE_PREFIX)) localStorage.removeItem(k);
+            });
+            localStorage.setItem(STORAGE_PREFIX + key, JSON.stringify(entry));
+        } catch (_) { }
     }
 };
 
@@ -68,13 +74,13 @@ const setCache = <T>(key: string, data: T): void => {
 export const invalidateCache = (key?: string) => {
     if (key) {
         cache.delete(key);
-        try { sessionStorage.removeItem(STORAGE_PREFIX + key); } catch (e) { }
+        try { localStorage.removeItem(STORAGE_PREFIX + key); } catch (e) { }
     } else {
         cache.clear();
         try {
             // Clear only our keys
-            Object.keys(sessionStorage).forEach(k => {
-                if (k.startsWith(STORAGE_PREFIX)) sessionStorage.removeItem(k);
+            Object.keys(localStorage).forEach(k => {
+                if (k.startsWith(STORAGE_PREFIX)) localStorage.removeItem(k);
             });
         } catch (e) { }
     }
