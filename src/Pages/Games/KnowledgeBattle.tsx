@@ -699,7 +699,7 @@ const KnowledgeBattle: React.FC = () => {
                                 <i className="bi bi-flag-fill display-1 text-dark opacity-10"></i>
                             </div>
                             <h2 className="fw-bold mb-2 ls-tight">You Finished!</h2>
-                            <p className="text-muted mb-2">Your Score: <strong style={{ color: '#FACC15' }}>{score} LP</strong></p>
+                            <p className="text-muted mb-2">Your Score: <strong style={{ color: '#FACC15' }}>{score} XP</strong></p>
                             <p className="text-muted mb-4">Waiting for your opponent to finish...</p>
                             <div className="d-flex justify-content-center gap-2 mb-4">
                                 {[0, 1, 2].map(i => (
@@ -860,14 +860,14 @@ const KnowledgeBattle: React.FC = () => {
                             <div className="p-4 rounded-4 bg-light border">
                                 <p className="smallest fw-bold text-muted ls-2 text-uppercase mb-1">YOU</p>
                                 <h2 className="fw-bold mb-0" style={{ color: isWinner ? '#10B981' : '#111827' }}>{myScore}</h2>
-                                <p className="smallest text-muted mb-0">LP EARNED</p>
+                                <p className="smallest text-muted mb-0">XP EARNED</p>
                             </div>
                         </div>
                         <div className="col-6">
                             <div className="p-4 rounded-4 bg-light border">
                                 <p className="smallest fw-bold text-muted ls-2 text-uppercase mb-1">{opponentName.toUpperCase()}</p>
                                 <h2 className="fw-bold mb-0" style={{ color: !isWinner && !isDraw ? '#10B981' : '#111827' }}>{theirScore}</h2>
-                                <p className="smallest text-muted mb-0">LP EARNED</p>
+                                <p className="smallest text-muted mb-0">XP EARNED</p>
                             </div>
                         </div>
                     </div>

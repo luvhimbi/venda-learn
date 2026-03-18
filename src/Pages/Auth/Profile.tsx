@@ -2,7 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { db, auth } from '../../services/firebaseConfig';
 import { doc, updateDoc, writeBatch, collection, query, where, getDocs, setDoc, increment } from 'firebase/firestore';
 import { onAuthStateChanged, signOut } from 'firebase/auth';
-import { Camera, Flame, Gift, Users, Bell, MessageCircle, Book, Gem, Edit3, Compass, LogOut, CheckCircle, Info, Shield, Clock } from 'lucide-react';
+import { Gem, Compass, Bell, Flame, Book, MessageCircle, Info, Shield, CheckCircle, LogOut, Users, Gift, Clock, Camera, Edit3 } from 'lucide-react';
+import LogoutModal from '../../components/LogoutModal';
 import { checkAchievements, awardTrophies, ALL_TROPHIES } from '../../services/achievementService';
 import TrophyIcon from '../../components/TrophyIcon';
 import AvatarPicker, { AvatarDisplay } from '../../components/AvatarPicker';
@@ -34,18 +35,12 @@ interface UserProfile {
     hapticEnabled?: boolean;
 }
 
-interface LearnedStats {
-    wordsCount: number;
-    lessonsCount: number;
-    points: number;
-    streak: number;
-    level: number;
-    completedLessons: string[];
-}
+// LearnedStats type removed as it was unused
 
 const Profile: React.FC = () => {
-    const [userData, setUserData] = useState<UserProfile | null>(null);
-    const [stats, setStats] = useState<LearnedStats | null>(null);
+    const [userData, setUserData] = useState<any>(null);
+    const [stats, setStats] = useState<any>(null);
+    const [showLogout, setShowLogout] = useState(false);
     const [isEditing, setIsEditing] = useState(false);
     const [loading, setLoading] = useState(true);
     const [updateLoading, setUpdateLoading] = useState(false);
@@ -53,7 +48,7 @@ const Profile: React.FC = () => {
     const [editUsername, setEditUsername] = useState('');
     const [editAvatarId, setEditAvatarId] = useState('adventurer');
     const [unclaimedInvites, setUnclaimedInvites] = useState<any[]>([]);
-    const [activeTab, setActiveTab] = useState<'overview' | 'mastery' | 'gear'>('overview');
+    const [activeTab, setActiveTab] = useState<'overview' | 'gear'>('overview');
     const [reminderEnabled, setReminderEnabled] = useState(false);
     const [reminderTime, setReminderTime] = useState('09:00');
     const [soundEnabled, setSoundEnabled] = useState(true);
@@ -93,7 +88,7 @@ const Profile: React.FC = () => {
                         await awardTrophies(user.uid, newIds);
 
                         // Update local state
-                        setUserData(prev => prev ? {
+                        setUserData((prev: UserProfile | null) => prev ? {
                             ...prev,
                             trophies: [...(prev.trophies || []), ...newIds]
                         } : null);
@@ -146,8 +141,8 @@ const Profile: React.FC = () => {
     const handleBuyFreeze = async () => {
         if (!userData || userData.points < 100) {
             Swal.fire({
-                title: 'Insufficient LP!',
-                text: 'You need 100 LP points to buy a streak freeze.',
+                title: 'Insufficient XP!',
+                text: 'You need 100 XP points to buy a streak freeze.',
                 icon: 'warning',
                 confirmButtonColor: '#FACC15',
                 customClass: { popup: 'rounded-4' }
@@ -163,7 +158,7 @@ const Profile: React.FC = () => {
                 streakFreezes: increment(1)
             });
 
-            setUserData(prev => prev ? {
+            setUserData((prev: UserProfile | null) => prev ? {
                 ...prev,
                 points: prev.points - 100,
                 streakFreezes: (prev.streakFreezes || 0) + 1
@@ -203,7 +198,7 @@ const Profile: React.FC = () => {
                 hapticEnabled: hapticEnabled
             }, { merge: true });
 
-            setUserData(prev => prev ? {
+            setUserData((prev: UserProfile | null) => prev ? {
                 ...prev,
                 username: editUsername,
                 avatarId: editAvatarId
@@ -247,7 +242,7 @@ const Profile: React.FC = () => {
 
             Swal.fire({
                 title: 'Ndi khwine!',
-                text: `You claimed ${totalReward} LP rewards!`,
+                text: `You claimed ${totalReward} XP rewards!`,
                 icon: 'success',
                 confirmButtonColor: '#111827'
             });
@@ -266,18 +261,6 @@ const Profile: React.FC = () => {
     );
 
     const levelStats = getLevelStats(userData?.points || 0);
-    const milestones = [
-        { level: 1, label: "Beginner" },
-        { level: 2, label: "Apprentice" },
-        { level: 5, label: "Warrior" },
-        { level: 10, label: "Master" },
-        { level: 15, label: "Leader" },
-        { level: 20, label: "Chief" },
-        { level: 25, label: "King/Queen" },
-        { level: 30, label: "Guardian" },
-        { level: 40, label: "Supreme" },
-        { level: 50, label: "Legendary" }
-    ];
 
     return (
         <div className="bg-white min-vh-100 py-5">
@@ -361,11 +344,7 @@ const Profile: React.FC = () => {
                                     </button>
                                 )}
 
-                                <button onClick={async () => {
-                                    await signOut(auth);
-                                    invalidateCache();
-                                    navigate('/login');
-                                }} className="btn btn-outline-danger btn-sm px-4 py-2 fw-bold ls-1 rounded-pill shadow-sm d-flex align-items-center gap-2">
+                                <button onClick={() => setShowLogout(true)} className="btn btn-outline-danger btn-sm px-4 py-2 fw-bold ls-1 rounded-pill shadow-sm d-flex align-items-center gap-2">
                                     <LogOut size={16} /> LOGOUT
                                 </button>
                             </div>
@@ -417,24 +396,17 @@ const Profile: React.FC = () => {
                     <div className="nav nav-pills bg-light p-1 rounded-pill shadow-sm border border-white flex-nowrap overflow-auto hide-scrollbar" style={{ maxWidth: '100%' }}>
                         <button
                             onClick={() => setActiveTab('overview')}
-                            className={`nav-link rounded-pill px-2 px-sm-4 py-2 fw-bold ls-1 smallest d-flex align-items-center justify-content-center transition-all ${activeTab === 'overview' ? 'bg-dark text-white active shadow-sm' : 'text-muted'}`}
+                            className={`nav-link rounded-pill px-4 px-sm-5 py-2 fw-bold ls-1 smallest d-flex align-items-center justify-content-center transition-all ${activeTab === 'overview' ? 'bg-dark text-white active shadow-sm' : 'text-muted'}`}
                             style={{ minWidth: 'fit-content' }}
                         >
-                            <Gem size={14} className="me-1 me-sm-2" /> <span className="d-none d-sm-inline">OVERVIEW</span><span className="d-inline d-sm-none">STATS</span>
-                        </button>
-                        <button
-                            onClick={() => setActiveTab('mastery')}
-                            className={`nav-link rounded-pill px-2 px-sm-4 py-2 fw-bold ls-1 smallest d-flex align-items-center justify-content-center transition-all ${activeTab === 'mastery' ? 'bg-dark text-white active shadow-sm' : 'text-muted'}`}
-                            style={{ minWidth: 'fit-content' }}
-                        >
-                            <Compass size={14} className="me-1 me-sm-2" /> <span className="d-none d-sm-inline">MASTERY</span><span className="d-inline d-sm-none">PATH</span>
+                            <Gem size={14} className="me-2" /> PROGRESS
                         </button>
                         <button
                             onClick={() => setActiveTab('gear')}
-                            className={`nav-link rounded-pill px-2 px-sm-4 py-2 fw-bold ls-1 smallest d-flex align-items-center justify-content-center transition-all tour-gear-tab ${activeTab === 'gear' ? 'bg-dark text-white active shadow-sm' : 'text-muted'}`}
+                            className={`nav-link rounded-pill px-4 px-sm-5 py-2 fw-bold ls-1 smallest d-flex align-items-center justify-content-center transition-all tour-gear-tab ${activeTab === 'gear' ? 'bg-dark text-white active shadow-sm' : 'text-muted'}`}
                             style={{ minWidth: 'fit-content' }}
                         >
-                            <Bell size={14} className="me-1 me-sm-2" /> GEAR
+                            <Bell size={14} className="me-2" /> SETTINGS
                         </button>
                     </div>
                 </div>
@@ -470,9 +442,9 @@ const Profile: React.FC = () => {
                                                             style={{ cursor: 'pointer' }}
                                                             onClick={() => navigate('/achievements')}
                                                         >
-                                                            <div className={`p-2 rounded-4 transition-all ${isEarned ? 'bg-white shadow-sm border border-warning' : 'opacity-25 bg-light grayscale border-dashed border-2'}`}>
+                                                            <div className={`p-2 rounded-4 transition-all ${isEarned ? 'bg-white shadow-sm border border-warning' : 'bg-white border'}`}>
                                                                 <TrophyIcon
-                                                                    rarity={isEarned ? trophy.rarity as any : 'locked'}
+                                                                    rarity={trophy.rarity as any}
                                                                     size={48}
                                                                     animate={isEarned}
                                                                     color={trophy.color}
@@ -548,102 +520,14 @@ const Profile: React.FC = () => {
 
                                     <p className="small text-muted mb-0 d-flex align-items-center gap-2">
                                         <Info size={14} />
-                                        Earn {levelStats.pointsForNextLevel - levelStats.pointsInCurrentLevel} more LP to reach Level {levelStats.level + 1}
+                                        Earn {levelStats.pointsForNextLevel - levelStats.pointsInCurrentLevel} more XP to level up your rank!
                                     </p>
                                 </div>
                                 <div className="position-absolute end-0 bottom-0 opacity-10 display-1 p-4"><Shield size={120} strokeWidth={1} /></div>
                             </div>
-                        </section>
-                    </div>
-                )}
 
-                {activeTab === 'mastery' && (
-                    <div className="animate__animated animate__fadeIn">
-                        {/* MASTERY PATH - High Fidelity Zigzag Map */}
-                        <div className="card border-0 shadow-sm rounded-4 p-4 p-md-5 mb-5 bg-white overflow-hidden">
-                            <div className="text-center mb-5">
-                                <h5 className="fw-bold mb-1 text-uppercase ls-2 smallest text-muted">Venda Mastery Path</h5>
-                                <h3 className="fw-bold text-dark">Your Journey to Fluency</h3>
-                            </div>
-
-                            <div className="mastery-path position-relative py-5">
-                                {/* The connecting path line - Zigzag dynamic path */}
-                                <svg className="position-absolute start-0 top-0 w-100 h-100" style={{ zIndex: 0, overflow: 'visible' }}>
-                                    <path
-                                        d={milestones.map((_, idx) => {
-                                            const isRightStagger = idx % 2 === 0;
-                                            const x = isRightStagger ? '25%' : '75%';
-                                            const y = `${(idx * 100) / (milestones.length - 1)}%`;
-                                            return `${idx === 0 ? 'M' : 'L'} ${x} ${y}`;
-                                        }).reverse().join(' ')}
-                                        stroke="url(#pathGradient)"
-                                        strokeWidth="6"
-                                        strokeDasharray="12 12"
-                                        fill="none"
-                                        className="path-animation"
-                                        strokeLinecap="round"
-                                    />
-                                    <defs>
-                                        <linearGradient id="pathGradient" x1="0%" y1="0%" x2="0%" y2="100%">
-                                            <stop offset="0%" stopColor="#FACC15" stopOpacity="1" />
-                                            <stop offset="100%" stopColor="#111827" stopOpacity="0.3" />
-                                        </linearGradient>
-                                    </defs>
-                                </svg>
-
-                                <div className="d-flex flex-column gap-5 position-relative z-1">
-                                    {[...milestones].reverse().map((m, idx) => {
-                                        const isReached = levelStats.level >= m.level;
-                                        const isCurrent = levelStats.level >= m.level && (idx === 0 || levelStats.level < [...milestones].reverse()[idx - 1].level);
-                                        const badge = getBadgeDetails(m.level);
-                                        const isRight = idx % 2 === 0;
-
-                                        return (
-                                            <div key={m.level} className={`path-node d-flex align-items-center justify-content-center w-100 gap-4 ${isReached ? 'reached' : 'locked'} ${isCurrent ? 'current' : ''}`}>
-                                                <div className={`node-content d-flex align-items-center gap-3 ${isRight ? 'flex-row' : 'flex-row-reverse text-end'}`} style={{ width: '100%', maxWidth: '500px' }}>
-
-                                                    <div className="flex-grow-1 d-none d-md-block" style={{ width: '150px' }}>
-                                                        <h6 className={`fw-bold mb-0 ${isReached ? 'text-dark' : 'text-muted'}`}>{badge.name}</h6>
-                                                        <span className="smallest text-muted uppercase ls-1">{m.label}</span>
-                                                    </div>
-
-                                                    <div className="node-icon-wrapper position-relative">
-                                                        <div className={`milestone-circle shadow-lg d-flex align-items-center justify-content-center rounded-circle transition-all ${isReached ? 'heartbeat-sm' : ''}`}
-                                                            style={{
-                                                                width: isCurrent ? '85px' : '70px',
-                                                                height: isCurrent ? '85px' : '70px',
-                                                                backgroundColor: isReached ? badge.color : '#f1f5f9',
-                                                                border: isCurrent ? `4px solid #111827` : isReached ? `2px solid white` : '2px dashed #cbd5e1',
-                                                                fontSize: isCurrent ? '1.8rem' : '1.5rem',
-                                                                color: isReached ? 'white' : '#94a3b8',
-                                                                zIndex: isCurrent ? 10 : 1,
-                                                                boxShadow: isCurrent ? `0 0 20px ${badge.color}66` : 'none'
-                                                            }}>
-                                                            <i className={`bi ${badge.icon}`}></i>
-                                                        </div>
-                                                        {isReached && !isCurrent && (
-                                                            <div className="position-absolute top-0 end-0 bg-success text-white rounded-circle d-flex align-items-center justify-content-center shadow-sm" style={{ width: 22, height: 22, border: '2px solid white' }}>
-                                                                <CheckCircle size={12} fill="currentColor" />
-                                                            </div>
-                                                        )}
-                                                    </div>
-
-                                                    <div className="flex-grow-1" style={{ width: '150px' }}>
-                                                        <span className="smallest fw-bold text-muted ls-1 uppercase d-block">LEVEL {m.level}</span>
-                                                        {isReached ? (
-                                                            <span className="badge bg-success-subtle text-success border border-success-subtle rounded-pill smallest px-2">UNLOCKED</span>
-                                                        ) : (
-                                                            <span className="badge bg-light text-muted border border-light-subtle rounded-pill smallest px-2">LOCKED</span>
-                                                        )}
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        );
-                                    })}
-                                </div>
-                            </div>
-
-                            <div className="mt-5 pt-5 border-top">
+                            {/* DAILY ACTIVITY LOG (Moved from Mastery) */}
+                            <div className="mt-5">
                                 <StreakCalendar
                                     activityHistory={userData?.activityHistory || []}
                                     streakFreezes={userData?.streakFreezes || 0}
@@ -651,9 +535,10 @@ const Profile: React.FC = () => {
                                     onBuyFreeze={handleBuyFreeze}
                                 />
                             </div>
-                        </div>
+                        </section>
                     </div>
                 )}
+
 
                 {activeTab === 'gear' && (
                     <div className="animate__animated animate__fadeIn">
@@ -811,9 +696,9 @@ const Profile: React.FC = () => {
                             <div className="bg-dark text-white p-5 rounded-4 position-relative overflow-hidden shadow-lg mb-4">
                                 <div className="position-relative z-1">
                                     <p className="smallest fw-bold ls-2 text-uppercase mb-2" style={{ color: '#FACC15' }}>Referral Rewards</p>
-                                    <h2 className="fw-bold mb-3">Invite & Earn 500 LP</h2>
+                                    <h2 className="fw-bold mb-3">Invite & Earn 500 XP</h2>
                                     <p className="small opacity-75 mb-4 pe-lg-5">
-                                        Ramba vhangana vhavho! Spread the language. You'll receive 500 Learning Points for every warrior who joins through your link.
+                                        Ramba vhangana vhavho! Spread the language. You'll receive 500 XP for every warrior who joins through your link.
                                     </p>
 
                                     {unclaimedInvites.length > 0 && (
@@ -824,7 +709,7 @@ const Profile: React.FC = () => {
                                                 className="w-100 py-3 fw-bold ls-1 shadow-lg text-dark d-flex align-items-center justify-content-center gap-2"
                                                 style={{ border: '2px solid #000' }}
                                             >
-                                                {claimLoading ? 'CLAIMING...' : <><Gift size={20} /> CLAIM {unclaimedInvites.length * 500} LP REWARDS</>}
+                                                {claimLoading ? 'CLAIMING...' : <><Gift size={20} /> CLAIM {unclaimedInvites.length * 500} XP REWARDS</>}
                                             </JuicyButton>
                                         </div>
                                     )}
@@ -900,10 +785,6 @@ const Profile: React.FC = () => {
                     transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
                 }
 
-                .path-node.locked {
-                    filter: saturate(0.5);
-                    opacity: 0.7;
-                }
 
                 .path-animation {
                     stroke-dashoffset: 1000;
@@ -922,6 +803,16 @@ const Profile: React.FC = () => {
                     scrollbar-width: none;
                 }
             `}</style>
+            {showLogout && (
+                <LogoutModal 
+                    onClose={() => setShowLogout(false)} 
+                    onConfirm={async () => {
+                        await signOut(auth);
+                        invalidateCache();
+                        navigate('/login');
+                    }}
+                />
+            )}
         </div>
     );
 };

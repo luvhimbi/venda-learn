@@ -165,7 +165,7 @@ const StreakCalendar: React.FC<StreakCalendarProps> = ({ activityHistory, streak
                         disabled={points < FREEZE_COST}
                         className="btn btn-sm btn-dark rounded-pill px-3 fw-bold smallest ls-1"
                     >
-                        BUY FOR {FREEZE_COST} LP
+                        BUY FOR {FREEZE_COST} XP
                     </button>
                 </div>
                 <p className="smallest text-muted mb-0 italic">

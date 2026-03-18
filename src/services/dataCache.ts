@@ -4,7 +4,8 @@
 
 import { db, auth } from './firebaseConfig';
 import type { Firestore } from 'firebase/firestore';
-import { collection, getDocs, doc, getDoc, setDoc, query, orderBy, limit } from 'firebase/firestore';
+import { collection, getDocs, doc, getDoc, setDoc, query, orderBy, limit, where } from 'firebase/firestore';
+import { getCurrentWeekIdentifier } from './levelUtils';
 
 
 interface CacheEntry<T> {
@@ -165,6 +166,35 @@ export const fetchTopLearners = async (count = 5): Promise<any[]> => {
 
     setCache(cacheKey, learners);
     return learners;
+};
+
+export const fetchTopLearnersByWeek = async (count = 20): Promise<any[]> => {
+    const currentWeek = getCurrentWeekIdentifier();
+    const cacheKey = `topLearners_weekly_${count}_${currentWeek}`;
+    const cached = getCached<any[]>(cacheKey);
+    if (cached) return cached;
+
+    try {
+        const q = query(
+            collection(db as Firestore, "users"),
+            where("lastActiveWeek", "==", currentWeek),
+            orderBy("weeklyXP", "desc"),
+            limit(count)
+        );
+        const snap = await getDocs(q);
+        const learners = snap.docs.map(d => ({
+            id: d.id,
+            ...d.data(),
+            points: Number(d.data().weeklyXP || 0) // We use weeklyXP for the leaderboard points
+        }));
+
+        setCache(cacheKey, learners);
+        return learners;
+    } catch (e: any) {
+        console.error("Weekly leaderboard fetch failed:", e);
+        // Fallback to total points if weekly query fails (e.g. missing index)
+        return fetchTopLearners(count);
+    }
 };
 
 export const fetchDailyWord = async (): Promise<any> => {

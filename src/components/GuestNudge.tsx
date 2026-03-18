@@ -43,7 +43,7 @@ const GuestNudge: React.FC = () => {
 
                 <div className="flex-grow-1">
                     <h6 className="fw-bold mb-1 small ls-1">DON'T LOSE PROGRESS!</h6>
-                    <p className="smallest mb-0 opacity-75 ls-tight">You're in Guest Mode. Sign up now to save your LP and progress permanently.</p>
+                    <p className="smallest mb-0 opacity-75 ls-tight">You're in Guest Mode. Sign up now to save your XP and progress permanently.</p>
                 </div>
 
                 <div className="d-flex align-items-center gap-2">

@@ -39,9 +39,9 @@ const Stories: React.FC = () => {
             return;
         }
 
-        // 2. Award 15 LP
-        const LP_REWARD = 15;
-        const result = await completeStory(id, LP_REWARD);
+        // 2. Award 15 XP
+        const XP_REWARD = 15;
+        const result = await completeStory(id, XP_REWARD);
         const success = result.success;
         const streakResult = result.streakResult;
 
@@ -49,7 +49,7 @@ const Stories: React.FC = () => {
             setUserCompletedList(prev => [...prev, id]); // Update local state
             Swal.fire({
                 title: 'Zwivhuya!',
-                text: `You earned ${LP_REWARD} LP for finishing this Ngano!`,
+                text: `You earned ${XP_REWARD} XP for finishing this Ngano!`,
                 icon: 'success',
                 confirmButtonColor: '#0d6efd',
                 customClass: { popup: 'rounded-4' }
@@ -129,7 +129,7 @@ const Stories: React.FC = () => {
                                     <h4 className="fw-bold mb-2">{story.title}</h4>
                                     <div className="d-flex align-items-center text-muted mb-4 gap-2">
                                         {isDone ? <Sparkles size={18} className="text-warning" /> : <Gem size={18} className="text-primary" />}
-                                        <span className="small fw-bold">{isDone ? 'Completed' : '15 LP Reward'}</span>
+                                        <span className="small fw-bold">{isDone ? 'Completed' : '15 XP Reward'}</span>
                                     </div>
                                     <button className={`btn ${isDone ? 'btn-outline-secondary' : 'btn-primary'} w-100 rounded-pill fw-bold py-3 shadow-sm`} onClick={() => setActiveStory(story)}>
                                         {isDone ? 'RE-READ STORY' : 'START READING'}

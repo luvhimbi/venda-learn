@@ -45,7 +45,7 @@ const AchievementCard: React.FC<AchievementCardProps> = ({
             <div className="d-flex flex-column align-items-center text-center">
                 <div className="mb-4 position-relative">
                     <TrophyIcon 
-                        rarity={isEarned ? rarity : 'locked'} 
+                        rarity={rarity} 
                         size={80} 
                         color={color}
                         animate={isEarned}
@@ -108,14 +108,13 @@ const AchievementCard: React.FC<AchievementCardProps> = ({
                     border-color: ${color} !important;
                 }
                 .achievement-card.locked {
-                    filter: grayscale(0.8);
-                    opacity: 0.8;
+                    /* Removed grayscale as per user request to show what they are working towards */
+                    border-style: solid;
+                    border-color: #f1f5f9;
                 }
                 .achievement-card.locked:hover {
-                    filter: grayscale(0.4);
-                    opacity: 1;
                     background-color: #fff !important;
-                    border-style: solid;
+                    border-color: #e2e8f0;
                 }
                 .share-badge:hover {
                     transform: scale(1.1);

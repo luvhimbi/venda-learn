@@ -47,9 +47,9 @@ const CourseLessons: React.FC = () => {
 
     const getDifficultyStyle = (d: string) => {
         const diff = d?.toLowerCase();
-        if (diff === 'beginner') return { color: '#10B981', bg: '#EDFDF5', label: 'MAVHAYI', icon: <Sprout size={14} className="me-1" /> };
-        if (diff === 'intermediate') return { color: '#F59E0B', bg: '#FFFBEB', label: 'VHUKATI', icon: <Shield size={14} className="me-1" /> };
-        return { color: '#EF4444', bg: '#FEF2F2', label: 'VHUḒU', icon: <Flame size={14} className="me-1" /> };
+        if (diff === 'beginner') return { color: '#10B981', bg: '#EDFDF5', label: 'BEGINNER', icon: <Sprout size={14} className="me-1" /> };
+        if (diff === 'intermediate') return { color: '#F59E0B', bg: '#FFFBEB', label: 'INTERMEDIATE', icon: <Shield size={14} className="me-1" /> };
+        return { color: '#EF4444', bg: '#FEF2F2', label: 'ADVANCED', icon: <Flame size={14} className="me-1" /> };
     };
 
     if (loading) return (
@@ -87,19 +87,18 @@ const CourseLessons: React.FC = () => {
         <div className="bg-white min-vh-100">
             {/* HERO HEADER */}
             <div className="position-relative overflow-hidden" style={{
-                background: allDone
-                    ? 'linear-gradient(135deg, #065F46, #047857)'
-                    : 'linear-gradient(135deg, #1e293b, #0f172a)',
-                padding: '2rem 1rem 3rem'
+                background: '#ffffff',
+                padding: '2rem 1rem 3rem',
+                borderBottom: '1px solid #f3f4f6'
             }}>
                 {/* Decorative circles */}
-                <div className="position-absolute" style={{ width: 200, height: 200, borderRadius: '50%', background: 'rgba(250,204,21,.06)', top: -60, right: -40 }}></div>
-                <div className="position-absolute" style={{ width: 120, height: 120, borderRadius: '50%', background: 'rgba(250,204,21,.04)', bottom: -30, left: -20 }}></div>
+                <div className="position-absolute" style={{ width: 200, height: 200, borderRadius: '50%', background: 'rgba(250,204,21,.04)', top: -60, right: -40 }}></div>
+                <div className="position-absolute" style={{ width: 120, height: 120, borderRadius: '50%', background: 'rgba(250,204,21,.02)', bottom: -30, left: -20 }}></div>
 
                 <div className="container" style={{ maxWidth: '700px' }}>
                     <button
                         className="btn btn-link text-decoration-none p-0 mb-4 d-flex align-items-center gap-2 fw-bold smallest ls-1 text-uppercase"
-                        style={{ color: 'rgba(255,255,255,.6)' }}
+                        style={{ color: 'rgba(0,0,0,.4)' }}
                         onClick={() => navigate('/courses')}
                     >
                         <i className="bi bi-arrow-left"></i> All Courses
@@ -107,19 +106,19 @@ const CourseLessons: React.FC = () => {
 
                     <div className="d-flex align-items-center gap-2 mb-2">
                         <span className="smallest fw-bold ls-1 px-2 py-1 rounded-pill"
-                            style={{ color: diffStyle.color, backgroundColor: 'rgba(255,255,255,.1)', border: `1px solid ${diffStyle.color}40` }}>
+                            style={{ color: diffStyle.color, backgroundColor: `${diffStyle.color}10`, border: `1px solid ${diffStyle.color}40` }}>
                             {diffStyle.icon} {diffStyle.label}
                         </span>
-                        {allDone && <span className="smallest fw-bold ls-1 text-white" style={{ color: '#6EE7B7' }}>✓ COMPLETED</span>}
+                        {allDone && <span className="smallest fw-bold ls-1 text-success">✓ COMPLETED</span>}
                     </div>
 
-                    <h2 className="fw-bold text-white mb-1 ls-tight" style={{ fontSize: '2rem' }}>{course.title}</h2>
-                    <p className="mb-3" style={{ color: 'rgba(255,255,255,.5)', fontSize: '0.95rem' }}>{course.vendaTitle}</p>
+                    <h2 className="fw-bold text-dark mb-1 ls-tight" style={{ fontSize: '2rem' }}>{course.title}</h2>
+                    <p className="mb-3" style={{ color: 'rgba(0,0,0,.4)', fontSize: '0.95rem' }}>{course.vendaTitle}</p>
 
                     {/* Progress */}
                     <div className="d-flex align-items-center gap-3">
                         <div className="flex-grow-1">
-                            <div className="progress" style={{ height: '8px', borderRadius: 10, backgroundColor: 'rgba(255,255,255,.1)' }}>
+                            <div className="progress" style={{ height: '8px', borderRadius: 10, backgroundColor: 'rgba(0,0,0,.04)' }}>
                                 <div className="progress-bar" style={{
                                     width: `${courseProgress}%`,
                                     backgroundColor: allDone ? '#6EE7B7' : '#FACC15',

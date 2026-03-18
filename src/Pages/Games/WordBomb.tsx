@@ -442,11 +442,11 @@ const WordBomb: React.FC = () => {
                     <p className="text-muted mb-0" style={{ maxWidth: '300px', fontSize: '1.1rem' }}>English words fall from the sky. Type the Venda translation!</p>
                 </div>
 
-                <div className="d-flex flex-column gap-3 w-100 mt-4" style={{ maxWidth: '400px' }}>
+                <div className="d-flex flex-column gap-3 w-100 mt-4 px-3" style={{ maxWidth: '400px' }}>
                     <button
                         onClick={startGame}
-                        className="btn-game btn-game-primary w-100 p-4 rounded-4 fw-bold shadow-lg transition-all"
-                        style={{ fontSize: '1.4rem', letterSpacing: '2px', padding: '20px !important' }}
+                        className="btn-game btn-game-primary w-100 p-3 p-md-4 rounded-4 fw-bold shadow-lg transition-all"
+                        style={{ fontSize: isMobile ? '1.1rem' : '1.4rem', letterSpacing: '2px' }}
                     >
                         START GAME
                     </button>
@@ -516,24 +516,24 @@ const WordBomb: React.FC = () => {
             {/* GAME HUD / HEADER */}
             {gameStatus === 'playing' && (
                 <div className={`position-absolute top-0 start-0 ${isMobile ? 'p-2' : 'p-4'} w-100 d-flex justify-content-between align-items-center`} style={{ zIndex: 50 }}>
-                    <div className="d-flex align-items-center gap-2 gap-md-3">
-                        <Mascot width={isMobile ? "60px" : "80px"} height={isMobile ? "60px" : "80px"} mood={mascotMood} className="shadow-sm rounded-circle bg-white p-1" />
-                        <div className={`${isMobile ? 'p-2' : 'p-3'} bg-dark bg-opacity-75 text-white rounded-4 shadow-lg backdrop-blur border border-warning border-opacity-25`}>
-                            <h5 className={`mb-0 fw-bold ls-1 ${isMobile ? 'small' : ''}`}>SCORE: {score}</h5>
+                    <div className="d-flex align-items-center gap-1 gap-md-3">
+                        <Mascot width={isMobile ? "50px" : "80px"} height={isMobile ? "50px" : "80px"} mood={mascotMood} className="shadow-sm rounded-circle bg-white p-1 border" />
+                        <div className={`${isMobile ? 'p-1 px-2' : 'p-3'} bg-white text-dark rounded-3 rounded-md-4 shadow-sm border border-warning border-opacity-50`}>
+                            <h5 className={`mb-0 fw-bold ls-1 ${isMobile ? 'smallest text-nowrap' : ''}`}>SCORE: {score}</h5>
                             <div className="d-flex align-items-center gap-2">
-                                <small className="text-warning fw-bold" style={{ fontSize: isMobile ? '10px' : '' }}>COMBO: {combo}</small>
-                                <small className="text-white-50" style={{ fontSize: isMobile ? '10px' : '' }}>SPD: {speedLevel}</small>
+                                <small className="text-warning fw-bold" style={{ fontSize: isMobile ? '9px' : '' }}>C:{combo}</small>
+                                <small className="text-muted" style={{ fontSize: isMobile ? '9px' : '' }}>S:{speedLevel}</small>
                             </div>
                         </div>
                     </div>
-                    <div className={`${isMobile ? 'p-2' : 'p-3'} bg-dark bg-opacity-75 text-white rounded-4 shadow-lg backdrop-blur border border-danger border-opacity-25`}>
+                    <div className={`${isMobile ? 'p-1 px-2' : 'p-3'} bg-white text-dark rounded-3 rounded-md-4 shadow-sm border border-danger border-opacity-50`}>
                         <div className="d-flex gap-1 gap-md-2">
                             {[...Array(INITIAL_LIVES)].map((_, i) => (
                                 <Heart
                                     key={i}
-                                    size={isMobile ? 16 : 24}
+                                    size={isMobile ? 12 : 24}
                                     fill={i < lives ? "#ef4444" : "none"}
-                                    className={i < lives ? "text-danger animate__animated animate__pulse animate__infinite" : "text-white opacity-25"}
+                                    className={i < lives ? "text-danger animate__animated animate__pulse animate__infinite" : "text-muted opacity-25"}
                                 />
                             ))}
                         </div>
@@ -587,7 +587,7 @@ const WordBomb: React.FC = () => {
             {/* INPUT / PALETTE BAR */}
             {gameStatus === 'playing' && (
                 isMobile ? (
-                    <div className="wb-palette-bar">
+                    <div className="wb-palette-bar pb-safe">
                         <div className="wb-palette-grid">
                             {paletteOptions.map((opt) => (
                                 <button
@@ -595,7 +595,7 @@ const WordBomb: React.FC = () => {
                                     className="wb-palette-btn"
                                     onClick={() => { playClick(); handlePaletteSelection(opt.venda); }}
                                 >
-                                    {opt.venda}
+                                    <span className="text-truncate" style={{ maxWidth: '100%' }}>{opt.venda}</span>
                                 </button>
                             ))}
                         </div>
@@ -624,7 +624,7 @@ const WordBomb: React.FC = () => {
 
             <style>{`
                 .wb-bg {
-                    background: linear-gradient(180deg, #0f0f1a 0%, #1a1a2e 40%, #16213e 100%);
+                    background: #ffffff;
                     position: relative;
                     cursor: text;
                     height: 100vh;
@@ -632,9 +632,9 @@ const WordBomb: React.FC = () => {
                     overflow: hidden;
                 }
                 .wb-header {
-                    background: rgba(0,0,0,0.6);
+                    background: rgba(255,255,255,0.9);
                     backdrop-filter: blur(15px);
-                    border-bottom: 1px solid rgba(250,204,21,0.2);
+                    border-bottom: 1px solid rgba(0,0,0,0.1);
                     z-index: 100;
                     height: 60px;
                 }
@@ -651,18 +651,17 @@ const WordBomb: React.FC = () => {
                 }
                 .wb-word-text {
                     display: inline-block;
-                    background: rgba(15, 15, 26, 0.7);
-                    border: 1.5px solid rgba(250,204,21,0.5);
-                    color: #fff;
+                    background: #ffffff;
+                    border: 2px solid #111827;
+                    color: #111827;
                     font-weight: 700;
                     padding: clamp(6px, 2vw, 10px) clamp(12px, 4vw, 24px);
                     border-radius: 12px;
                     font-size: clamp(0.75rem, 3.5vw, 1.1rem);
-                    backdrop-filter: blur(8px);
-                    box-shadow: 0 4px 15px rgba(0,0,0,0.4), 0 0 20px rgba(250,204,21,0.1);
+                    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
                     animation: wordGlow 2s ease-in-out infinite;
                     white-space: nowrap;
-                    text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+                    text-shadow: none;
                 }
                 .wb-heart-pulse {
                     animation: heartPulse 1.5s infinite ease-in-out;
@@ -672,8 +671,8 @@ const WordBomb: React.FC = () => {
                     50% { transform: scale(1.15); filter: drop-shadow(0 0 5px #EF4444); }
                 }
                 @keyframes wordGlow {
-                    0%, 100% { border-color: rgba(250,204,21,0.4); box-shadow: 0 4px 15px rgba(0,0,0,0.4); }
-                    50% { border-color: rgba(250,204,21,0.8); box-shadow: 0 4px 20px rgba(250,204,21,0.2); }
+                    0%, 100% { border-color: rgba(17, 24, 39, 0.4); box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+                    50% { border-color: rgba(17, 24, 39, 0.8); box-shadow: 0 4px 20px rgba(0,0,0,0.1); }
                 }
                 .wb-explode {
                     animation: explode 0.5s forwards !important;
@@ -702,36 +701,35 @@ const WordBomb: React.FC = () => {
                     right: 0;
                     height: 4px;
                     background: linear-gradient(90deg, transparent, #EF4444, #FACC15, #EF4444, transparent);
-                    box-shadow: 0 0 20px rgba(239,68,68,0.4);
+                    box-shadow: 0 0 20px rgba(239,68,68,0.2);
                 }
                 .wb-input-bar {
-                    background: rgba(0,0,0,0.7);
-                    backdrop-filter: blur(15px);
-                    border-top: 1px solid rgba(250,204,21,0.2);
+                    background: #ffffff;
+                    border-top: 1px solid rgba(0,0,0,0.1);
                     z-index: 100;
                     padding: clamp(10px, 3vw, 20px) !important;
                 }
                 .wb-input {
-                    background: rgba(255,255,255,0.05) !important;
-                    border: 2px solid rgba(250,204,21,0.2) !important;
-                    color: #fff !important;
+                    background: #f9fafb !important;
+                    border: 2px solid #e5e7eb !important;
+                    color: #111827 !important;
                     border-radius: 12px !important;
-                    font-size: 16px !important; /* Prevents auto-zoom on mobile */
+                    font-size: 16px !important;
                     padding: clamp(10px, 2.5vw, 14px) 16px !important;
                     flex: 1;
                 }
-                .wb-input::placeholder { color: rgba(255,255,255,0.2) !important; }
+                .wb-input::placeholder { color: #9ca3af !important; }
                 .wb-input:focus {
                     border-color: #FACC15 !important;
-                    box-shadow: 0 0 20px rgba(250,204,21,0.15) !important;
-                    background: rgba(255,255,255,0.1) !important;
+                    box-shadow: 0 0 20px rgba(250, 204, 21, 0.1) !important;
+                    background: #ffffff !important;
                 }
                 .wb-submit-btn {
-                    background: linear-gradient(135deg, #FACC15, #F59E0B) !important;
+                    background: #111827 !important;
                     border: none !important;
                     border-radius: 12px !important;
-                    color: #000 !important;
-                    box-shadow: 0 4px 0 #A1810B !important;
+                    color: #ffffff !important;
+                    box-shadow: 0 4px 0 #000 !important;
                     transition: transform 0.1s;
                 }
                 .wb-submit-btn:active {
@@ -775,12 +773,13 @@ const WordBomb: React.FC = () => {
 
                 /* Mobile palette */
                 .wb-palette-bar {
-                    background: rgba(0,0,0,0.85);
-                    backdrop-filter: blur(20px);
-                    border-top: 1px solid rgba(250,204,21,0.2);
-                    padding: 8px 10px;
+                    background: #ffffff;
+                    border-top: 1px solid rgba(0,0,0,0.1);
+                    padding: 8px 6px;
                     z-index: 100;
+                    position: relative;
                 }
+                .pb-safe { padding-bottom: max(8px, env(safe-area-inset-bottom)); }
                 .wb-palette-grid {
                     display: grid;
                     grid-template-columns: repeat(4, 1fr);
@@ -788,22 +787,28 @@ const WordBomb: React.FC = () => {
                     width: 100%;
                 }
                 .wb-palette-btn {
-                    background: rgba(255,255,255,0.08);
-                    border: 1px solid rgba(250,204,21,0.25);
-                    color: #fff;
+                    background: #f3f4f6;
+                    border: 2px solid #e5e7eb;
+                    color: #111827;
                     border-radius: 10px;
-                    padding: 10px 4px;
+                    padding: 6px 2px;
                     font-size: 0.8rem;
-                    font-weight: 600;
+                    font-weight: 700;
                     text-align: center;
-                    min-height: 42px;
+                    min-height: 40px;
                     transition: all 0.1s;
+                    box-shadow: 0 2px 0 #d1d5db;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    overflow: hidden;
                 }
                 .wb-palette-btn:active {
-                    background: #FACC15;
-                    color: #000;
-                    transform: scale(0.95);
-                    border-color: #FACC15;
+                    transform: translateY(2px);
+                    box-shadow: none;
+                }
+                    transform: translateY(2px);
+                    box-shadow: none;
                 }
             `}</style>
         </div>

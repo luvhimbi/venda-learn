@@ -134,7 +134,7 @@ const LandingPage: React.FC = () => {
                                 <div className="bg-light rounded-4 p-4 border shadow-sm" style={{ transform: 'rotate(-1deg)' }}>
                                     <div className="d-flex justify-content-between align-items-center mb-4">
                                         <h5 className="fw-bold mb-0 text-dark">Mitambo (Games)</h5>
-                                        <div className="badge bg-warning text-dark px-3 py-2 rounded-pill fw-bold">1200 LP</div>
+                                        <div className="badge bg-warning text-dark px-3 py-2 rounded-pill fw-bold">1200 XP</div>
                                     </div>
                                     <div className="row g-3">
                                         <div className="col-6">
@@ -161,7 +161,7 @@ const LandingPage: React.FC = () => {
                             <span className="badge bg-danger text-white mb-3 px-3 py-2 rounded-pill fw-bold ls-1 smallest">PLAY & LEARN</span>
                             <h2 className="display-5 fw-bold ls-tight mb-4">Master words under pressure.</h2>
                             <p className="lead text-muted mb-4">
-                                Testing your memory is one thing, but recalling words under pressure builds true fluency. 
+                                Testing your memory is one thing, but recalling words under pressure builds true fluency.
                                 Our interactive minigames are designed to make vocabulary stick while you have fun.
                             </p>
                             <ul className="list-unstyled d-flex flex-column gap-3 mb-5">
@@ -175,7 +175,7 @@ const LandingPage: React.FC = () => {
                                 </li>
                                 <li className="d-flex align-items-center gap-3">
                                     <i className="bi bi-check-circle-fill text-success fs-5"></i>
-                                    <span className="fw-bold text-slate">Earn Leaderboard Points (LP) to rank up</span>
+                                    <span className="fw-bold text-slate">Earn Leaderboard Points (XP) to rank up</span>
                                 </li>
                             </ul>
                             <button onClick={() => navigate('/mitambo')} className="btn btn-outline-dark px-4 py-2 fw-bold rounded-pill shadow-none">
@@ -204,7 +204,7 @@ const LandingPage: React.FC = () => {
                             </button>
                         </div>
                         <div className="col-lg-6 order-1 order-lg-2">
-                             <div className="d-flex gap-3 px-3">
+                            <div className="d-flex gap-3 px-3">
                                 <div className="d-flex flex-column gap-3 mt-5">
                                     <div className="bg-white p-4 rounded-4 shadow-sm border text-center hover-lift" style={{ width: '220px' }}>
                                         <div className="bg-warning bg-opacity-10 rounded-circle d-flex align-items-center justify-content-center mx-auto mb-3" style={{ width: 60, height: 60 }}>
@@ -222,14 +222,14 @@ const LandingPage: React.FC = () => {
                                     </div>
                                 </div>
                                 <div className="d-flex flex-column gap-3">
-                                     <div className="bg-white p-4 rounded-4 shadow-sm border text-center hover-lift" style={{ width: '220px' }}>
+                                    <div className="bg-white p-4 rounded-4 shadow-sm border text-center hover-lift" style={{ width: '220px' }}>
                                         <div className="bg-primary bg-opacity-10 rounded-circle d-flex align-items-center justify-content-center mx-auto mb-3" style={{ width: 60, height: 60 }}>
                                             <i className="bi bi-geo-alt-fill text-primary fs-3"></i>
                                         </div>
                                         <h6 className="fw-bold mb-1">Thohoyandou</h6>
                                         <p className="smallest text-muted mb-0">The capital city</p>
                                     </div>
-                                     <div className="bg-white p-4 rounded-4 shadow-sm border text-center hover-lift" style={{ width: '220px' }}>
+                                    <div className="bg-white p-4 rounded-4 shadow-sm border text-center hover-lift" style={{ width: '220px' }}>
                                         <div className="bg-success bg-opacity-10 rounded-circle d-flex align-items-center justify-content-center mx-auto mb-3" style={{ width: 60, height: 60 }}>
                                             <i className="bi bi-brush-fill text-success fs-3"></i>
                                         </div>
@@ -237,7 +237,7 @@ const LandingPage: React.FC = () => {
                                         <p className="smallest text-muted mb-0">Pottery & beadwork</p>
                                     </div>
                                 </div>
-                             </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -257,7 +257,7 @@ const LandingPage: React.FC = () => {
                             { q: "Do I need any prior experience with Tshivenda?", a: "Not at all. Our courses are designed for absolute beginners, starting from basic greetings and vocabulary." },
                             { q: "Can I use VendaLearn on my phone?", a: "Yes! VendaLearn is a Progressive Web App (PWA). You can 'Install' it directly from your mobile browser to your home screen." },
                             { q: "Are the audio pronunciations accurate?", a: "Yes, all our audio clips are recorded to ensure you learn the correct authentic Venda pronunciation." },
-                            { q: "How does the Leaderboard work?", a: "You earn Leaderboard Points (LP) by completing lessons, maintaining streaks, and playing minigames. Compete with others to reach the top ranks!" }
+                            { q: "How does the Leaderboard work?", a: "You earn Leaderboard Points (XP) by completing lessons, maintaining streaks, and playing minigames. Compete with others to reach the top ranks!" }
                         ].map((faq, i) => (
                             <div className="accordion-item" key={i}>
                                 <h2 className="accordion-header">
@@ -297,5 +297,6 @@ const LandingPage: React.FC = () => {
         </div>
     );
 };
+
 
 export default LandingPage;

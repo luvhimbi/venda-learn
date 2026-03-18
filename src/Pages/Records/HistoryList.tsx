@@ -225,7 +225,7 @@ const HistoryList: React.FC = () => {
                                                 Browsing as Guest
                                             </h5>
                                             <p className="mb-0 text-muted small" style={{ maxWidth: '600px' }}>
-                                                You can read a preview of every story. Log in or create a free account to unlock full stories, save your reading progress, and earn Learning Points!
+                                                You can read a preview of every story. Log in or create a free account to unlock full stories, save your reading progress, and earn XP!
                                             </p>
                                         </div>
                                     </div>

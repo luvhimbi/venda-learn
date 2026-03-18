@@ -164,9 +164,9 @@ const SyllableBuilder: React.FC = () => {
     };
 
     if (loading) return (
-        <div className="min-vh-100 d-flex flex-column justify-content-center align-items-center" style={{ background: 'linear-gradient(180deg, #111827, #1F2937)' }}>
+        <div className="min-vh-100 bg-white d-flex flex-column justify-content-center align-items-center">
             <Mascot width="100px" height="100px" mood="excited" />
-            <p className="text-white-50 mt-3 fw-bold" style={{ fontSize: '12px', letterSpacing: '2px', textTransform: 'uppercase' }}>Loading puzzles...</p>
+            <p className="text-muted mt-3 fw-bold" style={{ fontSize: '12px', letterSpacing: '2px', textTransform: 'uppercase' }}>Loading puzzles...</p>
         </div>
     );
 
@@ -189,7 +189,7 @@ const SyllableBuilder: React.FC = () => {
                     </div>
 
                     <div className="d-flex flex-column gap-3 w-100">
-                        {['easy', 'medium', 'hard'].map((lvl) => (
+                        {['Beginner', 'Intermediate', 'Advanced'].map((lvl) => (
                             <button
                                 key={lvl}
                                 onClick={() => startLevel(lvl)}
@@ -200,7 +200,7 @@ const SyllableBuilder: React.FC = () => {
                                     <div>
                                         <h2 className="h5 fw-bold mb-1 text-capitalize">{lvl}</h2>
                                         <p className="text-muted small mb-0">
-                                            {lvl === 'easy' ? 'Simple 2-syllable words' : lvl === 'medium' ? 'Common 3-syllable words' : 'Complex Tshivenda structures'}
+                                            {lvl === 'Beginner' ? 'Simple 2-syllable words' : lvl === 'Intermediate' ? 'Common 3-syllable words' : 'Complex Tshivenda structures'}
                                         </p>
                                     </div>
                                     <ChevronRight className="text-muted" />
@@ -225,20 +225,20 @@ const SyllableBuilder: React.FC = () => {
     const expectedSlots = currentPuzzle?.syllables.length || 0;
 
     return (
-        <div className="min-vh-100 d-flex flex-column" style={{ background: 'linear-gradient(180deg, #111827 0%, #1F2937 25%, #F9FAFB 25%)' }}>
+        <div className="min-vh-100 d-flex flex-column bg-white">
 
-            {/* DARK HEADER */}
-            <div className="px-3 pt-4 pb-5" style={{ color: 'white' }}>
+            {/* HEADER */}
+            <div className="px-3 pt-4 pb-5" style={{ color: '#111827' }}>
                 <div className="container" style={{ maxWidth: '700px' }}>
                     <div className="d-flex justify-content-between align-items-center mb-3">
-                        <button onClick={() => navigate('/mitambo')} className="btn btn-link text-decoration-none p-0 text-white fw-bold" style={{ fontSize: '11px', letterSpacing: '2px' }}>
+                        <button onClick={() => navigate('/mitambo')} className="btn btn-link text-decoration-none p-0 text-dark fw-bold" style={{ fontSize: '11px', letterSpacing: '2px' }}>
                             <i className="bi bi-x-lg me-2"></i>EXIT
                         </button>
                         <div className="d-flex align-items-center gap-3">
                             {streak > 0 && (
                                 <div className="d-flex align-items-center gap-1 glow-pulse" title="Daily Streak">
                                     <Flame size={18} color="#EF4444" fill="#EF4444" />
-                                    <span className="fw-bold small text-white">{streak}</span>
+                                    <span className="fw-bold small text-dark">{streak}</span>
                                 </div>
                             )}
                             <Mascot width="45px" height="45px" mood={status === 'correct' ? 'excited' : status === 'wrong' ? 'sad' : 'happy'} />
@@ -248,7 +248,7 @@ const SyllableBuilder: React.FC = () => {
                         </div>
                     </div>
                     <div className="d-flex align-items-center justify-content-between">
-                        <span style={{ color: 'rgba(255,255,255,0.5)', fontSize: '11px', fontWeight: 700, letterSpacing: '1px' }}>
+                        <span style={{ color: 'rgba(0,0,0,0.5)', fontSize: '11px', fontWeight: 700, letterSpacing: '1px' }}>
                             PUZZLE {currentIndex + 1} / {puzzles.length}
                         </span>
                         <span className="badge rounded-pill px-3 py-2 fw-bold d-flex align-items-center gap-1" style={{ background: '#FACC15', color: '#111827', fontSize: '12px' }}>
@@ -256,7 +256,7 @@ const SyllableBuilder: React.FC = () => {
                         </span>
                     </div>
                     <div className="mt-2">
-                        <div className="progress" style={{ height: '5px', borderRadius: 10, backgroundColor: 'rgba(255,255,255,.12)' }}>
+                        <div className="progress" style={{ height: '5px', borderRadius: 10, backgroundColor: 'rgba(0,0,0,.08)' }}>
                             <div className="progress-bar" style={{ width: `${((currentIndex + 1) / puzzles.length) * 100}%`, backgroundColor: '#FACC15', transition: '0.5s', borderRadius: 10 }}></div>
                         </div>
                     </div>

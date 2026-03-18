@@ -128,7 +128,7 @@ const Home: React.FC = () => {
                 "Every word you learn today is a victory!",
                 "I believe in you! Let's crush some lessons!",
                 "Tshivenda is beautiful, just like your progress!",
-                "Ready to earn some more LP today?",
+                "Ready to earn some more XP today?",
                 "Keep going! You're becoming a Venda master!"
             ];
             setMascotQuote(quotes[Math.floor(Math.random() * quotes.length)]);
@@ -201,7 +201,7 @@ const Home: React.FC = () => {
                                     </div>
                                     <div>
                                         <p className="mb-0 fw-bold text-slate ls-1">{userData?.points || 0}</p>
-                                        <p className="mb-0 smallest text-muted uppercase">LP Points</p>
+                                        <p className="mb-0 smallest text-muted uppercase">XP Points</p>
                                     </div>
                                 </div>
                                 <div className="d-flex align-items-center gap-2">
@@ -286,11 +286,11 @@ const Home: React.FC = () => {
                                         <div key={trophy.id} className="col-4">
                                             <div
                                                 onClick={() => navigate('/achievements')}
-                                                className={`p-3 rounded-4 text-center transition-all hover-lift ${isEarned ? 'bg-white shadow-sm border border-warning' : 'bg-light grayscale border-dashed border-2'}`}
+                                                className={`p-3 rounded-4 text-center transition-all hover-lift ${isEarned ? 'bg-white shadow-sm border border-warning' : 'bg-light border-dashed border-2'}`}
                                                 style={{ cursor: 'pointer' }}
                                             >
                                                 <TrophyIcon
-                                                    rarity={isEarned ? trophy.rarity as any : 'locked'}
+                                                    rarity={trophy.rarity as any}
                                                     size={42}
                                                     animate={isEarned}
                                                     color={trophy.color}
@@ -349,10 +349,10 @@ const Home: React.FC = () => {
                                     </div>
                                 </div>
 
-                                {/* LP Progress */}
+                                {/* XP Progress */}
                                 <div className="mb-3">
                                     <div className="d-flex justify-content-between mb-2">
-                                        <span className="smallest fw-bold ls-1 text-muted">LP PROGRESS</span>
+                                        <span className="smallest fw-bold ls-1 text-muted">XP PROGRESS</span>
                                         <span className="smallest fw-bold ls-1 text-warning">{stats.progress}%</span>
                                     </div>
                                     <div style={{ height: 8, borderRadius: 10, backgroundColor: '#F1F5F9' }}>
@@ -363,7 +363,7 @@ const Home: React.FC = () => {
                                         }}></div>
                                     </div>
                                     <p className="smallest mt-2 mb-0 text-muted">
-                                        {stats.pointsInCurrentLevel} / {stats.pointsForNextLevel} LP to Level {stats.level + 1}
+                                        {stats.pointsInCurrentLevel} / {stats.pointsForNextLevel} XP to Level {stats.level + 1}
                                     </p>
                                 </div>
 
@@ -393,7 +393,7 @@ const Home: React.FC = () => {
                                                 {learner.username || 'Anonymous'}
                                                 {learner.id === auth.currentUser?.uid && <i className="bi bi-star-fill ms-1 text-warning"></i>}
                                             </span>
-                                            <span className="fw-bold smallest ls-1" style={{ color: '#F59E0B' }}>{learner.points} LP</span>
+                                            <span className="fw-bold smallest ls-1" style={{ color: '#F59E0B' }}>{learner.points} XP</span>
                                         </div>
                                     ))}
                                 </div>

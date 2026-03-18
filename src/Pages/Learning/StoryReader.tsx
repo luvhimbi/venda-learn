@@ -128,7 +128,7 @@ const StoryReader: React.FC<Props> = ({ story, onClose, onFinish, alreadyClaimed
                                 <div className="ngano-front-badge">{story.level}</div>
                                 <h1 className="ngano-front-title">{story.title}</h1>
                                 <p className="ngano-front-sub">Ngano dza Tshivenda</p>
-                                <p className="ngano-front-pages">{pages.length} pages · {story.lpReward} LP</p>
+                                <p className="ngano-front-pages">{pages.length} pages · {story.lpReward} XP</p>
                                 <button className="ngano-open-btn" onClick={() => setView('reading')}>
                                     <BookOpen size={20} /> Open Story
                                 </button>
@@ -155,11 +155,11 @@ const StoryReader: React.FC<Props> = ({ story, onClose, onFinish, alreadyClaimed
 
                         {alreadyClaimed ? (
                             <div className="ngano-done-claimed">
-                                <CheckCircle size={18} /> Already claimed {story.lpReward} LP
+                                <CheckCircle size={18} /> Already claimed {story.lpReward} XP
                             </div>
                         ) : (
                             <button className="ngano-done-claim" onClick={() => onFinish(story.id)}>
-                                <CheckCircle size={18} /> Claim {story.lpReward} LP
+                                <CheckCircle size={18} /> Claim {story.lpReward} XP
                             </button>
                         )}
 
