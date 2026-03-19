@@ -1,6 +1,6 @@
 import React from 'react';
-import Mascot from './Mascot';
 import TrophyIcon from './TrophyIcon';
+import { AvatarDisplay } from './AvatarPicker';
 
 interface SharePreviewModalProps {
     isOpen: boolean;
@@ -12,9 +12,10 @@ interface SharePreviewModalProps {
         rarity: 'bronze' | 'silver' | 'gold' | 'special';
         color: string;
     } | null;
+    userData?: any;
 }
 
-const SharePreviewModal: React.FC<SharePreviewModalProps> = ({ isOpen, onClose, title, image, category, trophy }) => {
+const SharePreviewModal: React.FC<SharePreviewModalProps> = ({ isOpen, onClose, title, image, category, trophy, userData }) => {
     const [isSharing, setIsSharing] = React.useState(false);
     if (!isOpen) return null;
 
@@ -39,7 +40,7 @@ const SharePreviewModal: React.FC<SharePreviewModalProps> = ({ isOpen, onClose, 
             const canvas = await (window as any).html2canvas(element, {
                 useCORS: true,
                 scale: 2, // Higher quality
-                backgroundColor: trophy ? '#1e293b' : '#111827'
+                backgroundColor: null
             });
 
             const dataUrl = canvas.toDataURL('image/png');
@@ -73,7 +74,7 @@ const SharePreviewModal: React.FC<SharePreviewModalProps> = ({ isOpen, onClose, 
             const canvas = await (window as any).html2canvas(element, {
                 useCORS: true,
                 scale: 2,
-                backgroundColor: trophy ? '#1e293b' : '#111827'
+                backgroundColor: null
             });
 
             // 2. Prepare sharing data
@@ -129,14 +130,15 @@ const SharePreviewModal: React.FC<SharePreviewModalProps> = ({ isOpen, onClose, 
             {/* Modal Content */}
             <div className="bg-white rounded-5 overflow-hidden shadow-2xl position-relative animate-pop-in" style={{ width: '92%', maxWidth: '340px' }}>
                 
-                {/* PREVIEW CARD (Branded Style) */}
-                <div id="share-card" className="position-relative overflow-hidden d-flex flex-column align-items-center justify-content-center" style={{ aspectRatio: '1/1', backgroundColor: trophy ? '#1e293b' : '#111827' }}>
-                    {/* Branded Logo Overlay (Top-Right) - Wrapped for Visibility */}
-                    <div className="position-absolute top-0 end-0 p-3 z-2">
-                        <div className="bg-white p-1 rounded-2 shadow-sm d-flex align-items-center">
-                            <img src="/images/VendaLearnLogo.png" alt="Logo" height="18" className="object-fit-contain" />
-                        </div>
-                    </div>
+                {/* PREVIEW CARD (Standardized Modern Style with Venda Flag) */}
+                <div 
+                    id="share-card" 
+                    className="position-relative overflow-hidden d-flex flex-column align-items-center justify-content-center" 
+                    style={{ background: 'linear-gradient(135deg, #1e293b 0%, #0f172a 100%)', color: 'white', padding: '24px 16px' }}
+                >
+                    {/* Background Accents (Kept subtle and monochrome to avoid 'minwenda' feel) */}
+                    <div className="position-absolute rounded-circle" style={{ width: 250, height: 250, background: 'radial-gradient(circle, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0) 70%)', top: '-80px', right: '-50px' }}></div>
+                    <div className="position-absolute rounded-circle" style={{ width: 300, height: 300, background: 'radial-gradient(circle, rgba(255, 255, 255, 0.03) 0%, rgba(255, 255, 255, 0) 70%)', bottom: '-100px', left: '-100px' }}></div>
 
                     {/* SMALL DOWNLOAD ICON (Top-Left) */}
                     <button 
@@ -148,47 +150,72 @@ const SharePreviewModal: React.FC<SharePreviewModalProps> = ({ isOpen, onClose, 
                         <i className="bi bi-download text-dark" style={{ fontSize: '14px' }}></i>
                     </button>
 
-                    {/* Background Image with Overlay */}
-                    {!trophy && image && (
-                        <>
-                            <div 
-                                className="position-absolute top-0 start-0 w-100 h-100"
-                                style={{ 
-                                    backgroundImage: `url(${image})`, 
-                                    backgroundSize: 'cover', 
-                                    backgroundPosition: 'center',
-                                    filter: 'brightness(0.6) saturate(1.2)' 
-                                }}
-                            ></div>
-                            <div className="position-absolute top-0 start-0 w-100 h-100 bg-gradient-to-t from-black via-transparent to-transparent"></div>
-                        </>
-                    )}
-
-                    {/* Trophy Preview Layer */}
-                    {trophy && (
-                        <div className="position-relative z-1 mb-5 pb-3">
-                            <TrophyIcon rarity={trophy.rarity} color={trophy.color} size={150} animate />
+                    <div className="position-relative z-1 d-flex flex-column align-items-center text-center w-100 h-100">
+                        {/* Branded Logo */}
+                        <div className="d-flex align-items-center justify-content-center mb-3 mt-2">
+                            <div className="bg-white p-2 rounded-3 shadow-sm d-inline-block">
+                                <img src="/images/VendaLearnLogo.png" alt="VendaLearn" height="28" className="object-fit-contain" />
+                            </div>
                         </div>
-                    )}
 
-                    {/* Content Layer */}
-                    <div className="position-absolute bottom-0 start-0 w-100 p-3 text-start z-1">
-                        <span className="smallest fw-bold ls-2 text-warning uppercase d-block mb-1">{category}</span>
-                        <h1 className="text-white fw-bold mb-2 ls-tight" style={{ fontSize: '1.5rem', textShadow: '0 2px 4px rgba(0,0,0,0.5)' }}>{title}</h1>
+                        {/* Visual Asset (Trophy or Image) */}
+                        <div className="flex-grow-1 d-flex align-items-center justify-content-center w-100 mb-3 px-3">
+                            {trophy ? (
+                                <TrophyIcon rarity={trophy.rarity} color={trophy.color} size={100} animate={false} />
+                            ) : image ? (
+                                <div className="rounded-4 overflow-hidden shadow-lg w-100 position-relative" style={{ minHeight: '160px', border: '4px solid rgba(255,255,255,0.1)' }}>
+                                    <div 
+                                        className="position-absolute top-0 start-0 w-100 h-100"
+                                        style={{ 
+                                            backgroundImage: `url(${image})`, 
+                                            backgroundSize: 'cover', 
+                                            backgroundPosition: 'center',
+                                        }}
+                                    ></div>
+                                </div>
+                            ) : null}
+                        </div>
+
+                        {/* Custom Programmatic Venda Flag Strip */}
+                        <div className="d-flex align-items-center gap-2 mb-2 bg-dark rounded-pill p-1 shadow-sm border border-secondary border-opacity-25 pe-3">
+                            <div className="flex-shrink-0" style={{ width: '40px', height: '24px', position: 'relative', borderRadius: '12px', overflow: 'hidden' }}>
+                                {/* Horizontal Stripes */}
+                                <div style={{ position: 'absolute', top: 0, left: '10px', right: 0, height: '33%', backgroundColor: '#00703C' }} /> {/* Green */}
+                                <div style={{ position: 'absolute', top: '33%', left: '10px', right: 0, height: '34%', backgroundColor: '#FFB81C' }} /> {/* Yellow */}
+                                <div style={{ position: 'absolute', top: '67%', left: '10px', right: 0, height: '33%', backgroundColor: '#593C1F' }} /> {/* Brown */}
+                                {/* Vertical Blue Hoist */}
+                                <div style={{ position: 'absolute', top: 0, left: 0, width: '12px', height: '100%', backgroundColor: '#00529F', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                    {/* Brown V embedded inside the blue strip */}
+                                    <span style={{ color: '#593C1F', fontSize: '9px', fontWeight: '900', userSelect: 'none' }}>V</span>
+                                </div>
+                            </div>
+                            <span className="smallest fw-bold ls-2 text-warning uppercase">{category}</span>
+                        </div>
+
+                        {/* Title & Branding block */}
+                        <h1 className="text-white fw-bold mb-0 ls-tight px-3" style={{ fontSize: '1.75rem', lineHeight: '1.1' }}>{title}</h1>
                         
-                        <div className="d-flex align-items-center gap-2 pt-2 border-top border-white border-opacity-25">
-                            <div className="p-1 bg-white rounded-3 shadow-lg">
-                                <Mascot mood="happy" width="28px" height="28px" />
+                        {/* Dynamically Include Profile info if available */}
+                        {userData && (
+                            <div className="d-flex align-items-center gap-3 bg-white bg-opacity-10 shadow-sm p-3 rounded-4 mt-4 w-100 justify-content-between border border-white border-opacity-10 backdrop-blur-sm">
+                                <div className="d-flex align-items-center gap-3">
+                                    <div className="bg-white rounded-circle p-1 shadow-sm" style={{ width: 44, height: 44 }}>
+                                        <AvatarDisplay avatarId={userData.avatarId || 'adventurer'} seed={userData.username} size={36} />
+                                    </div>
+                                    <div className="text-start">
+                                        <p className="mb-0 fw-bold">{userData.username?.split(' ')[0]}</p>
+                                        <p className="smallest text-white-50 mb-0 ls-1 text-uppercase">Venda Learner</p>
+                                    </div>
+                                </div>
+                                <div className="text-end pe-1">
+                                    <p className="mb-0 fw-bold text-warning d-flex align-items-center gap-1 justify-content-end">
+                                        {userData.points || 0} <span className="smallest text-white-50">XP</span>
+                                    </p>
+                                </div>
                             </div>
-                            <div>
-                                <p className="text-white mb-0 fw-bold ls-1" style={{ fontSize: '8px' }}>VENDA LEARN</p>
-                                <p className="text-white text-opacity-75 mb-0" style={{ fontSize: '8px' }}>Learning my heritage</p>
-                            </div>
-                        </div>
+                        )}
+                        {!userData && <p className="smallest text-white-50 mt-2 mb-0 uppercase ls-2">VendaLearn Platform</p>}
                     </div>
-
-                    {/* Munwenda Accent */}
-                    <div className="position-absolute top-0 start-0 w-100" style={{ height: '4px', background: 'linear-gradient(90deg, #FACC15, #10B981, #EF4444, #3B82F6, #111827)' }}></div>
                 </div>
 
                 {/* Actions */}

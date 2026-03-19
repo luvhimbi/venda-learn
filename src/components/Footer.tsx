@@ -24,9 +24,9 @@ const Footer: React.FC = () => {
                         <h6 className="fw-bold mb-3 ls-1 uppercase" style={{ fontSize: '11px', color: '#6B7280' }}>Explore</h6>
                         <ul className="list-unstyled d-flex flex-column gap-2 mb-0">
                             <li><Link to="/courses" className="text-decoration-none text-dark small fw-medium hover-yellow transition-all">Courses</Link></li>
-                            <li><Link to="/history" className="text-decoration-none text-dark small fw-medium hover-yellow transition-all">Heritage</Link></li>
-                            <li><Link to="/mitambo" className="text-decoration-none text-dark small fw-medium hover-yellow transition-all">Minigames</Link></li>
-                            <li><Link to="/leaderboard" className="text-decoration-none text-dark small fw-medium hover-yellow transition-all">Leaderboard</Link></li>
+                            <li><Link to="/#culture" className="text-decoration-none text-dark small fw-medium hover-yellow transition-all">Heritage</Link></li>
+                            <li><Link to="/#minigames" className="text-decoration-none text-dark small fw-medium hover-yellow transition-all">Minigames</Link></li>
+                            <li><Link to="/muvhigo" className="text-decoration-none text-dark small fw-medium hover-yellow transition-all">Leaderboard</Link></li>
                         </ul>
                     </div>
 
@@ -34,9 +34,9 @@ const Footer: React.FC = () => {
                     <div className="col-6 col-md-2">
                         <h6 className="fw-bold mb-3 ls-1 uppercase" style={{ fontSize: '11px', color: '#6B7280' }}>Support</h6>
                         <ul className="list-unstyled d-flex flex-column gap-2 mb-0">
-                            <li><Link to="/faq" className="text-decoration-none text-dark small fw-medium hover-yellow transition-all">FAQ</Link></li>
-                            <li><Link to="/contact" className="text-decoration-none text-dark small fw-medium hover-yellow transition-all">Contact Us</Link></li>
-                            <li><Link to="/community" className="text-decoration-none text-dark small fw-medium hover-yellow transition-all">Community</Link></li>
+                            <li><Link to="/#faq" className="text-decoration-none text-dark small fw-medium hover-yellow transition-all">FAQ</Link></li>
+                            <li><Link to="/#contact" className="text-decoration-none text-dark small fw-medium hover-yellow transition-all">Contact Us</Link></li>
+                            <li><Link to="/achievements" className="text-decoration-none text-dark small fw-medium hover-yellow transition-all">Community</Link></li>
                         </ul>
                     </div>
 

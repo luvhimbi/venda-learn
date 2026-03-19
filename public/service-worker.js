@@ -1,5 +1,8 @@
 // VendaLearn Service Worker — Network-First with Cache Fallback
-const CACHE_NAME = 'venda-learn-v4';
+const CACHE_NAME = 'venda-learn-v5';
+const AVATAR_CACHE = 'venda-avatars-v1';
+const IMAGE_CACHE = 'venda-images-v1';
+const KNOWN_CACHES = [CACHE_NAME, AVATAR_CACHE, IMAGE_CACHE];
 
 // Pre-cache these on install (app shell)
 const PRECACHE_URLS = [
@@ -18,12 +21,12 @@ self.addEventListener('install', (event) => {
     self.skipWaiting(); // Activate immediately
 });
 
-// Activate: clean up old caches
+// Activate: clean up old caches (keep only known ones)
 self.addEventListener('activate', (event) => {
     event.waitUntil(
         caches.keys().then((keys) => {
             return Promise.all(
-                keys.filter((key) => key !== CACHE_NAME)
+                keys.filter((key) => !KNOWN_CACHES.includes(key))
                     .map((key) => caches.delete(key))
             );
         })
@@ -67,33 +70,56 @@ self.addEventListener('fetch', (event) => {
         return;
     }
 
-    // For static assets (JS, CSS, images, fonts) — cache-first for speed
-    if (request.url.match(/\.(js|css|woff2?|ttf|eot|svg|png|jpg|jpeg|webp|ico)(\?.*)?$/)) {
+    // DiceBear Avatar SVGs — Cache-first with dedicated cache (they rarely change)
+    if (request.url.includes('api.dicebear.com')) {
         event.respondWith(
-            caches.match(request).then((cached) => {
-                if (cached) {
-                    // Return cache immediately, but update in background
-                    fetch(request).then((response) => {
-                        if (response.ok) {
-                            caches.open(CACHE_NAME).then((cache) => {
-                                cache.put(request, response);
-                            });
-                        }
-                    }).catch(() => {}); // Ignore network errors
-                    return cached;
-                }
-
-                // Not cached yet — fetch and cache
-                return fetch(request).then((response) => {
-                    if (response.ok) {
-                        const responseClone = response.clone();
-                        caches.open(CACHE_NAME).then((cache) => {
-                            cache.put(request, responseClone);
-                        });
+            caches.open(AVATAR_CACHE).then((cache) => {
+                return cache.match(request).then((cached) => {
+                    if (cached) {
+                        // Stale-while-revalidate: return cache, update in background
+                        fetch(request).then((response) => {
+                            if (response.ok) cache.put(request, response);
+                        }).catch(() => {});
+                        return cached;
                     }
-                    return response;
-                }).catch(() => {
-                    return new Response('', { status: 503, statusText: 'Offline' });
+                    // Not cached — fetch, cache, and return
+                    return fetch(request).then((response) => {
+                        if (response.ok) {
+                            cache.put(request, response.clone());
+                        }
+                        return response;
+                    }).catch(() => {
+                        // Return a simple fallback SVG circle for offline
+                        return new Response(
+                            '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="45" fill="#e2e8f0"/><text x="50" y="58" text-anchor="middle" font-size="30" fill="#94a3b8">?</text></svg>',
+                            { headers: { 'Content-Type': 'image/svg+xml' } }
+                        );
+                    });
+                });
+            })
+        );
+        return;
+    }
+
+    // External images (culture content hosted on Firebase Storage, CDNs, etc.) — Stale-while-revalidate
+    if (request.destination === 'image' || request.url.match(/\.(png|jpg|jpeg|webp|gif|svg)(\?.*)?$/i)) {
+        event.respondWith(
+            caches.open(IMAGE_CACHE).then((cache) => {
+                return cache.match(request).then((cached) => {
+                    const fetchPromise = fetch(request).then((response) => {
+                        if (response.ok) {
+                            cache.put(request, response.clone());
+                        }
+                        return response;
+                    }).catch(() => {
+                        if (cached) return cached;
+                        // Return a transparent 1x1 PNG as last-resort fallback
+                        return new Response(
+                            Uint8Array.from(atob('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mN88P/BfwAJhAPk3KFb2AAAAABJRU5ErkJggg=='), c => c.charCodeAt(0)),
+                            { headers: { 'Content-Type': 'image/png' } }
+                        );
+                    });
+                    return cached || fetchPromise;
                 });
             })
         );

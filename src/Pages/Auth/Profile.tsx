@@ -1,16 +1,18 @@
 import React, { useEffect, useState } from 'react';
 import { db, auth } from '../../services/firebaseConfig';
-import { doc, updateDoc, writeBatch, collection, query, where, getDocs, setDoc, increment } from 'firebase/firestore';
+import { doc, getDoc, updateDoc, writeBatch, collection, query, where, getDocs, setDoc, increment } from 'firebase/firestore';
 import { onAuthStateChanged, signOut } from 'firebase/auth';
-import { Gem, Compass, Bell, Flame, Book, MessageCircle, Info, Shield, CheckCircle, LogOut, Users, Gift, Clock, Camera, Edit3 } from 'lucide-react';
+import { Gem, Compass, Bell, Flame, CheckCircle, LogOut, Users, Gift, Clock, Camera, Share2, MoreVertical } from 'lucide-react';
 import LogoutModal from '../../components/LogoutModal';
+import ShareProfileModal from '../../components/ShareProfileModal';
+import ShareStreakModal from '../../components/ShareStreakModal';
 import { checkAchievements, awardTrophies, ALL_TROPHIES } from '../../services/achievementService';
 import TrophyIcon from '../../components/TrophyIcon';
 import AvatarPicker, { AvatarDisplay } from '../../components/AvatarPicker';
 import StreakCalendar from '../../components/StreakCalendar';
 import JuicyButton from '../../components/JuicyButton';
 import { invalidateCache, refreshUserData, fetchUserData, fetchLearnedStats } from '../../services/dataCache';
-import { getLevelStats, getBadgeDetails } from '../../services/levelUtils';
+
 import { updateReminderSettings, requestNotificationPermission } from '../../services/reminderService';
 import Swal from 'sweetalert2';
 import { useNavigate } from "react-router-dom";
@@ -33,14 +35,18 @@ interface UserProfile {
     reminderTime?: string;
     soundEnabled?: boolean;
     hapticEnabled?: boolean;
+    lastLessonId?: string;
+    createdAt?: string;
 }
 
 // LearnedStats type removed as it was unused
 
 const Profile: React.FC = () => {
     const [userData, setUserData] = useState<any>(null);
-    const [stats, setStats] = useState<any>(null);
+    const [currentLessonTitle, setCurrentLessonTitle] = useState<string | null>(null);
     const [showLogout, setShowLogout] = useState(false);
+    const [isShareModalOpen, setIsShareModalOpen] = useState(false);
+    const [isShareStreakOpen, setIsShareStreakOpen] = useState(false);
     const [isEditing, setIsEditing] = useState(false);
     const [loading, setLoading] = useState(true);
     const [updateLoading, setUpdateLoading] = useState(false);
@@ -76,10 +82,24 @@ const Profile: React.FC = () => {
                     setUserData(normalizedProfile);
                     setEditUsername(profile.username || '');
                     setEditAvatarId(profile.avatarId || 'adventurer');
-                    setReminderEnabled(profile.reminderEnabled || false);
-                    setReminderTime(profile.reminderTime || '09:00');
-                    setSoundEnabled(profile.soundEnabled !== false);
-                    setHapticEnabled(profile.hapticEnabled !== false);
+                    
+                    // Default states for inputs
+                    setReminderEnabled(profile.reminderEnabled ?? false);
+                    setReminderTime(profile.reminderTime || '18:00');
+                    setSoundEnabled(profile.soundEnabled ?? true);
+                    setHapticEnabled(profile.hapticEnabled ?? true);
+
+                    // Fetch the active lesson if they have one
+                    if (profile.lastLessonId) {
+                        try {
+                            const lessonSnap = await getDoc(doc(db, "lessons", profile.lastLessonId));
+                            if (lessonSnap.exists()) {
+                                setCurrentLessonTitle(lessonSnap.data().title);
+                            }
+                        } catch (e) {
+                            console.error("Could not fetch current lesson", e);
+                        }
+                    }
 
                     // Check for new achievements (including 1st Login)
                     const newTrophies = checkAchievements(normalizedProfile, profile.trophies || []);
@@ -102,7 +122,6 @@ const Profile: React.FC = () => {
                             imageUrl: 'https://cdn-icons-png.flaticon.com/512/3112/3112946.png',
                             imageWidth: 80,
                             confirmButtonColor: '#FACC15',
-                            confirmButtonText: 'Awesome!',
                             customClass: { popup: 'rounded-4' }
                         });
                     }
@@ -118,12 +137,15 @@ const Profile: React.FC = () => {
                 }
 
                 if (learnedStats) {
-                    setStats(learnedStats);
+                    // setStats(learnedStats);
                 }
             }
             setLoading(false);
         });
-        return () => unsubscribe();
+
+        return () => {
+            unsubscribe();
+        };
     }, []);
 
     const handleCopyLink = () => {
@@ -260,135 +282,158 @@ const Profile: React.FC = () => {
         </div>
     );
 
-    const levelStats = getLevelStats(userData?.points || 0);
-
     return (
         <div className="bg-white min-vh-100 py-5">
             <div className="container" style={{ maxWidth: '850px' }}>
 
                 {/* PROFILE HEADER & SETTINGS */}
-                <header className={`mb-5 pb-5 border-bottom transition-all ${isEditing ? 'bg-light p-4 rounded-4 border-warning shadow-sm' : ''}`}>
-                    <div className="d-flex flex-column flex-md-row align-items-center gap-4 text-center text-md-start">
-                        <div className="position-relative">
-                            <AvatarDisplay
-                                avatarId={userData?.avatarId || 'adventurer'}
-                                seed={userData?.username || 'learner'}
-                                size={100}
-                                className="shadow-sm border-dark"
-                                style={{ borderWidth: '3px' }}
-                            />
-                            {isEditing && (
-                                <div className="position-absolute bottom-0 end-0 bg-dark text-white rounded-circle d-flex align-items-center justify-content-center shadow" style={{ width: 32, height: 32, border: '2px solid white' }}>
-                                    <Camera size={16} />
-                                </div>
-                            )}
-                        </div>
-                        <div className="flex-grow-1">
-                            <div className="d-flex align-items-center gap-2 mb-1">
-                                <h1 className="fw-bold mb-0 ls-tight">{userData?.username}</h1>
-                                {userData?.isNativeSpeaker && (
-                                    <span className="badge bg-success text-white smallest fw-bold ls-1 rounded-pill px-3">
-                                        <i className="bi bi-patch-check-fill me-1"></i> VERIFIED NATIVE
-                                    </span>
-                                )}
-                                {userData?.nativeVerificationStatus === 'pending' && (
-                                    <span className="badge bg-warning text-dark smallest fw-bold ls-1 rounded-pill px-3">
-                                        VERIFICATION PENDING
-                                    </span>
-                                )}
-                                {userData?.nativeVerificationStatus === 'rejected' && (
-                                    <span className="badge bg-danger text-white smallest fw-bold ls-1 rounded-pill px-3">
-                                        VERIFICATION REJECTED
-                                    </span>
-                                )}
-                            </div>
-                            <p className="smallest fw-bold text-muted text-uppercase ls-2 mb-3">{userData?.email}</p>
-
-                            <div className="d-flex gap-2 flex-wrap justify-content-center justify-content-md-start mb-3">
-                                {!isEditing && (
-                                    <>
-                                        {auth.currentUser?.isAnonymous ? (
-                                            <div className="d-flex align-items-center px-4 py-2 bg-light border rounded-pill shadow-sm">
-                                                <div className="bg-secondary rounded-circle me-2 animate-pulse" style={{ width: 8, height: 8 }}></div>
-                                                <span className="small fw-bold text-muted ls-1 uppercase">Guest Account</span>
-                                            </div>
-                                        ) : (
-                                            <button onClick={() => setIsEditing(true)} className="btn btn-dark btn-sm px-4 py-2 fw-bold ls-1 rounded-pill shadow-sm d-flex align-items-center gap-2">
-                                                <Edit3 size={16} /> EDIT PROFILE
-                                            </button>
-                                        )}
-                                        {window.innerWidth >= 768 && (
-                                            <button
-                                                onClick={async () => {
-                                                    const userRef = doc(db, "users", auth.currentUser!.uid);
-                                                    await updateDoc(userRef, { tourCompleted: false });
-                                                    sessionStorage.removeItem('tour_offered');
-                                                    window.location.href = '/';
-                                                }}
-                                                className="btn btn-outline-warning btn-sm px-4 py-2 fw-bold ls-1 rounded-pill shadow-sm text-dark d-flex align-items-center gap-2"
-                                            >
-                                                <Compass size={16} /> RESTART TOUR
-                                            </button>
-                                        )}
-                                    </>
-                                )}
-
+                <header className={`mb-5 pb-4 border-bottom transition-all ${isEditing ? 'bg-light p-4 rounded-4 border-warning shadow-sm' : ''}`}>
+                    <div className="d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-4">
+                        
+                        {/* LEFT COMPONENT - Avatar & Identity */}
+                        <div className="d-flex flex-column flex-md-row align-items-center gap-3 gap-md-4 text-center text-md-start">
+                            <div className="position-relative">
+                                <AvatarDisplay
+                                    avatarId={userData?.avatarId || 'adventurer'}
+                                    seed={userData?.username || 'learner'}
+                                    size={100}
+                                    className="shadow-sm border-dark"
+                                    style={{ borderWidth: '3px' }}
+                                />
                                 {isEditing && (
-                                    <button
-                                        type="button"
-                                        onClick={(e) => handleUpdate(e as any)}
-                                        className="btn btn-primary btn-sm px-4 py-2 fw-bold ls-1 rounded-pill shadow-sm d-flex align-items-center gap-2"
-                                        disabled={updateLoading}
-                                    >
-                                        {updateLoading ? <span className="spinner-border spinner-border-sm"></span> : <><CheckCircle size={16} /> SAVE</>}
-                                    </button>
-                                )}
-
-                                <button onClick={() => setShowLogout(true)} className="btn btn-outline-danger btn-sm px-4 py-2 fw-bold ls-1 rounded-pill shadow-sm d-flex align-items-center gap-2">
-                                    <LogOut size={16} /> LOGOUT
-                                </button>
-                            </div>
-
-                            {isEditing && (
-                                <form onSubmit={handleUpdate} className="animate__animated animate__fadeIn">
-                                    <div className="d-flex flex-column gap-3">
-                                        <div className="d-flex gap-2 justify-content-center justify-content-md-start">
-                                            <input
-                                                type="text"
-                                                className="form-control form-control-sm border-0 bg-light py-2 px-3 rounded-pill fw-bold"
-                                                style={{ maxWidth: '200px' }}
-                                                value={editUsername}
-                                                onChange={(e) => setEditUsername(e.target.value)}
-                                                required
-                                            />
-                                        </div>
-
-                                        <div className="p-3 rounded-4 bg-light border-0 text-start" style={{ maxWidth: '400px' }}>
-                                            <p className="smallest fw-bold text-muted mb-3 ls-2 text-uppercase">CHOOSE YOUR STYLE</p>
-                                            <AvatarPicker
-                                                selectedStyle={editAvatarId}
-                                                seed={editUsername || 'warrior'}
-                                                onSelect={setEditAvatarId}
-                                            />
-                                        </div>
-
-                                        <div className="d-flex gap-2 justify-content-center justify-content-md-start mt-2">
-                                            <JuicyButton type="submit" className="btn btn-warning btn-lg px-5 py-3 fw-bold ls-1 rounded-pill shadow" disabled={updateLoading}>
-                                                {updateLoading ? (
-                                                    <span className="spinner-border spinner-border-sm me-2"></span>
-                                                ) : (
-                                                    <><CheckCircle size={18} className="me-2" /> SAVE CHANGES</>
-                                                )}
-                                            </JuicyButton>
-                                            <button type="button" onClick={() => setIsEditing(false)} className="btn btn-light btn-lg px-4 py-3 fw-bold ls-1 rounded-pill">
-                                                CANCEL
-                                            </button>
-                                        </div>
+                                    <div className="position-absolute bottom-0 end-0 bg-dark text-white rounded-circle d-flex align-items-center justify-content-center shadow" style={{ width: 32, height: 32, border: '2px solid white' }}>
+                                        <Camera size={16} />
                                     </div>
-                                </form>
+                                )}
+                            </div>
+                            <div>
+                                <div className="d-flex flex-wrap align-items-center justify-content-center justify-content-md-start gap-2 mb-1">
+                                    <h1 className="fw-bold mb-0 ls-tight" style={{ fontSize: '1.75rem' }}>{userData?.username}</h1>
+                                    {userData?.isNativeSpeaker && (
+                                        <span className="badge bg-success text-white smallest fw-bold ls-1 rounded-pill px-2 py-1">
+                                            <i className="bi bi-patch-check-fill me-1"></i> VERIFIED
+                                        </span>
+                                    )}
+                                    {userData?.nativeVerificationStatus === 'pending' && (
+                                        <span className="badge bg-warning text-dark smallest fw-bold ls-1 rounded-pill px-2 py-1">PENDING</span>
+                                    )}
+                                    {userData?.nativeVerificationStatus === 'rejected' && (
+                                        <span className="badge bg-danger text-white smallest fw-bold ls-1 rounded-pill px-2 py-1">REJECTED</span>
+                                    )}
+                                </div>
+                                <p className="small text-muted mb-0">{userData?.email}</p>
+                                
+                                {/* JOIN DATE & CURRENT LESSON BADGES */}
+                                <div className="d-flex flex-wrap align-items-center justify-content-center gap-2 mt-3">
+                                    {userData?.createdAt && (
+                                        <div className="d-flex align-items-center gap-2 px-3 py-1 bg-light border rounded-pill smallest text-muted fw-bold ls-1 uppercase">
+                                            <i className="bi bi-calendar-check"></i>
+                                            Joined {new Date(userData.createdAt).toLocaleString('default', { month: 'long', year: 'numeric' })}
+                                        </div>
+                                    )}
+                                    {currentLessonTitle && (
+                                        <div className="d-flex align-items-center gap-2 px-3 py-1 bg-warning bg-opacity-10 text-dark border border-warning border-opacity-50 rounded-pill smallest fw-bold ls-1 uppercase">
+                                            <i className="bi bi-book text-warning"></i>
+                                            Learning: {currentLessonTitle}
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* RIGHT COMPONENT - Actions */}
+                        <div className="d-flex align-items-center justify-content-center justify-content-md-end gap-2 w-100 w-md-auto mt-3 mt-md-0">
+                            {!isEditing && (
+                                <>
+                                    {auth.currentUser?.isAnonymous ? (
+                                        <div className="d-flex align-items-center px-4 py-2 bg-light border rounded-pill shadow-sm">
+                                            <div className="bg-secondary rounded-circle me-2 animate-pulse" style={{ width: 8, height: 8 }}></div>
+                                            <span className="small fw-bold text-muted ls-1 uppercase">Guest Account</span>
+                                        </div>
+                                    ) : (
+                                        <button onClick={() => setIsEditing(true)} className="btn btn-primary px-4 py-2 fw-bold ls-1 rounded-pill shadow-sm d-flex align-items-center gap-2 text-white border-0">
+                                            Edit Profile
+                                        </button>
+                                    )}
+                                    
+                                    <div className="dropdown">
+                                        <button className="btn btn-light rounded-circle shadow-sm border border-light-subtle d-flex align-items-center justify-content-center" style={{ width: '42px', height: '42px' }} data-bs-toggle="dropdown" aria-expanded="false">
+                                            <MoreVertical size={18} className="text-secondary" />
+                                        </button>
+                                        <ul className="dropdown-menu dropdown-menu-end shadow border-0 rounded-4 mt-2 py-2" style={{ minWidth: '200px' }}>
+                                            <li className="d-none d-md-block">
+                                                <button
+                                                    onClick={async () => {
+                                                        const userRef = doc(db, "users", auth.currentUser!.uid);
+                                                        await updateDoc(userRef, { tourCompleted: false });
+                                                        sessionStorage.removeItem('tour_offered');
+                                                        window.location.href = '/';
+                                                    }}
+                                                    className="dropdown-item d-flex align-items-center gap-3 py-2 fw-medium text-dark"
+                                                >
+                                                    <Compass size={16} className="text-muted" /> Restart Tour
+                                                </button>
+                                            </li>
+                                            <li>
+                                                <button onClick={() => setIsShareModalOpen(true)} className="dropdown-item d-flex align-items-center gap-3 py-2 fw-medium text-dark">
+                                                    <Share2 size={16} className="text-primary" /> Share Profile
+                                                </button>
+                                            </li>
+                                            <li><hr className="dropdown-divider opacity-10" /></li>
+                                            <li>
+                                                <button onClick={() => setShowLogout(true)} className="dropdown-item d-flex align-items-center gap-3 py-2 fw-medium text-danger">
+                                                    <LogOut size={16} /> Logout
+                                                </button>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </>
                             )}
                         </div>
                     </div>
+
+                    {/* EDIT FORM - Placed underneath */}
+                    {isEditing && (
+                        <div className="mt-4 pt-4 border-top">
+                            <form onSubmit={handleUpdate} className="animate__animated animate__fadeIn">
+                                <div className="d-flex flex-column gap-4">
+                                    <div className="d-flex flex-column">
+                                        <label className="small fw-bold text-muted ls-1 mb-2">Display Name</label>
+                                        <input
+                                            type="text"
+                                            className="form-control form-control-lg border border-light-subtle bg-white py-2 px-3 rounded-4 shadow-sm fw-bold"
+                                            style={{ maxWidth: '300px' }}
+                                            value={editUsername}
+                                            onChange={(e) => setEditUsername(e.target.value)}
+                                            required
+                                        />
+                                    </div>
+
+                                    <div className="p-4 rounded-4 bg-white border border-light-subtle shadow-sm" style={{ maxWidth: '500px' }}>
+                                        <p className="small fw-bold text-muted mb-3 ls-1 text-uppercase">Choose your style</p>
+                                        <AvatarPicker
+                                            selectedStyle={editAvatarId}
+                                            seed={editUsername || 'warrior'}
+                                            onSelect={setEditAvatarId}
+                                        />
+                                    </div>
+
+                                    <div className="d-flex gap-2 mt-2">
+                                        <JuicyButton type="submit" className="btn btn-primary px-5 py-3 fw-bold ls-1 rounded-pill shadow" disabled={updateLoading}>
+                                            {updateLoading ? (
+                                                <span className="spinner-border spinner-border-sm me-2"></span>
+                                            ) : (
+                                                <><CheckCircle size={18} className="me-2" /> SAVE CHANGES</>
+                                            )}
+                                        </JuicyButton>
+                                        <button type="button" onClick={() => setIsEditing(false)} className="btn btn-light px-4 py-3 fw-bold ls-1 border border-light-subtle rounded-pill">
+                                            CANCEL
+                                        </button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    )}
                 </header>
 
                 {/* TABS NAVIGATION */}
@@ -416,10 +461,10 @@ const Profile: React.FC = () => {
                         {/* MY PROGRESS JOURNEY SECTION */}
                         <section className="mb-5">
                             <div className="d-flex justify-content-between align-items-end mb-4">
-                                <div>
+                                <div className="w-100">
                                     {/* TROPHY CASE */}
-                                    <div className="mb-4">
-                                        <div className="d-flex justify-content-between align-items-center mb-3">
+                                    <div className="mb-5">
+                                        <div className="d-flex flex-column flex-md-row justify-content-between align-items-center mb-4 text-center text-md-start gap-3">
                                             <div>
                                                 <h5 className="fw-bold mb-0 text-uppercase ls-2 smallest text-muted">Trophy Case</h5>
                                                 <h4 className="fw-bold text-dark mt-1">ACHIEVEMENTS</h4>
@@ -431,28 +476,38 @@ const Profile: React.FC = () => {
                                                 View All <i className="bi bi-arrow-right ms-1"></i>
                                             </button>
                                         </div>
-                                        <div className="row g-2">
-                                            {ALL_TROPHIES.slice(0, 6).map(trophy => {
+                                        <div className="d-flex flex-wrap justify-content-center justify-content-md-center gap-3 gap-md-4">
+                                            {[...ALL_TROPHIES]
+                                                .sort((a, b) => {
+                                                    const aEarned = (userData?.trophies || []).includes(a.id);
+                                                    const bEarned = (userData?.trophies || []).includes(b.id);
+                                                    if (aEarned && !bEarned) return -1;
+                                                    if (!aEarned && bEarned) return 1;
+                                                    return 0;
+                                                })
+                                                .slice(0, 3)
+                                                .map(trophy => {
                                                 const isEarned = (userData?.trophies || []).includes(trophy.id);
                                                 return (
-                                                    <div key={trophy.id} className="col-4 col-md-2">
+                                                    <div key={trophy.id} style={{ width: '100px' }}>
                                                         <div
-                                                            className="d-flex flex-column align-items-center gap-2"
+                                                            className="d-flex flex-column align-items-center gap-2 w-100"
                                                             title={trophy.description}
-                                                            style={{ cursor: 'pointer' }}
+                                                            style={{ 
+                                                                cursor: 'pointer',
+                                                                opacity: isEarned ? 1 : 0.5,
+                                                                filter: isEarned ? 'none' : 'grayscale(1)'
+                                                            }}
                                                             onClick={() => navigate('/achievements')}
                                                         >
-                                                            <div className={`p-2 rounded-4 transition-all ${isEarned ? 'bg-white shadow-sm border border-warning' : 'bg-white border'}`}>
+                                                            <div className={`p-3 rounded-4 w-100 d-flex justify-content-center transition-all ${isEarned ? 'bg-white shadow-sm border border-warning' : 'bg-white border'}`}>
                                                                 <TrophyIcon
                                                                     rarity={trophy.rarity as any}
-                                                                    size={48}
+                                                                    size={56}
                                                                     animate={isEarned}
                                                                     color={trophy.color}
                                                                 />
                                                             </div>
-                                                            <p className={`smallest fw-bold mb-0 text-truncate text-center w-100 ${isEarned ? 'text-dark' : 'text-muted'}`}>
-                                                                {trophy.title.split(' (')[0]}
-                                                            </p>
                                                         </div>
                                                     </div>
                                                 );
@@ -460,71 +515,10 @@ const Profile: React.FC = () => {
                                         </div>
                                     </div>
 
-                                    <p className="smallest fw-bold text-warning mb-1 ls-2 text-uppercase">Journey Overview</p>
-                                    <h2 className="fw-bold mb-0 ls-tight">MY PROGRESS JOURNEY</h2>
                                 </div>
                             </div>
 
-                            <div className="row g-4 mb-5">
-                                {/* Summary Cards */}
-                                <div className="col-6 col-md-3">
-                                    <div className="p-4 rounded-4 bg-light text-center h-100 shadow-sm border border-white hover-up transition-all">
-                                        <MessageCircle className="mx-auto mb-2 text-primary" size={32} />
-                                        <h3 className="fw-bold mb-0">{stats?.wordsCount || 0}</h3>
-                                        <p className="smallest fw-bold text-muted text-uppercase ls-1">Words Learned</p>
-                                    </div>
-                                </div>
-                                <div className="col-6 col-md-3">
-                                    <div className="p-4 rounded-4 bg-light text-center h-100 shadow-sm border border-white hover-up transition-all">
-                                        <Book className="mx-auto mb-2 text-success" size={32} />
-                                        <h3 className="fw-bold mb-0">{stats?.lessonsCount || 0}</h3>
-                                        <p className="smallest fw-bold text-muted text-uppercase ls-1">Lessons Done</p>
-                                    </div>
-                                </div>
-                                <div className="col-6 col-md-3">
-                                    <div className="p-4 rounded-4 bg-light text-center h-100 shadow-sm border border-white hover-up transition-all">
-                                        <Flame className="mx-auto mb-2 text-danger" size={32} />
-                                        <h3 className="fw-bold mb-0">{stats?.streak || 0}</h3>
-                                        <p className="smallest fw-bold text-muted text-uppercase ls-1">Day Streak</p>
-                                    </div>
-                                </div>
-                                <div className="col-6 col-md-3">
-                                    <div className="p-4 rounded-4 bg-light text-center h-100 shadow-sm border border-white hover-up transition-all">
-                                        <Gem className="mx-auto mb-2 text-warning" size={32} />
-                                        <h3 className="fw-bold mb-0">{stats?.points || 0}</h3>
-                                        <p className="smallest fw-bold text-muted text-uppercase ls-1">Total XP</p>
-                                    </div>
-                                </div>
-                            </div>
 
-                            {/* Progress Bar & Badges */}
-                            <div className="card border-0 shadow-sm rounded-4 p-4 p-md-5 mb-0 overflow-hidden position-relative" style={{ backgroundColor: '#111827', color: 'white' }}>
-                                <div className="position-relative z-1">
-                                    <div className="d-flex justify-content-between align-items-center mb-4">
-                                        <div>
-                                            <h4 className="fw-bold mb-1">Rank Progress</h4>
-                                            <p className="smallest fw-bold text-warning ls-1 uppercase">{getBadgeDetails(levelStats.level).name} (LEVEL {levelStats.level})</p>
-                                        </div>
-                                        <div className="text-end">
-                                            <h2 className="fw-bold mb-0 text-warning">{levelStats.progress}%</h2>
-                                            <p className="smallest fw-bold opacity-50 ls-1">TO NEXT RANK</p>
-                                        </div>
-                                    </div>
-
-                                    <div className="progress mb-4" style={{ height: '12px', borderRadius: '10px', backgroundColor: 'rgba(255,255,255,0.1)' }}>
-                                        <div
-                                            className="progress-bar progress-bar-striped progress-bar-animated bg-warning"
-                                            style={{ width: `${levelStats.progress}%`, borderRadius: '10px' }}
-                                        ></div>
-                                    </div>
-
-                                    <p className="small text-muted mb-0 d-flex align-items-center gap-2">
-                                        <Info size={14} />
-                                        Earn {levelStats.pointsForNextLevel - levelStats.pointsInCurrentLevel} more XP to level up your rank!
-                                    </p>
-                                </div>
-                                <div className="position-absolute end-0 bottom-0 opacity-10 display-1 p-4"><Shield size={120} strokeWidth={1} /></div>
-                            </div>
 
                             {/* DAILY ACTIVITY LOG (Moved from Mastery) */}
                             <div className="mt-5">
@@ -532,7 +526,9 @@ const Profile: React.FC = () => {
                                     activityHistory={userData?.activityHistory || []}
                                     streakFreezes={userData?.streakFreezes || 0}
                                     points={userData?.points || 0}
+                                    streak={userData?.streak || 0}
                                     onBuyFreeze={handleBuyFreeze}
+                                    onShareClick={() => setIsShareStreakOpen(true)}
                                 />
                             </div>
                         </section>
@@ -802,6 +798,25 @@ const Profile: React.FC = () => {
                     -ms-overflow-style: none;
                     scrollbar-width: none;
                 }
+
+                .active-streak-fire {
+                    animation: active-pulse 2s infinite ease-in-out;
+                }
+                .active-streak-text {
+                    text-shadow: 0 0 8px rgba(239, 68, 68, 0.2);
+                }
+                .fire-shake {
+                    display: inline-block !important;
+                    animation: fire-shake 0.5s infinite alternate ease-in-out;
+                }
+                @keyframes active-pulse {
+                    0%, 100% { transform: scale(1); box-shadow: 0 0 15px rgba(239, 68, 68, 0.4); }
+                    50% { transform: scale(1.05); box-shadow: 0 0 25px rgba(239, 68, 68, 0.6); }
+                }
+                @keyframes fire-shake {
+                    from { transform: rotate(-5deg); }
+                    to { transform: rotate(5deg); }
+                }
             `}</style>
             {showLogout && (
                 <LogoutModal 
@@ -813,6 +828,20 @@ const Profile: React.FC = () => {
                     }}
                 />
             )}
+
+            <ShareProfileModal 
+                isOpen={isShareModalOpen} 
+                onClose={() => setIsShareModalOpen(false)} 
+                userData={userData} 
+                inviteLink={inviteLink}
+            />
+
+            <ShareStreakModal 
+                isOpen={isShareStreakOpen} 
+                onClose={() => setIsShareStreakOpen(false)} 
+                userData={userData}
+                inviteLink={inviteLink}
+            />
         </div>
     );
 };

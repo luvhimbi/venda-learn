@@ -15,18 +15,18 @@ const LandingPage: React.FC = () => {
                 <div className="container position-relative z-1 pt-5 mt-3 mb-5" style={{ maxWidth: '1100px' }}>
                     <div className="row align-items-center">
                         <div className="col-lg-6 mb-5 mb-lg-0 order-2 order-lg-1 text-center text-lg-start">
-                            <h1 className="display-4 fw-bold ls-tight mb-4 text-slate animate__animated animate__fadeInUp">
+                            <h1 className="h1-mobile display-4 fw-bold ls-tight mb-4 text-slate animate__animated animate__fadeInUp">
                                 Learn <span className="text-warning">Tshivenda</span><br />
                                 The Fun Way.
                             </h1>
-                            <p className="lead text-muted mb-5 ls-1 animate__animated animate__fadeInUp animate__delay-1s mx-auto mx-lg-0" style={{ maxWidth: '480px' }}>
+                            <p className="lead text-muted mb-4 mb-md-5 ls-1 animate__animated animate__fadeInUp animate__delay-1s mx-auto mx-lg-0" style={{ maxWidth: '480px' }}>
                                 Master the language of Venda through gamified lessons, interactive stories, and engaging minigames.
                             </p>
-                            <div className="d-flex gap-3 justify-content-center justify-content-lg-start animate__animated animate__fadeInUp animate__delay-1s">
-                                <button onClick={() => navigate('/register')} className="btn btn-dark btn-lg px-4 px-md-5 py-3 fw-bold rounded-pill shadow-lg hover-lift smallest-md">
+                            <div className="d-flex flex-column flex-md-row gap-3 justify-content-center justify-content-lg-start animate__animated animate__fadeInUp animate__delay-1s">
+                                <button onClick={() => navigate('/register')} className="btn btn-dark btn-lg px-4 px-md-5 py-3 fw-bold rounded-pill shadow-lg hover-lift">
                                     START LEARNING
                                 </button>
-                                <button onClick={() => navigate('/courses')} className="btn btn-outline-dark btn-lg px-4 px-md-5 py-3 fw-bold rounded-pill hover-lift smallest-md">
+                                <button onClick={() => navigate('/courses')} className="btn btn-outline-dark btn-lg px-4 px-md-5 py-3 fw-bold rounded-pill hover-lift">
                                     EXPLORE
                                 </button>
                             </div>
@@ -37,7 +37,7 @@ const LandingPage: React.FC = () => {
                                 style={{ width: '80%', paddingBottom: '80%', background: 'radial-gradient(circle, rgba(250,204,21,0.2) 0%, rgba(255,255,255,0) 70%)', zIndex: -1 }}></div>
 
                             <div className="animate__animated animate__bounceInRight">
-                                <Mascot width="100%" height="auto" mood="excited" style={{ maxWidth: '380px' }} />
+                                <Mascot width="100%" height="auto" mood="excited" style={{ maxWidth: '300px', margin: '0 auto' }} />
                             </div>
                         </div>
                     </div>
@@ -54,7 +54,7 @@ const LandingPage: React.FC = () => {
 
 
             {/* --- FEATURES GRID --- */}
-            <section className="py-5 my-5">
+            <section id="features" className="py-5 my-5">
                 <div className="container" style={{ maxWidth: '1100px' }}>
                     <div className="text-center mb-5 mx-auto" style={{ maxWidth: '700px' }}>
                         <span className="badge bg-light text-dark border mb-3 px-3 py-2 rounded-pill fw-bold ls-1 smallest">FEATURES</span>
@@ -84,12 +84,12 @@ const LandingPage: React.FC = () => {
             </section>
 
             {/* --- HOW IT WORKS --- */}
-            <section className="py-5 bg-dark text-white position-relative overflow-hidden">
+            <section id="how-it-works" className="py-5 bg-dark text-white position-relative overflow-hidden">
                 <div className="container position-relative z-1 py-5" style={{ maxWidth: '1100px' }}>
                     <div className="row align-items-center text-center text-lg-start">
                         <div className="col-lg-5 mb-5 mb-lg-0">
-                            <h2 className="display-4 fw-bold ls-tight mb-4">How it works</h2>
-                            <p className="lead opacity-75 mb-5">Start speaking from day one with our proven method.</p>
+                            <h2 className="display-5 fw-bold ls-tight mb-4">How it works</h2>
+                            <p className="lead opacity-75 mb-4 mb-md-5">Start speaking from day one with our proven method.</p>
 
                             <div className="d-flex flex-column gap-4">
                                 {[
@@ -108,8 +108,8 @@ const LandingPage: React.FC = () => {
                             </div>
                         </div>
                         <div className="col-lg-6 offset-lg-1">
-                            <div className="bg-white rounded-5 p-2 shadow-lg" style={{ transform: 'rotate(-2deg)' }}>
-                                <div className="bg-light rounded-4 overflow-hidden" style={{ height: '400px', background: 'url(https://images.unsplash.com/photo-1516321318423-f06f85e504b3?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80) center/cover' }}>
+                            <div className="bg-white rounded-5 p-2 shadow-lg section-rotation-mobile" style={{ transform: 'rotate(-2deg)' }}>
+                                <div className="bg-light rounded-4 overflow-hidden section-height-mobile" style={{ height: '400px', background: 'url(https://images.unsplash.com/photo-1516321318423-f06f85e504b3?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80) center/cover' }}>
                                     {/* Placeholder for screenshot */}
                                     <div className="d-flex align-items-center justify-content-center h-100 bg-black bg-opacity-25">
                                         <div className="bg-white p-3 rounded-pill shadow-sm d-flex align-items-center gap-2">
@@ -125,7 +125,7 @@ const LandingPage: React.FC = () => {
             </section>
 
             {/* --- MINIGAMES SHOWCASE --- */}
-            <section className="py-5 bg-white">
+            <section id="minigames" className="py-5 bg-white">
                 <div className="container py-4" style={{ maxWidth: '1100px' }}>
                     <div className="row align-items-center g-5">
                         <div className="col-lg-6">
@@ -187,7 +187,7 @@ const LandingPage: React.FC = () => {
             </section>
 
             {/* --- CULTURE & HISTORY --- */}
-            <section className="py-5" style={{ backgroundColor: '#F9FAFB' }}>
+            <section id="culture" className="py-5" style={{ backgroundColor: '#F9FAFB' }}>
                 <div className="container py-4" style={{ maxWidth: '1100px' }}>
                     <div className="row align-items-center g-5">
                         <div className="col-lg-6 order-2 order-lg-1">
@@ -204,33 +204,37 @@ const LandingPage: React.FC = () => {
                             </button>
                         </div>
                         <div className="col-lg-6 order-1 order-lg-2">
-                            <div className="d-flex gap-3 px-3">
-                                <div className="d-flex flex-column gap-3 mt-5">
-                                    <div className="bg-white p-4 rounded-4 shadow-sm border text-center hover-lift" style={{ width: '220px' }}>
-                                        <div className="bg-warning bg-opacity-10 rounded-circle d-flex align-items-center justify-content-center mx-auto mb-3" style={{ width: 60, height: 60 }}>
+                            <div className="row g-3 px-2 px-md-0">
+                                <div className="col-6 col-sm-6 mt-md-5">
+                                    <div className="bg-white p-3 p-md-4 rounded-4 shadow-sm border text-center hover-lift h-100 w-100">
+                                        <div className="bg-warning bg-opacity-10 rounded-circle d-flex align-items-center justify-content-center mx-auto mb-3" style={{ width: 50, height: 50 }}>
                                             <i className="bi bi-book-half text-warning fs-3"></i>
                                         </div>
                                         <h6 className="fw-bold mb-1">Folktales</h6>
                                         <p className="smallest text-muted mb-0">Traditional stories</p>
                                     </div>
-                                    <div className="bg-white p-4 rounded-4 shadow-sm border text-center hover-lift" style={{ width: '220px' }}>
-                                        <div className="bg-danger bg-opacity-10 rounded-circle d-flex align-items-center justify-content-center mx-auto mb-3" style={{ width: 60, height: 60 }}>
+                                </div>
+                                <div className="col-6 col-sm-6">
+                                    <div className="bg-white p-3 p-md-4 rounded-4 shadow-sm border text-center hover-lift h-100 w-100">
+                                        <div className="bg-primary bg-opacity-10 rounded-circle d-flex align-items-center justify-content-center mx-auto mb-3" style={{ width: 50, height: 50 }}>
+                                            <i className="bi bi-geo-alt-fill text-primary fs-3"></i>
+                                        </div>
+                                        <h6 className="fw-bold mb-1">Thohoyandou</h6>
+                                        <p className="smallest text-muted mb-0">The capital city</p>
+                                    </div>
+                                </div>
+                                <div className="col-6 col-sm-6 mt-md-n5">
+                                    <div className="bg-white p-3 p-md-4 rounded-4 shadow-sm border text-center hover-lift h-100 w-100">
+                                        <div className="bg-danger bg-opacity-10 rounded-circle d-flex align-items-center justify-content-center mx-auto mb-3" style={{ width: 50, height: 50 }}>
                                             <i className="bi bi-music-note-beamed text-danger fs-3"></i>
                                         </div>
                                         <h6 className="fw-bold mb-1">Music</h6>
                                         <p className="smallest text-muted mb-0">Rhythms of Venda</p>
                                     </div>
                                 </div>
-                                <div className="d-flex flex-column gap-3">
-                                    <div className="bg-white p-4 rounded-4 shadow-sm border text-center hover-lift" style={{ width: '220px' }}>
-                                        <div className="bg-primary bg-opacity-10 rounded-circle d-flex align-items-center justify-content-center mx-auto mb-3" style={{ width: 60, height: 60 }}>
-                                            <i className="bi bi-geo-alt-fill text-primary fs-3"></i>
-                                        </div>
-                                        <h6 className="fw-bold mb-1">Thohoyandou</h6>
-                                        <p className="smallest text-muted mb-0">The capital city</p>
-                                    </div>
-                                    <div className="bg-white p-4 rounded-4 shadow-sm border text-center hover-lift" style={{ width: '220px' }}>
-                                        <div className="bg-success bg-opacity-10 rounded-circle d-flex align-items-center justify-content-center mx-auto mb-3" style={{ width: 60, height: 60 }}>
+                                <div className="col-6 col-sm-6 mt-md-n5">
+                                    <div className="bg-white p-3 p-md-4 rounded-4 shadow-sm border text-center hover-lift h-100 w-100">
+                                        <div className="bg-success bg-opacity-10 rounded-circle d-flex align-items-center justify-content-center mx-auto mb-3" style={{ width: 50, height: 50 }}>
                                             <i className="bi bi-brush-fill text-success fs-3"></i>
                                         </div>
                                         <h6 className="fw-bold mb-1">Art & Craft</h6>
@@ -244,7 +248,7 @@ const LandingPage: React.FC = () => {
             </section>
 
             {/* --- FAQ SECTION --- */}
-            <section className="py-5 bg-white mb-5">
+            <section id="faq" className="py-5 bg-white mb-5">
                 <div className="container py-4" style={{ maxWidth: '800px' }}>
                     <div className="text-center mb-5">
                         <h2 className="display-6 fw-bold ls-tight mb-3">Frequently Asked Questions</h2>
@@ -276,12 +280,38 @@ const LandingPage: React.FC = () => {
                 </div>
             </section>
 
+            {/* --- CONTACT SECTION --- */}
+            <section id="contact" className="py-5" style={{ backgroundColor: '#F9FAFB' }}>
+                <div className="container py-4" style={{ maxWidth: '800px' }}>
+                    <div className="text-center mb-5">
+                        <h2 className="display-6 fw-bold ls-tight mb-3">Get in touch</h2>
+                        <p className="text-muted lead">Have questions? We're here to help you on your journey.</p>
+                    </div>
+                    <div className="row g-4 justify-content-center">
+                        <div className="col-md-6">
+                            <div className="bg-white p-4 rounded-4 border shadow-sm h-100 text-center">
+                                <i className="bi bi-envelope-fill text-warning fs-1 mb-3 d-block"></i>
+                                <h5 className="fw-bold mb-2">Email Us</h5>
+                                <p className="text-muted mb-0">support@vendalearn.com</p>
+                            </div>
+                        </div>
+                        <div className="col-md-6">
+                            <div className="bg-white p-4 rounded-4 border shadow-sm h-100 text-center">
+                                <i className="bi bi-chat-dots-fill text-primary fs-1 mb-3 d-block"></i>
+                                <h5 className="fw-bold mb-2">Community</h5>
+                                <p className="text-muted mb-0">Join our Discord server</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
             {/* --- CTA --- */}
-            <section className="py-5 my-5 text-center">
-                <div className="container" style={{ maxWidth: '800px' }}>
+            <section className="py-5 my-0 my-md-5 text-center">
+                <div className="container px-4" style={{ maxWidth: '800px' }}>
                     <h2 className="display-5 fw-bold ls-tight mb-4">Ready to start your journey?</h2>
-                    <p className="lead text-muted mb-5">Join for free today and start speaking Tshivenda with confidence.</p>
-                    <button onClick={() => navigate('/register')} className="btn btn-warning btn-lg px-5 py-3 fw-bold rounded-pill shadow-lg hover-scale">
+                    <p className="lead text-muted mb-4 mb-md-5">Join for free today and start speaking Tshivenda with confidence.</p>
+                    <button onClick={() => navigate('/register')} className="btn btn-warning btn-lg px-4 px-md-5 py-3 fw-bold rounded-pill shadow-lg hover-scale w-100-mobile">
                         JOIN VENDALEARN FREE
                     </button>
                     <p className="mt-3 small text-muted">No credit card required • Cancel anytime</p>
@@ -293,6 +323,17 @@ const LandingPage: React.FC = () => {
                 .hover-lift:hover { transform: translateY(-5px); box-shadow: 0 10px 30px rgba(0,0,0,0.1) !important; }
                 .hover-scale:hover { transform: scale(1.05); }
                 .text-slate { color: #1e293b; }
+                @media (max-width: 768px) {
+                    .h1-mobile { font-size: 2.5rem !important; }
+                    .display-5 { font-size: 2rem !important; }
+                    .display-6 { font-size: 1.75rem !important; }
+                    .lead { font-size: 1rem !important; }
+                    .mt-md-n5 { margin-top: 0 !important; }
+                    .mt-md-5 { margin-top: 0 !important; }
+                    .section-rotation-mobile { transform: rotate(0deg) !important; }
+                    .section-height-mobile { height: 250px !important; }
+                    .w-100-mobile { width: 100% !important; }
+                }
             `}</style>
         </div>
     );
