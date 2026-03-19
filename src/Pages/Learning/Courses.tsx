@@ -52,9 +52,9 @@ const Courses: React.FC = () => {
 
     const getDifficultyStyle = (d: string) => {
         const diff = d?.toLowerCase();
-        if (diff === 'beginner') return { color: '#10B981', bg: '#EDFDF5', label: 'MAVHAYI', icon: <Sprout size={14} className="me-1" /> };
-        if (diff === 'intermediate') return { color: '#F59E0B', bg: '#FFFBEB', label: 'VHUKATI', icon: <Shield size={14} className="me-1" /> };
-        return { color: '#EF4444', bg: '#FEF2F2', label: 'VHUḒU', icon: <Flame size={14} className="me-1" /> };
+        if (diff === 'beginner') return { color: '#10B981', bg: '#EDFDF5', label: 'EASY', icon: <Sprout size={14} className="me-1" /> };
+        if (diff === 'intermediate') return { color: '#F59E0B', bg: '#FFFBEB', label: 'INTERMEDIATE', icon: <Shield size={14} className="me-1" /> };
+        return { color: '#EF4444', bg: '#FEF2F2', label: 'ADVANCED', icon: <Flame size={14} className="me-1" /> };
     };
 
     const getCourseProgress = (course: any) => {
@@ -101,7 +101,7 @@ const Courses: React.FC = () => {
                     <p className="smallest fw-bold text-muted mb-1 ls-2 text-uppercase">Tshivenda Learning Path</p>
                     <h2 className="fw-bold mb-2 ls-tight" style={{ fontSize: '2rem' }}>PFUNZO DZOTHE</h2>
                     <p className="text-muted small mb-0">
-                        {courses.length} courses • {totalCoursesCompleted} completed • {totalMlCompleted} micro lessons done
+                        {courses.length} courses • {totalCoursesCompleted} completed • {totalMlCompleted}/60 micro lessons done
                     </p>
 
                     {!isLoggedIn && (

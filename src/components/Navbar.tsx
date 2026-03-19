@@ -157,7 +157,7 @@ const Navbar: React.FC = () => {
                                             </div>
                                         </div>
                                         <div className="d-flex align-items-center gap-2 mt-2">
-                                            <span className="badge bg-dark rounded-pill smallest ls-1">{userData?.points || 0} LP</span>
+                                            <span className="badge bg-dark rounded-pill smallest ls-1">{userData?.points || 0} XP</span>
                                             <span className="smallest text-muted fw-bold">Active</span>
                                         </div>
                                     </li>

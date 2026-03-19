@@ -3,8 +3,7 @@ import TrophyIcon from './TrophyIcon';
 
 interface AchievementCardProps {
     id: string;
-    title: string;
-    description: string;
+
     color: string;
     isEarned: boolean;
     progress?: number; // 0 to 100
@@ -14,8 +13,6 @@ interface AchievementCardProps {
 
 const AchievementCard: React.FC<AchievementCardProps> = ({ 
     id,
-    title, 
-    description, 
     color, 
     isEarned, 
     progress = 0,
@@ -45,7 +42,7 @@ const AchievementCard: React.FC<AchievementCardProps> = ({
             <div className="d-flex flex-column align-items-center text-center">
                 <div className="mb-4 position-relative">
                     <TrophyIcon 
-                        rarity={isEarned ? rarity : 'locked'} 
+                        rarity={rarity} 
                         size={80} 
                         color={color}
                         animate={isEarned}
@@ -70,8 +67,7 @@ const AchievementCard: React.FC<AchievementCardProps> = ({
                     )}
                 </div>
 
-                <h5 className={`fw-bold mb-2 ls-tight ${isEarned ? 'text-dark' : 'text-muted'}`}>{title}</h5>
-                <p className="smallest fw-medium text-muted mb-4 px-2" style={{ lineHeight: '1.4' }}>{description}</p>
+
 
                 {!isEarned && progress > 0 && (
                     <div className="w-100 mt-auto">
@@ -108,14 +104,16 @@ const AchievementCard: React.FC<AchievementCardProps> = ({
                     border-color: ${color} !important;
                 }
                 .achievement-card.locked {
-                    filter: grayscale(0.8);
-                    opacity: 0.8;
+                    filter: grayscale(1);
+                    opacity: 0.5;
+                    border-style: solid;
+                    border-color: #f1f5f9;
                 }
                 .achievement-card.locked:hover {
-                    filter: grayscale(0.4);
-                    opacity: 1;
+                    filter: grayscale(0.5);
+                    opacity: 0.8;
                     background-color: #fff !important;
-                    border-style: solid;
+                    border-color: #e2e8f0;
                 }
                 .share-badge:hover {
                     transform: scale(1.1);

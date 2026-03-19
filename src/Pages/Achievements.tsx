@@ -107,7 +107,15 @@ const Achievements: React.FC = () => {
 
                 {/* GRID WITH BETTER DENSITY */}
                 <div className="row g-3 mb-5">
-                    {ALL_TROPHIES.map(trophy => {
+                    {[...ALL_TROPHIES]
+                        .sort((a, b) => {
+                            const aEarned = (userData?.trophies || []).includes(a.id);
+                            const bEarned = (userData?.trophies || []).includes(b.id);
+                            if (aEarned && !bEarned) return -1;
+                            if (!aEarned && bEarned) return 1;
+                            return 0;
+                        })
+                        .map(trophy => {
                         const isEarned = (userData?.trophies || []).includes(trophy.id);
                         const progress = calculateProgress(trophy);
                         
@@ -115,8 +123,6 @@ const Achievements: React.FC = () => {
                             <div key={trophy.id} className="col-12 col-md-4">
                                 <AchievementCard 
                                     id={trophy.id}
-                                    title={trophy.title}
-                                    description={trophy.description}
                                     color={trophy.color}
                                     isEarned={isEarned}
                                     progress={progress}
@@ -145,6 +151,7 @@ const Achievements: React.FC = () => {
                     rarity: selectedTrophy.rarity,
                     color: selectedTrophy.color
                 } : null}
+                userData={userData}
             />
 
             <style>{`

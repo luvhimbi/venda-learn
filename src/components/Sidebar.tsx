@@ -4,28 +4,9 @@ import { onAuthStateChanged, signOut, type User } from 'firebase/auth';
 import { doc, onSnapshot } from 'firebase/firestore';
 import { auth, db } from '../services/firebaseConfig';
 import { invalidateCache } from '../services/dataCache';
-import Mascot from './Mascot';
 import { AvatarDisplay } from './AvatarPicker';
+import LogoutModal from './LogoutModal';
 
-const LogoutModal: React.FC<{ onClose: () => void, onConfirm: () => void }> = ({ onClose, onConfirm }) => (
-    <div className="position-fixed top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center bg-black bg-opacity-50" style={{ zIndex: 1050 }}>
-        <div className="bg-white p-5 rounded-4 shadow-lg text-center animate__animated animate__zoomIn" style={{ maxWidth: '450px', width: '90%' }}>
-            <div className="mb-4 d-flex justify-content-center">
-                <Mascot mood="sad" width="180px" height="180px" />
-            </div>
-            <h4 className="fw-bold mb-3 text-slate">Leaving so soon?</h4>
-            <p className="text-muted mb-4">Are you sure you want to leave so soon?</p>
-            <div className="d-flex gap-3">
-                <button className="btn btn-light flex-grow-1 fw-bold text-slate py-3 rounded-pill" onClick={onClose}>
-                    Stay
-                </button>
-                <button className="btn bg-game-primary flex-grow-1 fw-bold py-3 rounded-pill text-dark" onClick={onConfirm}>
-                    Logout
-                </button>
-            </div>
-        </div>
-    </div>
-);
 
 const Sidebar: React.FC = () => {
     const [user, setUser] = useState<User | null>(null);
@@ -99,7 +80,7 @@ const Sidebar: React.FC = () => {
                         seed={userData?.username || 'warrior'}
                         size={28}
                     />
-                    <span className="smallest fw-bold text-muted ls-1">{userData?.points || 0} LP {user?.isAnonymous && <span className="text-secondary">(G)</span>}</span>
+                    <span className="smallest fw-bold text-muted ls-1">{userData?.points || 0} XP {user?.isAnonymous && <span className="text-secondary">(G)</span>}</span>
                 </Link>
             </div>
 
@@ -148,7 +129,7 @@ const Sidebar: React.FC = () => {
                                     <h6 className="fw-bold mb-0 text-truncate small text-dark">{userData?.username || (user?.isAnonymous ? "Guest Learner" : "Warrior")}</h6>
                                     {user?.isAnonymous && <span className="badge bg-secondary rounded-pill fw-bold" style={{ fontSize: '8px', padding: '2px 4px' }}>GUEST</span>}
                                 </div>
-                                <p className="smallest text-muted mb-0 fw-bold ls-1">{userData?.points || 0} LP</p>
+                                <p className="smallest text-muted mb-0 fw-bold ls-1">{userData?.points || 0} XP</p>
                             </div>
                         </Link>
                         <button onClick={handleLogout} className="btn btn-outline-danger w-100 rounded-pill py-2 smallest fw-bold ls-2 uppercase border-0 bg-danger-subtle text-danger transition-all tour-sidebar-logout">

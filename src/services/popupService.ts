@@ -15,10 +15,17 @@ export const popupService = {
             icon: 'success',
             confirmButtonColor: '#FACC15',
             confirmButtonText: confirmText,
+            background: '#ffffff',
+            showClass: {
+                popup: 'animate__animated animate__fadeInDown animate__faster'
+            },
+            hideClass: {
+                popup: 'animate__animated animate__fadeOutUp animate__faster'
+            },
             customClass: {
-                popup: 'rounded-5 border-0 shadow-lg p-4',
-                title: 'fw-bold ls-tight',
-                confirmButton: 'rounded-pill px-5 py-2 fw-bold text-dark ls-1'
+                popup: 'rounded-5 border-0 shadow-2xl p-4 p-md-5',
+                title: 'fw-bold ls-tight fs-3 mb-3 text-dark',
+                confirmButton: 'btn btn-warning rounded-pill px-5 py-3 fw-bold text-dark ls-1 border-0 shadow-sm'
             }
         });
     },
@@ -33,10 +40,11 @@ export const popupService = {
             icon: 'info',
             confirmButtonColor: '#FACC15',
             confirmButtonText: 'Got it!',
+            background: '#ffffff',
             customClass: {
-                popup: 'rounded-5 border-0 shadow-lg p-4',
-                title: 'fw-bold ls-tight',
-                confirmButton: 'rounded-pill px-5 py-2 fw-bold text-dark ls-1'
+                popup: 'rounded-5 border-0 shadow-2xl p-4 p-md-5',
+                title: 'fw-bold ls-tight fs-3 mb-3 text-dark',
+                confirmButton: 'btn btn-warning rounded-pill px-5 py-3 fw-bold text-dark ls-1 border-0 shadow-sm'
             }
         });
     },
@@ -49,12 +57,13 @@ export const popupService = {
             title: title,
             text: text,
             icon: 'error',
-            confirmButtonColor: '#111827',
+            confirmButtonColor: '#1e293b',
             confirmButtonText: 'OK',
+            background: '#ffffff',
             customClass: {
-                popup: 'rounded-5 border-0 shadow-lg p-4',
-                title: 'fw-bold ls-tight',
-                confirmButton: 'rounded-pill px-5 py-2 fw-bold text-white ls-1'
+                popup: 'rounded-5 border-0 shadow-2xl p-4 p-md-5',
+                title: 'fw-bold ls-tight fs-3 mb-3 text-danger',
+                confirmButton: 'btn btn-dark rounded-pill px-5 py-3 fw-bold text-white ls-1 border-0 shadow-sm'
             }
         });
     },
@@ -69,15 +78,16 @@ export const popupService = {
             icon: 'question',
             showCancelButton: true,
             confirmButtonColor: '#FACC15',
-            cancelButtonColor: '#111827',
+            cancelButtonColor: '#1e293b',
             confirmButtonText: confirmText,
             cancelButtonText: cancelText,
             reverseButtons: true,
+            background: '#ffffff',
             customClass: {
-                popup: 'rounded-5 border-0 shadow-lg p-4',
-                title: 'fw-bold ls-tight text-dark',
-                confirmButton: 'rounded-pill px-4 py-2 fw-bold text-dark ls-1',
-                cancelButton: 'rounded-pill px-4 py-2 fw-bold text-white ls-1'
+                popup: 'rounded-5 border-0 shadow-2xl p-4 p-md-5',
+                title: 'fw-bold ls-tight fs-3 mb-3 text-dark',
+                confirmButton: 'btn btn-warning rounded-pill px-4 py-3 fw-bold text-dark ls-1 border-0 shadow-sm mx-2',
+                cancelButton: 'btn btn-outline-dark border-2 rounded-pill px-4 py-3 fw-bold text-dark ls-1 mx-2'
             }
         });
     },
@@ -89,12 +99,13 @@ export const popupService = {
         Swal.fire({
             title: title,
             allowOutsideClick: false,
+            background: '#ffffff',
             didOpen: () => {
                 Swal.showLoading();
             },
             customClass: {
-                popup: 'rounded-5 border-0 shadow-lg p-4',
-                title: 'fw-bold ls-tight text-dark'
+                popup: 'rounded-5 border-0 shadow-2xl p-4 p-md-5',
+                title: 'fw-bold ls-tight fs-4 text-dark'
             }
         });
     },

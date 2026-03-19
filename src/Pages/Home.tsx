@@ -4,24 +4,17 @@ import { doc, updateDoc, type Firestore } from 'firebase/firestore';
 import { onAuthStateChanged } from 'firebase/auth';
 import { auth, db } from '../services/firebaseConfig';
 import { getBadgeDetails, getLevelStats } from "../services/levelUtils.ts";
-import { fetchLessons, fetchTopLearners, refreshUserData, getMicroLessons } from '../services/dataCache';
+import { fetchLessons, refreshUserData, getMicroLessons } from '../services/dataCache';
 import { useRetentionEngine } from '../hooks/useRetentionEngine';
 import { ALL_TROPHIES } from '../services/achievementService';
-import Mascot from '../components/Mascot';
 import LandingPage from './LandingPage';
 import InstallBanner from '../components/InstallBanner';
 import TourGuide from '../components/TourGuide';
 import DailyWelcomeModal from '../components/DailyWelcomeModal';
 import TrophyIcon from '../components/TrophyIcon';
 import JuicyButton from '../components/JuicyButton';
-// --- LEVEL UP MOTIVATION ---
-const getLevelMotivation = (level: number, progress: number) => {
-    if (progress >= 80) return { msg: "Almost there! Push through for the next level!", color: "#F59E0B" };
-    if (progress >= 50) return { msg: "Halfway to the next level! Keep learning!", color: "#10B981" };
-    if (level >= 10) return { msg: "You're a Venda language master!", color: "#4f46e5" };
-    if (level >= 5) return { msg: "Solid progress! You're becoming fluent!", color: "#059669" };
-    return { msg: "Every word brings you closer to fluency!", color: "#10B981" };
-};
+import PremiumStreakModal from '../components/PremiumStreakModal';
+
 
 const Home: React.FC = () => {
     const navigate = useNavigate();
@@ -29,9 +22,9 @@ const Home: React.FC = () => {
     const [isLoggedIn, setIsLoggedIn] = useState<boolean | null>(null);
     const [userData, setUserData] = useState<any>(null);
     const [lastLesson, setLastLesson] = useState<any>(null);
-    const [topLearners, setTopLearners] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [isTourOpen, setIsTourOpen] = useState(false);
+    const [showStreakModal, setShowStreakModal] = useState(false);
 
 
 
@@ -63,15 +56,13 @@ const Home: React.FC = () => {
                 setIsLoggedIn(true);
                 try {
                     // Fetch everything in parallel using the cache layer
-                    const [userData, lessons, topLearnersData] = await Promise.all([
+                    const [userData, lessons] = await Promise.all([
                         refreshUserData(),
                         fetchLessons(),          // cached across pages
-                        fetchTopLearners(),      // cached across pages
                     ]);
 
                     if (userData) {
                         setUserData(userData);
-                        setTopLearners(topLearnersData);
 
                         // Resolve last lesson from cached lessons instead of extra Firestore call
                         if (userData.lastLessonId) {
@@ -114,24 +105,28 @@ const Home: React.FC = () => {
             }
             setLoading(false);
         });
-        return () => unsubscribe();
-    }, []);
+        const handleOutsideClick = (e: MouseEvent) => {
+            const target = e.target as HTMLElement;
+            if (!target.closest('.streak-trigger-area')) {
+                setShowStreakModal(false);
+            }
+        };
+
+        if (showStreakModal) {
+            document.addEventListener('click', handleOutsideClick);
+        }
+
+        return () => {
+            unsubscribe();
+            document.removeEventListener('click', handleOutsideClick);
+        };
+    }, [showStreakModal]);
 
     // --- EMOTIONAL DESIGN: MASCOT QUOTES ---
-    const [mascotQuote, setMascotQuote] = useState("");
     const [showWelcomeModal, setShowWelcomeModal] = useState(false);
 
     useEffect(() => {
         if (isLoggedIn && userData) {
-            const quotes = [
-                `Vho vuwa hani, ${userData.username || 'Learner'}? Ready to learn?`,
-                "Every word you learn today is a victory!",
-                "I believe in you! Let's crush some lessons!",
-                "Tshivenda is beautiful, just like your progress!",
-                "Ready to earn some more LP today?",
-                "Keep going! You're becoming a Venda master!"
-            ];
-            setMascotQuote(quotes[Math.floor(Math.random() * quotes.length)]);
 
             // Show daily welcome if not seen today
             const lastWelcome = localStorage.getItem('vendalearn_last_welcome');
@@ -161,7 +156,6 @@ const Home: React.FC = () => {
 
     const stats = getLevelStats(userData?.points || 0);
     const badge = getBadgeDetails(stats.level);
-    const motivation = getLevelMotivation(stats.level, stats.progress);
 
     return (
         <div className="bg-white min-vh-100" style={{ overflowX: 'hidden' }}>
@@ -184,56 +178,77 @@ const Home: React.FC = () => {
                 onComplete={handleTourComplete}
             />
 
-            {/* LIGHT HERO HEADER WITH MASCOT */}
-            <div className="px-3 py-5" style={{ background: 'linear-gradient(180deg, #FFFFFF 0%, #F8FAFC 100%)', borderBottom: '1px solid #E2E8F0' }}>
-                <div className="container" style={{ maxWidth: '1100px' }}>
+            {/* CLEAN HERO HEADER WITH MASCOT */}
+            <div className="px-3 py-4 bg-white border-bottom position-relative">
+                <div className="container" style={{ maxWidth: '800px' }}>
                     <InstallBanner />
+                    
                     <div className="row align-items-center">
-                        <div className="col-8">
-                            <h2 className="fw-bold text-slate mb-1 ls-tight">{getVendaGreeting()}, {userData?.username || 'Learner'}</h2>
-                            <span className="smallest fw-bold ls-2 uppercase text-muted">Kha ri gude Tshivenda</span>
+                        <div className="col-12 mb-4 mb-md-0">
+                            {/* Greeting & Level Badge */}
+                            <div className="d-flex flex-wrap align-items-center gap-3 mb-2">
+                                <h2 className="fw-bold text-slate-800 mb-0 ls-tight fs-3 fs-md-2">
+                                    {getVendaGreeting()}, 
+                                    <span className="text-primary ms-2">{userData?.username?.split(' ')[0] || 'Learner'}</span>
+                                </h2>
+                                <span className="badge rounded-pill fw-bold" style={{ backgroundColor: badge.color + '15', color: badge.color, border: `1px solid ${badge.color}` }}>
+                                    <i className={`bi ${badge.icon} me-1`}></i> Level {stats?.level || 1}
+                                </span>
+                            </div>
+                            
+                            <p className="small fw-bold ls-2 uppercase text-slate-500 mb-4">Kha ri gude Tshivenda • Let's learn Venda</p>
 
-                            <div className="d-flex gap-4 mt-4">
-                                <div className="d-flex align-items-center gap-2">
+                            {/* Clean Stat Chips */}
+                            <div className="d-flex flex-wrap gap-4 mt-4">
+                                {/* XP */}
+                                <div className="d-flex align-items-center gap-3">
                                     <div className="d-inline-flex align-items-center justify-content-center rounded-3"
-                                        style={{ width: 40, height: 40, backgroundColor: 'rgba(250,204,21,.15)' }}>
-                                        <i className="bi bi-gem" style={{ color: '#FACC15' }}></i>
+                                        style={{ width: 44, height: 44, backgroundColor: 'rgba(250,204,21,.15)' }}>
+                                        <i className="bi bi-gem fs-5" style={{ color: '#FACC15' }}></i>
                                     </div>
                                     <div>
-                                        <p className="mb-0 fw-bold text-slate ls-1">{userData?.points || 0}</p>
-                                        <p className="mb-0 smallest text-muted uppercase">LP Points</p>
+                                        <p className="mb-0 fw-bold fs-5 text-slate-800 lh-1">{userData?.points || 0}</p>
+                                        <p className="mb-0 smallest text-slate-400 uppercase ls-1">Total XP</p>
                                     </div>
                                 </div>
-                                <div className="d-flex align-items-center gap-2">
-                                    <div className="d-inline-flex align-items-center justify-content-center rounded-3"
-                                        style={{ width: 40, height: 40, backgroundColor: 'rgba(239,68,68,.15)' }}>
-                                        <i className="bi bi-fire" style={{ color: '#EF4444' }}></i>
+
+                                {/* Streak */}
+                                <div 
+                                    className="d-flex align-items-center gap-3 position-relative streak-trigger-area"
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        setShowStreakModal(!showStreakModal);
+                                    }}
+                                    style={{ cursor: 'pointer' }}
+                                >
+                                    <div className={`d-inline-flex align-items-center justify-content-center rounded-3 transition-all ${userData?.streak > 0 ? 'active-streak-fire' : ''}`}
+                                        style={{ width: 44, height: 44, backgroundColor: userData?.streak > 0 ? '#EF4444' : 'rgba(239,68,68,.15)' }}>
+                                        <i className={`bi bi-fire fs-5 ${userData?.streak > 0 ? 'fire-shake text-white' : 'text-danger'}`}></i>
                                     </div>
                                     <div>
-                                        <p className="mb-0 fw-bold text-slate ls-1">{userData?.streak || 0}</p>
-                                        <p className="mb-0 smallest text-muted uppercase">Day Streak</p>
+                                        <p className={`mb-0 fw-bold fs-5 lh-1 ${userData?.streak > 0 ? 'text-danger' : 'text-slate-800'}`}>{userData?.streak || 0}</p>
+                                        <p className="mb-0 smallest text-slate-400 uppercase ls-1">Day Streak</p>
                                     </div>
+
+                                    <PremiumStreakModal 
+                                        streak={userData?.streak || 0}
+                                        activityHistory={userData?.activityHistory || []}
+                                        streakFreezes={userData?.streakFreezes || 0}
+                                        points={userData?.points || 0}
+                                        isVisible={showStreakModal}
+                                        onClose={() => setShowStreakModal(false)}
+                                    />
                                 </div>
                             </div>
-                        </div>
-                        <div className="col-4 d-flex justify-content-center position-relative">
-                            {mascotQuote && !isTourOpen && (
-                                <div className="mascot-speech-bubble position-absolute bg-white px-3 py-2 rounded-4 shadow-sm border"
-                                    style={{ top: '-10px', right: '10%', maxWidth: '180px', zIndex: 5 }}>
-                                    <p className="mb-0 small fw-bold text-dark lh-sm">{mascotQuote}</p>
-                                    <div className="bubble-tail position-absolute bg-white border-bottom border-end"
-                                        style={{ width: '12px', height: '12px', bottom: '-6px', left: '20px', transform: 'rotate(45deg)' }}></div>
-                                </div>
-                            )}
-                            <Mascot width="140px" height="140px" />
                         </div>
                     </div>
                 </div>
             </div>
 
-            <div className="container py-5" style={{ maxWidth: '1100px' }}>
+            <div className="container py-5" style={{ maxWidth: '800px' }}>
+
                 <div className="row g-5">
-                    <main className="col-lg-7">
+                    <main className="col-12">
 
 
 
@@ -280,22 +295,34 @@ const Home: React.FC = () => {
                                 <Link to="/achievements" className="smallest fw-bold text-warning text-decoration-none ls-1">VIEW ALL <i className="bi bi-arrow-right"></i></Link>
                             </div>
                             <div className="row g-3">
-                                {ALL_TROPHIES.slice(0, 3).map(trophy => {
+                                {[...ALL_TROPHIES]
+                                    .sort((a, b) => {
+                                        const aEarned = (userData?.trophies || []).includes(a.id);
+                                        const bEarned = (userData?.trophies || []).includes(b.id);
+                                        if (aEarned && !bEarned) return -1;
+                                        if (!aEarned && bEarned) return 1;
+                                        return 0;
+                                    })
+                                    .slice(0, 3)
+                                    .map(trophy => {
                                     const isEarned = (userData?.trophies || []).includes(trophy.id);
                                     return (
                                         <div key={trophy.id} className="col-4">
                                             <div
                                                 onClick={() => navigate('/achievements')}
-                                                className={`p-3 rounded-4 text-center transition-all hover-lift ${isEarned ? 'bg-white shadow-sm border border-warning' : 'bg-light grayscale border-dashed border-2'}`}
-                                                style={{ cursor: 'pointer' }}
+                                                className={`p-3 rounded-4 text-center transition-all hover-lift ${isEarned ? 'bg-white shadow-sm border border-warning' : 'bg-white border'}`}
+                                                style={{ 
+                                                    cursor: 'pointer',
+                                                    opacity: isEarned ? 1 : 0.5,
+                                                    filter: isEarned ? 'none' : 'grayscale(1)'
+                                                }}
                                             >
                                                 <TrophyIcon
-                                                    rarity={isEarned ? trophy.rarity as any : 'locked'}
+                                                    rarity={trophy.rarity as any}
                                                     size={42}
                                                     animate={isEarned}
                                                     color={trophy.color}
                                                 />
-                                                <p className={`smallest fw-bold mb-0 mt-2 text-truncate ${isEarned ? 'text-dark' : 'text-muted'}`}>{trophy.title.split(' (')[0]}</p>
                                             </div>
                                         </div>
                                     );
@@ -329,88 +356,15 @@ const Home: React.FC = () => {
                             </div>
                         </section>
                     </main>
-
-                    <aside className="col-lg-5">
-                        <div className="ps-lg-4 text-start">
-
-                            {/* RANK CARD - LIGHT THEME */}
-                            <div className="mb-4 p-4 rounded-4 shadow-sm position-relative overflow-hidden bg-white border tour-stats-card"
-                                style={{ borderColor: '#E2E8F0' }}>
-                                <h6 className="fw-bold smallest ls-2 uppercase mb-4 text-muted">Your Rank</h6>
-
-                                <div className="d-flex align-items-center gap-3 mb-4">
-                                    <div className="d-flex align-items-center justify-content-center rounded-circle"
-                                        style={{ width: 56, height: 56, backgroundColor: badge.color + '15', border: `2px solid ${badge.color}` }}>
-                                        <i className={`bi ${badge.icon}`} style={{ fontSize: '28px', color: badge.color }}></i>
-                                    </div>
-                                    <div>
-                                        <h4 className="fw-bold mb-0 text-slate">Level {stats.level}</h4>
-                                        <span className="fw-bold smallest ls-1" style={{ color: badge.color }}>{badge.name}</span>
-                                    </div>
-                                </div>
-
-                                {/* LP Progress */}
-                                <div className="mb-3">
-                                    <div className="d-flex justify-content-between mb-2">
-                                        <span className="smallest fw-bold ls-1 text-muted">LP PROGRESS</span>
-                                        <span className="smallest fw-bold ls-1 text-warning">{stats.progress}%</span>
-                                    </div>
-                                    <div style={{ height: 8, borderRadius: 10, backgroundColor: '#F1F5F9' }}>
-                                        <div style={{
-                                            width: `${stats.progress}%`, height: '100%', borderRadius: 10,
-                                            background: 'linear-gradient(90deg, #FACC15, #F59E0B)',
-                                            transition: 'width 0.8s ease'
-                                        }}></div>
-                                    </div>
-                                    <p className="smallest mt-2 mb-0 text-muted">
-                                        {stats.pointsInCurrentLevel} / {stats.pointsForNextLevel} LP to Level {stats.level + 1}
-                                    </p>
-                                </div>
-
-
-
-                                {/* Motivation message */}
-                                <div className="mt-4 p-3 rounded-3" style={{ backgroundColor: '#F8FAFC' }}>
-                                    <p className="mb-0 small fw-bold" style={{ color: motivation.color }}>{motivation.msg}</p>
-                                </div>
-                            </div>
-
-
-
-                            {/* TOP LEARNERS */}
-                            <div className="p-4 rounded-4 border" style={{ backgroundColor: '#F9FAFB' }}>
-                                <h6 className="fw-bold text-uppercase text-muted smallest ls-2 mb-4">Top Learners</h6>
-                                <div className="list-group list-group-flush mb-4">
-                                    {topLearners.map((learner, index) => (
-                                        <div key={learner.id} className="list-group-item bg-transparent border-0 px-0 py-2 d-flex align-items-center">
-                                            <span className="me-3 d-flex align-items-center justify-content-center" style={{ width: 24 }}>
-                                                {index === 0 ? <i className="bi bi-trophy-fill text-warning"></i> :
-                                                    index === 1 ? <i className="bi bi-trophy-fill text-secondary"></i> :
-                                                        index === 2 ? <i className="bi bi-trophy-fill" style={{ color: '#CD7F32' }}></i> :
-                                                            <span className="fw-bold text-muted small">{index + 1}</span>}
-                                            </span>
-                                            <span className={`flex-grow-1 smallest ls-1 ${learner.id === auth.currentUser?.uid ? 'fw-bold text-dark' : ''}`}>
-                                                {learner.username || 'Anonymous'}
-                                                {learner.id === auth.currentUser?.uid && <i className="bi bi-star-fill ms-1 text-warning"></i>}
-                                            </span>
-                                            <span className="fw-bold smallest ls-1" style={{ color: '#F59E0B' }}>{learner.points} LP</span>
-                                        </div>
-                                    ))}
-                                </div>
-                                <JuicyButton 
-                                    onClick={() => navigate('/muvhigo')} 
-                                    className="btn btn-outline-slate w-100 py-2 fw-bold ls-1 smallest uppercase rounded-3"
-                                >
-                                    FULL LEADERBOARD
-                                </JuicyButton>
-                            </div>
-                        </div>
-                    </aside>
                 </div>
             </div>
 
             <style>{`
-                .ls-tight { letter-spacing: -1.5px; }
+                .rounded-2xl { border-radius: 1rem; }
+                .text-slate-800 { color: #1e293b; }
+                .text-slate-500 { color: #64748b; }
+                .text-slate-400 { color: #94a3b8; }
+                .bg-red-50 { background-color: #fef2f2; }
                 .ls-1 { letter-spacing: 1px; }
                 .ls-2 { letter-spacing: 2px; }
                 .smallest { font-size: 10px; font-family: 'Poppins', sans-serif; }
@@ -453,6 +407,26 @@ const Home: React.FC = () => {
                 @keyframes floatBubble {
                     0%, 100% { transform: translateY(0); }
                     50% { transform: translateY(-5px); }
+                }
+
+                .active-streak-fire {
+                    box-shadow: 0 0 15px rgba(239, 68, 68, 0.4);
+                    animation: active-pulse 2s infinite ease-in-out;
+                }
+                .active-streak-text {
+                    text-shadow: 0 0 8px rgba(239, 68, 68, 0.2);
+                }
+                .fire-shake {
+                    display: inline-block;
+                    animation: fire-shake 0.5s infinite alternate ease-in-out;
+                }
+                @keyframes active-pulse {
+                    0%, 100% { transform: scale(1); box-shadow: 0 0 15px rgba(239, 68, 68, 0.4); }
+                    50% { transform: scale(1.05); box-shadow: 0 0 25px rgba(239, 68, 68, 0.6); }
+                }
+                @keyframes fire-shake {
+                    from { transform: rotate(-5deg); }
+                    to { transform: rotate(5deg); }
                 }
             `}</style>
         </div>

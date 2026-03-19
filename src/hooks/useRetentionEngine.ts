@@ -99,7 +99,7 @@ export const useRetentionEngine = (userData: any, shouldDelay: boolean = false) 
         if (distance > 0 && distance <= 50) {
             fireNotification({
                 title: "Almost there! ⭐",
-                message: `You are only ${distance} points away from ${nextMilestone} LP! Keep going!`,
+                message: `You are only ${distance} points away from ${nextMilestone} XP! Keep going!`,
                 type: 'success',
                 duration: 6000
             });

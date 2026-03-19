@@ -233,7 +233,7 @@ html {
     color: #000000;
 }
 
-::-moz-selection {
+::moz-selection {
     background: var(--game-primary);
     color: #000000;
 }
@@ -397,4 +397,66 @@ html {
 
 .glow-pulse {
     animation: glowPulse 2s infinite ease-in-out;
+}
+
+/* ============================================
+   EXTREME MOBILE FINE-TUNING (Xiaomi, Pixel, etc.)
+   Catering for widths: 360, 380, 393, 412
+   ============================================ */
+
+@media (max-width: 420px) {
+    .container { 
+        padding-left: 1.25rem !important; 
+        padding-right: 1.25rem !important; 
+    }
+    
+    h1, .display-4, .h1-mobile { 
+        font-size: 2.22rem !important; 
+        line-height: 1.15 !important;
+    }
+    
+    h2, .display-5 { 
+        font-size: 1.85rem !important; 
+    }
+    
+    .lead { 
+        font-size: 1rem !important; 
+        line-height: 1.5 !important;
+    }
+
+    .btn-lg {
+        padding: 0.8rem 1.25rem !important;
+        font-size: 1rem !important;
+    }
+
+    /* Reduce vertical padding to fit more "Above the Fold" on tall screens */
+    .py-5 {
+        padding-top: 2rem !important;
+        padding-bottom: 2rem !important;
+    }
+    
+    .my-5 {
+        margin-top: 2rem !important;
+        margin-bottom: 2rem !important;
+    }
+}
+
+/* Very Narrow Devices (360px and below) */
+@media (max-width: 370px) {
+    h1, .display-4, .h1-mobile { 
+        font-size: 2.05rem !important; 
+    }
+    
+    h2, .display-5 { 
+        font-size: 1.65rem !important; 
+    }
+
+    .btn-lg {
+        padding: 0.75rem 1.1rem !important;
+        font-size: 0.92rem !important;
+    }
+
+    .lead {
+        font-size: 0.92rem !important;
+    }
 }

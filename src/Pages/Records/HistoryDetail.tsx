@@ -80,7 +80,7 @@ const HistoryDetail: React.FC = () => {
             });
             popupService.innerSuccess(
                 'Ndi zwavhuḓi!',
-                `Congratulations! You've mastered: <b>${story?.title}</b>. <br/>+10 Learning Points added!`
+                `Congratulations! You've mastered: <b>${story?.title}</b>. <br/>+10 XP added!`
             );
         }
     }, [hasCelebrated, story, playCorrect]);
@@ -332,7 +332,7 @@ const HistoryDetail: React.FC = () => {
                                                 </div>
                                                 <h3 className="fw-bold mb-2 text-dark">Continue Reading</h3>
                                                 <p className="text-muted small mb-4 px-3">
-                                                    Log in or create a free account to unlock the full story, earn learning points, and save your progress!
+                                                You can read a preview of every story. Log in or create a free account to unlock full stories, save your reading progress, and earn XP!s!
                                                 </p>
                                                 <div className="d-flex flex-column flex-sm-row gap-3 w-100 justify-content-center px-4">
                                                     <button onClick={() => navigate('/login')} className="btn game-btn-yellow fw-bold ls-1 px-4 py-3 rounded-pill">

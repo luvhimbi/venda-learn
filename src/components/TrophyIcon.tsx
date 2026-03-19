@@ -69,10 +69,8 @@ const TrophyIcon: React.FC<TrophyIconProps> = ({ rarity, size = 80, animate = tr
                     strokeWidth="1.5"
                 />
 
-                {/* Minwenda Detail on Cup */}
-                {rarity !== 'locked' && (
-                    <rect x="31" y="25" width="38" height="8" fill="url(#minwendaPattern)" opacity="0.9" />
-                )}
+                {/* Minwenda Detail on Cup - ALWAYS VISIBLE NOW */}
+                <rect x="31" y="25" width="38" height="10" fill="url(#minwendaPattern)" opacity="1" stroke={c.dark} strokeWidth="0.5" />
                 
                 {/* Handles */}
                 <path d="M30 25 Q 15 25, 15 40 Q 15 50, 30 45" stroke={c.dark} strokeWidth="2" fill="none" strokeLinecap="round" />
@@ -91,16 +89,12 @@ const TrophyIcon: React.FC<TrophyIconProps> = ({ rarity, size = 80, animate = tr
                     <path d="M36 80 Q 50 105, 64 80" stroke={c.dark} strokeWidth="1" opacity="0.3" />
                     <path d="M40 95 L 60 95" stroke={c.dark} strokeWidth="1" opacity="0.2" />
 
-                    {/* Minwenda on Drum */}
-                    {rarity !== 'locked' && (
-                        <rect x="42" y="90" width="16" height="4" fill="url(#minwendaPattern)" opacity="0.7" />
-                    )}
+                    {/* Minwenda on Drum - ALWAYS VISIBLE NOW */}
+                    <rect x="42" y="88" width="16" height="6" fill="url(#minwendaPattern)" opacity="0.9" stroke={c.dark} strokeWidth="0.5" />
                 </g>
 
                 {/* Shine/Reflection */}
-                {rarity !== 'locked' && (
-                    <path d="M62 25 Q 68 40, 62 55" stroke="white" strokeWidth="2" strokeLinecap="round" opacity="0.3" />
-                )}
+                <path d="M62 25 Q 68 40, 62 55" stroke="white" strokeWidth="2" strokeLinecap="round" opacity="0.3" />
             </svg>
 
             <style>{`
@@ -116,8 +110,7 @@ const TrophyIcon: React.FC<TrophyIconProps> = ({ rarity, size = 80, animate = tr
                 }
 
                 .trophy-locked {
-                    filter: grayscale(1) contrast(0.8);
-                    opacity: 0.4;
+                    /* Removed grayscale to keep icons vibrant for all users */
                 }
 
                 @keyframes trophy-float-anim {

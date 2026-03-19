@@ -150,7 +150,7 @@ const WordPuzzle: React.FC = () => {
         }
         Swal.fire({
             title: 'Ndi hone! (Correct!)',
-            text: `You found the word: ${targetPuzzle?.word} (${targetPuzzle?.translation}). +10 LP`,
+            text: `You found the word: ${targetPuzzle?.word} (${targetPuzzle?.translation}). +10 XP`,
             icon: 'success',
             confirmButtonText: 'Play Again',
             confirmButtonColor: '#FACC15'
@@ -206,7 +206,7 @@ const WordPuzzle: React.FC = () => {
     );
 
     return (
-        <div className="min-vh-100 bg-light py-4 d-flex flex-column align-items-center">
+        <div className="min-vh-100 bg-white py-4 d-flex flex-column align-items-center">
             <div className="container" style={{ maxWidth: '500px' }}>
                 <div className="d-flex justify-content-between align-items-center mb-4">
                     <button onClick={() => navigate('/mitambo')} className="btn btn-outline-dark btn-sm rounded-circle d-flex align-items-center justify-content-center" style={{ width: 32, height: 32 }}>

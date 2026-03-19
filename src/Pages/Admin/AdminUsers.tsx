@@ -49,7 +49,7 @@ const AdminUsers: React.FC = () => {
             title: `Edit ${user.username || 'User'}`,
             html:
                 `<div class="text-start">
-                    <label class="form-label smallest fw-bold text-uppercase ls-1">Learning Points (XP)</label>
+                    <label class="form-label smallest fw-bold text-uppercase ls-1">XP Points</label>
                     <input id="swal-input1" class="form-control mb-3" type="number" value="${user.points || 0}">
                     
                     <div class="form-check form-switch mb-3">

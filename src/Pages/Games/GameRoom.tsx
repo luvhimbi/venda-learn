@@ -16,15 +16,11 @@ import Mascot, { type MascotMood } from '../../components/Mascot';
 import { useVisualJuice } from '../../hooks/useVisualJuice';
 import { updateStreak } from '../../services/streakUtils';
 import { popupService } from '../../services/popupService';
-import {
-    MessageSquare, Zap, Flame,
-    FileText, CheckCircle2, Pencil, Link, Volume2, BookOpen,
-    X, Mic, Square, ArrowLeft, ArrowRight, Save
-} from 'lucide-react';
+import { Trophy, HelpCircle, X, Bookmark, CheckCircle2, BookOpen, Volume2, Play, Flame, Zap, Users, Circle } from 'lucide-react';
 import { db, auth } from '../../services/firebaseConfig';
 import { doc, updateDoc, arrayUnion, increment } from 'firebase/firestore';
 import { onAuthStateChanged } from 'firebase/auth';
-import { getLevelStats } from "../../services/levelUtils.ts";
+import { getLevelStats, getCurrentWeekIdentifier } from "../../services/levelUtils.ts";
 import { type Difficulty } from "../../services/scoringUtils.ts";
 import { fetchLessons, fetchUserData, refreshUserData, invalidateCache, getMicroLessons } from '../../services/dataCache';
 import { checkAchievements, awardTrophies } from '../../services/achievementService';
@@ -73,7 +69,7 @@ const GameRoom: React.FC = () => {
     );
     const [isFirstTime, setIsFirstTime] = useState(true);
 
-    const { isRecording, audioUrl, isPlayingAudio, speakVenda, startRecording, stopRecording, setAudioUrl } = useAudio();
+    const { isPlayingAudio, speakVenda, setAudioUrl } = useAudio();
     const [studyStartTime, setStudyStartTime] = useState(initialPersistentState?.studyStartTime || Date.now());
 
     const [showExitModal, setShowExitModal] = useState(false);
@@ -86,6 +82,7 @@ const GameRoom: React.FC = () => {
     const [mascotCheerText, setMascotCheerText] = useState(MASCOT_CHEERS[0]);
     const [mascotMood, setMascotMood] = useState<MascotMood>('happy');
     const [showSavedHint, setShowSavedHint] = useState(false);
+    const [userData, setUserData] = useState<any>(null);
     const { playCorrect, playWrong, triggerShake } = useVisualJuice();
 
     const handleFinishQuiz = async (finalScore: number, _finalCorrect: number, totalDuration: number) => {
@@ -128,6 +125,8 @@ const GameRoom: React.FC = () => {
 
                 if (isFirstTime) {
                     const stats = getLevelStats((currentData.points || 0) + finalScore);
+                    const currentWeek = getCurrentWeekIdentifier();
+                    
                     const updateData: any = {
                         points: increment(finalScore),
                         level: stats.level,
@@ -141,6 +140,14 @@ const GameRoom: React.FC = () => {
                             timestamp: new Date().toISOString()
                         },
                     };
+
+                    // Weekly Leaderboard logic
+                    if (currentData.lastActiveWeek !== currentWeek) {
+                        updateData.weeklyXP = finalScore;
+                        updateData.lastActiveWeek = currentWeek;
+                    } else {
+                        updateData.weeklyXP = increment(finalScore);
+                    }
                     const lessons = await fetchLessons();
                     const foundCourse = lessons.find((l: any) => l.id === lessonId);
                     if (foundCourse) {
@@ -330,6 +337,7 @@ const GameRoom: React.FC = () => {
                 }
                 const userData = await fetchUserData();
                 if (userData) {
+                    setUserData(userData);
                     const completed = userData.completedLessons || [];
                     const mlId = microLessonId || `${lessonId}__ml_0`;
                     setIsFirstTime(!completed.includes(mlId));
@@ -390,112 +398,186 @@ const GameRoom: React.FC = () => {
         );
     }
 
+    const renderProgressHeader = () => {
+        let current = 0;
+        let total = 1;
+        
+        if (gameState === 'STUDY') {
+            current = currentSlide + 1;
+            total = lesson.slides.length;
+        } else if (gameState === 'QUIZ') {
+            current = currentQIndex + 1;
+            total = lesson.questions.length;
+        } else if (gameState === 'SCENE') {
+            current = currentSceneIndex + 1;
+            total = lesson.scenes.length;
+        }
+
+        const progress = (current / total) * 100;
+        const modeLabel = gameState === 'STUDY' ? 'STUDY' : (gameState === 'QUIZ' ? 'QUIZ' : 'SCENE');
+
+        return (
+            <div className="bg-white px-3 pt-3 pb-2 sticky-top border-bottom" style={{ zIndex: 1000 }}>
+                <div className="container" style={{ maxWidth: '600px' }}>
+                    <div className="d-flex justify-content-between align-items-center mb-2">
+                        <div className="d-flex align-items-center gap-2">
+                            <div className="bg-warning rounded-3 p-1 d-flex align-items-center justify-content-center" style={{ width: 32, height: 32 }}>
+                                <BookOpen size={20} className="text-white" />
+                            </div>
+                            <h5 className="fw-900 mb-0 ls-tight" style={{ fontSize: '1.1rem', color: '#111827' }}>VendaLearn</h5>
+                        </div>
+                        <div className="d-flex align-items-center gap-3">
+                            <div className="d-flex align-items-center gap-2 bg-light px-3 py-1 rounded-pill">
+                                <Trophy size={14} className="text-warning" />
+                                <span className="smallest fw-bold" style={{ color: '#111827' }}>{userData?.points || 0} XP</span>
+                            </div>
+                            <button className="btn p-0 border-0" onClick={() => setShowExitModal(true)}>
+                                <X size={20} className="text-secondary" />
+                            </button>
+                        </div>
+                    </div>
+                    <div className="d-flex flex-column gap-1">
+                        <div className="progress" style={{ height: '4px', borderRadius: 10, backgroundColor: 'rgba(0,0,0,.05)' }}>
+                            <div className="progress-bar" style={{ width: `${progress}%`, backgroundColor: '#FACC15', transition: '0.6s cubic-bezier(0.34, 1.56, 0.64, 1)', borderRadius: 10 }}></div>
+                        </div>
+                        <div className="d-flex justify-content-between mt-1">
+                            <span className="smallest fw-bold text-muted ls-1">{modeLabel} {current} OF {total}</span>
+                            {gameState === 'STUDY' ? (
+                                <button className="btn btn-link p-0 text-decoration-none smallest fw-bold text-success ls-1" onClick={() => saveStateToStorage(true)}>
+                                    {showSavedHint ? 'SAVED!' : 'SAVE PROGRESS'}
+                                </button>
+                            ) : (
+                                <span className="smallest fw-bold text-warning ls-1">{streak > 1 ? `🔥 ${streak} STREAK` : ''}</span>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        );
+    };
+
     const renderContent = () => {
         if (gameState === 'STUDY') {
             const slide = lesson.slides[currentSlide];
-            const progress = ((currentSlide + 1) / lesson.slides.length) * 100;
             const isLastSlide = currentSlide + 1 >= lesson.slides.length;
 
             return (
-                <div className="min-vh-100 d-flex flex-column" style={{ background: 'linear-gradient(180deg, #111827 0%, #1F2937 40%, #F9FAFB 40%)' }}>
-                    <div className="px-3 pt-4 pb-5" style={{ color: 'white' }}>
-                        <div className="container" style={{ maxWidth: '700px' }}>
-                            <div className="d-flex justify-content-between align-items-center mb-4">
-                                <div className="d-flex align-items-center gap-3">
-                                    <button className="btn btn-link text-decoration-none p-0 text-white fw-bold smallest ls-1 d-flex align-items-center gap-2"
-                                        onClick={() => saveStateToStorage(true)}
-                                        style={{ opacity: showSavedHint ? 1 : 0.7, color: showSavedHint ? '#10B981' : 'white', transition: 'all 0.3s' }}>
-                                        {showSavedHint ? <CheckCircle2 size={14} /> : <Save size={14} />}
-                                        {showSavedHint ? 'PROGRESS SAVED' : 'SAVE PROGRESS'}
-                                    </button>
-                                    <button className="btn btn-link text-decoration-none p-0 text-white fw-bold smallest ls-2 d-flex align-items-center gap-2" onClick={() => setShowExitModal(true)}>
-                                        <X size={16} /> EXIT
-                                    </button>
-                                </div>
-                                <div className="d-flex align-items-center gap-2">
-                                    <span className="smallest fw-bold ls-1" style={{ color: '#FACC15' }}>
-                                        {!isFirstTime ? '🔄 REVIEW' : `📖 ${lesson.title?.toUpperCase() || 'STUDY'}`}
-                                    </span>
-                                </div>
-                            </div>
-                            <div className="d-flex align-items-center gap-3">
-                                <div className="flex-grow-1">
-                                    <div className="progress" style={{ height: '5px', borderRadius: 10, backgroundColor: 'rgba(255,255,255,.15)' }}>
-                                        <div className="progress-bar" style={{ width: `${progress}%`, backgroundColor: '#FACC15', transition: '0.5s ease', borderRadius: 10 }}></div>
+                <div className="min-vh-100 d-flex flex-column" style={{ background: '#FFFFFF' }}>
+                    {renderProgressHeader()}
+
+                    <div className="flex-grow-1 overflow-auto bg-light">
+                        <div className="container py-4" style={{ maxWidth: '600px' }}>
+                            <div key={currentSlide} className="animate__animated animate__fadeIn animate__faster px-2">
+                                
+                                {/* Main Lesson Card */}
+                                <div className="bg-white rounded-5 shadow-sm border border-light p-4 p-md-5 w-100 position-relative" style={{ overflow: 'hidden' }}>
+                                    
+                                    {/* Mascot Tutoring */}
+                                    <div className="d-flex align-items-start gap-3 mb-5 mt-2">
+                                        <Mascot width="60px" height="60px" mood={mascotMood} />
+                                        <div className="bg-light p-3 rounded-4 position-relative" style={{ fontSize: '0.9rem', color: '#111827' }}>
+                                            <div className="position-absolute" style={{ width: 12, height: 12, backgroundColor: '#f8f9fa', top: 15, left: -6, transform: 'rotate(45deg)' }}></div>
+                                            <strong>Tip:</strong> {currentSlide === 0 ? "Let's start with basic greetings!" : "You're doing great, keep going!"}
+                                        </div>
                                     </div>
+
+                                    {/* Section 1: Phrase Display */}
+                                    <div className="text-center mb-5">
+                                        <h1 className="fw-900 mb-2" style={{ fontSize: 'clamp(2.5rem, 10vw, 4.5rem)', color: '#111827', letterSpacing: '-2px' }}>{slide.venda}</h1>
+                                        <h4 className="text-secondary fw-bold mb-0" style={{ opacity: 0.6 }}>{slide.english}</h4>
+                                    </div>
+
+                                    {/* Section 2: Audio Interaction */}
+                                    <div className="text-center mb-5">
+                                        <div className="d-flex flex-column align-items-center gap-3">
+                                            <div className="d-flex align-items-center gap-3">
+                                                <button className="btn rounded-circle d-flex align-items-center justify-content-center shadow-lg hover-scale" 
+                                                    onClick={() => speakVenda(slide.venda)}
+                                                    style={{ width: 64, height: 64, backgroundColor: isPlayingAudio ? '#FACC15' : '#111827', border: 'none', transition: 'all 0.3s' }}>
+                                                    <Play size={24} fill={isPlayingAudio ? '#111827' : '#FFFFFF'} className={isPlayingAudio ? 'text-dark' : 'text-white'} />
+                                                </button>
+                                                <button className="btn bg-light rounded-circle shadow-sm d-flex align-items-center justify-content-center hover-scale" 
+                                                    onClick={() => speakVenda(slide.venda)}
+                                                    style={{ width: 42, height: 42, border: 'none' }}>
+                                                    <span className="fw-bold text-dark" style={{ fontSize: '10px' }}>0.5x</span>
+                                                </button>
+                                            </div>
+                                            <span className="smallest fw-bold text-muted ls-2 text-uppercase">Listen to pronunciation</span>
+                                        </div>
+                                    </div>
+
+                                    <div className="hr-fade mb-5"></div>
+
+                                    {/* Section 3: Usage Explanation */}
+                                    <div className="mb-5 px-md-4">
+                                        <p className="smallest fw-bold text-muted ls-2 mb-4 text-uppercase d-flex align-items-center gap-2">
+                                            <HelpCircle size={14} className="text-warning" /> USAGE EXPLAINER
+                                        </p>
+                                        <div className="d-flex flex-column gap-4">
+                                            {slide.context.split('. ').map((point: string, idx: number) => {
+                                                if (!point.trim()) return null;
+                                                const isGenderSpecific = point.toLowerCase().includes('men') || point.toLowerCase().includes('women');
+                                                return (
+                                                    <div key={idx} className="d-flex align-items-start gap-3">
+                                                        <div className="mt-1">
+                                                            {isGenderSpecific ? (
+                                                                <div className="rounded-pill bg-warning-subtle p-2 d-flex align-items-center justify-content-center" style={{ width: 32, height: 32 }}>
+                                                                    <Users size={16} className="text-warning" />
+                                                                </div>
+                                                            ) : (
+                                                                <div className="rounded-pill bg-blue-subtle p-2 d-flex align-items-center justify-content-center" style={{ width: 32, height: 32 }}>
+                                                                    <Circle size={10} fill="currentColor" className="text-primary" />
+                                                                </div>
+                                                            )}
+                                                        </div>
+                                                        <p className="mb-0 text-dark-emphasis" style={{ lineHeight: 1.6, fontSize: '1.05rem' }}>{point.endsWith('.') ? point : point + '.'}</p>
+                                                    </div>
+                                                );
+                                            })}
+                                        </div>
+                                    </div>
+
                                 </div>
-                                <span className="smallest fw-bold" style={{ color: 'rgba(255,255,255,.6)' }}>{currentSlide + 1}/{lesson.slides.length}</span>
                             </div>
                         </div>
                     </div>
 
-                    <div className="flex-grow-1 px-3 d-flex align-items-center" style={{ marginTop: '-30px' }}>
-                        <div className="container" style={{ maxWidth: '700px' }}>
-                            <div key={currentSlide} className="animate__animated animate__fadeIn animate__faster">
-                                <div className="study-card bg-white rounded-4 p-4 p-md-5 d-flex flex-column align-items-center text-center shadow-sm w-100" style={{ border: '1px solid #E5E7EB', position: 'relative' }}>
-                                    <div className="d-flex justify-content-center gap-1 mb-4">
-                                        {lesson.slides.map((_: any, i: number) => (
-                                            <div key={i} style={{ width: i === currentSlide ? 20 : 6, height: 6, borderRadius: 10, backgroundColor: i === currentSlide ? '#FACC15' : (i < currentSlide ? '#10B981' : '#E2E8F0'), transition: 'all 0.3s' }}></div>
-                                        ))}
-                                    </div>
-                                    <h1 className="fw-bold ls-tight mb-4" style={{ fontSize: 'clamp(2.5rem, 10vw, 4rem)', color: '#111827' }}>{slide.venda}</h1>
-                                    <button className="btn rounded-circle d-inline-flex align-items-center justify-content-center mb-4" onClick={(e) => { e.stopPropagation(); speakVenda(slide.venda); }} style={{ width: 64, height: 64, backgroundColor: isPlayingAudio ? '#FEF3C7' : '#F9FBFF', border: isPlayingAudio ? '2px solid #FACC15' : '2px solid #E2E8F0', boxShadow: '0 4px 12px rgba(0,0,0,0.05)', transition: 'all 0.2s' }}>
-                                        <Volume2 className="fs-4" />
+                    {/* Navigation Controls */}
+                    <div className="bg-white px-4 py-3 border-top pb-5">
+                        <div className="container" style={{ maxWidth: '600px' }}>
+                            <div className="d-flex gap-3">
+                                <button className="btn border-2 py-1.5 px-3 rounded-4 d-flex flex-column align-items-center justify-content-center flex-grow-1"
+                                    disabled={currentSlide === 0}
+                                    onClick={() => { setAudioUrl(null); const prev = currentSlide - 1; setCurrentSlide(prev); saveProgress(prev, 'STUDY'); }}
+                                    style={{ borderColor: '#E5E7EB', color: '#6B7280', minHeight: '44px' }}>
+                                    <span className="fw-900 ls-1" style={{ fontSize: '0.75rem' }}>MURAHU</span>
+                                    <span className="smallest opacity-50 fw-bold" style={{ fontSize: '8px' }}>BACK</span>
+                                </button>
+                                {!isLastSlide ? (
+                                    <button className="btn game-btn-primary py-1.5 px-3 d-flex flex-column align-items-center justify-content-center flex-grow-2"
+                                        onClick={() => { setAudioUrl(null); const next = currentSlide + 1; setCurrentSlide(next); saveProgress(next, 'STUDY'); }}
+                                        style={{ backgroundColor: '#FACC15', border: 'none', borderRadius: '12px', boxShadow: '0 3px 0 #EAB308', flex: 2, minHeight: '44px' }}>
+                                        <span className="fw-900 ls-1" style={{ fontSize: '0.85rem' }}>PHANDA</span>
+                                        <span className="smallest opacity-70 fw-900" style={{ fontSize: '8px' }}>NEXT</span>
                                     </button>
-
-                                    <div className="w-100 mt-2 mb-4" style={{ height: '1px', backgroundColor: '#E2E8F0' }}></div>
-
-                                    <p className="smallest fw-bold text-muted ls-2 text-uppercase mb-3">DEFINITION</p>
-                                    <h2 className="fw-bold mb-4" style={{ color: '#111827', fontSize: 'clamp(1.5rem, 6vw, 2rem)' }}>{slide.english}</h2>
-
-                                    <div className="p-3 rounded-4 w-100 text-start" style={{ backgroundColor: '#FFFBEB', border: '1px solid #FDE68A' }}>
-                                        <p className="smallest fw-bold mb-2 ls-2 text-uppercase" style={{ color: '#92400E' }}>Context</p>
-                                        <p className="mb-0 small fst-italic" style={{ color: '#78350F', lineHeight: 1.5 }}>"{slide.context}"</p>
-                                    </div>
-                                </div>
-
-                                <div className="bg-white rounded-4 p-4 mt-4 text-center mx-auto" style={{ border: '1px solid #E5E7EB', maxWidth: '500px' }}>
-                                    <div className="d-flex align-items-center justify-content-center gap-2 mb-3">
-                                        <Mic size={14} style={{ color: '#FACC15' }} />
-                                        <span className="smallest fw-bold text-muted ls-2 text-uppercase">Pronunciation Lab</span>
-                                    </div>
-                                    {!isRecording ? (
-                                        <button className="btn rounded-pill px-4 py-2 fw-bold smallest ls-1 d-flex align-items-center gap-2 mx-auto" onClick={(e) => { e.stopPropagation(); startRecording(); }} style={{ backgroundColor: '#111827', color: 'white' }}>
-                                            <Mic size={14} /> TAP TO RECORD
-                                        </button>
-                                    ) : (
-                                        <button className="btn btn-danger rounded-pill px-4 py-2 fw-bold smallest ls-1 animate__animated animate__pulse animate__infinite d-flex align-items-center gap-2 mx-auto" onClick={(e) => { e.stopPropagation(); stopRecording(); }}>
-                                            <Square size={14} /> STOP RECORDING
-                                        </button>
-                                    )}
-                                    {audioUrl && <div className="mt-3 d-flex justify-content-center"><audio src={audioUrl} controls style={{ height: 35, width: '100%', maxWidth: 300 }} /></div>}
-                                </div>
+                                ) : (
+                                    <button className="btn py-1.5 px-3 d-flex flex-column align-items-center justify-content-center text-white flex-grow-2"
+                                        style={{ background: '#111827', borderRadius: '12px', boxShadow: '0 3px 0 #000', flex: 2, minHeight: '44px' }}
+                                        onClick={() => {
+                                            if (lesson.scenes && lesson.scenes.length > 0) {
+                                                setGameState('SCENE');
+                                                setCurrentSceneIndex(0);
+                                            } else {
+                                                setGameState('QUIZ');
+                                                saveProgress(0, 'QUIZ');
+                                            }
+                                        }}>
+                                        <span className="fw-900 ls-1" style={{ fontSize: '0.85rem' }}>START QUIZ</span>
+                                        <span className="smallest opacity-50 fw-bold" style={{ fontSize: '8px' }}>LET'S PLAY</span>
+                                    </button>
+                                )}
                             </div>
                         </div>
-                    </div>
-
-                    <div className="d-flex gap-3 pb-4 container mt-auto" style={{ maxWidth: '700px' }}>
-                        <button className="btn btn-outline-dark border-2 w-50 py-3 fw-bold ls-1 rounded-3 d-flex align-items-center justify-content-center gap-2" disabled={currentSlide === 0} onClick={() => { setAudioUrl(null); const prev = currentSlide - 1; setCurrentSlide(prev); saveProgress(prev, 'STUDY'); }}>
-                            <ArrowLeft size={18} /> MURAHU
-                        </button>
-                        {!isLastSlide ? (
-                            <button className="btn game-btn-primary w-50 py-3 fw-bold ls-1 d-flex align-items-center justify-content-center gap-2" onClick={() => { setAudioUrl(null); const next = currentSlide + 1; setCurrentSlide(next); saveProgress(next, 'STUDY'); }}>
-                                PHANDA <ArrowRight size={18} />
-                            </button>
-                        ) : (
-                            <button className="btn w-50 py-3 fw-bold ls-1 text-white rounded-3 d-flex align-items-center justify-content-center gap-2" style={{ background: 'linear-gradient(135deg, #111827, #374151)', boxShadow: '0 4px 0 #000' }}
-                                onClick={() => {
-                                    if (lesson.scenes && lesson.scenes.length > 0) {
-                                        setGameState('SCENE');
-                                        setCurrentSceneIndex(0);
-                                    } else {
-                                        setGameState('QUIZ');
-                                        saveProgress(0, 'QUIZ');
-                                    }
-                                }}>
-                                <MessageSquare size={18} /> {lesson.scenes && lesson.scenes.length > 0 ? 'VIEW SCENE' : 'START QUIZ'}
-                            </button>
-                        )}
                     </div>
                 </div>
             );
@@ -504,20 +586,27 @@ const GameRoom: React.FC = () => {
         if (gameState === 'SCENE') {
             const scene = lesson.scenes[currentSceneIndex];
             return (
-                <div className="min-vh-100 bg-white py-5 px-3">
-                    <div className="container" style={{ maxWidth: '700px' }}>
-                        <SceneView
-                            scene={scene}
-                            speakVenda={speakVenda}
-                            onComplete={() => {
-                                if (currentSceneIndex < (lesson.scenes?.length || 0) - 1) {
-                                    setCurrentSceneIndex(currentSceneIndex + 1);
-                                } else {
-                                    setGameState('QUIZ');
-                                    saveProgress(0, 'QUIZ');
-                                }
-                            }}
-                        />
+                <div className="min-vh-100 d-flex flex-column" style={{ background: '#FFFFFF' }}>
+                    {renderProgressHeader()}
+                    <div className="flex-grow-1 overflow-auto bg-light">
+                        <div className="container py-4" style={{ maxWidth: '600px' }}>
+                            <div className="animate__animated animate__fadeIn px-2">
+                                <div className="bg-white rounded-5 shadow-sm border border-light p-4 p-md-5 w-100">
+                                    <SceneView
+                                        scene={scene}
+                                        speakVenda={speakVenda}
+                                        onComplete={() => {
+                                            if (currentSceneIndex < (lesson.scenes?.length || 0) - 1) {
+                                                setCurrentSceneIndex(currentSceneIndex + 1);
+                                            } else {
+                                                setGameState('QUIZ');
+                                                saveProgress(0, 'QUIZ');
+                                            }
+                                        }}
+                                    />
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             );
@@ -525,7 +614,6 @@ const GameRoom: React.FC = () => {
 
         if (gameState === 'QUIZ') {
             const q = lesson.questions[currentQIndex] as Question;
-            const progress = ((currentQIndex + 1) / lesson.questions.length) * 100;
 
             const renderQuestion = () => {
                 switch (q.type) {
@@ -538,16 +626,17 @@ const GameRoom: React.FC = () => {
             };
 
             const typeLabel: Record<string, { label: string, icon: any }> = {
-                'multiple-choice': { label: 'MULTIPLE CHOICE', icon: <FileText size={12} /> },
+                'multiple-choice': { label: 'MULTIPLE CHOICE', icon: <Bookmark size={12} /> },
                 'true-false': { label: 'TRUE OR FALSE', icon: <CheckCircle2 size={12} /> },
-                'fill-in-the-blank': { label: 'FILL IN THE BLANK', icon: <Pencil size={12} /> },
-                'match-pairs': { label: 'MATCH PAIRS', icon: <Link size={12} /> },
+                'fill-in-the-blank': { label: 'FILL IN THE BLANK', icon: <HelpCircle size={12} /> },
+                'match-pairs': { label: 'MATCH PAIRS', icon: <Users size={12} /> },
                 'listen-and-choose': { label: 'LISTEN & CHOOSE', icon: <Volume2 size={12} /> },
             };
-            const currentLabel = typeLabel[q.type] || { label: 'QUESTION', icon: <FileText size={12} /> };
+            const currentLabel = typeLabel[q.type] || { label: 'QUESTION', icon: <HelpCircle size={12} /> };
 
             return (
-                <div className="min-vh-100 bg-white py-5 px-3">
+                <div className="min-vh-100 d-flex flex-column" style={{ background: '#FFFFFF' }}>
+                    {renderProgressHeader()}
                     <ScorePopup result={lastScoreResult} />
                     {showMascotCheer && (
                         <div className="mascot-cheer-overlay">
@@ -555,49 +644,51 @@ const GameRoom: React.FC = () => {
                             <Mascot width="90px" height="90px" mood={mascotMood} />
                         </div>
                     )}
-                    <div className="container" style={{ maxWidth: '700px' }}>
-                        <div className="d-flex justify-content-between align-items-center mb-3">
-                            <span className="smallest fw-bold ls-1 text-muted">QUESTION {currentQIndex + 1}</span>
-                            <div className="flex-grow-1 mx-4">
-                                <div className="progress" style={{ height: '6px', borderRadius: '10px', backgroundColor: '#F3F4F6' }}>
-                                    <div className="progress-bar" style={{ width: `${progress}%`, backgroundColor: '#FACC15' }}></div>
+                    <div className="flex-grow-1 overflow-auto bg-light">
+                        <div className="container py-4" style={{ maxWidth: '600px' }}>
+                            <div className="animate__animated animate__fadeIn px-2">
+                                <div className="bg-white rounded-5 shadow-sm border border-light p-4 p-md-5 w-100 text-center">
+                                    <div className="d-flex justify-content-center mb-4">
+                                        <span className="badge rounded-pill bg-light text-dark border smallest d-flex align-items-center gap-2 py-2 px-3">
+                                            {currentLabel.icon} {currentLabel.label}
+                                        </span>
+                                    </div>
+
+                                    <div className="mb-4">
+                                        <Mascot width="80px" height="80px" mood={mascotMood} />
+                                    </div>
+
+                                    <h2 className="fw-900 text-dark mb-5 ls-tight" style={{ fontSize: 'clamp(1.5rem, 5vw, 2.25rem)' }}>{q.question}</h2>
+
+                                    {!showExplanation ? (
+                                        <div className="w-100 text-start">
+                                            {renderQuestion()}
+                                        </div>
+                                    ) : (
+                                        <div className="text-start animate__animated animate__fadeIn">
+                                            <div className="p-4 border-start border-4 border-danger bg-light mb-4 rounded-4 shadow-sm">
+                                                <h5 className="fw-bold text-danger mb-3">Pfarelo (Oops!)</h5>
+                                                <div className="p-3 bg-white rounded-3 border mb-3">
+                                                    <p className="smallest fw-bold mb-1 text-muted ls-2 text-uppercase">Correct Answer</p>
+                                                    <p className="fs-4 fw-bold mb-0 text-success">
+                                                        {
+                                                            q.type === 'true-false'
+                                                                ? ((q as any).correctAnswer === true ? 'NGOHO (TRUE)' : 'MAZWIFHI (FALSE)')
+                                                                : (q as any).correctAnswer
+                                                        }
+                                                    </p>
+                                                </div>
+                                                <p className="smallest fw-bold mb-1 text-muted ls-2 text-uppercase">Why?</p>
+                                                <p className="text-secondary mb-0" style={{ lineHeight: '1.5' }}>{q.explanation}</p>
+                                            </div>
+                                            <button className="btn game-btn-primary w-100 py-3 fw-bold ls-1" onClick={() => {
+                                                const newScore = isFirstTime ? awardConsolation() : score;
+                                                nextQuestion(newScore);
+                                            }}>I UNDERSTAND, NEXT</button>
+                                        </div>
+                                    )}
                                 </div>
                             </div>
-                            <span className="smallest fw-bold ls-1 text-warning">{isFirstTime ? `${score} LP` : 'REVIEWING'}</span>
-                        </div>
-                        <div className="d-flex justify-content-between align-items-center mb-4">
-                            <span className="badge rounded-pill bg-light text-dark border smallest d-flex align-items-center gap-2">
-                                {currentLabel.icon} {currentLabel.label}
-                            </span>
-                        </div>
-                        <div className="text-center mb-4">
-                            <Mascot width="100px" height="100px" mood={mascotMood} />
-                        </div>
-                        <div className="py-4 text-center">
-                            <h2 className="fw-bold text-dark mb-5 ls-tight">{q.question}</h2>
-                            {!showExplanation ? renderQuestion() : (
-                                <div className="text-start animate__animated animate__fadeIn">
-                                    <div className="p-4 border-start border-4 border-danger bg-light mb-4 rounded-end-4 shadow-sm">
-                                        <h5 className="fw-bold text-danger mb-3">Pfarelo (Oops!)</h5>
-                                        <div className="p-3 bg-white rounded-3 border mb-3">
-                                            <p className="smallest fw-bold mb-1 text-muted ls-2 text-uppercase">Correct Answer</p>
-                                            <p className="fs-4 fw-bold mb-0 text-success">
-                                                {
-                                                    q.type === 'true-false'
-                                                        ? ((q as any).correctAnswer === true ? 'NGOHO (TRUE)' : 'MAZWIFHI (FALSE)')
-                                                        : (q as any).correctAnswer
-                                                }
-                                            </p>
-                                        </div>
-                                        <p className="smallest fw-bold mb-1 text-muted ls-2 text-uppercase">Why?</p>
-                                        <p className="text-secondary mb-0" style={{ lineHeight: '1.5' }}>{q.explanation}</p>
-                                    </div>
-                                    <button className="btn game-btn-primary w-100 py-3 fw-bold ls-1" onClick={() => {
-                                        const newScore = isFirstTime ? awardConsolation() : score;
-                                        nextQuestion(newScore);
-                                    }}>I UNDERSTAND, NEXT</button>
-                                </div>
-                            )}
                         </div>
                     </div>
                 </div>
@@ -605,47 +696,54 @@ const GameRoom: React.FC = () => {
         }
 
         return (
-            <div className="min-vh-100 bg-white d-flex align-items-center justify-content-center p-3">
-                {showLevelUp && <LevelUpModal level={newLevelReached} onClose={() => setShowLevelUp(false)} />}
-                <div className="text-center w-100" style={{ maxWidth: '500px' }}>
-                    <div className="d-flex justify-content-center mb-4">
-                        <Mascot mood={mascotMood} width="150px" height="150px" />
-                    </div>
-                    <h1 className="fw-bold display-4 text-dark mb-2 ls-tight">{isFirstTime ? 'Ro Fhedza!' : 'Review Done!'}</h1>
-                    <p className="text-muted mb-4 ls-1">{isFirstTime ? "You've mastered this lesson." : "Great job refreshing your knowledge."}</p>
-                    {isFirstTime && (
-                        <div className="py-4 border-top border-bottom mb-4">
-                            <h1 className="display-2 fw-bold mb-3" style={{ color: '#FACC15' }}>+{score} LP</h1>
-                            <div className="d-flex flex-column gap-2 text-start mx-auto" style={{ maxWidth: 280 }}>
-                                <div className="d-flex justify-content-between smallest text-muted align-items-center">
-                                    <span className="d-flex align-items-center gap-2"><FileText size={14} /> Base points</span>
-                                    <span className="fw-bold text-dark">{scoreBreakdown.base}</span>
+            <div className="min-vh-100 d-flex flex-column" style={{ background: '#FFFFFF' }}>
+                <div className="flex-grow-1 d-flex align-items-center justify-content-center p-3 bg-light">
+                    {showLevelUp && <LevelUpModal level={newLevelReached} onClose={() => setShowLevelUp(false)} />}
+                    <div className="text-center w-100 bg-white rounded-5 p-4 p-md-5 shadow-sm border border-light" style={{ maxWidth: '500px' }}>
+                        <div className="d-flex justify-content-center mb-4">
+                            <Mascot mood={mascotMood} width="120px" height="120px" />
+                        </div>
+                        <h1 className="fw-900 display-5 text-dark mb-2 ls-tight">{isFirstTime ? 'Ro Fhedza!' : 'Review Done!'}</h1>
+                        <p className="text-muted mb-4 ls-1 smallest fw-bold">{isFirstTime ? "YOU'VE MASTERED THIS LESSON" : "GREAT JOB REFRESHING YOUR KNOWLEDGE"}</p>
+                        
+                        {isFirstTime && (
+                            <div className="py-4 border-top border-bottom mb-4">
+                                <h1 className="display-2 fw-900 mb-3" style={{ color: '#FACC15', letterSpacing: '-2px' }}>+{score} XP</h1>
+                                <div className="d-flex flex-column gap-2 text-start mx-auto" style={{ maxWidth: 280 }}>
+                                    <div className="d-flex justify-content-between smallest text-muted align-items-center">
+                                        <span className="d-flex align-items-center gap-2 px-2 py-1 bg-light rounded-pill"><Bookmark size={12} /> Base points</span>
+                                        <span className="fw-900 text-dark">{scoreBreakdown.base}</span>
+                                    </div>
+                                    {scoreBreakdown.speed > 0 &&
+                                        <div className="d-flex justify-content-between smallest text-muted align-items-center">
+                                            <span className="d-flex align-items-center gap-2 px-2 py-1 bg-light rounded-pill"><Zap size={12} className="text-warning" /> Speed bonus</span>
+                                            <span className="fw-900 text-dark">+{scoreBreakdown.speed}</span>
+                                        </div>}
+                                    {scoreBreakdown.streakBonus > 0 &&
+                                        <div className="d-flex justify-content-between smallest text-muted align-items-center">
+                                            <span className="d-flex align-items-center gap-2 px-2 py-1 bg-light rounded-pill"><Flame size={12} className="text-danger" /> Streak bonus</span>
+                                            <span className="fw-900 text-dark">+{scoreBreakdown.streakBonus}</span>
+                                        </div>}
+                                    {scoreBreakdown.consolation > 0 &&
+                                        <div className="d-flex justify-content-between smallest text-muted align-items-center">
+                                            <span className="d-flex align-items-center gap-2 px-2 py-1 bg-light rounded-pill"><HelpCircle size={12} className="text-primary" /> Learning bonus</span>
+                                            <span className="fw-900 text-dark">{scoreBreakdown.consolation}</span>
+                                        </div>}
                                 </div>
-                                {scoreBreakdown.speed > 0 &&
-                                    <div className="d-flex justify-content-between smallest text-muted align-items-center">
-                                        <span className="d-flex align-items-center gap-2"><Zap size={14} /> Speed bonus</span>
-                                        <span className="fw-bold text-dark">+{scoreBreakdown.speed}</span>
-                                    </div>}
-                                {scoreBreakdown.streakBonus > 0 &&
-                                    <div className="d-flex justify-content-between smallest text-muted align-items-center">
-                                        <span className="d-flex align-items-center gap-2"><Flame size={14} /> Streak bonus</span>
-                                        <span className="fw-bold text-dark">+{scoreBreakdown.streakBonus}</span>
-                                    </div>}
-                                {scoreBreakdown.consolation > 0 &&
-                                    <div className="d-flex justify-content-between smallest text-muted align-items-center">
-                                        <span className="d-flex align-items-center gap-2"><BookOpen size={14} /> Learning bonus</span>
-                                        <span className="fw-bold text-dark">+{scoreBreakdown.consolation}</span>
-                                    </div>}
                             </div>
-                        </div>
-                    )}
-                    {!isFirstTime && (
-                        <div className="py-5 border-top border-bottom mb-5">
-                            <p className="smallest fw-bold text-muted mb-1 ls-2 text-uppercase">Progress Status</p>
-                            <h1 className="display-2 fw-bold mb-0" style={{ color: '#FACC15' }}>COMPLETE</h1>
-                        </div>
-                    )}
-                    <button className="btn game-btn-primary w-100 py-3 fw-bold ls-1" onClick={() => navigate(lesson?.courseId ? `/courses/${lesson.courseId}` : '/courses')}>BACK TO COURSE</button>
+                        )}
+                        
+                        {!isFirstTime && (
+                            <div className="py-5 border-top border-bottom mb-5">
+                                <p className="smallest fw-bold text-muted mb-1 ls-2 text-uppercase">Progress Status</p>
+                                <h1 className="display-2 fw-900 mb-0" style={{ color: '#FACC15', letterSpacing: '-2px' }}>COMPLETE</h1>
+                            </div>
+                        )}
+                        
+                        <button className="btn game-btn-primary w-100 py-3 fw-900 ls-1 shadow-sm" onClick={() => navigate(lesson?.courseId ? `/courses/${lesson.courseId}` : '/courses')} style={{ borderRadius: '18px', backgroundColor: '#FACC15', boxShadow: '0 6px 0 #EAB308' }}>
+                            BACK TO COURSE
+                        </button>
+                    </div>
                 </div>
             </div>
         );
@@ -656,14 +754,26 @@ const GameRoom: React.FC = () => {
             {renderContent()}
             {showExitModal && <ExitModal onClose={() => setShowExitModal(false)} onConfirm={() => navigate(lesson?.courseId ? `/courses/${lesson.courseId}` : '/courses')} />}
             <style>{`
-                .ls-tight { letter-spacing: -1.5px; }
+                .ls-tight { letter-spacing: -2px; }
                 .ls-1 { letter-spacing: 1px; }
                 .ls-2 { letter-spacing: 2px; }
                 .smallest { font-size: 11px; }
-                .game-btn-primary { background-color: #FACC15 !important; color: #111827 !important; border: none !important; border-radius: 12px; box-shadow: 0 4px 0 #EAB308 !important; transition: all 0.2s; }
-                .game-btn-primary:active { transform: translateY(2px); box-shadow: 0 2px 0 #EAB308 !important; }
+                .fw-900 { font-weight: 900; }
+                .italic-text { font-style: italic; }
+                .hover-scale { transition: transform 0.2s ease; }
+                .hover-scale:hover { transform: scale(1.05); }
+                .hover-scale:active { transform: scale(0.95); }
+                .hr-fade { height: 1px; background: linear-gradient(to right, transparent, #E5E7EB, transparent); }
+                .bg-warning-subtle { background-color: #FEF3C7; }
+                .bg-blue-subtle { background-color: #DBEAFE; }
+                .pulse-danger { animation: pulseDanger 1.5s infinite; }
+                @keyframes pulseDanger { 0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); } 70% { box-shadow: 0 0 0 15px rgba(239, 68, 68, 0); } 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); } }
+                .pulse-wave { animation: pulseWave 1s infinite ease-in-out; }
+                @keyframes pulseWave { 0%, 100% { transform: scaleY(1); } 50% { transform: scaleY(2); } }
+                .game-btn-primary { background-color: #FACC15 !important; color: #111827 !important; border: none !important; border-radius: 12px; transition: all 0.2s; }
+                .game-btn-primary:active { transform: translateY(4px); box-shadow: 0 2px 0 #EAB308 !important; }
                 .game-btn-primary:disabled { opacity: 0.5; }
-                .study-card { max-width: 500px; margin: 0 auto; transition: transform 0.2s; }
+                .study-card { max-width: 500px; margin: 0 auto; transition: all 0.3s ease; }
                 @keyframes cheerPopIn { 0% { opacity: 0; transform: translateX(-50%) translateY(40px) scale(0.7); } 50% { opacity: 1; transform: translateX(-50%) translateY(-8px) scale(1.05); } 100% { opacity: 1; transform: translateX(-50%) translateY(0) scale(1); } }
                 .mascot-cheer-overlay { position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%); z-index: 9999; display: flex; flex-direction: column; align-items: center; animation: cheerPopIn 0.4s ease-out forwards; pointer-events: none; filter: drop-shadow(0 6px 20px rgba(0,0,0,0.15)); }
                 .mascot-cheer-bubble { background: #111827; color: #FACC15; font-size: 14px; font-weight: 800; font-family: 'Poppins', sans-serif; letter-spacing: 0.5px; padding: 8px 20px; border-radius: 20px; margin-bottom: 6px; white-space: nowrap; box-shadow: 0 4px 16px rgba(250, 204, 21, 0.25); position: relative; }

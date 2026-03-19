@@ -1,60 +1,69 @@
 import React from 'react';
 
-// Recommended DiceBear styles with Venda cultural context
+// Venda Minwenda Pattern colors
 export const DICEBEAR_STYLES = [
     {
-        id: 'adventurer',
-        label: 'Adventurer',
-        vendaName: 'Ronewa',
-        story: 'A curious learner who loves exploring new vocabularies and cultural traditions.'
-    },
-    {
         id: 'avataaars',
-        label: 'Person',
+        label: 'The Leader',
         vendaName: 'Dakalo',
-        story: 'Spreading happiness and positivity through every word learned in Tshivenda.'
+        themeColor: '#FACC15',
+        story: 'Sharing the joy of Venda traditions through leading and teaching others.'
     },
     {
-        id: 'bottts',
-        label: 'Robot',
-        vendaName: 'Emmanuel',
-        story: 'Mastering the technical side of language with precision and futuristic energy.'
-    },
-    {
-        id: 'pixel-art',
-        label: 'Pixel Art',
-        vendaName: 'Tshifhiwa',
-        story: 'A creative soul preserving the vibrant patterns of heritage through digital art.'
+        id: 'adventurer',
+        label: 'The Voyager',
+        vendaName: 'Ronewa',
+        themeColor: '#1D4ED8',
+        story: 'Exploring the vast plains of knowledge with the spirit of the ancestors.'
     },
     {
         id: 'lorelei',
-        label: 'Character',
+        label: 'The Protector',
         vendaName: 'Rofhiwa',
-        story: 'Finding peace and rhythm in the poetic sounds of our ancient language.'
+        themeColor: '#15803D',
+        story: 'Guarding the heritage and language with grace and unwavering strength.'
     },
     {
-        id: 'notionists',
-        label: 'NotionStyle',
+        id: 'open-peeps',
+        label: 'The Artist',
+        vendaName: 'Tshifhiwa',
+        themeColor: '#B91D1D',
+        story: 'Preserving our culture through digital patterns and visual storytelling.'
+    },
+    {
+        id: 'personas',
+        label: 'The Scholar',
         vendaName: 'Mukona',
-        story: 'A dedicated scribe documenting stories to bridge the gap between generations.'
+        themeColor: '#EA580C',
+        story: 'Mastering the ancient proverbs to bridge the wisdom of the past with the future.'
     },
     {
         id: 'miniavs',
-        label: 'Mini',
+        label: 'The Youth',
         vendaName: 'Zwivhuya',
-        story: 'Representing the bright future of language learners with curiosity and joy.'
+        themeColor: '#4F46E5',
+        story: 'The bright new generation carrying the torch of our language forward.'
     },
     {
         id: 'big-smile',
-        label: 'Smile',
+        label: 'The Host',
         vendaName: 'Khodani',
-        story: 'Always encouraging fellow learners with a bright smile and helpful tips.'
+        themeColor: '#059669',
+        story: 'Always welcoming others with the warm hospitality of the Venda people.'
     },
     {
         id: 'micah',
-        label: 'Sketch',
+        label: 'The Dreamer',
         vendaName: 'Thabelo',
-        story: 'Artistic and thoughtful, capturing the essence of Venda life in every lesson.'
+        themeColor: '#7C3AED',
+        story: 'Finding inspiration in the sacred landscapes and rhythms of our home.'
+    },
+    {
+        id: 'bottts',
+        label: 'The Inventor',
+        vendaName: 'Emmanuel',
+        themeColor: '#71717a',
+        story: 'Building tools to help the tribe thrive in the digital age.'
     }
 ];
 
@@ -72,7 +81,8 @@ const AvatarPicker: React.FC<AvatarPickerProps> = ({ selectedStyle, seed, onSele
             <div className="avatar-picker-grid mb-4">
                 {DICEBEAR_STYLES.map((style) => {
                     const isSelected = selectedStyle === style.id;
-                    const avatarUrl = `https://api.dicebear.com/9.x/${style.id}/svg?seed=${seed}`;
+                    const clothingColor = style.themeColor.replace('#', '');
+                    const avatarUrl = `https://api.dicebear.com/9.x/${style.id}/svg?seed=${seed}&backgroundColor=f8fafc&clothingColor=${clothingColor}&topColor=${clothingColor}`;
 
                     return (
                         <button
@@ -80,104 +90,150 @@ const AvatarPicker: React.FC<AvatarPickerProps> = ({ selectedStyle, seed, onSele
                             type="button"
                             className={`avatar-choice-btn ${isSelected ? 'selected' : ''}`}
                             onClick={() => onSelect(style.id)}
-                            title={style.label}
                         >
-                            <div className="avatar-preview-wrapper">
+                            <div className="avatar-preview-wrapper position-relative" style={{ border: `3px solid ${style.themeColor}` }}>
                                 <img
                                     src={avatarUrl}
                                     alt={style.label}
-                                    className="avatar-img shadow-sm"
+                                    className="avatar-img"
                                     loading="lazy"
                                 />
+                                {/* MINWENDA ACCENT STRIPE */}
+                                <div className="minwenda-accent" style={{ background: style.themeColor }}></div>
                             </div>
                             <span className="style-label">{style.vendaName}</span>
-                            {isSelected && <div className="selection-indicator"></div>}
+                            {isSelected && <div className="selection-indicator" style={{ backgroundColor: style.themeColor }}></div>}
                         </button>
                     );
                 })}
             </div>
 
             {selectedStyleData && (
-                <div className="selected-avatar-story p-3 rounded-4 animate__animated animate__fadeIn" style={{ background: '#EEF2FF', borderLeft: '4px solid #4F46E5' }}>
-                    <div className="d-flex align-items-center gap-2 mb-1">
-                        <span className="fw-bold text-indigo" style={{ color: '#4338CA' }}>{selectedStyleData.vendaName}</span>
-                        <span className="smallest text-muted text-uppercase ls-1">({selectedStyleData.label})</span>
+                <div className="selected-avatar-card p-4 rounded-4 animate__animated animate__fadeIn">
+                    <div className="minwenda-pattern-header"></div>
+                    <div className="card-content d-flex align-items-center gap-4">
+                        <div className="avatar-large flex-shrink-0 position-relative">
+                             <img 
+                                src={`https://api.dicebear.com/9.x/${selectedStyleData.id}/svg?seed=${seed}&backgroundColor=FACC15&clothingColor=${selectedStyleData.themeColor.replace('#', '')}&topColor=${selectedStyleData.themeColor.replace('#', '')}`} 
+                                className="rounded-circle border-4 border-white shadow w-100 h-100" 
+                                style={{ objectFit: 'cover' }}
+                                alt="preview" 
+                             />
+                        </div>
+                        <div className="text-dark">
+                            <h4 className="fw-bold mb-0 ls-1" style={{ color: '#1e293b' }}>{selectedStyleData.vendaName}</h4>
+                            <p className="smallest fw-bold text-uppercase ls-2 mb-2" style={{ color: selectedStyleData.themeColor }}>{selectedStyleData.label}</p>
+                            <p className="small mb-0 opacity-75 italic text-secondary" style={{ borderLeft: `3px solid ${selectedStyleData.themeColor}`, paddingLeft: '12px', fontStyle: 'italic' }}>
+                                "{selectedStyleData.story}"
+                            </p>
+                        </div>
                     </div>
-                    <p className="small text-dark mb-0 italic" style={{ fontStyle: 'italic' }}>
-                        "{selectedStyleData.story}"
-                    </p>
                 </div>
             )}
 
             <style>{`
                 .avatar-picker-grid {
                     display: grid;
-                    grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
-                    gap: 12px;
-                    padding: 10px;
-                    background: #f8fafc;
-                    border-radius: 16px;
-                    border: 1px solid #e2e8f0;
+                    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+                    gap: 15px;
+                    padding: 15px;
+                    background: #f1f5f9;
+                    border-radius: 20px;
                 }
                 .avatar-choice-btn {
                     position: relative;
                     border: 2px solid transparent;
                     background: white;
-                    border-radius: 12px;
-                    padding: 8px;
+                    border-radius: 18px;
+                    padding: 12px;
                     cursor: pointer;
-                    transition: all 0.2s;
+                    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
                     display: flex;
                     flex-direction: column;
                     align-items: center;
-                    gap: 6px;
-                    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+                    gap: 10px;
+                    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
                 }
                 .avatar-choice-btn:hover {
-                    transform: scale(1.05);
-                    border-color: #cbd5e1;
+                    transform: translateY(-5px);
+                    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
                 }
                 .avatar-choice-btn.selected {
-                    border-color: #FACC15;
-                    background: #fffef3;
-                    box-shadow: 0 4px 12px rgba(250, 204, 21, 0.2);
+                    border-color: currentColor;
+                    transform: scale(1.05);
                 }
                 .avatar-preview-wrapper {
-                    width: 50px;
-                    height: 50px;
+                    width: 70px;
+                    height: 70px;
+                    flex-shrink: 0;
                     border-radius: 50%;
                     overflow: hidden;
                     background: #f1f5f9;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
+                    box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
                 }
                 .avatar-img {
                     width: 100%;
                     height: 100%;
                     object-fit: cover;
                 }
-                .style-label {
-                    font-size: 10px;
-                    font-weight: 700;
-                    text-transform: uppercase;
-                    letter-spacing: 0.5px;
-                    color: #64748b;
+                .minwenda-accent {
+                    position: absolute;
+                    bottom: 0;
+                    width: 100%;
+                    height: 6px;
+                    opacity: 0.8;
                 }
-                .avatar-choice-btn.selected .style-label {
-                    color: #111827;
+                .style-label {
+                    font-size: 11px;
+                    font-weight: 800;
+                    text-transform: uppercase;
+                    letter-spacing: 1px;
+                    color: #475569;
+                }
+                .selected-avatar-card {
+                    position: relative;
+                    background: #ffffff;
+                    border: 1px solid #e2e8f0;
+                    overflow: hidden;
+                    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05);
+                }
+                .minwenda-pattern-header {
+                    position: absolute;
+                    top: 0;
+                    right: 0;
+                    width: 100%;
+                    height: 8px;
+                    z-index: 10;
+                    background: repeating-linear-gradient(
+                        to right,
+                        #FACC15 0%, #FACC15 20%,
+                        #1D4ED8 20%, #1D4ED8 40%,
+                        #15803D 40%, #15803D 60%,
+                        #B91D1D 60%, #B91D1D 80%,
+                        #EA580C 80%, #EA580C 100%
+                    );
+                }
+                .avatar-large {
+                    width: 80px;
+                    height: 80px;
+                    flex-shrink: 0;
+                }
+                .avatar-large img {
+                    width: 100%;
+                    height: 100%;
+                    aspect-ratio: 1/1;
+                    object-fit: cover;
                 }
                 .selection-indicator {
                     position: absolute;
-                    top: -4px;
-                    right: -4px;
-                    width: 14px;
-                    height: 14px;
-                    background: #FACC15;
-                    border: 2px solid white;
+                    top: -6px;
+                    right: -6px;
+                    width: 22px;
+                    height: 22px;
+                    border: 4px solid white;
                     border-radius: 50%;
+                    box-shadow: 0 4px 6px rgba(0,0,0,0.2);
                 }
-                .text-indigo { color: #4338CA; }
             `}</style>
         </div>
     );
@@ -192,17 +248,18 @@ export const AvatarDisplay: React.FC<{
     className?: string;
     style?: React.CSSProperties
 }> = ({ avatarId, seed = "default", size = 36, className = "", style }) => {
-    // avatarId is the style (e.g. 'adventurer'), seed is the individual variant (e.g. uid or username)
-    const styleName = avatarId || 'adventurer';
-    const avatarUrl = `https://api.dicebear.com/9.x/${styleName}/svg?seed=${seed}`;
+    const styleData = DICEBEAR_STYLES.find(s => s.id === avatarId) || DICEBEAR_STYLES[0];
+    const clothingColor = styleData.themeColor.replace('#', '');
+    const avatarUrl = `https://api.dicebear.com/9.x/${styleData.id}/svg?seed=${seed}&backgroundColor=f1f5f9&clothingColor=${clothingColor}&topColor=${clothingColor}`;
 
     return (
         <div
-            className={`d-flex align-items-center justify-content-center rounded-circle flex-shrink-0 overflow-hidden bg-light ${className}`}
+            className={`d-flex align-items-center justify-content-center rounded-circle flex-shrink-0 overflow-hidden shadow-sm ${className}`}
             style={{
                 width: `${size}px`,
                 height: `${size}px`,
-                border: `1px solid #e2e8f0`,
+                border: `2px solid ${styleData.themeColor}`,
+                backgroundColor: 'white',
                 ...style
             }}
         >

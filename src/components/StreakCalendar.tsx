@@ -1,247 +1,240 @@
 import React from 'react';
-import { Calendar as CalendarIcon, Shield, ChevronLeft, ChevronRight, Check } from 'lucide-react';
+import { Shield, ChevronLeft, ChevronRight, Check, Flame, Trophy, Calendar as CalendarIcon } from 'lucide-react';
 
 interface StreakCalendarProps {
     activityHistory: string[]; // Array of YYYY-MM-DD
     streakFreezes: number;
     points: number;
+    streak?: number;
     onBuyFreeze: () => void;
+    onShareClick?: () => void;
 }
 
 interface CalendarDay {
     day: number;
+    dateStr: string;
     active: boolean;
     isToday: boolean;
-    isStart: boolean;
-    isEnd: boolean;
-    isMiddle: boolean;
-    isIsolated: boolean;
 }
 
-const StreakCalendar: React.FC<StreakCalendarProps> = ({ activityHistory, streakFreezes, points, onBuyFreeze }) => {
+const StreakCalendar: React.FC<StreakCalendarProps> = ({ 
+    activityHistory, 
+    streakFreezes, 
+    points, 
+    streak = 0, 
+    onBuyFreeze,
+    onShareClick
+}) => {
     const today = new Date();
     const [viewDate, setViewDate] = React.useState(new Date(today.getFullYear(), today.getMonth(), 1));
 
-    const daysInMonth = (year: number, month: number) => new Date(year, month + 1, 0).getDate();
-    const startDay = new Date(viewDate.getFullYear(), viewDate.getMonth(), 1).getDay();
-
+    const daysInMonthCount = (year: number, month: number) => new Date(year, month + 1, 0).getDate();
+    const firstDayOfMonth = new Date(viewDate.getFullYear(), viewDate.getMonth(), 1).getDay();
     const monthName = viewDate.toLocaleString('default', { month: 'long' });
     const year = viewDate.getFullYear();
 
+    // Generate days for the view date month
     const generateDays = () => {
         const days: (CalendarDay | null)[] = [];
-        const numDays = daysInMonth(viewDate.getFullYear(), viewDate.getMonth());
-
-        // Padding for the start of the month
-        for (let i = 0; i < startDay; i++) {
+        const numDays = daysInMonthCount(viewDate.getFullYear(), viewDate.getMonth());
+        
+        // Monday start adjustment
+        const adjustedStart = (firstDayOfMonth + 6) % 7;
+        
+        for (let i = 0; i < adjustedStart; i++) {
             days.push(null);
         }
-
+        
         for (let d = 1; d <= numDays; d++) {
             const dateStr = `${viewDate.getFullYear()}-${String(viewDate.getMonth() + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
             days.push({
                 day: d,
+                dateStr,
                 active: activityHistory.includes(dateStr),
-                isToday: dateStr === today.toISOString().split('T')[0],
-                isStart: false,
-                isEnd: false,
-                isMiddle: false,
-                isIsolated: false
+                isToday: dateStr === today.toISOString().split('T')[0]
             });
         }
-
-        // Second pass to find consecutive streaks
-        for (let i = startDay; i < days.length; i++) {
-            const currentDay = days[i];
-            if (currentDay && currentDay.active) {
-                // To connect across grid gaps within the same row, we need to know neighbors
-                const prevDay = i > 0 ? days[i - 1] : null;
-                const nextDay = i < days.length - 1 ? days[i + 1] : null;
-
-                const prevActive = !!(prevDay && prevDay.active);
-                const nextActive = !!(nextDay && nextDay.active);
-
-                // Also check if they are on the same row (0-indexed position % 7)
-                const isStartOfWeek = i % 7 === 0;
-                const isEndOfWeek = i % 7 === 6;
-
-                const connectPrev = prevActive && !isStartOfWeek; // Only connect left if not start of week row
-                const connectNext = nextActive && !isEndOfWeek;   // Only connect right if not end of week row
-
-                currentDay.isStart = !connectPrev && connectNext;
-                currentDay.isEnd = connectPrev && !connectNext;
-                currentDay.isMiddle = connectPrev && connectNext;
-                currentDay.isIsolated = !connectPrev && !connectNext;
-            }
-        }
-
         return days;
     };
 
     const days = generateDays();
+    const weekDays = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
     const FREEZE_COST = 100;
 
     return (
-        <div className="streak-calendar-container p-4 rounded-4 bg-white border shadow-sm">
-            <div className="d-flex align-items-center justify-content-between mb-4">
-                <div className="d-flex align-items-center gap-2">
-                    <div className="p-2 rounded-3 bg-danger bg-opacity-10 text-danger">
-                        <CalendarIcon size={20} />
-                    </div>
-                    <h5 className="fw-bold mb-0 text-dark">Activity Calendar</h5>
-                </div>
-                <div className="d-flex align-items-center gap-2 bg-light p-1 rounded-3">
-                    <button
-                        onClick={() => setViewDate(new Date(viewDate.getFullYear(), viewDate.getMonth() - 1, 1))}
-                        className="btn btn-sm btn-light p-1 border-0"
-                    >
-                        <ChevronLeft size={18} />
-                    </button>
-                    <span className="small fw-bold px-2 text-uppercase ls-1">{monthName} {year}</span>
-                    <button
-                        onClick={() => setViewDate(new Date(viewDate.getFullYear(), viewDate.getMonth() + 1, 1))}
-                        className="btn btn-sm btn-light p-1 border-0"
-                    >
-                        <ChevronRight size={18} />
-                    </button>
-                </div>
-            </div>
+        <div className="unified-streak-calendar rounded-3xl overflow-hidden border border-slate-200 bg-white shadow-sm animate__animated animate__fadeIn">
 
-            <div className="calendar-grid mb-4 position-relative">
-                {/* Horizontal line running behind the week rows (optional visual effect similar to Dribbble) */}
-                <div className="position-absolute w-100 h-100" style={{ zIndex: 0, pointerEvents: 'none' }}></div>
-
-                {['M', 'T', 'W', 'T', 'F', 'S', 'S'].map((day, i) => (
-                    <div key={`${day}-${i}`} className="calendar-weekday text-muted smallest fw-bold text-center py-2 z-1">{day}</div>
-                ))}
-
-                {days.map((day, idx) => {
-                    if (!day) return <div key={`empty-${idx}`} className="calendar-day-cell empty z-1"></div>;
-
-                    let streakClass = '';
-                    if (day.active) {
-                        if (day.isStart) streakClass = 'streak-start';
-                        else if (day.isMiddle) streakClass = 'streak-middle';
-                        else if (day.isEnd) streakClass = 'streak-end';
-                        else if (day.isIsolated) streakClass = 'streak-isolated';
-                    }
-
-                    return (
-                        <div
-                            key={idx}
-                            className={`calendar-day-cell position-relative d-flex align-items-center justify-content-center ${day.active ? 'active' : ''} ${day.isToday ? 'today' : ''} ${streakClass} z-1`}
-                        >
-                            {/* Visual connector line that runs horizontally behind */}
-                            {day.active && (day.isStart || day.isMiddle) && (
-                                <div className="streak-connector"></div>
-                            )}
-
-                            {/* The Circle with either Day Number or Checkmark */}
-                            <div className={`day-circle d-flex align-items-center justify-content-center bg-white shadow-sm position-relative z-1 ${day.active ? 'active-circle' : ''}`}>
-                                {day.active ? (
-                                    <Check size={16} strokeWidth={3} className="text-white" />
-                                ) : (
-                                    <span className="small fw-bold">{day.day}</span>
-                                )}
-                            </div>
-                        </div>
-                    );
-                })}
-            </div>
-
-            <div className="streak-freezes-section p-3 rounded-4 bg-light border-0">
-                <div className="d-flex align-items-center justify-content-between mb-3">
-                    <div className="d-flex align-items-center gap-2">
-                        <div className="p-2 rounded-3 bg-info bg-opacity-10 text-info">
-                            <Shield size={20} />
+            
+            <div className="p-4">
+                {/* Header with Streak and Stats */}
+                <div className="d-flex flex-column flex-md-row justify-content-between align-items-center gap-4 mb-4 pb-4 border-bottom border-slate-100">
+                    <div className="d-flex align-items-center gap-3">
+                        <div className="fire-badge-large p-3 rounded-2xl bg-danger bg-opacity-10 d-flex align-items-center justify-content-center">
+                            <Flame className={`text-danger ${streak > 0 ? 'fire-animate' : ''}`} size={32} fill={streak > 0 ? "currentColor" : "none"} />
                         </div>
                         <div>
-                            <p className="mb-0 fw-bold text-dark small">Streak Freezes</p>
-                            <p className="mb-0 smallest text-muted text-uppercase ls-1">{streakFreezes} available</p>
+                            <h3 className="fw-bold mb-0 text-slate-900 ls-tight">{streak} Day Streak</h3>
+                            <div className="d-flex align-items-center gap-2 mt-1">
+                                <Trophy size={14} className="text-warning-emphasis" />
+                                <span className="smallest fw-bold text-warning-emphasis uppercase tracking-widest">{points} XP EARNED</span>
+                            </div>
                         </div>
                     </div>
-                    <button
-                        onClick={onBuyFreeze}
-                        disabled={points < FREEZE_COST}
-                        className="btn btn-sm btn-dark rounded-pill px-3 fw-bold smallest ls-1"
-                    >
-                        BUY FOR {FREEZE_COST} LP
-                    </button>
+                    
+                    <div className="d-flex gap-2">
+                        {onShareClick && (
+                            <button 
+                                onClick={onShareClick}
+                                className="btn btn-danger d-flex align-items-center gap-2 px-3 py-2 rounded-xl border-0 shadow-sm transition-all"
+                            >
+                                <Flame size={16} fill="currentColor" />
+                                <span className="small fw-bold">Share</span>
+                            </button>
+                        )}
+                        <div className="d-flex align-items-center gap-2 px-3 py-2 bg-slate-50 border border-slate-100 rounded-xl">
+                            <Shield size={16} className="text-info" />
+                            <span className="small fw-bold text-info">{streakFreezes} Freezes</span>
+                        </div>
+                    </div>
                 </div>
-                <p className="smallest text-muted mb-0 italic">
-                    Streak freezes automatically protect your progress if you miss a day of learning.
-                </p>
+
+                <div className="calendar-section">
+                    <div className="d-flex justify-content-between align-items-center mb-4">
+                        <div className="d-flex align-items-center gap-2">
+                            <CalendarIcon size={16} className="text-slate-400" />
+                            <span className="small fw-bold text-slate-600 uppercase tracking-widest">{monthName} {year}</span>
+                        </div>
+                        <div className="d-flex align-items-center gap-1">
+                            <button 
+                                onClick={() => setViewDate(new Date(viewDate.getFullYear(), viewDate.getMonth() - 1, 1))}
+                                className="btn btn-light btn-sm rounded-lg p-1 border-slate-200"
+                            >
+                                <ChevronLeft size={18} />
+                            </button>
+                            <button 
+                                onClick={() => setViewDate(new Date(viewDate.getFullYear(), viewDate.getMonth() + 1, 1))}
+                                className="btn btn-light btn-sm rounded-lg p-1 border-slate-200"
+                            >
+                                <ChevronRight size={18} />
+                            </button>
+                        </div>
+                    </div>
+
+                    <div className="calendar-grid-v2">
+                        {weekDays.map((wd, i) => (
+                            <div key={i} className="text-center smallest fw-bold text-slate-400 uppercase mb-2">{wd}</div>
+                        ))}
+                        
+                        {days.map((day, idx) => {
+                            if (!day) return <div key={`empty-${idx}`} className="calendar-node empty"></div>;
+                            return (
+                                <div 
+                                    key={idx} 
+                                    className={`calendar-node-cell d-flex flex-column align-items-center justify-content-center`}
+                                >
+                                    <div className={`calendar-node ${day.active ? 'active' : ''} ${day.isToday ? 'today' : ''}`}>
+                                        {day.active ? <Check size={16} strokeWidth={4} /> : <span className="node-day-num">{day.day}</span>}
+                                    </div>
+                                    {day.active && <div className="active-dot mt-1"></div>}
+                                </div>
+                            );
+                        })}
+                    </div>
+                </div>
+
+                {/* Footer Action */}
+                <div className="mt-4 pt-4 border-top border-slate-100">
+                    <div className="d-flex flex-column flex-md-row align-items-center justify-content-between gap-3 bg-slate-50 p-3 rounded-2xl border border-slate-100">
+                        <div className="d-flex align-items-center gap-3">
+                            <div className="p-2 rounded-xl bg-white border border-slate-200 text-info">
+                                <Shield size={20} />
+                            </div>
+                            <div>
+                                <p className="mb-0 fw-bold text-slate-800 small">Protect your streak</p>
+                                <p className="mb-0 smallest text-slate-500 italic">"Nungo i bva kha u guda" (Strength comes from learning)</p>
+                            </div>
+                        </div>
+                        <button
+                            onClick={onBuyFreeze}
+                            disabled={points < FREEZE_COST}
+                            className={`btn ${points >= FREEZE_COST ? 'btn-dark' : 'btn-slate-200'} rounded-xl px-4 py-2 fw-bold small ls-1 transition-all`}
+                        >
+                            BUY FREEZE ({FREEZE_COST} XP)
+                        </button>
+                    </div>
+                </div>
             </div>
 
             <style>{`
-                .calendar-grid {
+                .unified-streak-calendar {
+                    font-family: 'Inter', sans-serif;
+                }
+                
+
+
+                .fire-animate {
+                    animation: fireFlicker 1.5s infinite ease-in-out;
+                }
+
+                @keyframes fireFlicker {
+                    0%, 100% { transform: scale(1); opacity: 1; }
+                    50% { transform: scale(1.1); opacity: 0.8; }
+                }
+
+                .calendar-grid-v2 {
                     display: grid;
                     grid-template-columns: repeat(7, 1fr);
-                    gap: 16px 0; /* Vertical gap between rows */
+                    gap: 8px;
                 }
-                .calendar-weekday {
-                    margin-bottom: 4px;
-                }
-                .calendar-day-cell {
+
+                .calendar-node-cell {
                     aspect-ratio: 1;
+                    min-height: 48px;
+                }
+
+                .calendar-node {
+                    width: 40px;
+                    height: 40px;
+                    border-radius: 12px;
+                    background: #f8fafc;
+                    border: 1.5px solid #f1f5f9;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    transition: all 0.2s ease;
+                    color: #94a3b8;
+                    font-size: 14px;
+                    font-weight: 700;
                     position: relative;
-                    margin: 0;
-                }
-                .calendar-day-cell.empty {
-                    background: transparent;
-                    border: none;
-                }
-                
-                /* The actual circle inside the cell */
-                .day-circle {
-                    width: 36px;
-                    height: 36px;
-                    border-radius: 50%;
-                    color: #1e293b; /* slate-800 */
-                    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-                }
-                
-                .calendar-day-cell.empty .day-circle {
-                    display: none;
                 }
 
-                /* Active state (Orange/Coral gradient) */
-                .day-circle.active-circle {
-                    background: linear-gradient(135deg, #FF7E5F, #FEB47B);
-                    border: none;
-                    box-shadow: 0 4px 10px rgba(255, 126, 95, 0.4);
+                .calendar-node.active {
+                    background: #EF4444;
                     color: white;
-                    transform: scale(1.1);
+                    border-color: #EF4444;
+                    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.25);
+                    transform: scale(1.05);
                 }
 
-                /* Today state (Not active) */
-                .calendar-day-cell.today:not(.active) .day-circle {
-                    border: 2px solid #FF7E5F;
-                    color: #FF7E5F;
-                    box-shadow: none;
+                .calendar-node.today {
+                    border-color: #FACC15;
+                    border-width: 2px;
+                    color: #334155;
+                }
+                
+                .calendar-node.today:not(.active) {
+                    background: #fffbeb;
                 }
 
-                /* Inactive state (just grey text, no background in dribbble) */
-                .calendar-day-cell:not(.active):not(.today):not(.empty) .day-circle {
-                    background-color: transparent;
-                    box-shadow: none;
-                    color: #94A3B8; /* slate-400 */
+                .active-dot {
+                    width: 5px;
+                    height: 5px;
+                    background: #EF4444;
+                    border-radius: 50%;
                 }
 
-                /* The connector physically bridges the cells */
-                .streak-connector {
-                    position: absolute;
-                    top: 50%;
-                    right: -50%; /* Extend fully to the center of the next cell */
-                    height: 4px;
-                    width: 100%;
-                    background-color: #FF7E5F; /* Corresponds to the orange */
-                    opacity: 0.3; /* Make it a faint line behind the circles */
-                    transform: translateY(-50%);
-                    z-index: 0;
-                    border-radius: 4px;
-                }
-                .ls-1 { letter-spacing: 1px; }
+                .ls-tight { letter-spacing: -0.5px; }
+                .tracking-widest { letter-spacing: 0.1em; }
                 .smallest { font-size: 10px; }
             `}</style>
         </div>

@@ -30,14 +30,32 @@ export const getLevelStats = (totalPoints: number = 0) => {
 };
 
 export const getBadgeDetails = (level: number) => {
-    if (level >= 50) return { name: "Tshivhumbeo", icon: "bi-stars", color: "#f472b6" }; // Pink/Legendary
-    if (level >= 40) return { name: "Khosi", icon: "bi-gem", color: "#fb7185" }; // Rose/Supreme
-    if (level >= 30) return { name: "Ndumi", icon: "bi-shield-fill-check", color: "#38bdf8" }; // Sky/Guardian
-    if (level >= 25) return { name: "Thovhele", icon: "bi-trophy-fill", color: "#f59e0b" }; // Gold/King
-    if (level >= 20) return { name: "Vhamusanda", icon: "bi-crown-fill", color: "#fbbf24" }; // Amber/Chief
-    if (level >= 15) return { name: "Gota", icon: "bi-award-fill", color: "#059669" }; // Emerald/Leader
-    if (level >= 10) return { name: "Vele", icon: "bi-shield-shaded", color: "#4f46e5" }; // Indigo/Master
-    if (level >= 5) return { name: "Muhali", icon: "bi-patch-check-fill", color: "#818cf8" }; // Light Indigo/Warrior
-    if (level >= 2) return { name: "Mudzulathungo", icon: "bi-book-fill", color: "#10b981" }; // Green/Apprentice
-    return { name: "Mugudi", icon: "bi-seedling", color: "#34d399" }; // Light Green/Novice
+    if (level >= 50) return { name: "Grandmaster", icon: "bi-stars", color: "#f472b6" }; // Pink/Legendary
+    if (level >= 40) return { name: "Supreme Sage", icon: "bi-gem", color: "#fb7185" }; // Rose/Supreme
+    if (level >= 30) return { name: "Guardian", icon: "bi-shield-fill-check", color: "#38bdf8" }; // Sky/Guardian
+    if (level >= 25) return { name: "Royal King/Queen", icon: "bi-trophy-fill", color: "#f59e0b" }; // Gold/King
+    if (level >= 20) return { name: "Noble Chief", icon: "bi-crown-fill", color: "#fbbf24" }; // Amber/Chief
+    if (level >= 15) return { name: "Elite Leader", icon: "bi-award-fill", color: "#059669" }; // Emerald/Leader
+    if (level >= 10) return { name: "Master Learner", icon: "bi-shield-shaded", color: "#4f46e5" }; // Indigo/Master
+    if (level >= 5) return { name: "Language Warrior", icon: "bi-patch-check-fill", color: "#818cf8" }; // Light Indigo/Warrior
+    if (level >= 2) return { name: "Apprentice", icon: "bi-book-fill", color: "#10b981" }; // Green/Apprentice
+    return { name: "Novice", icon: "bi-seedling", color: "#34d399" }; // Light Green/Novice
+};
+
+/**
+ * Returns a unique identifier for the current ISO week (e.g., "2024-W12").
+ * Used for the Weekly Leaderboard reset.
+ */
+export const getCurrentWeekIdentifier = (): string => {
+    const d = new Date();
+    // Copy date so don't modify original
+    const date = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
+    // Set to nearest Thursday: current date + 4 - current day number
+    // Make Sunday's day number 7
+    date.setUTCDate(date.getUTCDate() + 4 - (date.getUTCDay() || 7));
+    // Get first day of year
+    const yearStart = new Date(Date.UTC(date.getUTCFullYear(), 0, 1));
+    // Calculate full weeks to nearest Thursday
+    const weekNo = Math.ceil((((date.getTime() - yearStart.getTime()) / 86400000) + 1) / 7);
+    return `${date.getUTCFullYear()}-W${weekNo}`;
 };
