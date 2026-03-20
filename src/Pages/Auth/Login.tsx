@@ -3,13 +3,14 @@ import { Link, useNavigate } from 'react-router-dom';
 import { doc, getDoc, setDoc, type Firestore } from 'firebase/firestore';
 import { signInAnonymously, signInWithEmailAndPassword, signInWithPopup } from 'firebase/auth';
 import { auth, db, googleProvider } from '../../services/firebaseConfig';
-import { Loader2 } from 'lucide-react';
+import { Loader2, Eye, EyeOff } from 'lucide-react';
 import ReCAPTCHA from 'react-google-recaptcha';
 import BaobabAuthHeader from '../../components/BaobabAuthHeader';
 
 const Login: React.FC = () => {
     const [email, setEmail] = useState<string>('');
     const [password, setPassword] = useState<string>('');
+    const [showPassword, setShowPassword] = useState<boolean>(false);
     const [loading, setLoading] = useState<boolean>(false);
     const [error, setError] = useState<string | null>(null);
     const [captchaValue, setCaptchaValue] = useState<string | null>(null);
@@ -153,7 +154,7 @@ const Login: React.FC = () => {
                         <div className="custom-input-group">
                             <input
                                 type="email"
-                                className="form-control border-0 bg-transparent fs-6 px-0"
+                                className="border-0 bg-transparent fs-6 flex-grow-1"
                                 placeholder="vhadau@example.com"
                                 value={email}
                                 onChange={(e) => setEmail(e.target.value)}
@@ -170,16 +171,24 @@ const Login: React.FC = () => {
                                 Forgot?
                             </Link>
                         </div>
-                        <div className="custom-input-group">
+                        <div className="custom-input-group d-flex align-items-center">
                             <input
-                                type="password"
-                                className="form-control border-0 bg-transparent fs-6 px-0"
+                                type={showPassword ? "text" : "password"}
+                                className="border-0 bg-transparent fs-6 flex-grow-1"
                                 placeholder="••••••••"
                                 value={password}
                                 onChange={(e) => setPassword(e.target.value)}
                                 required
                                 disabled={loading}
                             />
+                            <button
+                                type="button"
+                                className="btn border-0 p-0 text-muted me-3 shadow-none"
+                                onClick={() => setShowPassword(!showPassword)}
+                                tabIndex={-1}
+                            >
+                                {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                            </button>
                         </div>
                     </div>
 
@@ -247,14 +256,38 @@ const Login: React.FC = () => {
                 .game-btn-primary:active { transform: translateY(2px); box-shadow: 0 2px 0 #EAB308 !important; }
                 
                 .custom-input-group { 
-                    border-bottom: 2px solid #F3F4F6; 
+                    border: 2px solid #F3F4F6; 
+                    border-radius: 12px;
+                    background-color: #F9FAFB;
                     transition: 0.2s; 
-                    background: transparent; 
+                    overflow: hidden;
+                    display: flex;
+                    align-items: center;
                 }
-                .custom-input-group:focus-within { border-color: #FACC15; }
-                .form-control:focus { background-color: transparent !important; box-shadow: none; outline: none; }
+                .custom-input-group:focus-within { 
+                    border-color: #FACC15; 
+                    background-color: #FFFFFF;
+                }
+                .custom-input-group input {
+                    border: none !important;
+                    border-radius: 0 !important;
+                    background: transparent !important;
+                    background-color: transparent !important;
+                    box-shadow: none !important;
+                    outline: none !important;
+                    padding: 0.75rem 1rem !important;
+                    width: 100%;
+                }
                 
-                .form-control:focus { background-color: transparent !important; box-shadow: none; outline: none; }
+                /* Hide default browser password reveal icon */
+                input::-ms-reveal,
+                input::-ms-clear {
+                    display: none;
+                }
+                input[type="password"]::-webkit-contacts-auto-fill-button,
+                input[type="password"]::-webkit-credentials-auto-fill-button {
+                    display: none !important;
+                }
             `}</style>
         </div>
     );

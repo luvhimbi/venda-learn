@@ -2,7 +2,7 @@ import React, { useState, type FormEvent, type ChangeEvent } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { doc, setDoc, getDoc, type Firestore } from 'firebase/firestore';
 import { createUserWithEmailAndPassword, signInWithPopup } from 'firebase/auth';
-import { Loader2 } from 'lucide-react';
+import { Loader2, Eye, EyeOff } from 'lucide-react';
 import ReCAPTCHA from 'react-google-recaptcha';
 import { auth, db, googleProvider } from '../../services/firebaseConfig';
 import BaobabAuthHeader from '../../components/BaobabAuthHeader';
@@ -27,6 +27,8 @@ const Register: React.FC = () => {
         password: '',
         confirmPassword: ''
     });
+    const [showPassword, setShowPassword] = useState(false);
+    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [captchaValue, setCaptchaValue] = useState<string | null>(null);
@@ -146,26 +148,42 @@ const Register: React.FC = () => {
                     <div className="mb-2">
                         <label className="form-label smallest fw-bold text-uppercase text-muted ls-1">Full Name</label>
                         <div className="custom-input-group">
-                            <input name="username" type="text" className="form-control border-0 bg-transparent fs-6 px-0" placeholder="John Doe" onChange={handleChange} required disabled={loading} />
+                            <input name="username" type="text" className="border-0 bg-transparent fs-6 flex-grow-1" placeholder="John Doe" onChange={handleChange} required disabled={loading} />
                         </div>
                     </div>
                     <div className="mb-2">
                         <label className="form-label smallest fw-bold text-uppercase text-muted ls-1">Email</label>
                         <div className="custom-input-group">
-                            <input name="email" type="email" className="form-control border-0 bg-transparent fs-6 px-0" placeholder="vhadau@example.com" onChange={handleChange} required disabled={loading} />
+                            <input name="email" type="email" className="border-0 bg-transparent fs-6 flex-grow-1" placeholder="vhadau@example.com" onChange={handleChange} required disabled={loading} />
                         </div>
                     </div>
                     <div className="row mb-2">
                         <div className="col-md-6 mb-2 mb-md-0">
                             <label className="form-label smallest fw-bold text-uppercase text-muted ls-1">Password</label>
-                            <div className="custom-input-group">
-                                <input name="password" type="password" className="form-control border-0 bg-transparent fs-6 px-0" placeholder="••••••••" onChange={handleChange} required disabled={loading} />
+                            <div className="custom-input-group d-flex align-items-center">
+                                <input name="password" type={showPassword ? "text" : "password"} className="border-0 bg-transparent fs-6 flex-grow-1" placeholder="••••••••" onChange={handleChange} required disabled={loading} />
+                                <button
+                                    type="button"
+                                    className="btn border-0 p-0 text-muted me-3 shadow-none"
+                                    onClick={() => setShowPassword(!showPassword)}
+                                    tabIndex={-1}
+                                >
+                                    {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                                </button>
                             </div>
                         </div>
                         <div className="col-md-6">
                             <label className="form-label smallest fw-bold text-uppercase text-muted ls-1">Confirm</label>
-                            <div className="custom-input-group">
-                                <input name="confirmPassword" type="password" className="form-control border-0 bg-transparent fs-6 px-0" placeholder="••••••••" onChange={handleChange} required disabled={loading} />
+                            <div className="custom-input-group d-flex align-items-center">
+                                <input name="confirmPassword" type={showConfirmPassword ? "text" : "password"} className="border-0 bg-transparent fs-6 flex-grow-1" placeholder="••••••••" onChange={handleChange} required disabled={loading} />
+                                <button
+                                    type="button"
+                                    className="btn border-0 p-0 text-muted me-3 shadow-none"
+                                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                                    tabIndex={-1}
+                                >
+                                    {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                                </button>
                             </div>
                         </div>
                     </div>
@@ -222,13 +240,38 @@ const Register: React.FC = () => {
                 .game-btn-primary:active { transform: translateY(2px); box-shadow: 0 2px 0 #EAB308 !important; }
                 
                 .custom-input-group { 
-                    border-bottom: 2px solid #F3F4F6; 
+                    border: 2px solid #F3F4F6; 
+                    border-radius: 12px;
+                    background-color: #F9FAFB;
                     transition: 0.2s; 
+                    overflow: hidden;
+                    display: flex;
+                    align-items: center;
                 }
-                .custom-input-group:focus-within { border-color: #FACC15; }
-                .form-control:focus { background-color: transparent !important; box-shadow: none; outline: none; }
+                .custom-input-group:focus-within { 
+                    border-color: #FACC15; 
+                    background-color: #FFFFFF;
+                }
+                .custom-input-group input {
+                    border: none !important;
+                    border-radius: 0 !important;
+                    background: transparent !important;
+                    background-color: transparent !important;
+                    box-shadow: none !important;
+                    outline: none !important;
+                    padding: 0.75rem 1rem !important;
+                    width: 100%;
+                }
                 
-                .form-control:focus { background-color: transparent !important; box-shadow: none; outline: none; }
+                /* Hide default browser password reveal icon */
+                input::-ms-reveal,
+                input::-ms-clear {
+                    display: none;
+                }
+                input[type="password"]::-webkit-contacts-auto-fill-button,
+                input[type="password"]::-webkit-credentials-auto-fill-button {
+                    display: none !important;
+                }
             `}</style>
         </div>
     );
