@@ -58,82 +58,65 @@ const Sidebar: React.FC = () => {
         { path: '/', label: 'Home', icon: 'bi-house-heart-fill', tourClass: 'tour-sidebar-home' },
         { path: '/courses', label: 'Lessons', icon: 'bi-journal-bookmark-fill', tourClass: 'tour-sidebar-lessons' },
         // { path: '/ngano', label: 'Stories', icon: 'bi-book-half', tourClass: 'tour-sidebar-ngano' },
-        { path: '/history', label: 'Culture', icon: 'bi-bank2', tourClass: 'tour-sidebar-culture' },
+        // { path: '/history', label: 'Culture', icon: 'bi-bank2', tourClass: 'tour-sidebar-culture' },
         { path: '/mitambo', label: 'Games', icon: 'bi-controller', tourClass: 'tour-sidebar-games' },
-        { path: '/muvhigo', label: 'Progress', icon: 'bi-graph-up-arrow', tourClass: 'tour-sidebar-progress' },
+        { path: '/muvhigo', label: 'Leaderboard', icon: 'bi-trophy-fill', tourClass: 'tour-sidebar-progress' },
     ];
 
     if (!user) return null;
 
     return (
         <>
-            {/* MOBILE TOP BAR (Hidden on Desktop) */}
-            <div className="d-lg-none mobile-top-bar bg-white border-bottom px-4 d-flex align-items-center justify-content-between sticky-top shadow-sm">
-                <Link className="d-flex align-items-center text-decoration-none" to="/">
-                    <img src="/images/VendaLearnLogo.png" alt="Venda Learn Logo" height="32" className="object-fit-contain" />
-                </Link>
-
-                {/* Mobile Profile Link - Avatar now shows here instead of initial */}
-                <Link to="/profile" className="d-flex align-items-center gap-2 text-decoration-none bg-light rounded-pill pe-3 p-1 border">
-                    <AvatarDisplay
-                        avatarId={userData?.avatarId || 'adventurer'}
-                        seed={userData?.username || 'warrior'}
-                        size={28}
-                    />
-                    <span className="smallest fw-bold text-muted ls-1">{userData?.points || 0} XP {user?.isAnonymous && <span className="text-secondary">(G)</span>}</span>
-                </Link>
-            </div>
 
             {/* MAIN SIDEBAR (Desktop Only) */}
-            <aside className="sidebar bg-white border-end d-none d-lg-flex flex-column transition-all" style={{ paddingLeft: '6px' }}>
-                <div className="bg-munwenda-vertical h-100 position-absolute start-0 top-0" style={{ width: '6px', zIndex: 10 }}></div>
+            <aside className="sidebar bg-white border-end d-none d-lg-flex flex-column transition-all">
 
                 {/* BRAND */}
-                <Link className="sidebar-brand px-4 py-5 d-flex align-items-center gap-2 text-decoration-none" to="/">
-                    <img src="/images/VendaLearnLogo.png" alt="Venda Learn Logo" height="45" className="object-fit-contain w-100" style={{ maxWidth: '180px' }} />
+                <Link className="sidebar-brand px-4 pt-5 pb-2 d-flex align-items-center gap-2 text-decoration-none" to="/">
+                    <img src="/images/Logo.png" alt="Language Learning Platform Logo" height="45" className="object-fit-contain w-100" style={{ maxWidth: '160px' }} />
                 </Link>
 
                 {/* NAV LINKS */}
-                <nav className="flex-grow-1 px-3 d-flex flex-column gap-2 overflow-auto scrollbar-hide">
+                <nav className="flex-grow-1 px-3 d-flex flex-column gap-3 overflow-auto scrollbar-hide py-4">
                     {navItems.map((item) => (
                         <Link
                             key={item.path}
                             to={item.path}
-                            className={`nav-item-link d-flex align-items-center gap-3 px-4 py-3 rounded-4 transition-all text-decoration-none ${item.tourClass || ''} ${isActive(item.path) ? 'active shadow-sm' : 'text-muted'}`}
+                            className={`nav-item-link d-flex align-items-center gap-3 px-4 py-2 rounded-4 transition-all text-decoration-none border-2 border-transparent ${item.tourClass || ''} ${isActive(item.path) ? 'active' : 'text-muted'}`}
                         >
-                            <i className={`bi ${item.icon} fs-5`}></i>
+                            <i className={`bi ${item.icon} fs-4`}></i>
                             <span className="fw-bold small ls-1 uppercase flex-grow-1">{item.label}</span>
                             {item.badge !== undefined && item.badge > 0 && <span className="badge rounded-pill bg-danger border-0 smallest py-1 px-2">{item.badge}</span>}
                         </Link>
                     ))}
 
                     {userData?.role === 'admin' && (
-                        <Link to="/admin/dashboard" className="nav-item-link d-flex align-items-center gap-3 px-4 py-3 rounded-4 transition-all text-decoration-none text-danger mt-4 bg-light-danger border border-danger-subtle">
-                            <i className="bi bi-shield-lock-fill fs-5"></i>
+                        <Link to="/admin/dashboard" className={`nav-item-link d-flex align-items-center gap-3 px-4 py-2 rounded-4 transition-all text-decoration-none mt-4 ${isActive('/admin/dashboard') ? 'active-admin' : 'text-danger bg-danger-subtle border-2 border-transparent'}`}>
+                            <i className="bi bi-shield-lock-fill fs-4"></i>
                             <span className="fw-bold small ls-1 uppercase">Admin Panel</span>
                         </Link>
                     )}
                 </nav>
 
                 {/* USER CARD (Bottom) */}
-                <div className="sidebar-footer p-2 border-top bg-light-subtle">
-                    <div className="user-profile-card bg-white border rounded-4 p-2 shadow-sm tour-sidebar-footer transition-all">
-                        <Link to="/profile" className="d-flex align-items-center gap-2 mb-2 text-decoration-none p-1 rounded-3 hover-bg-light transition-all">
+                <div className="sidebar-footer p-3 border-top">
+                    <div className="user-profile-card transition-all">
+                        <Link to="/profile" className="d-flex align-items-center gap-3 mb-3 text-decoration-none p-2 rounded-4 hover-bg-light transition-all border border-transparent">
                             <AvatarDisplay
                                 avatarId={userData?.avatarId || 'adventurer'}
                                 seed={userData?.username || 'warrior'}
-                                size={36}
+                                size={42}
                             />
                             <div className="overflow-hidden">
                                 <div className="d-flex align-items-center gap-1">
-                                    <h6 className="fw-bold mb-0 text-truncate small text-dark">{userData?.username || (user?.isAnonymous ? "Guest Learner" : "Warrior")}</h6>
+                                    <h6 className="fw-bold mb-0 text-truncate text-dark" style={{ fontSize: '14px' }}>{userData?.username || (user?.isAnonymous ? "Guest Learner" : "Warrior")}</h6>
                                     {user?.isAnonymous && <span className="badge bg-secondary rounded-pill fw-bold" style={{ fontSize: '8px', padding: '2px 4px' }}>GUEST</span>}
                                 </div>
-                                <p className="smallest text-muted mb-0 fw-bold ls-1">{userData?.points || 0} XP</p>
+                                <p className="smallest text-muted mb-0 fw-bold ls-1 uppercase">{userData?.points || 0} XP</p>
                             </div>
                         </Link>
-                        <button onClick={handleLogout} className="btn btn-outline-danger w-100 rounded-pill py-2 smallest fw-bold ls-2 uppercase border-0 bg-danger-subtle text-danger transition-all tour-sidebar-logout">
-                            <i className="bi bi-box-arrow-right me-2 font-bold"></i> Sign Out
+                        <button onClick={handleLogout} className="btn-logout w-100 rounded-4 py-2 small fw-bold ls-1 uppercase transition-all d-flex align-items-center justify-content-center gap-2">
+                            <i className="bi bi-box-arrow-right fs-5"></i> Sign Out
                         </button>
                     </div>
                 </div>
@@ -141,7 +124,6 @@ const Sidebar: React.FC = () => {
 
             {/* MOBILE BOTTOM NAV (Mobile Only) */}
             <nav className="mobile-bottom-nav fixed-bottom bg-white border-top d-lg-none d-flex flex-column shadow-lg">
-                <div className="bg-munwenda w-100" style={{ height: '4px' }}></div>
                 <div className="d-flex align-items-center px-1 py-1 overflow-x-auto no-scrollbar w-100">
                     {navItems.map((item) => (
                         <Link
@@ -161,6 +143,22 @@ const Sidebar: React.FC = () => {
                             <span className="fw-bold ls-1" style={{ fontSize: '9px', textTransform: 'uppercase' }}>{item.label}</span>
                         </Link>
                     ))}
+
+                    {/* NEW: MOBILE PROFILE LINK IN BOTTOM NAV */}
+                    <Link
+                        to="/profile"
+                        className={`d-flex flex-column align-items-center justify-content-center p-2 rounded-3 text-decoration-none transition-all flex-grow-1 flex-shrink-0 ${isActive('/profile') ? 'text-primary' : 'text-muted'}`}
+                        style={{ minWidth: '70px' }}
+                    >
+                        <div className={`position-relative mb-1 rounded-circle d-flex align-items-center justify-content-center ${isActive('/profile') ? 'bg-primary-subtle' : ''}`} style={{ width: '32px', height: '32px' }}>
+                            <AvatarDisplay
+                                avatarId={userData?.avatarId || 'adventurer'}
+                                seed={userData?.username || 'warrior'}
+                                size={isActive('/profile') ? 30 : 26}
+                            />
+                        </div>
+                        <span className="fw-bold ls-1" style={{ fontSize: '9px', textTransform: 'uppercase' }}>Profile</span>
+                    </Link>
                 </div>
             </nav>
 
@@ -174,19 +172,39 @@ const Sidebar: React.FC = () => {
                     z-index: 1050;
                 }
                 .nav-item-link {
-                    color: #64748b;
+                    color: #777;
+                    border: 2px solid transparent;
+                    border-bottom: 2px solid transparent;
                 }
                 .nav-item-link:hover {
-                    background-color: #f8fafc;
+                    background-color: #f1f5f9;
                     color: #1e293b;
                 }
+                
+                /* Duolingo Inspired Active State - Brand Black & Yellow */
                 .nav-item-link.active {
-                    background: linear-gradient(135deg, #1e293b, #0f172a);
-                    color: white !important;
+                    background-color: #1e293b !important;
+                    border: 2px solid #0f172a !important;
+                    border-bottom: 4px solid #0f172a !important;
+                    color: #FACC15 !important;
+                    transform: translateY(-2px);
                 }
                 .nav-item-link.active i {
                     color: #FACC15 !important;
                 }
+
+                /* Admin Panel Link Customization */
+                .active-admin {
+                    background-color: #1e293b !important;
+                    border: 2px solid #0f172a !important;
+                    border-bottom: 4px solid #0f172a !important;
+                    color: #fb7185 !important; /* Slightly distinct but consistent */
+                    transform: translateY(-2px);
+                }
+                .active-admin i {
+                    color: #fb7185 !important;
+                }
+
                 .ls-tight { letter-spacing: -1.2px; }
                 .ls-1 { letter-spacing: 1px; }
                 .ls-2 { letter-spacing: 2.2px; }
@@ -194,7 +212,7 @@ const Sidebar: React.FC = () => {
                 .uppercase { text-transform: uppercase; }
                 
                 .mobile-top-bar {
-                    height: 60px;
+                    height: 50px;
                     z-index: 1060;
                 }
                 
@@ -203,19 +221,29 @@ const Sidebar: React.FC = () => {
                     padding-bottom: env(safe-area-inset-bottom, 15px); /* Interact with iPhone Home indicator */
                 }
 
-                .transition-all { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+                .transition-all { transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); }
                 .scrollbar-hide::-webkit-scrollbar { display: none; }
                 .no-scrollbar::-webkit-scrollbar { display: none; }
                 .bg-light-danger { background-color: #fff1f2; }
                 .text-slate { color: #1e293b !important; }
                 .text-primary { color: #FACC15 !important; }
-                .bg-primary-subtle { background-color: #FEF3C7 !important; }
+                .bg-primary-subtle { background-color: #1e293b !important; }
                 
-                .btn-slate { background-color: #1e293b; color: white; border: none; }
-                .btn-slate:hover { background-color: #334155; color: white; }
+                .btn-logout {
+                    background-color: transparent;
+                    color: #ef4444;
+                    border: 2px solid transparent;
+                }
+                .btn-logout:hover {
+                    background-color: #fef2f2;
+                    border: 2px solid #fee2e2;
+                    border-bottom: 4px solid #fee2e2;
+                    transform: translateY(-1px);
+                }
 
                 .hover-bg-light:hover {
                     background-color: #f8fafc !important;
+                    border-color: #e2e8f0 !important;
                 }
             `}</style>
             {/* Logout Modal */}

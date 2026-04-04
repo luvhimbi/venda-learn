@@ -1,20 +1,36 @@
 import React, { useEffect, useState } from 'react';
 import { auth } from '../../services/firebaseConfig';
 import { onAuthStateChanged } from 'firebase/auth';
-import { useNavigate, Link } from 'react-router-dom';
-import { fetchLessons, fetchUserData, getMicroLessons } from '../../services/dataCache';
-import { Sprout, Shield, Flame, Key, BookOpen, CheckCircle } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { fetchLessons, fetchUserData, getMicroLessons, fetchLanguages, invalidateCache } from '../../services/dataCache';
+import { doc, updateDoc } from 'firebase/firestore';
+import { db } from '../../services/firebaseConfig';
+import { Key, BookOpen, MessageSquare, Star, Lightbulb, CheckSquare, Zap, Globe, ChevronRight, ArrowLeft, Check } from 'lucide-react';
+import { motion } from 'framer-motion';
+import Skeleton from 'react-loading-skeleton';
+import 'react-loading-skeleton/dist/skeleton.css';
 import JuicyButton from '../../components/JuicyButton';
+import '../../styles/learning-grid.css';
+
+const CARD_THEMES = [
+    { bg: '#A3E635', border: '#65A30D', icon: <MessageSquare size={32} color="white" fill="white" strokeWidth={1} />, progress: '#84CC16' },
+    { bg: '#7DD3FC', border: '#0284C7', icon: <Star size={36} color="#FEF08A" fill="#FEF08A" strokeWidth={1} />, progress: '#38BDF8' },
+    { bg: '#F87171', border: '#DC2626', icon: <Lightbulb size={32} color="#FEF08A" fill="#FEF08A" strokeWidth={1} />, progress: '#EF4444' },
+    { bg: '#FB923C', border: '#EA580C', icon: <CheckSquare size={32} color="white" fill="white" strokeWidth={1} />, progress: '#F97316' },
+    { bg: '#FACC15', border: '#CA8A04', icon: <Zap size={32} color="white" fill="white" strokeWidth={1} />, progress: '#EAB308' }
+];
 
 const Courses: React.FC = () => {
     const navigate = useNavigate();
     const [courses, setCourses] = useState<any[]>([]);
+    const [languages, setLanguages] = useState<any[]>([]);
+    const [selectedLanguageId, setSelectedLanguageId] = useState<string | null>(null);
     const [completedMlIds, setCompletedMlIds] = useState<string[]>([]);
     const [completedCourseIds, setCompletedCourseIds] = useState<string[]>([]);
     const [loading, setLoading] = useState(true);
     const [isLoggedIn, setIsLoggedIn] = useState(false);
     const [currentPage, setCurrentPage] = useState(1);
-    const coursesPerPage = 5;
+    const coursesPerPage = 6;
 
     useEffect(() => {
         const unsubAuth = onAuthStateChanged(auth, (user) => {
@@ -23,17 +39,18 @@ const Courses: React.FC = () => {
 
         const fetchData = async () => {
             try {
-                const [lessonsData, userData] = await Promise.all([
+                const [lessonsData, userData, langsData] = await Promise.all([
                     fetchLessons(),
-                    fetchUserData()
+                    fetchUserData(),
+                    fetchLanguages()
                 ]);
 
-                const sorted = [...lessonsData].sort((a, b) => {
-                    const orderA = a.order ?? 999;
-                    const orderB = b.order ?? 999;
-                    return orderA - orderB;
-                });
+                setLanguages(langsData);
 
+                const prefId = userData?.preferredLanguageId || localStorage.getItem('venda_student_lang');
+                if (prefId) setSelectedLanguageId(prefId);
+
+                const sorted = [...lessonsData].sort((a, b) => (a.order ?? 999) - (b.order ?? 999));
                 setCourses(sorted);
 
                 if (userData) {
@@ -41,7 +58,7 @@ const Courses: React.FC = () => {
                     setCompletedCourseIds(userData.completedCourses || []);
                 }
             } catch (error) {
-                console.error("Error fetching courses:", error);
+                console.error("Error fetching data:", error);
             }
             setLoading(false);
         };
@@ -50,11 +67,19 @@ const Courses: React.FC = () => {
         return () => unsubAuth();
     }, []);
 
-    const getDifficultyStyle = (d: string) => {
-        const diff = d?.toLowerCase();
-        if (diff === 'beginner') return { color: '#10B981', bg: '#EDFDF5', label: 'EASY', icon: <Sprout size={14} className="me-1" /> };
-        if (diff === 'intermediate') return { color: '#F59E0B', bg: '#FFFBEB', label: 'INTERMEDIATE', icon: <Shield size={14} className="me-1" /> };
-        return { color: '#EF4444', bg: '#FEF2F2', label: 'ADVANCED', icon: <Flame size={14} className="me-1" /> };
+    const handleLanguageSelect = async (langId: string) => {
+        setSelectedLanguageId(langId);
+        localStorage.setItem('venda_student_lang', langId);
+
+        if (auth.currentUser) {
+            try {
+                const userRef = doc(db, "users", auth.currentUser.uid);
+                await updateDoc(userRef, { preferredLanguageId: langId });
+                invalidateCache(`user_${auth.currentUser.uid}`);
+            } catch (e) {
+                console.error("Failed to save language preference:", e);
+            }
+        }
     };
 
     const getCourseProgress = (course: any) => {
@@ -65,228 +90,271 @@ const Courses: React.FC = () => {
     };
 
     const isCourseComplete = (course: any) => {
-        // Check explicit completedCourses array first, then fallback to checking all micro lessons
         if (completedCourseIds.includes(course.id)) return true;
         const { total, completed } = getCourseProgress(course);
         return total > 0 && completed === total;
     };
 
     if (loading) return (
-        <div className="min-vh-100 bg-white d-flex justify-content-center align-items-center">
-            <div className="text-center">
-                <div className="spinner-border mb-3" style={{ color: '#FACC15', width: 48, height: 48 }}></div>
-                <p className="smallest fw-bold text-muted ls-2 text-uppercase">LOADING COURSES...</p>
+        <div className="learning-container animate__animated animate__fadeIn">
+            <div className="container pt-2 pb-4" style={{ maxWidth: '1000px' }}>
+                <div className="mb-4" style={{ maxWidth: 280 }}>
+                    <Skeleton height={36} width={200} borderRadius={8} />
+                    <Skeleton height={18} width={280} borderRadius={6} style={{ marginTop: 8 }} />
+                </div>
+                <div className="course-grid">
+                    {[...Array(4)].map((_, i) => (
+                        <div key={i} className="course-card-professional" style={{ border: '2px solid #e2e8f0' }}>
+                            <div className="d-flex justify-content-between align-items-start mb-3">
+                                <div style={{ flex: 1 }}>
+                                    <Skeleton height={24} width="70%" borderRadius={6} />
+                                    <Skeleton height={16} width="50%" borderRadius={6} style={{ marginTop: 6 }} />
+                                </div>
+                                <Skeleton circle height={40} width={40} />
+                            </div>
+                            <div className="card-footer-progress">
+                                <Skeleton height={10} width="40%" borderRadius={4} style={{ marginBottom: 6 }} />
+                                <Skeleton height={14} borderRadius={7} />
+                                <Skeleton height={10} width="30%" borderRadius={4} style={{ marginTop: 6 }} />
+                            </div>
+                        </div>
+                    ))}
+                </div>
             </div>
         </div>
     );
 
-    // Count total completed micro lessons and courses
-    const totalMlCompleted = completedMlIds.length;
-    const totalCoursesCompleted = courses.filter(c => isCourseComplete(c)).length;
+    const filteredCourses = courses.filter(c =>
+        c.languageId === selectedLanguageId ||
+        (!c.languageId && selectedLanguageId === 'venda')
+    );
 
     return (
-        <div className="bg-white min-vh-100 py-5">
-            <div className="container" style={{ maxWidth: '800px' }}>
+        <div className="learning-container animate__animated animate__fadeIn">
+            <div className="container pt-2 pb-4" style={{ maxWidth: '1000px' }}>
 
                 {/* NAVIGATION */}
-                <JuicyButton
-                    className="btn btn-link text-decoration-none p-0 mb-5 d-flex align-items-center gap-2 text-dark fw-bold smallest ls-1 text-uppercase"
-                    onClick={() => navigate('/')}
-                >
-                    <i className="bi bi-arrow-left"></i> Murahu
-                </JuicyButton>
+                <div className="d-flex justify-content-between align-items-center mb-3">
+                    <JuicyButton
+                        className="btn btn-link text-decoration-none p-0 d-flex align-items-center gap-2 text-dark fw-bold smallest ls-1 text-uppercase"
+                        onClick={() => navigate('/')}
+                    >
+                        <ArrowLeft size={16} /> Home
+                    </JuicyButton>
 
-                {/* HEADER */}
-                <header className="mb-5 pb-4">
-                    <p className="smallest fw-bold text-muted mb-1 ls-2 text-uppercase">Tshivenda Learning Path</p>
-                    <h2 className="fw-bold mb-2 ls-tight" style={{ fontSize: '2rem' }}>PFUNZO DZOTHE</h2>
-                    <p className="text-muted small mb-0">
-                        {courses.length} courses • {totalCoursesCompleted} completed • {totalMlCompleted}/60 micro lessons done
-                    </p>
-
-                    {!isLoggedIn && (
-                        <div className="mt-3 p-3 rounded-3 d-flex align-items-center gap-3" style={{ backgroundColor: '#FFFBEB', border: '1px solid #FDE68A' }}>
-                            <span className="text-warning"><Key size={24} /></span>
-                            <span className="small fw-bold text-dark">Sign in to save your progress and earn points.</span>
-                        </div>
+                    {selectedLanguageId && (
+                        <JuicyButton
+                            className="btn btn-outline-dark rounded-pill px-3 py-1 fw-bold smallest ls-1 text-uppercase d-flex align-items-center gap-2"
+                            onClick={() => setSelectedLanguageId(null)}
+                            style={{ fontSize: '10px' }}
+                        >
+                            <Globe size={12} /> Switch Language
+                        </JuicyButton>
                     )}
-                </header>
+                </div>
 
-                {/* LEARNING PATH */}
-                {(() => {
-                    const totalPages = Math.ceil(courses.length / coursesPerPage);
-                    const startIdx = (currentPage - 1) * coursesPerPage;
-                    const paginatedCourses = courses.slice(startIdx, startIdx + coursesPerPage);
+                {!selectedLanguageId ? (
+                    <div className="animate__animated animate__fadeIn">
+                        <header className="mb-5 text-center">
+                            <h2 className="fw-bold mb-2 ls-tight" style={{ fontSize: '2.5rem' }}>Select Your Path</h2>
+                            <p className="text-muted small">Choose a language course to begin your learning journey.</p>
+                        </header>
 
-                    // Sequential unlock: find highest index with a completed course
-                    const maxCompletedIdx = courses.reduce((max, c, i) =>
-                        isCourseComplete(c) ? i : max, -1);
-
-                    return (<>
-                        <div className="position-relative">
-                            {/* Connector line */}
-                            <div className="position-absolute" style={{ left: '20px', top: 0, bottom: 0, width: '2px', background: 'linear-gradient(to bottom, #FACC15, #E5E7EB)', zIndex: 0 }}></div>
-
-                            {paginatedCourses.map((course, pageIdx) => {
-                                const index = startIdx + pageIdx;
-                                const isDone = isCourseComplete(course);
-
-                                // Course is unlocked if it's the first one, or if any earlier course is complete,
-                                // or if the user has started any micro lesson in this course
-                                const hasStarted = getMicroLessons(course).some((ml: any) => completedMlIds.includes(ml.id));
-                                const isUnlocked = index <= (maxCompletedIdx + 1) || hasStarted;
-
-                                const diffStyle = getDifficultyStyle(course.difficulty);
-                                const progress = getCourseProgress(course);
-                                const microLessons = getMicroLessons(course);
-
-                                return (
-                                    <div key={course.id} className="position-relative mb-4 ps-5 animate__animated animate__fadeInUp" style={{ animationDelay: `${pageIdx * 0.08}s` }}>
-
-                                        {/* Step Indicator */}
-                                        <div className="position-absolute start-0 d-flex align-items-center justify-content-center rounded-circle"
-                                            style={{
-                                                width: '42px', height: '42px', zIndex: 1,
-                                                backgroundColor: isDone ? '#10B981' : (isUnlocked ? '#FACC15' : '#E5E7EB'),
-                                                border: '3px solid white',
-                                                boxShadow: isDone ? '0 0 12px rgba(16,185,129,.3)' : (isUnlocked ? '0 0 12px rgba(250,204,21,.3)' : 'none')
-                                            }}>
-                                            {isDone ? <i className="bi bi-check-lg text-white fw-bold"></i>
-                                                : isUnlocked ? <span className="fw-bold smallest text-dark">{index + 1}</span>
-                                                    : <i className="bi bi-lock-fill text-muted small"></i>}
-                                        </div>
-
-                                        {/* Course Card */}
-                                        <div className={`p-4 rounded-4 border ${!isUnlocked ? 'opacity-50' : ''}`}
-                                            style={{
-                                                backgroundColor: isDone ? '#F0FDF4' : 'white',
-                                                borderColor: isDone ? '#BBF7D0' : '#E5E7EB',
-                                                transition: 'all 0.2s',
-                                            }}>
-                                            <div className="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
-                                                <div className="flex-grow-1">
-                                                    <div className="d-flex align-items-center gap-2 mb-2">
-                                                        <span className="smallest fw-bold ls-1 px-2 py-1 rounded-pill d-flex align-items-center"
-                                                            style={{ color: diffStyle.color, backgroundColor: diffStyle.bg }}>
-                                                            {diffStyle.icon} {diffStyle.label}
-                                                        </span>
-                                                        {isDone && <span className="smallest fw-bold text-success ls-1">✓ COMPLETED</span>}
-                                                    </div>
-                                                    <h4 className="fw-bold mb-1 text-dark">{course.title}</h4>
-                                                    <p className="text-muted small mb-2">{course.vendaTitle}</p>
-
-                                                    {/* Micro lesson count & progress */}
-                                                    <div className="d-flex align-items-center gap-3 mb-2">
-                                                        <span className="smallest text-muted fw-bold d-flex align-items-center gap-1"><BookOpen size={12} /> {microLessons.length} micro lesson{microLessons.length !== 1 ? 's' : ''}</span>
-                                                        <span className="smallest text-muted fw-bold d-flex align-items-center gap-1"><CheckCircle size={12} className="text-success" /> {progress.completed}/{progress.total} done</span>
-                                                    </div>
-
-                                                    {/* Progress bar */}
-                                                    {isUnlocked && progress.total > 0 && (
-                                                        <div className="progress" style={{ height: '6px', borderRadius: 10, backgroundColor: '#F3F4F6' }}>
-                                                            <div className="progress-bar" style={{
-                                                                width: `${progress.percent}%`,
-                                                                backgroundColor: isDone ? '#10B981' : '#FACC15',
-                                                                transition: '0.5s ease',
-                                                                borderRadius: 10
-                                                            }}></div>
-                                                        </div>
-                                                    )}
+                        <div className="d-flex flex-column gap-3 mx-auto" style={{ maxWidth: '600px' }}>
+                            {languages.map((lang) => (
+                                <div key={lang.id} className="w-100">
+                                    <div
+                                        onClick={() => handleLanguageSelect(lang.id)}
+                                        className="course-card-professional p-4 shadow-sm"
+                                        style={{ transition: 'all 0.3s ease', minHeight: '120px' }}
+                                    >
+                                        <div className="d-flex align-items-center justify-content-between">
+                                            <div className="d-flex align-items-center gap-4">
+                                                <div className="bg-light p-3 rounded-4 border">
+                                                    <Globe size={28} className="text-dark" />
                                                 </div>
-
-                                                <div className="text-md-end flex-shrink-0">
-                                                    {isUnlocked ? (
-                                                        <Link
-                                                            to={`/courses/${course.id}`}
-                                                            className={`btn ${isDone ? 'btn-outline-dark border-2' : 'game-btn-primary'} px-4 py-2 smallest fw-bold ls-1`}
-                                                        >
-                                                            {isDone ? '🔄 REVIEW' : progress.completed > 0 ? '▶ CONTINUE' : '▶ THOMA'}
-                                                        </Link>
-                                                    ) : (
-                                                        <span className="smallest fw-bold text-muted ls-1"><i className="bi bi-lock-fill me-1"></i>LOCKED</span>
-                                                    )}
+                                                <div>
+                                                    <h4 className="fw-bold text-dark mb-0" style={{ fontSize: '1.6rem' }}>{lang.name}</h4>
+                                                    <p className="smallest text-muted fw-bold ls-1 uppercase opacity-75 mb-0">Explore Library</p>
                                                 </div>
+                                            </div>
+                                            <div className="d-flex align-items-center gap-3">
+                                                <span className="badge bg-light text-muted border fw-bold ls-1 px-3 py-2" style={{ fontSize: '12px' }}>
+                                                    {lang.code?.toUpperCase()}
+                                                </span>
+                                                <ChevronRight size={20} className="text-warning" />
                                             </div>
                                         </div>
                                     </div>
-                                );
-                            })}
+                                </div>
+                            ))}
                         </div>
-
-                        {/* PAGINATION */}
-                        {totalPages > 1 && (
-                            <div className="d-flex justify-content-center align-items-center gap-2 mt-5">
-                                <JuicyButton
-                                    className="btn btn-outline-dark border-2 px-3 py-2 fw-bold smallest ls-1 rounded-3"
-                                    disabled={currentPage === 1}
-                                    onClick={() => setCurrentPage(p => p - 1)}
-                                >
-                                    ← PREV
-                                </JuicyButton>
-                                {[...Array(totalPages)].map((_, i) => (
-                                    <JuicyButton
-                                        key={i}
-                                        className={`btn px-3 py-2 fw-bold smallest ls-1 rounded-3 ${currentPage === i + 1 ? 'text-dark' : 'btn-outline-secondary'}`}
-                                        style={currentPage === i + 1 ? { backgroundColor: '#FACC15', border: 'none', boxShadow: '0 2px 0 #EAB308' } : {}}
-                                        onClick={() => setCurrentPage(i + 1)}
-                                    >
-                                        {i + 1}
-                                    </JuicyButton>
-                                ))}
-                                <JuicyButton
-                                    className="btn btn-outline-dark border-2 px-3 py-2 fw-bold smallest ls-1 rounded-3"
-                                    disabled={currentPage === totalPages}
-                                    onClick={() => setCurrentPage(p => p + 1)}
-                                >
-                                    NEXT →
-                                </JuicyButton>
-                            </div>
-                        )}
-                    </>);
-                })()}
-
-                {/* Empty State */}
-                {courses.length === 0 && (
-                    <div className="text-center py-5">
-                        <div className="mb-3 text-muted">
-                            <BookOpen size={64} strokeWidth={1} />
-                        </div>
-                        <h4 className="fw-bold text-dark">No courses yet</h4>
-                        <p className="text-muted">Check back soon — new courses are being added!</p>
                     </div>
+                ) : (
+                    <>
+                        {/* HEADER */}
+                        <header className="learning-header">
+                            <div className="d-flex align-items-center gap-2 mb-3">
+                                <span className="badge bg-warning text-dark px-3 py-2 fw-bold smallest ls-1 rounded-3">
+                                    {languages.find(l => l.id === selectedLanguageId)?.name.toUpperCase() || 'LANGUAGE'}
+                                </span>
+                            </div>
+                            <div className="d-md-flex align-items-end justify-content-between gap-4">
+                                <div>
+                                    <h2 className="mb-1">Learning Path</h2>
+                                    <p className="mb-0">Structured courses to help you master {languages.find(l => l.id === selectedLanguageId)?.name}.</p>
+                                </div>
+
+                            </div>
+
+                            {!isLoggedIn && (
+                                <div className="mt-4 p-4 rounded-4 d-flex align-items-center gap-3 bg-white border shadow-sm">
+                                    <div className="bg-warning bg-opacity-10 p-3 rounded-circle text-warning">
+                                        <Key size={30} />
+                                    </div>
+                                    <div className="flex-grow-1">
+                                        <h6 className="fw-bold text-dark mb-1">Sign in to save progress</h6>
+                                        <p className="small text-muted mb-0">Your learning data will be synced across all your devices.</p>
+                                    </div>
+                                    <JuicyButton onClick={() => navigate('/login')} className="btn btn-sm btn-dark rounded-pill px-4 py-2 fw-bold smallest ls-1 text-nowrap">
+                                        SIGN IN
+                                    </JuicyButton>
+                                </div>
+                            )}
+                        </header>
+
+                        {/* COURSE GRID */}
+                        {(() => {
+                            const totalPages = Math.ceil(filteredCourses.length / coursesPerPage);
+                            const startIdx = (currentPage - 1) * coursesPerPage;
+                            const paginatedCourses = filteredCourses.slice(startIdx, startIdx + coursesPerPage);
+                            const maxCompletedIdx = filteredCourses.reduce((max, c, i) => isCourseComplete(c) ? i : max, -1);
+
+                            return (
+                                <>
+                                    <div className="course-grid">
+                                        {paginatedCourses.map((course, idx) => {
+                                            const globalIdx = startIdx + idx;
+                                            const isDone = isCourseComplete(course);
+                                            const hasStarted = getMicroLessons(course).some((ml: any) => completedMlIds.includes(ml.id));
+                                            const isUnlocked = globalIdx <= (maxCompletedIdx + 1) || hasStarted;
+                                            const progress = getCourseProgress(course);
+                                            const theme = CARD_THEMES[globalIdx % CARD_THEMES.length];
+
+                                            const borderColor = isDone
+                                                ? '#22c55e'
+                                                : hasStarted
+                                                    ? '#3b82f6'
+                                                    : !isUnlocked
+                                                        ? '#cbd5e1'
+                                                        : '#e2e8f0';
+
+                                            return (
+                                                <motion.div
+                                                    key={course.id}
+                                                    className={`course-card-professional position-relative ${!isUnlocked ? 'locked' : ''}`}
+                                                    onClick={() => { if (isUnlocked) navigate(`/courses/${course.id}`); }}
+                                                    initial={{ opacity: 0, y: 20 }}
+                                                    animate={{ opacity: 1, y: 0 }}
+                                                    transition={{ delay: idx * 0.08, duration: 0.4, ease: 'easeOut' }}
+                                                    whileHover={isUnlocked ? { y: -4, boxShadow: '0 12px 24px -8px rgba(0,0,0,0.12)' } : {}}
+                                                    style={{
+                                                        '--theme-color': theme.bg,
+                                                        '--theme-hover': theme.border,
+                                                        borderColor: borderColor,
+                                                        borderBottomColor: isDone ? '#16a34a' : hasStarted ? '#2563eb' : !isUnlocked ? '#94a3b8' : '#e2e8f0',
+                                                    } as any}
+                                                >
+                                                    <div className="d-flex justify-content-between align-items-start mb-2">
+                                                        <div>
+                                                            <div className="card-title text-truncate-2 mb-0" style={{ minHeight: 'auto' }}>{course.title}</div>
+                                                            <div className="card-subtitle mb-0">{course.vendaTitle}</div>
+                                                        </div>
+                                                        {isDone && (
+                                                            <div className="bg-success bg-opacity-10 text-success p-2 rounded-circle">
+                                                                <Check size={20} />
+                                                            </div>
+                                                        )}
+                                                    </div>
+
+                                                    <div className="card-footer-progress">
+                                                        <div className="progress-text">
+                                                            <span>PROGRESS</span>
+                                                            <span>{progress.percent}%</span>
+                                                        </div>
+                                                        <div className="professional-progress-container mb-2">
+                                                            <div
+                                                                className="professional-progress-bar"
+                                                                style={{
+                                                                    width: `${progress.percent}%`,
+                                                                    '--theme-color': theme.progress
+                                                                } as any}
+                                                            ></div>
+                                                        </div>
+                                                        <div className="smallest fw-bold text-muted ls-1 uppercase opacity-50">
+                                                            {progress.completed} / {progress.total} Sections
+                                                        </div>
+                                                    </div>
+                                                </motion.div>
+                                            );
+                                        })}
+                                    </div>
+
+                                    {/* PAGINATION */}
+                                    {totalPages > 1 && (
+                                        <div className="d-flex justify-content-center align-items-center gap-2 mt-5">
+                                            <JuicyButton
+                                                className="btn btn-outline-dark border-2 px-3 py-2 fw-bold smallest ls-1 rounded-3"
+                                                disabled={currentPage === 1}
+                                                onClick={() => setCurrentPage(p => p - 1)}
+                                            >
+                                                ← PREV
+                                            </JuicyButton>
+                                            {[...Array(totalPages)].map((_, i) => (
+                                                <JuicyButton
+                                                    key={i}
+                                                    className={`btn px-3 py-2 fw-bold smallest ls-1 rounded-3 ${currentPage === i + 1 ? 'text-dark' : 'btn-outline-secondary'}`}
+                                                    style={currentPage === i + 1 ? { backgroundColor: '#FACC15', border: 'none', boxShadow: '0 2px 0 #EAB308' } : {}}
+                                                    onClick={() => setCurrentPage(i + 1)}
+                                                >
+                                                    {i + 1}
+                                                </JuicyButton>
+                                            ))}
+                                            <JuicyButton
+                                                className="btn btn-outline-dark border-2 px-3 py-2 fw-bold smallest ls-1 rounded-3"
+                                                disabled={currentPage === totalPages}
+                                                onClick={() => setCurrentPage(p => p + 1)}
+                                            >
+                                                NEXT →
+                                            </JuicyButton>
+                                        </div>
+                                    )}
+                                </>
+                            );
+                        })()}
+                    </>
                 )}
 
-                {/* GUEST FOOTER */}
-                {!isLoggedIn && (
-                    <footer className="mt-5 pt-5 text-center">
-                        <p className="text-muted small mb-4">You are browsing as a guest. Your progress will not be saved.</p>
-                        <JuicyButton onClick={() => navigate('/login')} className="btn btn-dark rounded-pill px-5 py-2 fw-bold smallest ls-1">
-                            SIGN IN NOW
-                        </JuicyButton>
-                    </footer>
+                {filteredCourses.length === 0 && selectedLanguageId && !loading && (
+                    <div className="text-center py-5 mt-5">
+                        <BookOpen size={80} className="text-muted opacity-25 mb-4" />
+                        <h4 className="fw-bold text-dark mb-2">No courses found</h4>
+                        <p className="text-muted">Stay tuned! We're preparing new content for this language.</p>
+                        <JuicyButton className="btn btn-dark rounded-pill px-5 py-2 mt-3" onClick={() => setSelectedLanguageId(null)}>BACK TO LANGUAGES</JuicyButton>
+                    </div>
                 )}
             </div>
 
             <style>{`
-                .ls-tight { letter-spacing: -1.5px; }
-                .ls-1 { letter-spacing: 1px; }
-                .ls-2 { letter-spacing: 2px; }
-                .smallest { font-size: 11px; }
-                
-                .game-btn-primary { 
-                    background-color: #FACC15 !important; 
-                    color: #1e293b !important; 
-                    border: none !important; 
-                    border-radius: 8px; 
-                    box-shadow: 0 4px 0 #EAB308 !important; 
-                    transition: all 0.2s; 
+                .text-truncate-2 {
+                    display: -webkit-box;
+                    -webkit-line-clamp: 2;
+                    -webkit-box-orient: vertical;
+                    overflow: hidden;
                 }
-                .game-btn-primary:active { transform: translateY(2px); box-shadow: 0 2px 0 #EAB308 !important; }
             `}</style>
         </div>
     );
 };
 
 export default Courses;
-
-

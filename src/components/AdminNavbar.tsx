@@ -4,7 +4,9 @@ import { onAuthStateChanged, signOut, type User } from 'firebase/auth';
 import { auth } from '../services/firebaseConfig';
 import { invalidateCache } from '../services/dataCache';
 import { popupService } from '../services/popupService';
-import { Menu, LogOut, Database } from 'lucide-react';
+import { Menu, LogOut, Database, ClipboardList } from 'lucide-react';
+
+
 import { seedSyllables } from '../services/seedSyllables';
 import { seedSentences } from '../services/seedSentences';
 import { seedPicturePuzzles } from '../services/seedPicturePuzzles';
@@ -55,7 +57,7 @@ const AdminNavbar: React.FC = () => {
 
                 {/* BRAND LOGO - Matches Student UI exactly */}
                 <Link className="navbar-brand d-flex align-items-center mb-0 text-decoration-none shadow-none" to="/admin/dashboard">
-                    <img src="/images/VendaLearnLogo.png" alt="Venda Learn Logo" height="45" className="object-fit-contain" />
+                    <img src="/images/Logo.png" alt="Language Learning Platform Logo" height="45" className="object-fit-contain" />
                 </Link>
 
                 {/* MOBILE TOGGLER */}
@@ -82,8 +84,8 @@ const AdminNavbar: React.FC = () => {
                             </Link>
                         </li>
                         <li className="nav-item w-100 w-lg-auto text-center">
-                            <Link className={`nav-link nav-custom-link ${isActive('/admin/visualizer') ? 'active-link' : ''}`} to="/admin/visualizer">
-                                Visualizer
+                            <Link className={`nav-link nav-custom-link ${isActive('/admin/reviews') ? 'active-link' : ''}`} to="/admin/reviews">
+                                <ClipboardList size={14} className="me-1" /> Reviews
                             </Link>
                         </li>
                         <li className="nav-item w-100 w-lg-auto text-center">
@@ -94,6 +96,11 @@ const AdminNavbar: React.FC = () => {
                         <li className="nav-item w-100 w-lg-auto text-center">
                             <Link className={`nav-link nav-custom-link ${isActive('/admin/daily-words') ? 'active-link' : ''}`} to="/admin/daily-words">
                                 Daily Words
+                            </Link>
+                        </li>
+                        <li className="nav-item w-100 w-lg-auto text-center">
+                            <Link className={`nav-link nav-custom-link ${isActive('/admin/languages') ? 'active-link' : ''}`} to="/admin/languages">
+                                Languages
                             </Link>
                         </li>
                         <li className="nav-item w-100 w-lg-auto text-center">

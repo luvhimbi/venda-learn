@@ -23,20 +23,20 @@ const ShareStreakModal: React.FC<ShareStreakModalProps> = ({ isOpen, onClose, us
         setIsDownloading(true);
         try {
             const canvas = await html2canvas(cardRef.current, {
-                scale: 2, 
+                scale: 2,
                 useCORS: true,
                 backgroundColor: null,
             });
-            
+
             canvas.toBlob(async (blob) => {
                 if (!blob) throw new Error('Blob generation failed');
-                const file = new File([blob], `VendaLearn_Streak_${userData.username}.png`, { type: 'image/png' });
-                
+                const file = new File([blob], `LanguagePlatform_Streak_${userData.username}.png`, { type: 'image/png' });
+
                 if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
                     try {
                         await navigator.share({
-                            title: 'My VendaLearn Streak',
-                            text: `I am on a ${userData.streak || 0} day streak on VendaLearn! Join me!`,
+                            title: 'My Language Learning Streak',
+                            text: `I am on a ${userData.streak || 0} day streak on this language platform! Join me!`,
                             url: inviteLink,
                             files: [file]
                         });
@@ -44,11 +44,11 @@ const ShareStreakModal: React.FC<ShareStreakModalProps> = ({ isOpen, onClose, us
                     } catch (err) {
                         console.error('Share failed, falling back to text share', err);
                         if (navigator.share) {
-                            await navigator.share({ title: 'My VendaLearn Streak', text: `I am on a ${userData.streak || 0} day streak on VendaLearn! Join me!`, url: inviteLink });
+                            await navigator.share({ title: 'My Language Learning Streak', text: `I am on a ${userData.streak || 0} day streak on this language platform! Join me!`, url: inviteLink });
                         }
                     }
                 } else if (navigator.share) {
-                    await navigator.share({ title: 'My VendaLearn Streak', text: `I am on a ${userData.streak || 0} day streak on VendaLearn! Join me!`, url: inviteLink });
+                    await navigator.share({ title: 'My Language Learning Streak', text: `I am on a ${userData.streak || 0} day streak on this language platform! Join me!`, url: inviteLink });
                 } else {
                     downloadBlob(blob);
                 }
@@ -66,7 +66,7 @@ const ShareStreakModal: React.FC<ShareStreakModalProps> = ({ isOpen, onClose, us
         setIsDownloading(true);
         try {
             const canvas = await html2canvas(cardRef.current, {
-                scale: 2, 
+                scale: 2,
                 useCORS: true,
                 backgroundColor: null,
             });
@@ -84,7 +84,7 @@ const ShareStreakModal: React.FC<ShareStreakModalProps> = ({ isOpen, onClose, us
         const imageObjectURL = URL.createObjectURL(blob);
         const link = document.createElement('a');
         link.href = imageObjectURL;
-        link.download = `VendaLearn_Streak_${userData.username}.png`;
+        link.download = `LanguagePlatform_Streak_${userData.username}.png`;
         link.click();
         URL.revokeObjectURL(imageObjectURL);
     };
@@ -108,8 +108,8 @@ const ShareStreakModal: React.FC<ShareStreakModalProps> = ({ isOpen, onClose, us
                 </div>
 
                 {/* THE CARD TO BE SNAPSHOTTED */}
-                <div 
-                    ref={cardRef} 
+                <div
+                    ref={cardRef}
                     className="share-card-container position-relative overflow-hidden rounded-4 shadow-sm mb-4"
                     style={{ background: 'linear-gradient(135deg, #ef4444 0%, #7f1d1d 100%)', color: 'white', padding: '24px 16px' }}
                 >
@@ -118,7 +118,7 @@ const ShareStreakModal: React.FC<ShareStreakModalProps> = ({ isOpen, onClose, us
                     <div className="position-absolute rounded-circle" style={{ width: 300, height: 300, background: 'radial-gradient(circle, rgba(255, 255, 255, 0.03) 0%, rgba(255, 255, 255, 0) 70%)', bottom: '-100px', left: '-100px' }}></div>
 
                     {/* Download Icon (Top-Left) */}
-                    <button 
+                    <button
                         onClick={(e) => { e.stopPropagation(); handleManualDownload(); }}
                         className="position-absolute top-0 start-0 m-3 btn btn-white bg-white rounded-circle shadow-sm d-flex align-items-center justify-content-center z-2 p-0"
                         style={{ width: '32px', height: '32px', border: 'none' }}
@@ -132,7 +132,7 @@ const ShareStreakModal: React.FC<ShareStreakModalProps> = ({ isOpen, onClose, us
                         {/* Logo / Header */}
                         <div className="d-flex align-items-center justify-content-center mb-3">
                             <div className="bg-white p-2 rounded-3 shadow-sm d-inline-block">
-                                <img src="/images/VendaLearnLogo.png" alt="VendaLearn" height="24" className="object-fit-contain" />
+                                <img src="/images/Logo.png" alt="Language Platform" height="24" className="object-fit-contain" />
                             </div>
                         </div>
 
@@ -140,7 +140,7 @@ const ShareStreakModal: React.FC<ShareStreakModalProps> = ({ isOpen, onClose, us
                         <div className="mb-1">
                             <Flame size={56} className="text-warning" fill="#facc15" strokeWidth={1.5} style={{ filter: 'drop-shadow(0 0 15px rgba(250,204,21,0.5))' }} />
                         </div>
-                        
+
                         <h1 className="fw-bold mb-0 text-white" style={{ fontSize: '3.5rem', lineHeight: '1', letterSpacing: '-2px', textShadow: '0 2px 10px rgba(0,0,0,0.3)' }}>
                             {userData.streak || 0}
                         </h1>
@@ -175,8 +175,8 @@ const ShareStreakModal: React.FC<ShareStreakModalProps> = ({ isOpen, onClose, us
 
                 {/* Actions */}
                 <div className="d-flex flex-column gap-2">
-                    <button 
-                        onClick={handleShareImage} 
+                    <button
+                        onClick={handleShareImage}
                         disabled={isDownloading}
                         className="btn w-100 py-3 rounded-3 fw-bold ls-1 d-flex align-items-center justify-content-center gap-2 transition-all hover-lift shadow-sm"
                         style={{ backgroundColor: '#FACC15', border: 'none', color: '#111827' }}
@@ -187,9 +187,9 @@ const ShareStreakModal: React.FC<ShareStreakModalProps> = ({ isOpen, onClose, us
                             <><Share2 size={18} /> SHARE TO SOCIALS</>
                         )}
                     </button>
-                    
-                    <button 
-                        onClick={handleCopyLink} 
+
+                    <button
+                        onClick={handleCopyLink}
                         className={`btn ${isCopied ? 'btn-success' : 'btn-outline-dark'} w-100 py-3 rounded-3 fw-bold ls-1 d-flex align-items-center justify-content-center gap-2 transition-all`}
                     >
                         {isCopied ? <><Check size={18} /> COPIED!</> : <><Copy size={18} /> COPY INVITE LINK</>}

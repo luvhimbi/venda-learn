@@ -186,8 +186,8 @@ const TourGuide: React.FC<TourGuideProps> = ({ isOpen, onClose, onComplete }) =>
                             ))}
                         </div>
                         <div className="d-flex gap-2">
-                             <button className="btn btn-link text-muted text-decoration-none fw-bold smallest uppercase p-0 px-2" onClick={(e) => handleSkip(e)}>Skip</button>
-                             <button className="btn btn-warning rounded-pill px-4 py-2 fw-bold shadow-sm" onClick={(e) => handleNext(e)}>
+                             <button className="btn btn-primary  text-muted text-decoration-none fw-bold smallest uppercase p-0 px-2" onClick={(e) => handleSkip(e)}>Skip</button>
+                             <button className="btn btn-primary rounded-pill px-4 py-2 fw-bold shadow-sm" onClick={(e) => handleNext(e)}>
                                 {currentStepIndex === tourSteps.length - 1 ? 'GO!' : 'NEXT'}
                              </button>
                         </div>

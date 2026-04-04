@@ -304,7 +304,7 @@ const PicturePuzzle: React.FC = () => {
                             <div className="mb-3 text-white">
                                 {icon}
                             </div>
-                            <p className="text-uppercase fw-bold mb-1" style={{ fontSize: '11px', letterSpacing: '2px', opacity: 0.8 }}>What is this in Tshivenda?</p>
+                            <p className="text-uppercase fw-bold mb-1" style={{ fontSize: '11px', letterSpacing: '2px', opacity: 0.8 }}>What is this in the target language?</p>
                             <h1 className="fw-bold mb-0" style={{ fontSize: 'clamp(2rem, 8vw, 3rem)', textShadow: '0 2px 8px rgba(0,0,0,0.2)' }}>
                                 {currentSlide?.english}
                             </h1>
@@ -417,7 +417,7 @@ const PicturePuzzle: React.FC = () => {
                     color: #FACC15;
                     font-size: 13px;
                     font-weight: 800;
-                    font-family: 'Poppins', sans-serif;
+                    font-family: var(--game-font-family);
                     padding: 6px 16px;
                     border-radius: 20px;
                     margin-bottom: 4px;

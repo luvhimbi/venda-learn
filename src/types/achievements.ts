@@ -1,6 +1,6 @@
 // src/types/achievements.ts
 
-export type RequirementType = 'points' | 'level' | 'streak' | 'lessons' | 'login';
+export type RequirementType = 'points' | 'streak' | 'lessons' | 'login';
 
 export interface Trophy {
     id: string;

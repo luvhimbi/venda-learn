@@ -3,6 +3,7 @@ import { Shield, ChevronLeft, ChevronRight, Check, Flame, Trophy, Calendar as Ca
 
 interface StreakCalendarProps {
     activityHistory: string[]; // Array of YYYY-MM-DD
+    frozenDays?: string[];      // Array of YYYY-MM-DD
     streakFreezes: number;
     points: number;
     streak?: number;
@@ -14,11 +15,13 @@ interface CalendarDay {
     day: number;
     dateStr: string;
     active: boolean;
+    frozen: boolean;
     isToday: boolean;
 }
 
 const StreakCalendar: React.FC<StreakCalendarProps> = ({ 
     activityHistory, 
+    frozenDays = [],
     streakFreezes, 
     points, 
     streak = 0, 
@@ -50,8 +53,9 @@ const StreakCalendar: React.FC<StreakCalendarProps> = ({
             days.push({
                 day: d,
                 dateStr,
-                active: activityHistory.includes(dateStr),
-                isToday: dateStr === today.toISOString().split('T')[0]
+                active: streak > 0 && activityHistory.includes(dateStr),
+                frozen: frozenDays.includes(dateStr),
+                isToday: dateStr === `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`
             });
         }
         return days;
@@ -132,35 +136,39 @@ const StreakCalendar: React.FC<StreakCalendarProps> = ({
                                     key={idx} 
                                     className={`calendar-node-cell d-flex flex-column align-items-center justify-content-center`}
                                 >
-                                    <div className={`calendar-node ${day.active ? 'active' : ''} ${day.isToday ? 'today' : ''}`}>
-                                        {day.active ? <Check size={16} strokeWidth={4} /> : <span className="node-day-num">{day.day}</span>}
+                                    <div className={`calendar-node ${day.active ? 'active' : ''} ${day.frozen ? 'frozen' : ''} ${day.isToday ? 'today' : ''}`}>
+                                        {day.active ? <Check size={16} strokeWidth={4} /> : (day.frozen ? <Shield size={16} fill="currentColor" opacity={0.5} /> : <span className="node-day-num">{day.day}</span>)}
                                     </div>
-                                    {day.active && <div className="active-dot mt-1"></div>}
+                                    {(day.active || day.frozen) && <div className={day.active ? "active-dot mt-1" : "frozen-dot mt-1"}></div>}
                                 </div>
                             );
                         })}
                     </div>
                 </div>
 
-                {/* Footer Action */}
+                {/* Premium Freeze Section */}
                 <div className="mt-4 pt-4 border-top border-slate-100">
-                    <div className="d-flex flex-column flex-md-row align-items-center justify-content-between gap-3 bg-slate-50 p-3 rounded-2xl border border-slate-100">
+                    <div className="d-flex flex-column flex-md-row align-items-center justify-content-between gap-4 p-4 rounded-3xl bg-slate-50 border border-slate-100 shadow-sm">
                         <div className="d-flex align-items-center gap-3">
-                            <div className="p-2 rounded-xl bg-white border border-slate-200 text-info">
-                                <Shield size={20} />
+                            <div className="p-3 rounded-2xl bg-white border border-slate-200 text-info d-flex align-items-center justify-content-center shadow-sm">
+                                <Shield size={24} fill="currentColor" opacity={0.15} strokeWidth={2} />
                             </div>
                             <div>
-                                <p className="mb-0 fw-bold text-slate-800 small">Protect your streak</p>
-                                <p className="mb-0 smallest text-slate-500 italic">"Nungo i bva kha u guda" (Strength comes from learning)</p>
+                                <h5 className="fw-bold mb-0 text-slate-900">{streakFreezes} Streak Freezes</h5>
+                                <p className="smallest fw-bold text-slate-400 uppercase tracking-widest mb-0 mt-1">Status: {streakFreezes > 0 ? 'Protected' : 'At Risk'}</p>
                             </div>
                         </div>
-                        <button
-                            onClick={onBuyFreeze}
-                            disabled={points < FREEZE_COST}
-                            className={`btn ${points >= FREEZE_COST ? 'btn-dark' : 'btn-slate-200'} rounded-xl px-4 py-2 fw-bold small ls-1 transition-all`}
-                        >
-                            BUY FREEZE ({FREEZE_COST} XP)
-                        </button>
+                        
+                        <div className="d-flex flex-column gap-2 align-items-stretch min-w-[140px]">
+                            <button
+                                onClick={onBuyFreeze}
+                                disabled={points < FREEZE_COST || streak === 0}
+                                className={`btn ${points >= FREEZE_COST && streak > 0 ? 'btn-dark' : 'btn-slate-200'} rounded-2xl px-4 py-3 fw-bold small ls-1 transition-all d-flex align-items-center justify-content-center gap-2`}
+                            >
+                                <span className="opacity-75">Buy Freeze</span>
+                                <span className={points >= FREEZE_COST ? 'badge bg-warning text-dark' : ''}>{FREEZE_COST} XP</span>
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -216,13 +224,20 @@ const StreakCalendar: React.FC<StreakCalendarProps> = ({
                     transform: scale(1.05);
                 }
 
+                .calendar-node.frozen {
+                    background: #0ea5e9;
+                    color: white;
+                    border-color: #0ea5e9;
+                    box-shadow: 0 4px 12px rgba(14, 165, 233, 0.25);
+                }
+
                 .calendar-node.today {
                     border-color: #FACC15;
                     border-width: 2px;
                     color: #334155;
                 }
                 
-                .calendar-node.today:not(.active) {
+                .calendar-node.today:not(.active):not(.frozen) {
                     background: #fffbeb;
                 }
 
@@ -230,6 +245,13 @@ const StreakCalendar: React.FC<StreakCalendarProps> = ({
                     width: 5px;
                     height: 5px;
                     background: #EF4444;
+                    border-radius: 50%;
+                }
+
+                .frozen-dot {
+                    width: 5px;
+                    height: 5px;
+                    background: #0ea5e9;
                     border-radius: 50%;
                 }
 

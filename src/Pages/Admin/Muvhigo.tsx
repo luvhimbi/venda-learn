@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { onAuthStateChanged } from 'firebase/auth';
 import { auth } from '../../services/firebaseConfig';
 import { fetchTopLearnersByWeek, fetchUserData } from '../../services/dataCache';
-import { getCurrentWeekIdentifier, getLevelStats, getBadgeDetails } from "../../services/levelUtils.ts";
+import { getCurrentWeekIdentifier } from "../../services/levelUtils.ts";
 import { AvatarDisplay } from '../../components/AvatarPicker';
 import { ArrowLeft, Award, Trophy, Loader2, Info } from 'lucide-react';
 import Swal from 'sweetalert2';
@@ -21,7 +21,7 @@ const Leaderboard: React.FC = () => {
     const [currentUserRank, setCurrentUserRank] = useState<{ rank: number, player: Player } | null>(null);
     const [loading, setLoading] = useState(true);
     const [isLoggedIn, setIsLoggedIn] = useState(false);
-    const [communityStats, setCommunityStats] = useState({ totalXP: 0, avgLevel: 0 });
+    const [communityStats, setCommunityStats] = useState({ totalXP: 0 });
 
     useEffect(() => {
         // Track Auth State for the sidebar display
@@ -36,13 +36,11 @@ const Leaderboard: React.FC = () => {
                 const currentWeek = getCurrentWeekIdentifier();
 
                 let totalXP = 0;
-                let totalLevel = 0;
 
                 if (playersData && Array.isArray(playersData)) {
                     playersData.forEach((player, index) => {
                         if (index < 10) {
                             totalXP += (player.points || 0);
-                            totalLevel += getLevelStats(player.points || 0).level;
                         }
 
                         if (player.id === auth.currentUser?.uid) {
@@ -67,10 +65,8 @@ const Leaderboard: React.FC = () => {
                     }
 
                     setPlayers(playersData);
-                    const count = Math.min(playersData.length, 10);
                     setCommunityStats({
-                        totalXP,
-                        avgLevel: count > 0 ? Math.round(totalLevel / count) : 0
+                        totalXP
                     });
                 }
             } catch (error) {
@@ -122,6 +118,45 @@ const Leaderboard: React.FC = () => {
         // Add to window for the icon click
         (window as any).showScoringGuide = handleShowGuide;
 
+        const handleShowLeaguesGuide = () => {
+            Swal.fire({
+                title: '<span class="fw-bold ls-tight">LEAGUES EXPLAINED</span>',
+                html: `
+                    <div class="text-start p-2">
+                        <div class="mb-4 d-flex align-items-start gap-3">
+                            <div class="bg-light p-3 rounded-4" style="color: #0284c7;"><i class="bi bi-gem fs-4"></i></div>
+                            <div>
+                                <p class="smallest fw-bold text-dark mb-1 ls-1 text-uppercase">The Podium (Top 3)</p>
+                                <p class="small text-muted mb-0">The elite learners. Your avatar is displayed dynamically at the top of the leaderboard.</p>
+                            </div>
+                        </div>
+                        <div class="mb-4 d-flex align-items-start gap-3">
+                            <div class="bg-light p-3 rounded-4" style="color: #CA8A04;"><i class="bi bi-star-fill fs-4"></i></div>
+                            <div>
+                                <p class="smallest fw-bold text-dark mb-1 ls-1 text-uppercase">Gold League</p>
+                                <p class="small text-muted mb-0">The rising stars. Place between Rank 4 and Rank 10 to earn your gold shield.</p>
+                            </div>
+                        </div>
+                        <div class="mb-0 d-flex align-items-start gap-3">
+                            <div class="bg-light p-3 rounded-4 text-secondary"><i class="bi bi-shield-fill fs-4"></i></div>
+                            <div>
+                                <p class="smallest fw-bold text-dark mb-1 ls-1 text-uppercase">Silver League</p>
+                                <p class="small text-muted mb-0">The active challengers. Secure a spot between Rank 11 and Rank 20 to maintain Silver League status.</p>
+                            </div>
+                        </div>
+                    </div>
+                `,
+                confirmButtonText: 'GOT IT',
+                confirmButtonColor: '#FACC15',
+                customClass: {
+                    popup: 'rounded-5 border-0 shadow-lg',
+                    confirmButton: 'rounded-pill px-5 fw-bold text-dark ls-1'
+                }
+            });
+        };
+
+        (window as any).showLeaguesGuide = handleShowLeaguesGuide;
+
         return () => unsubAuth();
     }, []);
 
@@ -132,37 +167,77 @@ const Leaderboard: React.FC = () => {
     );
 
     const topThree = players.slice(0, 3);
-    const topTen = players.slice(0, 10);
+    const goldLeague = players.slice(3, 10);
+    const silverLeague = players.slice(10, 20);
+
+    const renderPlayer = (player: Player, globalIndex: number, leagueColor: string) => {
+        const isMe = isLoggedIn && player.id === auth.currentUser?.uid;
+
+        return (
+            <div key={player.id} className={`list-group-item bg-transparent border-0 px-3 py-3 d-flex align-items-center ${isMe ? 'border-start border-4' : ''}`} style={isMe ? { borderLeftColor: leagueColor, backgroundColor: 'rgba(0,0,0,0.02)' } : {}}>
+                <span className="me-3 fw-bold text-muted smallest" style={{ width: '25px', textAlign: 'left' }}>#{globalIndex + 1}</span>
+
+                <div className="me-3">
+                    {player.id === 'community_avg' ? null : (
+                        <AvatarDisplay
+                            avatarId={player.avatarId || 'adventurer'}
+                            seed={player.username}
+                            size={40}
+                        />
+                    )}
+                </div>
+
+                <div className="flex-grow-1 text-start">
+                    <div className="d-flex align-items-center gap-2">
+                        <span className={`fw-bold text-dark`}>{player.username || 'Anonymous Learner'}</span>
+                        {isMe && <span className="smallest fw-bold ls-1 text-uppercase" style={{ color: leagueColor }}> (YOU)</span>}
+                    </div>
+                </div>
+
+                <div className="text-end">
+                    <div className="fw-bold text-dark">{player.points.toLocaleString()} XP</div>
+                </div>
+            </div>
+        );
+    };
 
     return (
-        <div className="bg-white min-vh-100 py-5" style={{ overflowX: 'hidden' }}>
+        <div className="bg-white min-vh-100 pt-3 pb-5" style={{ overflowX: 'hidden' }}>
             <div className="container" style={{ maxWidth: '1100px' }}>
 
                 {/* BACK NAVIGATION */}
                 <button
-                    className="btn btn-link text-decoration-none p-0 mb-5 d-flex align-items-center gap-2 text-dark fw-bold smallest ls-2 text-uppercase"
+                    className="btn btn-link text-decoration-none p-0 mb-4 d-flex align-items-center gap-2 text-dark fw-bold smallest ls-2 text-uppercase"
                     onClick={() => navigate('/')}
                 >
                     <ArrowLeft size={16} /> Murahu
                 </button>
 
                 {/* HEADER SECTION */}
-                <header className="mb-5 border-bottom pb-4 d-flex flex-column flex-md-row justify-content-between align-items-md-end gap-3">
+                <header className="mb-4 border-bottom pb-4 d-flex flex-column flex-md-row justify-content-between align-items-md-end gap-3">
                     <div>
                         <p className="smallest fw-bold text-muted mb-1 ls-2 text-uppercase">Weekly Standings</p>
                         <h2 className="fw-bold mb-0 ls-tight">THE WEEKLY TRIBE</h2>
                     </div>
                     <div className="d-flex align-items-center gap-4">
                         <div className="d-none d-md-block text-end">
-                            <span className="smallest fw-bold text-muted ls-1 uppercase d-block">Top 10 Average:</span>
-                            <span className="fw-bold text-dark">Level {communityStats.avgLevel}</span>
+                            <span className="smallest fw-bold text-muted ls-1 uppercase d-block">Community Effort:</span>
+                            <span className="fw-bold text-dark">{communityStats.totalXP.toLocaleString()} XP</span>
                         </div>
-                        <button
-                            className="btn btn-outline-dark rounded-pill py-2 px-4 fw-bold smallest ls-1 d-flex align-items-center gap-2 transition-all"
-                            onClick={() => (window as any).showScoringGuide()}
-                        >
-                            <Info size={16} /> HOW TO RANK UP
-                        </button>
+                        <div className="d-flex align-items-center gap-2">
+                            <button
+                                className="btn btn-outline-dark rounded-pill py-2 px-3 fw-bold smallest ls-1 d-flex align-items-center gap-2 transition-all"
+                                onClick={() => (window as any).showScoringGuide()}
+                            >
+                                <Info size={16} className="d-none d-sm-block" /> <span className="d-none d-sm-block">HOW TO RANK UP</span><span className="d-sm-none"><Info size={16} /> INFO</span>
+                            </button>
+                            <button
+                                className="btn btn-dark rounded-pill py-2 px-3 fw-bold smallest ls-1 d-flex align-items-center gap-2 transition-all border border-dark"
+                                onClick={() => (window as any).showLeaguesGuide()}
+                            >
+                                <Trophy size={16} className="d-none d-sm-block text-warning" /> <span className="d-none d-sm-block">LEAGUES</span><span className="d-sm-none"><Trophy size={16} className="text-warning"/></span>
+                            </button>
+                        </div>
                     </div>
                 </header>
 
@@ -175,7 +250,7 @@ const Leaderboard: React.FC = () => {
                             <section className="p-4 bg-dark text-white rounded-4 shadow-lg mb-5 text-center animate__animated animate__fadeIn">
                                 <p className="smallest fw-bold ls-2 text-uppercase mb-2" style={{ color: '#FACC15' }}>Join the Tribe</p>
                                 <h4 className="fw-bold mb-3">Ready to climb the ranks?</h4>
-                                <p className="small opacity-75 mb-4">Log in to track your personal ranking, earn badges, and climb the Venda Learn Hall of Fame.</p>
+                                <p className="small opacity-75 mb-4">Log in to track your personal ranking, earn badges, and climb the Hall of Fame.</p>
                                 <button onClick={() => navigate('/login')} className="btn game-btn-primary px-5 py-3 fw-bold smallest ls-1">
                                     SIGN IN TO RANK
                                 </button>
@@ -249,47 +324,39 @@ const Leaderboard: React.FC = () => {
                                         )}
                                     </div>
 
-                                    {/* FULL LIST */}
-                                    <section className="text-center">
-                                        <h6 className="fw-bold text-uppercase text-muted small ls-2 mb-4">Hall of Fame</h6>
-                                        <div className="list-group list-group-flush mb-5 mx-auto" style={{ maxWidth: '600px' }}>
-                                            {topTen.map((player, index) => {
-                                                const stats = getLevelStats(player.points);
-                                                const badge = getBadgeDetails(stats.level);
-                                                const isMe = isLoggedIn && player.id === auth.currentUser?.uid;
+                                    {/* LEAGUES */}
+                                    <section className="text-center mt-5">
+                                        <h6 className="fw-bold text-uppercase text-muted small ls-2 mb-4">League Standings</h6>
 
-                                                return (
-                                                    <div key={player.id} className={`list-group-item bg-transparent border-0 px-0 py-4 d-flex align-items-center ${isMe ? 'border-start border-4 ps-3' : ''}`} style={isMe ? { borderColor: '#FACC15' } : {}}>
-                                                        <span className="me-3 fw-bold text-muted smallest" style={{ width: '25px', textAlign: 'left' }}>#{index + 1}</span>
-
-                                                        <div className="me-3">
-                                                            {player.id === 'community_avg' ? null : (
-                                                                <AvatarDisplay
-                                                                    avatarId={player.avatarId || 'adventurer'}
-                                                                    seed={player.username}
-                                                                    size={40}
-                                                                />
-                                                            )}
-                                                        </div>
-
-                                                        <div className="flex-grow-1 text-start">
-                                                            <div className="d-flex align-items-center gap-2">
-                                                                <span className={`fw-bold ${isMe ? 'text-dark' : 'text-secondary'}`}>{player.username || 'Anonymous Learner'}</span>
-                                                                {isMe && <span className="smallest fw-bold ls-1 text-uppercase" style={{ color: '#FACC15' }}> (YOU)</span>}
-                                                            </div>
-                                                            <div className="smallest fw-bold text-muted ls-1 d-flex align-items-center gap-1">
-                                                                <i className={`bi ${badge.icon}`}></i> {badge.name} • LEVEL {stats.level}
-                                                            </div>
-                                                        </div>
-
-                                                        <div className="text-end">
-                                                            <div className="fw-bold" style={{ color: isMe ? '#FACC15' : '#111827' }}>{player.points.toLocaleString()} XP</div>
-                                                            <div className="smallest text-muted text-uppercase ls-1 fw-bold">This Week</div>
-                                                        </div>
+                                        {/* GOLD LEAGUE */}
+                                        {goldLeague.length > 0 && (
+                                            <div className="mb-5 mx-auto animate__animated animate__fadeInUp" style={{ maxWidth: '600px' }}>
+                                                <div className="d-flex align-items-center justify-content-center gap-2 mb-3 bg-light py-2 px-4 rounded-pill d-inline-flex mx-auto border" style={{ borderColor: '#FDE047' }}>
+                                                    <div style={{ width: "24px", height: "24px", backgroundColor: "#FEF08A", color: "#CA8A04", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                                                        <i className="bi bi-star-fill fs-6"></i>
                                                     </div>
-                                                );
-                                            })}
-                                        </div>
+                                                    <h6 className="mb-0 fw-bold ls-1 text-uppercase" style={{ color: "#CA8A04", fontSize: "12px" }}>Gold League</h6>
+                                                </div>
+                                                <div className="list-group list-group-flush shadow-sm rounded-4 border bg-white overflow-hidden">
+                                                    {goldLeague.map((player, index) => renderPlayer(player, index + 3, '#CA8A04'))}
+                                                </div>
+                                            </div>
+                                        )}
+
+                                        {/* SILVER LEAGUE */}
+                                        {silverLeague.length > 0 && (
+                                            <div className="mb-5 mx-auto animate__animated animate__fadeInUp" style={{ maxWidth: '600px' }}>
+                                                <div className="d-flex align-items-center justify-content-center gap-2 mb-3 bg-light py-2 px-4 rounded-pill d-inline-flex mx-auto border" style={{ borderColor: '#E5E7EB' }}>
+                                                    <div style={{ width: "24px", height: "24px", backgroundColor: "#F3F4F6", color: "#9CA3AF", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                                                        <i className="bi bi-shield-fill fs-6"></i>
+                                                    </div>
+                                                    <h6 className="mb-0 fw-bold ls-1 text-uppercase" style={{ color: "#6B7280", fontSize: "12px" }}>Silver League</h6>
+                                                </div>
+                                                <div className="list-group list-group-flush shadow-sm rounded-4 border bg-white overflow-hidden">
+                                                    {silverLeague.map((player, index) => renderPlayer(player, index + 10, '#6B7280'))}
+                                                </div>
+                                            </div>
+                                        )}
                                     </section>
                                 </>
                             )

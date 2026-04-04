@@ -3,7 +3,6 @@ import { Link, useNavigate } from 'react-router-dom';
 import { doc, updateDoc, type Firestore } from 'firebase/firestore';
 import { onAuthStateChanged } from 'firebase/auth';
 import { auth, db } from '../services/firebaseConfig';
-import { getBadgeDetails, getLevelStats } from "../services/levelUtils.ts";
 import { fetchLessons, refreshUserData, getMicroLessons } from '../services/dataCache';
 import { useRetentionEngine } from '../hooks/useRetentionEngine';
 import { ALL_TROPHIES } from '../services/achievementService';
@@ -14,6 +13,7 @@ import DailyWelcomeModal from '../components/DailyWelcomeModal';
 import TrophyIcon from '../components/TrophyIcon';
 import JuicyButton from '../components/JuicyButton';
 import PremiumStreakModal from '../components/PremiumStreakModal';
+import NotificationNudge from '../components/NotificationNudge';
 
 
 const Home: React.FC = () => {
@@ -25,6 +25,7 @@ const Home: React.FC = () => {
     const [loading, setLoading] = useState(true);
     const [isTourOpen, setIsTourOpen] = useState(false);
     const [showStreakModal, setShowStreakModal] = useState(false);
+
 
 
 
@@ -42,32 +43,33 @@ const Home: React.FC = () => {
         }
     };
 
-    const getVendaGreeting = () => {
-        const hour = new Date().getHours();
-        if (hour >= 5 && hour < 12) return "Ndi Matsheloni";
-        if (hour >= 12 && hour < 17) return "Ndi Masiari";
-        if (hour >= 17 && hour <= 23) return "Ndi Madekwana";
-        return "Ndi Madaucha";
-    };
+
 
     useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth, async (user) => {
             if (user) {
                 setIsLoggedIn(true);
                 try {
-                    // Fetch everything in parallel using the cache layer
                     const [userData, lessons] = await Promise.all([
                         refreshUserData(),
-                        fetchLessons(),          // cached across pages
+                        fetchLessons(),
                     ]);
 
                     if (userData) {
                         setUserData(userData);
+                        const prefId = userData.preferredLanguageId || localStorage.getItem('venda_student_lang');
+
+
 
                         // Resolve last lesson from cached lessons instead of extra Firestore call
                         if (userData.lastLessonId) {
                             const cachedCourse = lessons.find((l: any) => l.id === userData.lastLessonId);
-                            if (cachedCourse) {
+
+                            // Only show if it matches the current language preference
+                            const isVendaFallback = !cachedCourse?.languageId && (prefId === 'venda' || !prefId);
+                            const matchesLang = cachedCourse?.languageId === prefId || isVendaFallback;
+
+                            if (cachedCourse && matchesLang) {
                                 const microLessons = getMicroLessons(cachedCourse);
                                 let targetMl = microLessons[0];
 
@@ -154,8 +156,6 @@ const Home: React.FC = () => {
         return <LandingPage />;
     }
 
-    const stats = getLevelStats(userData?.points || 0);
-    const badge = getBadgeDetails(stats.level);
 
     return (
         <div className="bg-white min-vh-100" style={{ overflowX: 'hidden' }}>
@@ -179,27 +179,16 @@ const Home: React.FC = () => {
             />
 
             {/* CLEAN HERO HEADER WITH MASCOT */}
-            <div className="px-3 py-4 bg-white border-bottom position-relative">
+            <div className="px-3 py-3 bg-white border-bottom position-relative">
                 <div className="container" style={{ maxWidth: '800px' }}>
                     <InstallBanner />
-                    
+
                     <div className="row align-items-center">
                         <div className="col-12 mb-4 mb-md-0">
-                            {/* Greeting & Level Badge */}
-                            <div className="d-flex flex-wrap align-items-center gap-3 mb-2">
-                                <h2 className="fw-bold text-slate-800 mb-0 ls-tight fs-3 fs-md-2">
-                                    {getVendaGreeting()}, 
-                                    <span className="text-primary ms-2">{userData?.username?.split(' ')[0] || 'Learner'}</span>
-                                </h2>
-                                <span className="badge rounded-pill fw-bold" style={{ backgroundColor: badge.color + '15', color: badge.color, border: `1px solid ${badge.color}` }}>
-                                    <i className={`bi ${badge.icon} me-1`}></i> Level {stats?.level || 1}
-                                </span>
-                            </div>
-                            
-                            <p className="small fw-bold ls-2 uppercase text-slate-500 mb-4">Kha ri gude Tshivenda • Let's learn Venda</p>
+
 
                             {/* Clean Stat Chips */}
-                            <div className="d-flex flex-wrap gap-4 mt-4">
+                            <div className="d-flex flex-wrap gap-4 mt-3">
                                 {/* XP */}
                                 <div className="d-flex align-items-center gap-3">
                                     <div className="d-inline-flex align-items-center justify-content-center rounded-3"
@@ -213,7 +202,7 @@ const Home: React.FC = () => {
                                 </div>
 
                                 {/* Streak */}
-                                <div 
+                                <div
                                     className="d-flex align-items-center gap-3 position-relative streak-trigger-area"
                                     onClick={(e) => {
                                         e.stopPropagation();
@@ -230,9 +219,10 @@ const Home: React.FC = () => {
                                         <p className="mb-0 smallest text-slate-400 uppercase ls-1">Day Streak</p>
                                     </div>
 
-                                    <PremiumStreakModal 
+                                    <PremiumStreakModal
                                         streak={userData?.streak || 0}
                                         activityHistory={userData?.activityHistory || []}
+                                        frozenDays={userData?.frozenDays || []}
                                         streakFreezes={userData?.streakFreezes || 0}
                                         points={userData?.points || 0}
                                         isVisible={showStreakModal}
@@ -245,28 +235,28 @@ const Home: React.FC = () => {
                 </div>
             </div>
 
-            <div className="container py-5" style={{ maxWidth: '800px' }}>
+            <div className="container py-3" style={{ maxWidth: '800px' }}>
 
                 <div className="row g-5">
                     <main className="col-12">
-
-
+                        
+                        <NotificationNudge />
 
                         {/* CONTINUE LEARNING */}
-                        <section className="mb-5 text-start">
-                            <h6 className="fw-bold text-uppercase text-muted smallest ls-2 mb-4">Bvelelani Phanda (Continue)</h6>
+                        <section className="mb-3 text-start">
+                            <h6 className="fw-bold text-uppercase text-muted smallest ls-2 mb-4">Continue Learning</h6>
                             {lastLesson ? (
                                 <div className="p-4 rounded-4 position-relative overflow-hidden"
                                     style={{ backgroundColor: '#F9FAFB', border: '1px solid #E5E7EB' }}>
                                     <div className="position-relative z-1">
-                                        <div className="d-flex align-items-center gap-2 mb-2">
-                                            <span className="px-2 py-1 rounded-pill smallest fw-bold ls-1"
-                                                style={{ backgroundColor: '#FEF3C7', color: '#92400E' }}>
-                                                {lastLesson.savedType === 'quiz' ? <><i className="bi bi-pencil-square me-1"></i> QUIZ</> : <><i className="bi bi-journal-text me-1"></i> LESSON</>}
+                                        <div className="d-flex align-items-center gap-1 mb-2">
+                                            <span className="px-2 py-0.5 rounded-pill fw-bold ls-1"
+                                                style={{ backgroundColor: '#FEF3C7', color: '#92400E', fontSize: '9px' }}>
+                                                {lastLesson.savedType === 'quiz' ? <><i className="bi bi-pencil-square me-1" style={{ fontSize: '10px' }}></i> QUIZ</> : <><i className="bi bi-journal-text me-1" style={{ fontSize: '10px' }}></i> LEARNING:</>}
                                             </span>
                                         </div>
-                                        <h3 className="fw-bold mb-1 text-dark">{lastLesson.title}</h3>
-                                        <p className="text-muted small mb-0">{lastLesson.courseTitle}</p>
+                                        <h5 className="fw-bold mb-1 text-dark">{lastLesson.title}</h5>
+                                        <p className="text-muted smallest mb-0 uppercase ls-1">{lastLesson.courseTitle}</p>
                                         <div className="mb-4"></div>
                                         <JuicyButton
                                             onClick={() => navigate(`/game/${lastLesson.id}/${lastLesson.microLessonId}?start=${lastLesson.savedIndex}&type=${lastLesson.savedType?.toUpperCase()}`)}
@@ -278,9 +268,9 @@ const Home: React.FC = () => {
                                     <i className="bi bi-play-fill position-absolute end-0 bottom-0 opacity-5" style={{ fontSize: '120px', transform: 'translate(20%, 20%)', color: '#111827' }}></i>
                                 </div>
                             ) : (
-                                <div className="py-5 text-center rounded-4" style={{ backgroundColor: '#F9FAFB', border: '1px dashed #D1D5DB' }}>
-                                    <div className="mb-3"><i className="bi bi-mortarboard-fill text-muted" style={{ fontSize: '40px' }}></i></div>
-                                    <p className="text-muted smallest fw-bold uppercase ls-1 mb-3">No active lesson found</p>
+                                <div className="py-4 text-center rounded-4" style={{ backgroundColor: '#F9FAFB', border: '1px dashed #D1D5DB' }}>
+                                    <div className="mb-2"><i className="bi bi-mortarboard-fill text-muted" style={{ fontSize: '32px' }}></i></div>
+                                    <p className="text-muted smallest fw-bold uppercase ls-1 mb-2">No active lesson found</p>
                                     <JuicyButton onClick={() => navigate('/courses')} className="btn btn-slate rounded-3 px-4 py-2 fw-bold smallest ls-1">
                                         EXPLORE LESSONS
                                     </JuicyButton>
@@ -289,7 +279,7 @@ const Home: React.FC = () => {
                         </section>
 
                         {/* ACHIEVEMENTS PREVIEW */}
-                        <section className="mb-5 text-start">
+                        <section className="mb-3 text-start">
                             <div className="d-flex justify-content-between align-items-end mb-4">
                                 <h6 className="fw-bold text-uppercase text-muted smallest ls-2 mb-0">Mastery Collection</h6>
                                 <Link to="/achievements" className="smallest fw-bold text-warning text-decoration-none ls-1">VIEW ALL <i className="bi bi-arrow-right"></i></Link>
@@ -305,28 +295,28 @@ const Home: React.FC = () => {
                                     })
                                     .slice(0, 3)
                                     .map(trophy => {
-                                    const isEarned = (userData?.trophies || []).includes(trophy.id);
-                                    return (
-                                        <div key={trophy.id} className="col-4">
-                                            <div
-                                                onClick={() => navigate('/achievements')}
-                                                className={`p-3 rounded-4 text-center transition-all hover-lift ${isEarned ? 'bg-white shadow-sm border border-warning' : 'bg-white border'}`}
-                                                style={{ 
-                                                    cursor: 'pointer',
-                                                    opacity: isEarned ? 1 : 0.5,
-                                                    filter: isEarned ? 'none' : 'grayscale(1)'
-                                                }}
-                                            >
-                                                <TrophyIcon
-                                                    rarity={trophy.rarity as any}
-                                                    size={42}
-                                                    animate={isEarned}
-                                                    color={trophy.color}
-                                                />
+                                        const isEarned = (userData?.trophies || []).includes(trophy.id);
+                                        return (
+                                            <div key={trophy.id} className="col-4">
+                                                <div
+                                                    onClick={() => navigate('/achievements')}
+                                                    className={`p-3 rounded-4 text-center transition-all hover-lift ${isEarned ? 'bg-white shadow-sm border border-warning' : 'bg-white border'}`}
+                                                    style={{
+                                                        cursor: 'pointer',
+                                                        opacity: isEarned ? 1 : 0.5,
+                                                        filter: isEarned ? 'none' : 'grayscale(1)'
+                                                    }}
+                                                >
+                                                    <TrophyIcon
+                                                        rarity={trophy.rarity as any}
+                                                        size={42}
+                                                        animate={isEarned}
+                                                        color={trophy.color}
+                                                    />
+                                                </div>
                                             </div>
-                                        </div>
-                                    );
-                                })}
+                                        );
+                                    })}
                             </div>
                         </section>
 
@@ -336,7 +326,7 @@ const Home: React.FC = () => {
                             <div className="d-grid gap-3">
                                 {[
                                     { to: '/courses', icon: 'bi-grid-fill', title: 'Courses & Catalog', sub: 'Browse all lessons' },
-                                    { to: '/history', icon: 'bi-bank2', title: 'Ḓivhazwakale (History)', sub: 'Learn about Venda heritage' },
+                                    { to: '/history', icon: 'bi-bank2', title: 'History', sub: 'Learn about South African heritage' },
                                     { to: '/muvhigo', icon: 'bi-trophy-fill', title: 'Leaderboard', sub: 'See how you rank' },
                                 ].map((item) => (
                                     <Link key={item.to} to={item.to} className="text-decoration-none d-block p-4 rounded-4 transition-all hover-lift"
@@ -367,7 +357,7 @@ const Home: React.FC = () => {
                 .bg-red-50 { background-color: #fef2f2; }
                 .ls-1 { letter-spacing: 1px; }
                 .ls-2 { letter-spacing: 2px; }
-                .smallest { font-size: 10px; font-family: 'Poppins', sans-serif; }
+                .smallest { font-size: 10px; font-family: var(--game-font-family); }
                 .uppercase { text-transform: uppercase; }
                 
                 .transition-all { transition: all 0.2s ease-in-out; }

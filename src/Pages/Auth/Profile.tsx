@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { db, auth } from '../../services/firebaseConfig';
 import { doc, getDoc, updateDoc, writeBatch, collection, query, where, getDocs, setDoc, increment } from 'firebase/firestore';
 import { onAuthStateChanged, signOut } from 'firebase/auth';
-import { Gem, Compass, Bell, Flame, CheckCircle, LogOut, Users, Gift, Clock, Camera, Share2, MoreVertical } from 'lucide-react';
+import { Gem, Compass, Bell, Flame, CheckCircle, LogOut, Users, Gift, Clock, Camera, Share2, MoreVertical, Shield, ChevronRight, Star, Globe } from 'lucide-react';
 import LogoutModal from '../../components/LogoutModal';
 import ShareProfileModal from '../../components/ShareProfileModal';
 import ShareStreakModal from '../../components/ShareStreakModal';
@@ -11,11 +11,12 @@ import TrophyIcon from '../../components/TrophyIcon';
 import AvatarPicker, { AvatarDisplay } from '../../components/AvatarPicker';
 import StreakCalendar from '../../components/StreakCalendar';
 import JuicyButton from '../../components/JuicyButton';
-import { invalidateCache, refreshUserData, fetchUserData, fetchLearnedStats } from '../../services/dataCache';
+import { invalidateCache, refreshUserData, fetchUserData, fetchLearnedStats, fetchLanguages } from '../../services/dataCache';
+import ReviewModal from '../../components/ReviewModal';
 
-import { updateReminderSettings, requestNotificationPermission } from '../../services/reminderService';
+import { updateReminderSettings, requestNotificationPermission, getUserTokens } from '../../services/reminderService';
 import Swal from 'sweetalert2';
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 
 interface UserProfile {
     username: string;
@@ -31,6 +32,7 @@ interface UserProfile {
     trophies?: string[];
     streakFreezes?: number;
     activityHistory?: string[];
+    frozenDays?: string[];
     reminderEnabled?: boolean;
     reminderTime?: string;
     soundEnabled?: boolean;
@@ -59,24 +61,27 @@ const Profile: React.FC = () => {
     const [reminderTime, setReminderTime] = useState('09:00');
     const [soundEnabled, setSoundEnabled] = useState(true);
     const [hapticEnabled, setHapticEnabled] = useState(true);
+    const [showReviewModal, setShowReviewModal] = useState(false);
+    const [languages, setLanguages] = useState<any[]>([]);
     const navigate = useNavigate();
     const inviteLink = `${window.location.origin}/register?ref=${auth.currentUser?.uid}`;
 
     useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth, async (user) => {
             if (user) {
-                const [data, learnedStats] = await Promise.all([
+                const [data, learnedStats, langsData] = await Promise.all([
                     fetchUserData(),
-                    fetchLearnedStats()
+                    fetchLearnedStats(),
+                    fetchLanguages()
                 ]);
+
+                if (langsData) setLanguages(langsData);
 
                 if (data) {
                     const profile = data as UserProfile;
                     const normalizedProfile = {
                         ...profile,
                         points: Number(profile.points) || 0,
-                        level: Number(profile.level) || 1,
-                        streak: Number(profile.streak) || 0,
                         trophies: profile.trophies || []
                     };
                     setUserData(normalizedProfile);
@@ -161,7 +166,20 @@ const Profile: React.FC = () => {
     };
 
     const handleBuyFreeze = async () => {
-        if (!userData || userData.points < 100) {
+        if (!userData) return;
+
+        if (userData.streak === 0) {
+            Swal.fire({
+                title: 'No Active Streak!',
+                text: 'You need an active streak to protect before you can buy a freeze.',
+                icon: 'info',
+                confirmButtonColor: '#FACC15',
+                customClass: { popup: 'rounded-4' }
+            });
+            return;
+        }
+
+        if (userData.points < 100) {
             Swal.fire({
                 title: 'Insufficient XP!',
                 text: 'You need 100 XP points to buy a streak freeze.',
@@ -232,6 +250,27 @@ const Profile: React.FC = () => {
             Swal.fire('Error', 'Update failed', 'error');
         } finally {
             setUpdateLoading(false);
+        }
+    };
+
+    const handleLanguageChange = async (langId: string) => {
+        if (!auth.currentUser) return;
+        try {
+            const userRef = doc(db, "users", auth.currentUser.uid);
+            await updateDoc(userRef, { preferredLanguageId: langId });
+            setUserData((prev: any) => ({ ...prev, preferredLanguageId: langId }));
+            invalidateCache(`user_${auth.currentUser.uid}`);
+            Swal.fire({
+                title: 'Language Updated!',
+                text: `Target language changed.`,
+                icon: 'success',
+                toast: true,
+                position: 'top-end',
+                timer: 3000,
+                showConfirmButton: false
+            });
+        } catch (e) {
+            Swal.fire('Error', 'Failed to update language.', 'error');
         }
     };
 
@@ -332,9 +371,9 @@ const Profile: React.FC = () => {
                                         </div>
                                     )}
                                     {currentLessonTitle && (
-                                        <div className="d-flex align-items-center gap-2 px-3 py-1 bg-warning bg-opacity-10 text-dark border border-warning border-opacity-50 rounded-pill smallest fw-bold ls-1 uppercase">
-                                            <i className="bi bi-book text-warning"></i>
-                                            Learning: {currentLessonTitle}
+                                        <div className="d-flex align-items-center gap-1 px-2 py-0.5 bg-warning bg-opacity-10 text-dark border border-warning border-opacity-50 rounded-pill fw-bold ls-1 uppercase" style={{ fontSize: '9px' }}>
+                                            <i className="bi bi-book text-warning" style={{ fontSize: '10px' }}></i>
+                                            LEARNING: {currentLessonTitle}
                                         </div>
                                     )}
                                 </div>
@@ -524,6 +563,7 @@ const Profile: React.FC = () => {
                             <div className="mt-5">
                                 <StreakCalendar
                                     activityHistory={userData?.activityHistory || []}
+                                    frozenDays={userData?.frozenDays || []}
                                     streakFreezes={userData?.streakFreezes || 0}
                                     points={userData?.points || 0}
                                     streak={userData?.streak || 0}
@@ -538,6 +578,52 @@ const Profile: React.FC = () => {
 
                 {activeTab === 'gear' && (
                     <div className="animate__animated animate__fadeIn">
+                        {/* LANGUAGE PREFERENCES */}
+                        <section className="mb-4">
+                            <div className="card border-0 shadow-sm rounded-4 p-4 bg-white overflow-hidden position-relative mb-4">
+                                <div className="d-flex align-items-center gap-2 mb-4">
+                                    <div className="bg-primary bg-opacity-10 p-2 rounded-3 text-primary">
+                                        <Globe size={20} />
+                                    </div>
+                                    <h5 className="fw-bold mb-0 text-dark">Target Language</h5>
+                                </div>
+                                <div className="row g-3">
+                                    {languages.map((lang, idx) => (
+                                        <div key={lang.id} className="col-6 col-md-4 animate__animated animate__fadeInUp" style={{ animationDelay: `${idx * 0.1}s` }}>
+                                            <div 
+                                                onClick={() => handleLanguageChange(lang.id)}
+                                                className={`p-3 rounded-4 border-2 text-center cursor-pointer transition-all h-100 d-flex flex-column justify-content-center hover-up ${
+                                                    userData?.preferredLanguageId === lang.id 
+                                                    ? 'border-warning bg-white shadow' 
+                                                    : 'border-light bg-light bg-opacity-50'
+                                                }`}
+                                            >
+                                                <h6 className={`fw-bold mb-1 ${userData?.preferredLanguageId === lang.id ? 'text-dark' : 'text-secondary'}`}>{lang.name}</h6>
+                                                <span className="smallest fw-extrabold ls-1 opacity-50 mb-2">{lang.code.toUpperCase()}</span>
+                                                {userData?.preferredLanguageId === lang.id ? (
+                                                    <div className="mt-1">
+                                                        <span 
+                                                            className="badge smallest fw-bold ls-1 rounded-pill px-3 py-1 shadow-sm border border-warning" 
+                                                            style={{ 
+                                                                fontSize: '9px', 
+                                                                backgroundColor: '#FACC15', 
+                                                                color: '#000000',
+                                                                display: 'inline-block'
+                                                            }}
+                                                        >
+                                                            ACTIVE
+                                                        </span>
+                                                    </div>
+                                                ) : (
+                                                    <div style={{ height: '20px' }}></div> // Spacer to maintain uniform height
+                                                )}
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        </section>
+
                         {/* NOTIFICATION PREFERENCES */}
                         <section className="mb-5">
                             <div className="card border-0 shadow-sm rounded-4 p-4 bg-white overflow-hidden position-relative mb-4">
@@ -551,7 +637,7 @@ const Profile: React.FC = () => {
                                 <div className="row align-items-center g-4">
                                     <div className="col-md-7">
                                         <p className="small text-muted mb-0">
-                                            Set a daily reminder to keep your streak alive and make steady progress in your Tshivenda journey.
+                                            Set a daily reminder to keep your streak alive and make steady progress in your language-learning journey.
                                         </p>
                                     </div>
                                     <div className="col-md-5">
@@ -600,6 +686,53 @@ const Profile: React.FC = () => {
                                                     {reminderEnabled ? 'Daily Reminders On' : 'Daily Reminders Off'}
                                                 </label>
                                             </div>
+
+                                            {reminderEnabled && (
+                                                <div className="d-flex flex-column gap-2 mt-2 animate__animated animate__fadeIn">
+                                                    <button 
+                                                        onClick={async () => {
+                                                            if (!('Notification' in window)) return;
+                                                            
+                                                            // Local test notification (simulates the look)
+                                                            new Notification("Test Notification", {
+                                                                body: "This is a test of your pop-up notifications! It works! 🎉",
+                                                                icon: '/images/vendalearn.png'
+                                                            });
+
+                                                            const tokens = await getUserTokens(auth.currentUser!.uid);
+                                                            const latestToken = tokens[tokens.length - 1];
+                                                            
+                                                            if (latestToken) {
+                                                                Swal.fire({
+                                                                    title: 'Test Sent!',
+                                                                    html: `
+                                                                        <div class="text-start">
+                                                                            <p class="small text-muted mb-3">A local pop-up has been triggered. To test a real <b>remote</b> push from Firebase, use your device token below:</p>
+                                                                            <div class="p-2 bg-light rounded border smallest fw-mono text-break" style="max-height: 100px; overflow-y: auto;">
+                                                                                ${latestToken}
+                                                                            </div>
+                                                                        </div>
+                                                                    `,
+                                                                    icon: 'success',
+                                                                    showCancelButton: true,
+                                                                    confirmButtonText: 'Copy Token',
+                                                                    confirmButtonColor: '#FACC15',
+                                                                    cancelButtonText: 'Great!',
+                                                                }).then((result) => {
+                                                                    if (result.isConfirmed) {
+                                                                        navigator.clipboard.writeText(latestToken);
+                                                                        Swal.fire({ title: 'Copied!', icon: 'success', timer: 1500, showConfirmButton: false });
+                                                                    }
+                                                                });
+                                                            }
+                                                        }}
+                                                        className="btn btn-outline-warning btn-sm border-2 fw-bold ls-1 smallest rounded-pill py-2"
+                                                        style={{ width: 'fit-content' }}
+                                                    >
+                                                        SEND TEST POP-UP
+                                                    </button>
+                                                </div>
+                                            )}
 
                                             {reminderEnabled && (
                                                 <div className="d-flex align-items-center gap-2 animate__animated animate__fadeIn">
@@ -688,38 +821,83 @@ const Profile: React.FC = () => {
                                 </div>
                             </div>
 
-                            {/* REFERRAL / INVITE SECTION */}
-                            <div className="bg-dark text-white p-5 rounded-4 position-relative overflow-hidden shadow-lg mb-4">
+                            {/* LEGAL SECTION */}
+                            <Link 
+                                to="/legal"
+                                className="card border-0 shadow-sm rounded-4 p-4 bg-white overflow-hidden position-relative mb-4 text-decoration-none hover-up transition-all"
+                            >
+                                <div className="d-flex align-items-center justify-content-between">
+                                    <div className="d-flex align-items-center gap-3">
+                                        <div className="bg-primary bg-opacity-10 p-2 rounded-3 text-primary">
+                                            <Shield size={20} />
+                                        </div>
+                                        <div>
+                                            <h5 className="fw-bold mb-1 text-dark">Legal & Policies</h5>
+                                            <p className="smallest text-muted mb-0">Privacy, Terms, DMCA & POPI Act</p>
+                                        </div>
+                                    </div>
+                                    <ChevronRight size={20} className="text-muted" />
+                                </div>
+                            </Link>
+
+                            {/* REVIEW / FEEDBACK SECTION */}
+                            <button 
+                                onClick={() => setShowReviewModal(true)}
+                                className="w-100 text-start border-0 p-0 bg-transparent mb-4"
+                            >
+                                <div className="card border-0 shadow-sm rounded-4 p-4 bg-white overflow-hidden position-relative hover-up transition-all">
+                                    <div className="d-flex align-items-center justify-content-between">
+                                        <div className="d-flex align-items-center gap-3">
+                                            <div className="bg-warning bg-opacity-10 p-2 rounded-3 text-warning">
+                                                <Star size={20} />
+                                            </div>
+                                            <div>
+                                                <h5 className="fw-bold mb-1 text-dark">Leave a Review</h5>
+                                            <p className="smallest text-muted mb-0">Help us improve your South African languages learning journey</p>
+                                            </div>
+                                        </div>
+                                        <ChevronRight size={20} className="text-muted" />
+                                    </div>
+                                </div>
+                            </button>
+
+                            {/* REFERRAL / INVITE SECTION (SHRUNK) */}
+                            <div className="bg-dark text-white p-4 rounded-4 position-relative overflow-hidden shadow-lg mb-4">
                                 <div className="position-relative z-1">
-                                    <p className="smallest fw-bold ls-2 text-uppercase mb-2" style={{ color: '#FACC15' }}>Referral Rewards</p>
-                                    <h2 className="fw-bold mb-3">Invite & Earn 500 XP</h2>
-                                    <p className="small opacity-75 mb-4 pe-lg-5">
-                                        Ramba vhangana vhavho! Spread the language. You'll receive 500 XP for every warrior who joins through your link.
+                                    <div className="d-flex align-items-center gap-2 mb-2">
+                                        <div className="bg-primary bg-opacity-20 p-1 rounded-2 text-warning">
+                                            <Users size={16} />
+                                        </div>
+                                        <p className="smallest fw-bold ls-1 text-uppercase mb-0" style={{ color: '#FACC15' }}>Referral Rewards</p>
+                                    </div>
+                                    <h5 className="fw-bold mb-2">Invite & Earn 500 XP</h5>
+                                    <p className="smallest opacity-75 mb-3 pe-lg-5">
+                                        Invite friends to learn South African languages and get 500 XP for every learner who joins.
                                     </p>
 
                                     {unclaimedInvites.length > 0 && (
-                                        <div className="mb-4 animate__animated animate__pulse animate__infinite">
+                                        <div className="mb-3 animate__animated animate__pulse animate__infinite">
                                             <JuicyButton
                                                 onClick={handleClaimRewards}
                                                 disabled={claimLoading}
-                                                className="w-100 py-3 fw-bold ls-1 shadow-lg text-dark d-flex align-items-center justify-content-center gap-2"
-                                                style={{ border: '2px solid #000' }}
+                                                className="w-100 py-2 fw-bold smallest ls-1 shadow-lg text-dark d-flex align-items-center justify-content-center gap-2"
+                                                style={{ border: '1px solid #000' }}
                                             >
-                                                {claimLoading ? 'CLAIMING...' : <><Gift size={20} /> CLAIM {unclaimedInvites.length * 500} XP REWARDS</>}
+                                                {claimLoading ? 'CLAIMING...' : <><Gift size={16} /> CLAIM {unclaimedInvites.length * 500} XP</>}
                                             </JuicyButton>
                                         </div>
                                     )}
 
                                     <div className="d-flex flex-column flex-md-row gap-2">
-                                        <div className="flex-grow-1 bg-white bg-opacity-10 rounded-3 p-3 small text-truncate border border-secondary border-opacity-25">
+                                        <div className="flex-grow-1 bg-white bg-opacity-10 rounded-2 p-2 smallest text-truncate border border-secondary border-opacity-25 opacity-75">
                                             {inviteLink}
                                         </div>
-                                        <JuicyButton className="btn game-btn-primary px-4 py-2 fw-bold ls-1" onClick={handleCopyLink}>
+                                        <JuicyButton className="btn game-btn-primary px-3 py-1 smallest fw-bold ls-1" onClick={handleCopyLink}>
                                             COPY LINK
                                         </JuicyButton>
                                     </div>
                                 </div>
-                                <div className="position-absolute end-0 bottom-0 opacity-10 display-1 p-4"><Users size={120} strokeWidth={1} /></div>
+                                <div className="position-absolute end-0 bottom-0 opacity-10 p-3"><Users size={60} strokeWidth={1} /></div>
                             </div>
                         </section>
                     </div>
@@ -727,6 +905,14 @@ const Profile: React.FC = () => {
 
 
             </div>
+
+            {/* REVIEW MODAL */}
+            {showReviewModal && (
+                <ReviewModal 
+                    username={userData?.username || 'Learner'} 
+                    onClose={() => setShowReviewModal(false)} 
+                />
+            )}
 
             <style>{`
                 .ls-tight { letter-spacing: -1.5px; }

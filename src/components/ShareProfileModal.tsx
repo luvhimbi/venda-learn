@@ -32,13 +32,13 @@ const ShareProfileModal: React.FC<ShareProfileModalProps> = ({ isOpen, onClose, 
             
             canvas.toBlob(async (blob) => {
                 if (!blob) throw new Error('Blob generation failed');
-                const file = new File([blob], `VendaLearn_Profile_${userData.username}.png`, { type: 'image/png' });
+                const file = new File([blob], `LanguagePlatform_Profile_${userData.username}.png`, { type: 'image/png' });
                 
                 if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
                     try {
                         await navigator.share({
-                            title: 'My VendaLearn Profile',
-                            text: 'Check out my progress on VendaLearn!',
+                            title: 'My Language Learning Profile',
+                            text: 'Check out my progress on this language platform!',
                             url: inviteLink,
                             files: [file]
                         });
@@ -47,12 +47,12 @@ const ShareProfileModal: React.FC<ShareProfileModalProps> = ({ isOpen, onClose, 
                         console.error('Share failed, falling back to text share', err);
                         // Fallback to text share
                         if (navigator.share) {
-                            await navigator.share({ title: 'My VendaLearn Profile', text: 'Check out my progress on VendaLearn!', url: inviteLink });
+                            await navigator.share({ title: 'My Language Learning Profile', text: 'Check out my progress on this language platform!', url: inviteLink });
                         }
                     }
                 } else if (navigator.share) {
                     // Fallback to text share
-                    await navigator.share({ title: 'My VendaLearn Profile', text: 'Check out my progress on VendaLearn!', url: inviteLink });
+                    await navigator.share({ title: 'My Language Learning Profile', text: 'Check out my progress on this language platform!', url: inviteLink });
                 } else {
                     // Fallback completely to download only if share API isn't present
                     downloadBlob(blob);
@@ -89,7 +89,7 @@ const ShareProfileModal: React.FC<ShareProfileModalProps> = ({ isOpen, onClose, 
         const imageObjectURL = URL.createObjectURL(blob);
         const link = document.createElement('a');
         link.href = imageObjectURL;
-        link.download = `VendaLearn_Profile_${userData.username}.png`;
+        link.download = `LanguagePlatform_Profile_${userData.username}.png`;
         link.click();
         URL.revokeObjectURL(imageObjectURL);
     };
@@ -114,7 +114,7 @@ const ShareProfileModal: React.FC<ShareProfileModalProps> = ({ isOpen, onClose, 
 
                 <div className="text-center mb-4">
                     <h5 className="fw-bold text-dark ls-tight mb-1">Share Your Journey</h5>
-                    <p className="small text-muted mb-0">Download or share your VendaLearn profile card!</p>
+                    <p className="small text-muted mb-0">Download or share your profile card.</p>
                 </div>
 
                 {/* THE CARD TO BE SNAPSHOTTED */}
@@ -142,7 +142,7 @@ const ShareProfileModal: React.FC<ShareProfileModalProps> = ({ isOpen, onClose, 
                         {/* Logo / Header */}
                         <div className="d-flex align-items-center justify-content-center mb-4">
                             <div className="bg-white p-2 rounded-3 shadow-sm d-inline-block">
-                                <img src="/images/VendaLearnLogo.png" alt="VendaLearn" height="32" className="object-fit-contain" />
+                                <img src="/images/Logo.png" alt="Language Platform" height="32" className="object-fit-contain" />
                             </div>
                         </div>
 

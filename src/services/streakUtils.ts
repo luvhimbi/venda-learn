@@ -2,6 +2,7 @@
 import { doc, getDoc, updateDoc } from 'firebase/firestore';
 import type { Firestore } from 'firebase/firestore';
 import { db } from './firebaseConfig';
+import dayjs from 'dayjs';
 
 /**
  * Safely converts a Firestore date field to a JS Date.
@@ -17,10 +18,76 @@ const toDate = (val: any): Date | null => {
 };
 
 /**
- * Gets midnight of a given date (strips time component for accurate day-diff).
+ * Updates the user's streak based on their last activity date.
+ * Called on every app visit. Returns streak count and whether today is a new day.
+ * Includes "Streak Freeze" logic and activity history logging.
  */
-const toMidnight = (d: Date): number =>
-    new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime();
+export const syncStreak = async (uid: string): Promise<{
+    streak: number;
+    freezeUsed: boolean;
+    wasReset: boolean;
+}> => {
+    try {
+        const userRef = doc(db as Firestore, "users", uid);
+        const userSnap = await getDoc(userRef);
+
+        if (!userSnap.exists()) return { streak: 0, freezeUsed: false, wasReset: false };
+
+        const data = userSnap.data();
+        const now = dayjs();
+        const todayMid = now.startOf('day');
+
+        const lastActivityDate = toDate(data.lastActivity) || toDate(data.lastLogin);
+        if (!lastActivityDate) return { streak: 0, freezeUsed: false, wasReset: false };
+
+        const lastMid = dayjs(lastActivityDate).startOf('day');
+        const diffInDays = todayMid.diff(lastMid, 'day');
+
+        if (diffInDays <= 1) {
+            // No gap yet (either today or yesterday was active)
+            return { streak: data.streak || 0, freezeUsed: false, wasReset: false };
+        }
+
+        // GAP DETECTED
+        let streak = data.streak || 0;
+        let streakFreezes = data.streakFreezes || 0;
+        let frozenDays = data.frozenDays || [];
+        let freezeUsed = false;
+        let wasReset = false;
+
+        const missedDays = diffInDays - 1; // Days between last activity and today
+        
+        if (streakFreezes >= missedDays) {
+            // Use freezes to bridge the gap
+            streakFreezes -= missedDays;
+            for (let i = 1; i <= missedDays; i++) {
+                const fStr = lastMid.add(i, 'day').format('YYYY-MM-DD');
+                if (!frozenDays.includes(fStr)) {
+                    frozenDays.push(fStr);
+                }
+            }
+            freezeUsed = true;
+        } else {
+            // Not enough freezes -> reset
+            streak = 0;
+            streakFreezes = 0;
+            wasReset = true;
+        }
+
+        if (freezeUsed || wasReset) {
+            await updateDoc(userRef, {
+                streak,
+                streakFreezes,
+                frozenDays: frozenDays.slice(-90),
+            });
+        }
+
+        return { streak, freezeUsed, wasReset };
+    } catch (error) {
+        console.error("Error in syncStreak:", error);
+        return { streak: 0, freezeUsed: false, wasReset: false };
+    }
+};
 
 /**
  * Updates the user's streak based on their last activity date.
@@ -43,15 +110,16 @@ export const updateStreak = async (uid: string): Promise<{
         }
 
         const data = userSnap.data();
-        const now = new Date();
-        const todayMid = toMidnight(now);
-        const todayStr = now.toISOString().split('T')[0]; // YYYY-MM-DD
+        const now = dayjs();
+        const todayMid = now.startOf('day');
+        const todayStr = now.format('YYYY-MM-DD');
 
         // Parse last activity
         const lastActivityDate = toDate(data.lastActivity) || toDate(data.lastLogin);
 
         // Activity History (Limit to 90 days)
         let activityHistory = data.activityHistory || [];
+        let frozenDays = data.frozenDays || [];
         if (!activityHistory.includes(todayStr)) {
             activityHistory = [todayStr, ...activityHistory].slice(0, 90);
         }
@@ -63,8 +131,8 @@ export const updateStreak = async (uid: string): Promise<{
         let streakFreezes = data.streakFreezes || 0;
 
         if (lastActivityDate) {
-            const lastMid = toMidnight(lastActivityDate);
-            const diffInDays = Math.round((todayMid - lastMid) / (1000 * 60 * 60 * 24));
+            const lastMid = dayjs(lastActivityDate).startOf('day');
+            const diffInDays = todayMid.diff(lastMid, 'day');
 
             if (diffInDays === 1) {
                 // CONSECUTIVE DAY → increment streak
@@ -72,13 +140,25 @@ export const updateStreak = async (uid: string): Promise<{
                 isNewDay = true;
             } else if (diffInDays > 1) {
                 // MISSED DAYS → check for streak freeze
-                if (streakFreezes > 0) {
-                    streakFreezes -= 1;
+                const missedDays = diffInDays - 1;
+                if (streakFreezes >= missedDays) {
+                    streakFreezes -= missedDays;
+                    
+                    // Log the missed days as frozen
+                    for (let i = 1; i <= missedDays; i++) {
+                        const fStr = lastMid.add(i, 'day').format('YYYY-MM-DD');
+                        if (!frozenDays.includes(fStr)) {
+                            frozenDays.push(fStr);
+                        }
+                    }
+                    frozenDays = frozenDays.slice(-90); // Limit history
+
                     freezeUsed = true;
                     isNewDay = true;
-                    newStreak = (data.streak || 0) + 1; // Protect and increment as if yesterday was done
+                    newStreak = (data.streak || 0) + 1; // Preserve and increment for TODAY's activity
                 } else {
-                    // BROKEN STREAK → reset to 1
+                    // BROKEN STREAK → reset to 1 (they were away too long but are here today)
+                    streakFreezes = 0;
                     newStreak = 1;
                     isNewDay = true;
                     wasReset = true;
@@ -102,6 +182,7 @@ export const updateStreak = async (uid: string): Promise<{
             streak: newStreak,
             lastActivity: now.toISOString(),
             activityHistory: activityHistory,
+            frozenDays: frozenDays,
             streakFreezes: streakFreezes
         };
 
@@ -113,5 +194,3 @@ export const updateStreak = async (uid: string): Promise<{
         return { streak: 0, isNewDay: false, freezeUsed: false, wasReset: false };
     }
 };
-
-

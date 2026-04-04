@@ -73,7 +73,7 @@ const Navbar: React.FC = () => {
 
                 {/* BRAND LOGO & SLOGAN */}
                 <Link className="navbar-brand d-flex align-items-center mb-0 text-decoration-none shadow-none" to="/">
-                    <img src="/images/VendaLearnLogo.png" alt="Venda Learn Logo" height="45" className="object-fit-contain" />
+                    <img src="/images/Logo.png" alt="Language Learning Platform Logo" height="45" className="object-fit-contain" />
                 </Link>
 
                 {/* MOBILE TOGGLER */}
@@ -91,12 +91,12 @@ const Navbar: React.FC = () => {
                     <ul className="navbar-nav ms-auto gap-lg-4 align-items-center">
                         <li className="nav-item w-100 w-lg-auto text-center">
                             <Link className={`nav-link nav-custom-link ${isActive('/') ? 'active-link' : ''}`} to="/">
-                                Hayani
+                                Home
                             </Link>
                         </li>
                         <li className="nav-item w-100 w-lg-auto text-center">
                             <Link className={`nav-link nav-custom-link ${isActive('/courses') ? 'active-link' : ''}`} to="/courses">
-                                Pfunzo
+                                Lessons
                             </Link>
                         </li>
                         <li className="nav-item w-100 w-lg-auto text-center">
@@ -106,12 +106,12 @@ const Navbar: React.FC = () => {
                         </li>
                         <li className="nav-item w-100 w-lg-auto text-center">
                             <Link className={`nav-link nav-custom-link ${isActive('/muvhigo') ? 'active-link' : ''}`} to="/muvhigo">
-                                Muvhigo
+                                Leaderboard
                             </Link>
                         </li>
                         <li className="nav-item w-100 w-lg-auto text-center">
                             <Link className={`nav-link nav-custom-link ${isActive('/mitambo') || isActive('/word-puzzle') || isActive('/picture-puzzle') ? 'active-link' : ''}`} to="/mitambo">
-                                Mitambo
+                                Games
                             </Link>
                         </li>
 
@@ -188,10 +188,10 @@ const Navbar: React.FC = () => {
                             /* GUEST BUTTONS */
                             <div className="ms-lg-4 d-flex flex-column flex-lg-row gap-2 mt-3 mt-lg-0 w-100 w-lg-auto">
                                 <Link to="/login" className="btn btn-link text-decoration-none text-dark fw-bold smallest ls-1 px-3 shadow-none">
-                                    DZHENA
+                                    LOG IN
                                 </Link>
                                 <Link to="/register" className="btn game-btn-primary fw-bold smallest ls-1 px-4 py-2 shadow-none">
-                                    ṄWALISANI
+                                    SIGN UP
                                 </Link>
                             </div>
                         )}

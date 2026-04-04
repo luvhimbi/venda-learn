@@ -12,6 +12,14 @@ body {
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     min-height: 100vh;
+    overflow-x: hidden; /* Prevent horizontal stretching from badges/animations */
+}
+
+/* ReCAPTCHA Badge Positioning Fix */
+.grecaptcha-badge {
+    bottom: 90px !important; /* Move it up slightly to avoid bottom constraints */
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06) !important;
+    z-index: 9999 !important;
 }
 
 /* ============================================
@@ -22,8 +30,8 @@ body {
 
 /* Cards - Enhanced with Game Style */
 .card {
-    background: var(--game-bg-card) !important;
-    border: 2px solid var(--game-border) !important;
+    background: var(--game-bg-card, #ffffff);
+    border: 2px solid var(--game-border, #e5e7eb);
     border-radius: var(--game-radius-lg) !important;
     box-shadow: var(--game-shadow-md) !important;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;

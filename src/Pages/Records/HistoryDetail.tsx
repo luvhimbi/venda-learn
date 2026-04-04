@@ -48,7 +48,7 @@ const HistoryDetail: React.FC = () => {
     const mascotMood = scrollProgress > 75 ? 'excited' : 'happy';
     const mascotSpeech =
         scrollProgress < 10
-            ? 'Vhalani!'
+            ? 'Keep reading!'
             : scrollProgress < 50
                 ? 'Ni khou ita zwavhuḓi!'
                 : scrollProgress < 80
@@ -133,7 +133,7 @@ const HistoryDetail: React.FC = () => {
             <div className="mascot-loader">
                 <Mascot width="120px" height="120px" mood="excited" />
             </div>
-            <p className="text-muted fw-semibold" style={{ fontFamily: "'Poppins', sans-serif", letterSpacing: '1.5px', fontSize: '12px', textTransform: 'uppercase' }}>
+            <p className="text-muted fw-semibold" style={{ fontFamily: "var(--game-font-family)", letterSpacing: '1.5px', fontSize: '12px', textTransform: 'uppercase' }}>
                 Loading story...
             </p>
             <style>{`
@@ -159,7 +159,7 @@ const HistoryDetail: React.FC = () => {
         'Zwiambaro': 'Traditional Venda clothing.',
         'Mvelele': 'Culture and heritage.',
         'Ḓivhazwakale': 'History.',
-        'Tshivenda': 'The language of the Venda people.',
+        'Target Language': 'The language currently being learned in this lesson.',
         'Tshidzimba': 'Traditional Venda dish made of maize and beans.',
         'Vhuswa': 'Staple maize meal porridge, known as pap elsewhere.',
         'Dzata': 'The ancient capital of the Venda Kingdom.',
@@ -214,7 +214,7 @@ const HistoryDetail: React.FC = () => {
         <div className="bg-white min-vh-100 pb-5">
             <SEO
                 title={story.title}
-                description={story.vendaTitle || `Learn about ${story.title} on VendaLearn`}
+                description={story.vendaTitle || `Learn about ${story.title} on LanguageLearn`}
                 image={story.imageUrl || "/images/vendalearn.png"}
                 type="article"
             />
@@ -501,7 +501,7 @@ const HistoryDetail: React.FC = () => {
 
                 .ls-tight { letter-spacing: -2px; }
                 .ls-1 { letter-spacing: 1px; }
-                .smallest-print { font-size: 11px; font-family: 'Poppins', sans-serif; }
+                .smallest-print { font-size: 11px; font-family: var(--game-font-family); }
                 .uppercase { text-transform: uppercase; }
 
                 .munwenda-bg-container {
@@ -658,7 +658,7 @@ const HistoryDetail: React.FC = () => {
                     margin-bottom: 6px;
                     font-size: 12px;
                     font-weight: 700;
-                    font-family: 'Poppins', sans-serif;
+                    font-family: var(--game-font-family);
                     color: #111827;
                     white-space: nowrap;
                     box-shadow: 0 4px 16px rgba(250, 204, 21, 0.18);
@@ -680,7 +680,7 @@ const HistoryDetail: React.FC = () => {
 
                 .swal2-venda-style {
                     border-radius: 24px !important;
-                    font-family: 'Poppins', sans-serif !important;
+                    font-family: var(--game-font-family) !important;
                 }
 
                 /* ===== MOBILE RESPONSIVE ===== */

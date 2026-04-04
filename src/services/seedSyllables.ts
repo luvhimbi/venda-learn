@@ -10,7 +10,7 @@ export const syllableWords = [
     { word: "Thavha", syllables: ["Tha", "vha"], translation: "Mountain", difficulty: "Beginner" },
     { word: "Nndu", syllables: ["N", "ndu"], translation: "House", difficulty: "Beginner" },
     { word: "Madi", syllables: ["Ma", "di"], translation: "Water", difficulty: "Beginner" },
-    { word: "Zwilo", syllables: ["Zwi", "lo"], translation: "Food", difficulty: "Beginner" },
+    { word: "Zwiliwa", syllables: ["Zwi", "li","wa"], translation: "Food", difficulty: "Beginner" },
     { word: "Duvha", syllables: ["Du", "vha"], translation: "Sun/Day", difficulty: "Beginner" },
     { word: "Nwedzi", syllables: ["Nwe", "dzi"], translation: "Moon/Month", difficulty: "Beginner" },
     { word: "Mvula", syllables: ["Mvu", "la"], translation: "Rain", difficulty: "Beginner" },

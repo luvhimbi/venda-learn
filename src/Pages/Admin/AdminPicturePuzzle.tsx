@@ -3,6 +3,7 @@ import { db } from '../../services/firebaseConfig';
 import { collection, addDoc, getDocs, deleteDoc, doc, serverTimestamp } from 'firebase/firestore';
 import AdminNavbar from '../../components/AdminNavbar';
 import { popupService } from '../../services/popupService';
+import { invalidateCache } from '../../services/dataCache';
 import { Loader2, Plus, Trash2, Image as ImageIcon, ExternalLink } from 'lucide-react';
 
 interface PicturePuzzlePart {
@@ -56,6 +57,7 @@ const AdminPicturePuzzle: React.FC = () => {
                 createdAt: serverTimestamp()
             });
             popupService.innerSuccess("Added!", "Picture puzzle part added successfully.");
+            invalidateCache('picturePuzzles');
             setNewPuzzle({ imageUrl: '', venda: '', english: '' });
             fetchPuzzles();
         } catch (error) {
@@ -71,6 +73,7 @@ const AdminPicturePuzzle: React.FC = () => {
         if (confirm.isConfirmed) {
             try {
                 await deleteDoc(doc(db, "picturePuzzles", id));
+                invalidateCache('picturePuzzles');
                 popupService.innerSuccess("Deleted", "Puzzle part removed.");
                 fetchPuzzles();
             } catch (error) {

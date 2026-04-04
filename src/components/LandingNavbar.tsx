@@ -16,8 +16,8 @@ const LandingNavbar: React.FC = () => {
         <nav className={`navbar navbar-expand-lg fixed-top transition-all py-3 ${scrolled ? 'bg-white shadow-sm' : 'bg-transparent'}`}>
             <div className="container px-3 px-md-4" style={{ maxWidth: '1100px' }}>
                 <Link className="navbar-brand d-flex align-items-center mb-0 text-decoration-none shadow-none" to="/">
-                    <img src="/images/VendaLearnLogo.png" alt="Venda Learn Logo" height="45" className="object-fit-contain d-none d-md-block" />
-                    <img src="/images/VendaLearnLogo.png" alt="Venda Learn Logo" height="35" className="object-fit-contain d-md-none" />
+                    <img src="/images/Logo.png" alt="South African Languages Learning Platform" height="45" className="object-fit-contain d-none d-md-block" />
+                    <img src="/images/Logo.png" alt="South African Languages Learning Platform" height="35" className="object-fit-contain d-md-none" />
                 </Link>
 
                 <div className="ms-auto d-flex align-items-center gap-1 gap-sm-2 gap-md-3">

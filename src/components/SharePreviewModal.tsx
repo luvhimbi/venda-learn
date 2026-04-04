@@ -45,7 +45,7 @@ const SharePreviewModal: React.FC<SharePreviewModalProps> = ({ isOpen, onClose, 
 
             const dataUrl = canvas.toDataURL('image/png');
             const link = document.createElement('a');
-            link.download = `VendaLearn_${title.replace(/\s+/g, '_')}.png`;
+            link.download = `LanguagePlatform_${title.replace(/\s+/g, '_')}.png`;
             link.href = dataUrl;
             link.click();
         } catch (err) {
@@ -79,23 +79,23 @@ const SharePreviewModal: React.FC<SharePreviewModalProps> = ({ isOpen, onClose, 
 
             // 2. Prepare sharing data
             const blob = await new Promise<Blob | null>(resolve => canvas.toBlob(resolve, 'image/png'));
-            const file = blob ? new File([blob], `VendaLearn_${title.replace(/\s+/g, '_')}.png`, { type: 'image/png' }) : null;
+            const file = blob ? new File([blob], `LanguagePlatform_${title.replace(/\s+/g, '_')}.png`, { type: 'image/png' }) : null;
             
             const shareText = trophy 
-                ? `I just earned the "${title}" trophy on Venda Learn! 🏅`
-                : `I just learned about ${title} on Venda Learn!`;
+                ? `I just earned the "${title}" trophy on this language platform! 🏅`
+                : `I just learned about ${title} on this language platform!`;
 
             // 3. Attempt to share with file if supported
             if (navigator.canShare && file && navigator.canShare({ files: [file] })) {
                 await navigator.share({
                     files: [file],
-                    title: trophy ? 'My Achievement' : 'Venda Learn Story',
+                    title: trophy ? 'My Achievement' : 'Language Story',
                     text: shareText,
                 });
             } else if (navigator.share) {
                 // Fallback to text sharing
                 await navigator.share({
-                    title: trophy ? 'My Achievement' : 'Venda Learn Story',
+                    title: trophy ? 'My Achievement' : 'Language Story',
                     text: shareText,
                     url: shareUrl,
                 });
@@ -109,7 +109,7 @@ const SharePreviewModal: React.FC<SharePreviewModalProps> = ({ isOpen, onClose, 
             // Final fallback to text sharing if process fails
             if (navigator.share) {
                 try {
-                    await navigator.share({ title: 'Venda Learn', text: `I just learned about ${title} on Venda Learn!`, url: shareUrl });
+                    await navigator.share({ title: 'Language Learning Platform', text: `I just learned about ${title} on this language platform!`, url: shareUrl });
                 } catch (e) {
                     console.error('Text fallback failed:', e);
                 }
@@ -130,7 +130,7 @@ const SharePreviewModal: React.FC<SharePreviewModalProps> = ({ isOpen, onClose, 
             {/* Modal Content */}
             <div className="bg-white rounded-5 overflow-hidden shadow-2xl position-relative animate-pop-in" style={{ width: '92%', maxWidth: '340px' }}>
                 
-                {/* PREVIEW CARD (Standardized Modern Style with Venda Flag) */}
+                {/* PREVIEW CARD */}
                 <div 
                     id="share-card" 
                     className="position-relative overflow-hidden d-flex flex-column align-items-center justify-content-center" 
@@ -154,7 +154,7 @@ const SharePreviewModal: React.FC<SharePreviewModalProps> = ({ isOpen, onClose, 
                         {/* Branded Logo */}
                         <div className="d-flex align-items-center justify-content-center mb-3 mt-2">
                             <div className="bg-white p-2 rounded-3 shadow-sm d-inline-block">
-                                <img src="/images/VendaLearnLogo.png" alt="VendaLearn" height="28" className="object-fit-contain" />
+                                <img src="/images/Logo.png" alt="Language Platform" height="28" className="object-fit-contain" />
                             </div>
                         </div>
 
@@ -176,7 +176,7 @@ const SharePreviewModal: React.FC<SharePreviewModalProps> = ({ isOpen, onClose, 
                             ) : null}
                         </div>
 
-                        {/* Custom Programmatic Venda Flag Strip */}
+                        {/* Category Strip */}
                         <div className="d-flex align-items-center gap-2 mb-2 bg-dark rounded-pill p-1 shadow-sm border border-secondary border-opacity-25 pe-3">
                             <div className="flex-shrink-0" style={{ width: '40px', height: '24px', position: 'relative', borderRadius: '12px', overflow: 'hidden' }}>
                                 {/* Horizontal Stripes */}
@@ -204,7 +204,7 @@ const SharePreviewModal: React.FC<SharePreviewModalProps> = ({ isOpen, onClose, 
                                     </div>
                                     <div className="text-start">
                                         <p className="mb-0 fw-bold">{userData.username?.split(' ')[0]}</p>
-                                        <p className="smallest text-white-50 mb-0 ls-1 text-uppercase">Venda Learner</p>
+                                        <p className="smallest text-white-50 mb-0 ls-1 text-uppercase">Language Learner</p>
                                     </div>
                                 </div>
                                 <div className="text-end pe-1">
@@ -214,7 +214,7 @@ const SharePreviewModal: React.FC<SharePreviewModalProps> = ({ isOpen, onClose, 
                                 </div>
                             </div>
                         )}
-                        {!userData && <p className="smallest text-white-50 mt-2 mb-0 uppercase ls-2">VendaLearn Platform</p>}
+                        {!userData && <p className="smallest text-white-50 mt-2 mb-0 uppercase ls-2">Language Learning Platform</p>}
                     </div>
                 </div>
 

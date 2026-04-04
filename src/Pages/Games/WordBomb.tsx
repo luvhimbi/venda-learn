@@ -439,7 +439,7 @@ const WordBomb: React.FC = () => {
                         <Bomb size={40} className="text-warning wb-pulse" />
                     </div>
                     <h1 className="fw-bold mb-2 text-dark" style={{ fontSize: '2.5rem' }}>Word Bomb</h1>
-                    <p className="text-muted mb-0" style={{ maxWidth: '300px', fontSize: '1.1rem' }}>English words fall from the sky. Type the Venda translation!</p>
+                    <p className="text-muted mb-0" style={{ maxWidth: '300px', fontSize: '1.1rem' }}>English words fall from the sky. Type the matching translation.</p>
                 </div>
 
                 <div className="d-flex flex-column gap-3 w-100 mt-4 px-3" style={{ maxWidth: '400px' }}>
@@ -606,7 +606,7 @@ const WordBomb: React.FC = () => {
                             ref={inputRef}
                             type="text"
                             className="form-control wb-input fw-bold"
-                            placeholder="Type the Venda word..."
+                            placeholder="Type the translated word..."
                             value={userInput}
                             onChange={handleInputChange}
                             autoFocus

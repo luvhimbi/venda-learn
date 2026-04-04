@@ -127,7 +127,7 @@ const StoryReader: React.FC<Props> = ({ story, onClose, onFinish, alreadyClaimed
                             <div className="ngano-front-overlay">
                                 <div className="ngano-front-badge">{story.level}</div>
                                 <h1 className="ngano-front-title">{story.title}</h1>
-                                <p className="ngano-front-sub">Ngano dza Tshivenda</p>
+                                <p className="ngano-front-sub">Traditional Language Stories</p>
                                 <p className="ngano-front-pages">{pages.length} pages · {story.lpReward} XP</p>
                                 <button className="ngano-open-btn" onClick={() => setView('reading')}>
                                     <BookOpen size={20} /> Open Story
@@ -212,7 +212,7 @@ const StoryReader: React.FC<Props> = ({ story, onClose, onFinish, alreadyClaimed
                     </div>
                     <div className="ngano-settings-row">
                         <button className={`ngano-lang-btn ${!showEnglish ? 'active' : ''}`}
-                            onClick={() => { stopTTS(); setShowEnglish(false); }}>Tshivenda</button>
+                            onClick={() => { stopTTS(); setShowEnglish(false); }}>Original</button>
                         <button className={`ngano-lang-btn ${showEnglish ? 'active' : ''}`}
                             onClick={() => { stopTTS(); setShowEnglish(true); }}>English</button>
                     </div>
@@ -305,7 +305,7 @@ const CSS = `
     position: fixed; inset: 0; z-index: 1060;
     display: flex; flex-direction: column;
     background: #0f172a;
-    font-family: 'Poppins', sans-serif;
+    font-family: var(--game-font-family);
     color: #fff;
 }
 
@@ -577,7 +577,7 @@ const CSS = `
 .ngano-vocab-hd {
     font-size: 11px; font-weight: 700; text-transform: uppercase;
     color: #999; margin-bottom: 8px; letter-spacing: 1px;
-    font-family: 'Poppins', sans-serif;
+    font-family: var(--game-font-family);
 }
 .ngano-vocab-chips { display: flex; flex-wrap: wrap; gap: 6px; }
 .ngano-vchip {
@@ -585,7 +585,7 @@ const CSS = `
     border-radius: 8px; padding: 5px 10px; cursor: pointer;
     font-size: 12px; display: flex; flex-direction: column;
     transition: all 0.2s; text-align: left;
-    font-family: 'Poppins', sans-serif;
+    font-family: var(--game-font-family);
 }
 .ngano-vchip:hover { background: #fef3c7; transform: translateY(-2px); box-shadow: 0 3px 8px rgba(0,0,0,0.08); }
 .ngano-vchip strong { color: #b45309; font-size: 13px; }

@@ -7,7 +7,7 @@ const POPIAct: React.FC = () => {
         Last Updated: December 2025.
 
         1. Commitment to Privacy.
-        Venda Learn is committed to protecting the privacy and rights of our users in accordance with the Protection of Personal Information Act 4 of 2013 ("POPIA"). We value your trust and are dedicated to processing your personal information lawfully, transparently, and securely.
+        LanguageLearn is committed to protecting the privacy and rights of our users in accordance with the Protection of Personal Information Act 4 of 2013 ("POPIA"). We value your trust and are dedicated to processing your personal information lawfully, transparently, and securely.
 
         2. Information Officer.
         We have appointed an Information Officer who is responsible for encouraging compliance with POPIA. 

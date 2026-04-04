@@ -12,9 +12,18 @@ service cloud.firestore {
 
     // --- USER PROFILES & LEADERBOARD ---
     match /users/{userId} {
-      // Users can only write to their own document
-      // Exception: Admins can modify any user (useful for banning or fixing accounts)
-      allow write: if (request.auth != null && request.auth.uid == userId) || isAdmin();
+      // Users can only create their own profile
+      allow create: if request.auth != null && request.auth.uid == userId;
+      
+      // Users can update their own profile BUT cannot change sensitive fields like 'role'
+      // Admins have full write access
+      allow update: if isAdmin() || (
+        request.auth != null && request.auth.uid == userId &&
+        !request.resource.data.diff(resource.data).affectedKeys().hasAny(['role', 'createdAt'])
+      );
+      
+      // Only admins can delete profiles
+      allow delete: if isAdmin();
       
       // Allow any logged-in user to read any profile (required for Leaderboard)
       allow read: if request.auth != null;
@@ -22,76 +31,68 @@ service cloud.firestore {
 
     // --- CHALLENGES ---
     match /challenges/{challengeId} {
-      // Allow any authenticated user to read the challenge 
       allow read: if request.auth != null;
-      
-      // Allow creation
       allow create: if request.auth != null;
-      
-      // Allow update if the user is already a player OR if there is space to join
-      // Or if the user is an admin (to cleanup stuck games)
       allow update: if isAdmin() || (
         request.auth != null && 
         (request.auth.uid in resource.data.players || resource.data.players.size() < 2)
       );
-
-      // Only admins should be able to delete challenges
       allow delete: if isAdmin();
     }
 
     // --- LESSONS ---
     match /lessons/{lessonId} {
-      allow read: if true; // Allow guests to view courses list
-      
-      // Admin only write (create, update, delete)
+      allow read: if true; 
       allow write: if isAdmin(); 
     }
 
+    // --- LANGUAGES & LOCALIZATION ---
+    match /languages/{langId} {
+      allow read: if true; 
+      allow write: if isAdmin(); 
+    }
+
+
     // --- WORD OF THE DAY ---
     match /dailyWords/{dateId} {
-      allow read: if true; // Temporarily allow public read for debugging
-      
-      // Admin only write
-      allow write: if isAdmin() || request.auth != null; // Allow auth users to seed
+      allow read: if true; 
+      allow write: if isAdmin(); 
     }
 
     // --- CULTURE, HISTORY & HERITAGE ---
     match /history/{storyId} {
-      // Allows ANY user (including guests) to browse history, food, dance, and attire
       allow read: if true;
-      
-      // Admin only write: Prevents regular users from changing heritage data
       allow write: if isAdmin();
     }
 
     // --- WORD PUZZLES (VENDA WORDLE) ---
     match /puzzleWords/{puzzleId} {
       allow read: if request.auth != null;
-      allow write: if isAdmin() || request.auth != null;
+      allow write: if isAdmin();
     }
 
     // --- SYLLABLE PUZZLES ---
     match /syllablePuzzles/{puzzleId} {
         allow read: if request.auth != null;
-        allow write: if isAdmin() || request.auth != null;
+        allow write: if isAdmin();
     }
 
     // --- SENTENCE PUZZLES ---
     match /sentencePuzzles/{puzzleId} {
         allow read: if request.auth != null;
-        allow write: if isAdmin() || request.auth != null;
+        allow write: if isAdmin();
     }
 
     // --- PICTURE PUZZLES ---
     match /picturePuzzles/{puzzleId} {
-        allow read: if true; // Allow guests to play
-        allow write: if isAdmin() || request.auth != null;
+        allow read: if true; 
+        allow write: if isAdmin();
     }
 
     // --- WORD BOMB ---
     match /wordBombWords/{wordId} {
         allow read: if request.auth != null;
-        allow write: if request.auth != null;
+        allow write: if isAdmin();
     }
 
     // --- LOGS ---
@@ -155,6 +156,14 @@ service cloud.firestore {
     match /settings/{docId} {
       allow read: if true;
       allow write: if isAdmin();
+    }
+
+    // --- REVIEWS & FEEDBACK ---
+    match /reviews/{userId} {
+      // User can only create/update their own review (ID = UID)
+      allow read: if request.auth != null; 
+      allow create, update: if request.auth != null && request.auth.uid == userId;
+      allow delete: if isAdmin() || (request.auth != null && request.auth.uid == userId);
     }
   }
 }

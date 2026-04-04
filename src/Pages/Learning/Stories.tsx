@@ -74,7 +74,7 @@ const Stories: React.FC = () => {
                             text: `Starting fresh today. Keep it up!`,
                             icon: 'info',
                             confirmButtonColor: '#64748B',
-                            confirmButtonText: 'Kha ri ye!',
+                            confirmButtonText: 'Let us go!',
                             customClass: { popup: 'rounded-4' }
                         });
                     } else {
@@ -85,7 +85,7 @@ const Stories: React.FC = () => {
                             imageUrl: 'https://cdn-icons-png.flaticon.com/512/785/785116.png',
                             imageWidth: 80,
                             confirmButtonColor: '#EF4444',
-                            confirmButtonText: 'Kha ri ye!',
+                            confirmButtonText: 'Let us go!',
                             customClass: { popup: 'rounded-4' }
                         });
                     }
@@ -109,8 +109,9 @@ const Stories: React.FC = () => {
     return (
         <div className="container py-5">
             <div className="mb-5 animate__animated animate__fadeInDown">
-                <h1 className="display-5 fw-bold mb-2">Ngano dza kale</h1>
-                <p className="text-muted fs-5">Immerse yourself in traditional Venda stories and master the language.</p>
+                <span className="badge bg-warning text-dark mb-2 px-3 py-1 rounded-pill fw-bold smallest ls-1 shadow-sm">VENDA HERITAGE</span>
+                <h1 className="display-5 fw-bold mb-2">Classic Ngano</h1>
+                <p className="text-muted fs-5">Immerse yourself in traditional Vhavenda stories and strengthen your language skills.</p>
             </div>
 
             <div className="row g-4">

@@ -200,7 +200,7 @@ const SyllableBuilder: React.FC = () => {
                                     <div>
                                         <h2 className="h5 fw-bold mb-1 text-capitalize">{lvl}</h2>
                                         <p className="text-muted small mb-0">
-                                            {lvl === 'Beginner' ? 'Simple 2-syllable words' : lvl === 'Intermediate' ? 'Common 3-syllable words' : 'Complex Tshivenda structures'}
+                                            {lvl === 'Beginner' ? 'Simple 2-syllable words' : lvl === 'Intermediate' ? 'Common 3-syllable words' : 'Complex language structures'}
                                         </p>
                                     </div>
                                     <ChevronRight className="text-muted" />
@@ -272,7 +272,7 @@ const SyllableBuilder: React.FC = () => {
                             <h5 className="fw-bold m-0"><i className="bi bi-book-half me-2" style={{ color: '#FACC15' }}></i>How to Play</h5>
                             <button onClick={() => setShowRules(false)} className="btn btn-close"></button>
                         </div>
-                        <p className="text-muted mb-3 small">Arrange the syllable blocks to build the correct Tshivenda word!</p>
+                        <p className="text-muted mb-3 small">Arrange the syllable blocks to build the correct word.</p>
                         <ul className="list-unstyled small mb-4">
                             <li className="mb-2"><i className="bi bi-check-circle-fill text-success me-2"></i>Tap a block to place it in the answer zone</li>
                             <li className="mb-2"><i className="bi bi-check-circle-fill text-success me-2"></i>Tap a placed block to remove it</li>
@@ -294,7 +294,7 @@ const SyllableBuilder: React.FC = () => {
                         <h1 className="fw-bold mb-1" style={{ fontSize: 'clamp(2rem, 8vw, 3.5rem)', color: '#111827', letterSpacing: '-1px' }}>
                             {currentPuzzle?.translation}
                         </h1>
-                        <p className="text-muted small mb-0">Build the Tshivenda word using the blocks below</p>
+                        <p className="text-muted small mb-0">Build the correct word using the blocks below.</p>
                         <button onClick={() => setShowRules(true)} className="btn btn-link text-muted small text-decoration-none mt-1 d-flex align-items-center justify-content-center gap-1">
                             <HelpCircle size={14} /> How to play
                         </button>
@@ -393,7 +393,7 @@ const SyllableBuilder: React.FC = () => {
                     cursor: pointer;
                     transition: all 0.15s ease;
                     text-transform: capitalize;
-                    font-family: 'Poppins', sans-serif;
+                    font-family: var(--game-font-family);
                     outline: none;
                 }
                 .syl-block:active {
@@ -492,7 +492,7 @@ const SyllableBuilder: React.FC = () => {
                     color: #FACC15;
                     font-size: 14px;
                     font-weight: 800;
-                    font-family: 'Poppins', sans-serif;
+                    font-family: var(--game-font-family);
                     letter-spacing: 0.5px;
                     padding: 8px 20px;
                     border-radius: 20px;

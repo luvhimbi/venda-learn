@@ -7,7 +7,7 @@ const PrivacyPolicy: React.FC = () => {
         Last Updated: December 2025.
 
         1. Introduction.
-        Venda Learn ("we," "us," or "our") respects the privacy of our users ("user" or "you"). This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you visit our website and mobile application (the "Service"). Please read this privacy policy carefully. If you do not agree with the terms of this privacy policy, please do not access the Service.
+        LanguageLearn ("we," "us," or "our") respects the privacy of our users ("user" or "you"). This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you visit our website and mobile application (the "Service"). Please read this privacy policy carefully. If you do not agree with the terms of this privacy policy, please do not access the Service.
 
         2. Collection of Your Information.
         We may collect information about you in a variety of ways. The information we may collect via the Service includes:

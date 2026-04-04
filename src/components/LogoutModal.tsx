@@ -1,5 +1,6 @@
 import React from 'react';
 import Mascot from './Mascot';
+import JuicyButton from './JuicyButton';
 
 interface LogoutModalProps {
     onClose: () => void;
@@ -13,16 +14,49 @@ const LogoutModal: React.FC<LogoutModalProps> = ({ onClose, onConfirm }) => (
                 <Mascot mood="sad" width="180px" height="180px" />
             </div>
             <h4 className="fw-bold mb-3 text-dark">Leaving so soon?</h4>
-            <p className="text-muted mb-4">Are you sure you want to leave so soon?</p>
+            <p className="text-muted mb-4 opacity-75">Vho khwaṱha uri vha khou fhedza u shumisa system?</p>
             <div className="d-flex flex-column flex-sm-row gap-3 mt-2">
-                <button className="btn btn-light flex-grow-1 fw-bold py-3 rounded-pill" onClick={onClose} style={{ color: '#1e293b', border: '1px solid #e2e8f0' }}>
-                    Stay
-                </button>
-                <button className="btn btn-primary flex-grow-1 fw-bold py-3 rounded-pill text-dark shadow-sm" onClick={onConfirm} style={{ backgroundColor: '#FACC15', border: 'none' }}>
-                    Logout
-                </button>
+                <JuicyButton 
+                    className="btn flex-grow-1 fw-bold py-3 px-4 rounded-4 btn-juicy-stay shadow-none" 
+                    onClick={onClose}
+                >
+                    STAY
+                </JuicyButton>
+                <JuicyButton 
+                    className="btn flex-grow-1 fw-bold py-3 px-4 rounded-4 btn-juicy-logout shadow-none" 
+                    onClick={onConfirm}
+                    hapticType="heavy"
+                >
+                    LOGOUT
+                </JuicyButton>
             </div>
         </div>
+
+        <style>{`
+            .btn-juicy-stay {
+                background-color: #f8fafc !important;
+                color: #475569 !important;
+                border: 2px solid #e2e8f0 !important;
+                border-bottom: 5px solid #cbd5e1 !important;
+                transition: all 0.1s ease;
+            }
+            .btn-juicy-stay:active {
+                transform: translateY(3px) !important;
+                border-bottom-width: 2px !important;
+            }
+
+            .btn-juicy-logout {
+                background-color: #FACC15 !important;
+                color: #111827 !important;
+                border: 2px solid #EAB308 !important;
+                border-bottom: 5px solid #CA8A04 !important;
+                transition: all 0.1s ease;
+            }
+            .btn-juicy-logout:active {
+                transform: translateY(3px) !important;
+                border-bottom-width: 2px !important;
+            }
+        `}</style>
     </div>
 );
 

@@ -64,7 +64,7 @@ const InstallBanner: React.FC = () => {
                     <span className="fw-bold text-dark fs-5">V</span>
                 </div>
                 <div className="text-start">
-                    <h6 className="fw-bold mb-0 text-dark" style={{ fontSize: '14px' }}>Install VendaLearn</h6>
+                    <h6 className="fw-bold mb-0 text-dark" style={{ fontSize: '14px' }}>Install Language App</h6>
                     <p className="text-muted mb-0" style={{ fontSize: '11px' }}>
                         {isIOS
                             ? 'Tap the "Share" icon then "Add to Home Screen"'

@@ -19,36 +19,6 @@ const lessonsData = [
                 questions: [
                     { id: 1, question: "How do you say 'Hello' as man?", options: ["Ndaa", "Aa", "Matsheloni"], correctAnswer: "Ndaa", explanation: "'Ndaa' is specifically for men. 'Aa' is used by women, and 'Matsheloni' means morning.", type: "multiple-choice" },
                     { id: 2, question: "'Aa' is the greeting used by men.", correctAnswer: false, explanation: "'Aa' is the greeting used by women. Men use 'Ndaa'.", type: "true-false" }
-                ],
-                scenes: [
-                    {
-                        id: 'scene_greetings_0',
-                        title: 'Morning Meeting',
-                        background: 'Village',
-                        dialogue: [
-                            {
-                                characterName: 'Ronewa',
-                                venda: 'Ndaa, Vho-Makhulu!',
-                                english: 'Hello, Grandmother!',
-                                avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Ronewa',
-                                position: 'left'
-                            },
-                            {
-                                characterName: 'Makhulu',
-                                venda: 'Ndaa, Mutukana. Ni khou bva gai?',
-                                english: 'Hello, Boy. Where are you from?',
-                                avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Makhulu',
-                                position: 'right'
-                            },
-                            {
-                                characterName: 'Ronewa',
-                                venda: 'Ndi khou bva hayani.',
-                                english: 'I am coming from home.',
-                                avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Ronewa',
-                                position: 'left'
-                            }
-                        ]
-                    }
                 ]
             },
             {
