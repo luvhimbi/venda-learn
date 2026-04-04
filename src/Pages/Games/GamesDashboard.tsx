@@ -5,6 +5,7 @@ import { auth } from '../../services/firebaseConfig';
 import { onAuthStateChanged } from 'firebase/auth';
 import { Puzzle, Image, Layout, FileText, Gamepad2, Calendar, Bomb } from 'lucide-react';
 import { popupService } from '../../services/popupService';
+import JuicyButton from '../../components/JuicyButton';
 
 const GamesDashboard: React.FC = () => {
     const navigate = useNavigate();
@@ -13,7 +14,7 @@ const GamesDashboard: React.FC = () => {
     const handleLoginNagger = () => {
         popupService.confirm(
             'Luvha (Log In Required)',
-            'Log in to track your scores, earn XP, and climb the leaderboard while mastering Tshivenda.',
+            'Log in to track your scores, earn XP, and climb the leaderboard while practicing South African languages.',
             'LOG IN',
             'NOT NOW'
         ).then((res) => {
@@ -33,7 +34,7 @@ const GamesDashboard: React.FC = () => {
         {
             id: 'word-puzzle',
             title: 'Guess The correct venda word',
-            description: 'Guess the 5-letter Venda word. A daily challenge to test your vocabulary!',
+            description: 'Guess the 5-letter target word. A daily challenge to test your vocabulary.',
             icon: <Puzzle size={64} />,
             route: '/word-puzzle',
             color: 'bg-primary',
@@ -42,7 +43,7 @@ const GamesDashboard: React.FC = () => {
         {
             id: 'picture-puzzle',
             title: 'Match the pictures with venda words',
-            description: 'Race against the clock! Match the pictures to the correct Venda words.',
+            description: 'Race against the clock and match pictures to the correct words.',
             icon: <Image size={64} />,
             route: '/picture-puzzle',
             color: 'bg-warning',
@@ -60,7 +61,7 @@ const GamesDashboard: React.FC = () => {
         {
             id: 'sentence-scramble',
             title: 'Build sentences(Sentences)',
-            description: 'Unscramble the words to form correct Venda sentences!',
+            description: 'Unscramble the words to form correct sentences.',
             icon: <FileText size={64} />,
             route: '/game/scramble',
             color: 'bg-success',
@@ -78,7 +79,7 @@ const GamesDashboard: React.FC = () => {
         {
             id: 'word-bomb',
             title: 'Word Bomb 💣',
-            description: 'English words fall from the sky — type the Venda translation before they hit the ground!',
+            description: 'English words fall from the sky — type the matching translation before they hit the ground.',
             icon: <Bomb size={64} />,
             route: '/word-bomb',
             color: 'bg-dark',
@@ -112,7 +113,7 @@ const GamesDashboard: React.FC = () => {
                         <Gamepad2 size={80} strokeWidth={1.5} />
                     </div>
                     <h1 className="fw-bold mb-3 ls-tight">Ready to Play?</h1>
-                    <p className="text-muted mb-5">Log in to track your scores, earn XP, and climb the leaderboard while mastering Tshivenda.</p>
+                    <p className="text-muted mb-5">Log in to track your scores, earn XP, and climb the leaderboard while practicing South African languages.</p>
                     <div className="d-grid gap-3">
                         <button onClick={() => navigate('/login')} className="btn btn-dark py-3 fw-bold ls-1 rounded-pill">
                             LOG IN TO PLAY
@@ -130,8 +131,8 @@ const GamesDashboard: React.FC = () => {
         <div className="min-vh-100 bg-light py-5">
             <div className="container">
                 <div className="text-center mb-5">
-                    <h1 className="fw-bold display-4 text-dark mb-3">Mitambo</h1>
-                    <p className="lead text-muted">Play games to practice your Tshivenda and earn XP!</p>
+                    <h1 className="fw-bold display-4 text-dark mb-3">Games</h1>
+                    <p className="lead text-muted">Play games to practice and earn XP.</p>
                 </div>
 
                 <div className="row g-4 justify-content-center">
@@ -155,9 +156,9 @@ const GamesDashboard: React.FC = () => {
                                     <div className="p-4 flex-grow-1 bg-white">
                                         <h3 className="fw-bold mb-2">{game.title}</h3>
                                         <p className="text-muted mb-4">{game.description}</p>
-                                        <button className="btn btn-dark w-100 rounded-pill fw-bold">
-                                            Play Now <i className="bi bi-arrow-right ms-2"></i>
-                                        </button>
+                                        <JuicyButton className="btn btn-juicy-play w-100 rounded-4 fw-bold py-3 shadow-none">
+                                            PLAY NOW <i className="bi bi-arrow-right ms-2"></i>
+                                        </JuicyButton>
                                     </div>
                                 </div>
                             </div>
@@ -170,6 +171,22 @@ const GamesDashboard: React.FC = () => {
                 .game-card:hover {
                     transform: translateY(-5px);
                     box-shadow: 0 10px 20px rgba(0,0,0,0.1) !important;
+                }
+                
+                .btn-juicy-play {
+                    background-color: #1e293b !important;
+                    color: #fff !important;
+                    border: 2px solid #0f172a !important;
+                    border-bottom: 5px solid #0f172a !important;
+                    transition: all 0.1s ease;
+                    letter-spacing: 1px;
+                    text-transform: uppercase;
+                    font-size: 13px;
+                }
+                
+                .btn-juicy-play:active {
+                    transform: translateY(3px) !important;
+                    border-bottom-width: 2px !important;
                 }
             `}</style>
         </div>

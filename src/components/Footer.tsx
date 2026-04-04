@@ -3,111 +3,127 @@ import { Link } from 'react-router-dom';
 
 const Footer: React.FC = () => {
     return (
-        <footer className="bg-white pt-0 pb-3">
-            <div className="bg-munwenda mb-4" style={{ height: '6px', width: '100%' }}></div>
-            <div className="container py-4" style={{ maxWidth: '1100px' }}>
-                <div className="row gy-4 mb-4">
+        <footer className="bg-white border-top border-4 border-dark pt-0 pb-4">
+            {/* TOP DECORATIVE BAR (Game Style) */}
+            <div className="bg-warning border-bottom border-4 border-dark mb-5" style={{ height: '12px', width: '100%' }}></div>
+
+            <div className="container py-2" style={{ maxWidth: '1100px' }}>
+                <div className="row gy-5 mb-5">
                     {/* BRAND & DESCRIPTION */}
                     <div className="col-12 col-md-4 pe-md-5">
-                        <div className="d-flex align-items-center mb-3">
-                            <Link to="/" className="text-decoration-none text-dark">
-                                <img src="/images/VendaLearnLogo.png" alt="Venda Learn Logo" height="40" className="object-fit-contain" />
+                        <div className="mb-4">
+                            <Link to="/" className="text-decoration-none">
+                                <span className="fw-black fs-2 text-dark ls-tight text-uppercase border border-4 border-dark px-3 py-1 bg-white shadow-action-sm">
+                                    Chommie
+                                </span>
                             </Link>
                         </div>
-                        <p className="text-muted small mb-0 lh-lg pe-md-4">
-                            Master the beauty of Tshivenda through culture, history, and gamified learning. The premium way to become fluent.
+                        <p className="fw-bold text-muted small mb-4 lh-base pe-md-4 text-uppercase">
+                            Your language companion for mastering South African culture and conversation. Start your quest today.
                         </p>
+                        <div className="d-flex align-items-center gap-2">
+                            <div className="bg-dark text-white px-3 py-1 fw-black smallest-print text-uppercase border border-2 border-dark shadow-action-sm">
+                                Level Up Your Voice
+                            </div>
+                        </div>
                     </div>
 
                     {/* EXPLORE LINKS */}
                     <div className="col-6 col-md-2">
-                        <h6 className="fw-bold mb-3 ls-1 uppercase" style={{ fontSize: '11px', color: '#6B7280' }}>Explore</h6>
-                        <ul className="list-unstyled d-flex flex-column gap-2 mb-0">
-                            <li><Link to="/courses" className="text-decoration-none text-dark small fw-medium hover-yellow transition-all">Courses</Link></li>
-                            <li><Link to="/#culture" className="text-decoration-none text-dark small fw-medium hover-yellow transition-all">Heritage</Link></li>
-                            <li><Link to="/#minigames" className="text-decoration-none text-dark small fw-medium hover-yellow transition-all">Minigames</Link></li>
-                            <li><Link to="/muvhigo" className="text-decoration-none text-dark small fw-medium hover-yellow transition-all">Leaderboard</Link></li>
+                        <h6 className="fw-black mb-4 text-uppercase border-bottom border-3 border-dark d-inline-block pb-1" style={{ fontSize: '13px' }}>Explore</h6>
+                        <ul className="list-unstyled d-flex flex-column gap-3 mb-0">
+                            <li><Link to="/courses" className="text-decoration-none text-dark small fw-black text-uppercase hover-yellow transition-all">Quests</Link></li>
+                            <li><Link to="/#culture" className="text-decoration-none text-dark small fw-black text-uppercase hover-yellow transition-all">Heritage</Link></li>
+                            <li><Link to="/#minigames" className="text-decoration-none text-dark small fw-black text-uppercase hover-yellow transition-all">Minigames</Link></li>
+                            <li><Link to="/muvhigo" className="text-decoration-none text-dark small fw-black text-uppercase hover-yellow transition-all">Leaderboard</Link></li>
                         </ul>
                     </div>
 
                     {/* SUPPORT LINKS */}
                     <div className="col-6 col-md-2">
-                        <h6 className="fw-bold mb-3 ls-1 uppercase" style={{ fontSize: '11px', color: '#6B7280' }}>Support</h6>
-                        <ul className="list-unstyled d-flex flex-column gap-2 mb-0">
-                            <li><Link to="/#faq" className="text-decoration-none text-dark small fw-medium hover-yellow transition-all">FAQ</Link></li>
-                            <li><Link to="/#contact" className="text-decoration-none text-dark small fw-medium hover-yellow transition-all">Contact Us</Link></li>
-                            <li><Link to="/achievements" className="text-decoration-none text-dark small fw-medium hover-yellow transition-all">Community</Link></li>
+                        <h6 className="fw-black mb-4 text-uppercase border-bottom border-3 border-dark d-inline-block pb-1" style={{ fontSize: '13px' }}>Support</h6>
+                        <ul className="list-unstyled d-flex flex-column gap-3 mb-0">
+                            <li><Link to="/#faq" className="text-decoration-none text-dark small fw-black text-uppercase hover-yellow transition-all">FAQ</Link></li>
+                            <li><Link to="/#contact" className="text-decoration-none text-dark small fw-black text-uppercase hover-yellow transition-all">Contact Us</Link></li>
+                            <li><Link to="/achievements" className="text-decoration-none text-dark small fw-black text-uppercase hover-yellow transition-all">Community</Link></li>
                         </ul>
                     </div>
 
                     {/* LEGAL & SOCIALS */}
                     <div className="col-12 col-md-4">
-                        <h6 className="fw-bold mb-3 ls-1 uppercase" style={{ fontSize: '11px', color: '#6B7280' }}>Legal</h6>
+                        <h6 className="fw-black mb-4 text-uppercase border-bottom border-3 border-dark d-inline-block pb-1" style={{ fontSize: '13px' }}>Legal</h6>
                         <div className="d-flex flex-wrap gap-3 mb-4">
-                            <Link to="/privacy" className="text-decoration-none text-muted small fw-medium hover-yellow transition-all">Privacy</Link>
-                            <Link to="/terms" className="text-decoration-none text-muted small fw-medium hover-yellow transition-all">Terms</Link>
-                            <Link to="/popiact" className="text-decoration-none text-muted small fw-medium hover-yellow transition-all">POPIA</Link>
-                            <Link to="/dmca" className="text-decoration-none text-muted small fw-medium hover-yellow transition-all">DMCA</Link>
+                            <Link to="/privacy" className="text-decoration-none text-muted small fw-black text-uppercase hover-yellow transition-all">Privacy</Link>
+                            <Link to="/terms" className="text-decoration-none text-muted small fw-black text-uppercase hover-yellow transition-all">Terms</Link>
+                            <Link to="/popiact" className="text-decoration-none text-muted small fw-black text-uppercase hover-yellow transition-all">POPIA</Link>
                         </div>
-                        
-                        <h6 className="fw-bold mb-3 ls-1 uppercase" style={{ fontSize: '11px', color: '#6B7280' }}>Connect</h6>
+
+                        <h6 className="fw-black mb-3 text-uppercase" style={{ fontSize: '13px' }}>Connect with Elphie</h6>
                         <div className="d-flex gap-3">
-                            <a href="#" className="text-dark bg-light rounded-circle d-flex align-items-center justify-content-center hover-yellow transition-all" style={{ width: '36px', height: '36px' }} aria-label="Twitter">
-                                <i className="bi bi-twitter-x"></i>
-                            </a>
-                            <a href="#" className="text-dark bg-light rounded-circle d-flex align-items-center justify-content-center hover-yellow transition-all" style={{ width: '36px', height: '36px' }} aria-label="Facebook">
-                                <i className="bi bi-facebook"></i>
-                            </a>
-                            <a href="#" className="text-dark bg-light rounded-circle d-flex align-items-center justify-content-center hover-yellow transition-all" style={{ width: '36px', height: '36px' }} aria-label="Instagram">
-                                <i className="bi bi-instagram"></i>
-                            </a>
-                            <a href="#" className="text-dark bg-light rounded-circle d-flex align-items-center justify-content-center hover-yellow transition-all" style={{ width: '36px', height: '36px' }} aria-label="LinkedIn">
-                                <i className="bi bi-linkedin"></i>
-                            </a>
+                            {['twitter-x', 'facebook', 'instagram', 'linkedin'].map((social) => (
+                                <a key={social} href="#" className="text-dark bg-white border border-3 border-dark d-flex align-items-center justify-content-center hover-press shadow-action-sm" style={{ width: '42px', height: '42px' }}>
+                                    <i className={`bi bi-${social} fs-5`}></i>
+                                </a>
+                            ))}
                         </div>
                     </div>
                 </div>
 
                 {/* BOTTOM REGION */}
-                <div className="border-top pt-4 mt-2 d-flex flex-column flex-md-row justify-content-between align-items-center gap-3">
-                    <p className="text-muted smallest-print mb-0 fw-bold ls-1 uppercase opacity-75 text-center text-md-start">
-                        &copy; {new Date().getFullYear()} VendaLearn. All Rights Reserved. • Luvhimbi Digitals
+                <div className="border-top border-3 border-dark pt-4 mt-2 d-flex flex-column flex-md-row justify-content-between align-items-center gap-4">
+                    <p className="text-muted smallest-print mb-0 fw-black text-uppercase ls-1 text-center text-md-start">
+                        &copy; {new Date().getFullYear()} CHOMMIE. ALL RIGHTS RESERVED. <br className="d-md-none" />
+                        <span className="text-dark">DESIGNED BY LUVHIMBI DIGITALS</span>
                     </p>
                     <div className="d-flex align-items-center gap-2">
-                        <span className="badge bg-light text-dark border rounded-pill px-3 py-2 fw-medium">
-                            <i className="bi bi-globe-americas me-1 text-primary"></i> Made in South Africa
+                        <span className="bg-white text-dark border border-3 border-dark px-3 py-2 fw-black smallest-print d-flex align-items-center shadow-action-sm text-uppercase">
+                            <img src="https://flagcdn.com/za.svg" width="20" alt="South Africa" className="me-2 border border-1 border-dark" />
+                            Made in South Africa
                         </span>
                     </div>
                 </div>
             </div>
 
             <style>{`
+                @import url('https://fonts.googleapis.com/css2?family=Lexend:wght@400;700;900&display=swap');
+
                 footer {
-                    font-family: 'Outfit', sans-serif;
+                    font-family: 'Lexend', sans-serif;
                 }
+                .fw-black { font-weight: 900; }
+                .ls-tight { letter-spacing: -1.5px; }
+                
                 .smallest-print {
-                    font-size: 9px;
-                    letter-spacing: 1.5px;
-                }
-                .ls-1 {
+                    font-size: 10px;
                     letter-spacing: 1px;
                 }
-                .ls-2 {
-                    letter-spacing: 2px;
+
+                .shadow-action-sm { box-shadow: 4px 4px 0px 0px #000; }
+
+                .hover-press {
+                    transition: all 0.1s ease;
                 }
-                .uppercase {
-                    text-transform: uppercase;
+
+                .hover-press:hover {
+                    transform: translate(-2px, -2px);
+                    box-shadow: 6px 6px 0px 0px #000;
+                    background-color: #FACC15 !important;
                 }
-                .transition-all {
-                    transition: all 0.2s ease;
+
+                .hover-press:active {
+                    transform: translate(2px, 2px);
+                    box-shadow: 0px 0px 0px 0px #000;
                 }
+
                 .hover-yellow:hover {
                     color: #FACC15 !important;
+                    text-decoration: underline !important;
+                    text-underline-offset: 4px;
                 }
                 
                 @media (max-width: 768px) {
                     .smallest-print {
-                        font-size: 8px;
+                        font-size: 9px;
                     }
                 }
             `}</style>

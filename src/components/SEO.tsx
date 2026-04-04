@@ -10,13 +10,13 @@ interface SEOProps {
 }
 
 const SEO: React.FC<SEOProps> = ({ 
-    title = "VendaLearn: Shumela Venda", 
-    description = "Learn Tshivenda through interactive stories, games, and lessons.", 
+    title = "LanguageLearn | Learn South African Languages", 
+    description = "A platform for people who want to learn South African languages through interactive lessons, stories, and games.", 
     image = "/images/vendalearn.png", 
     url = window.location.href,
     type = "website"
 }) => {
-    const siteTitle = title.includes("VendaLearn") ? title : `${title} | VendaLearn`;
+    const siteTitle = title.includes("LanguageLearn") ? title : `${title} | LanguageLearn`;
 
     return (
         <Helmet>

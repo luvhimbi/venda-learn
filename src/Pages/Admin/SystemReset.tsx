@@ -60,7 +60,7 @@ const SystemReset: React.FC = () => {
     const handleResetUserProgress = async () => {
         const { value: confirmReset } = await Swal.fire({
             title: 'RESET ALL USERS?',
-            text: "This will set points to 0, level to 1, and clear all streaks and completed lessons for EVERY user. Type 'RESET' to confirm.",
+            text: "This will set points to 0 and clear all streaks and completed lessons for EVERY user. Type 'RESET' to confirm.",
             input: 'text',
             inputPlaceholder: 'RESET',
             icon: 'warning',
@@ -84,7 +84,6 @@ const SystemReset: React.FC = () => {
                 querySnapshot.forEach((document) => {
                     batch.update(doc(db, "users", document.id), {
                         points: 0,
-                        level: 1,
                         streak: 0,
                         completedLessons: [],
                         completedCourses: []

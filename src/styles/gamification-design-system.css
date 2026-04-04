@@ -3,7 +3,8 @@
    Theme: High-Energy Amber (Poppins / Compact Scale)
    ============================================ */
 
-@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800&display=swap');
+@import url('https://fonts.cdnfonts.com/css/tt-octosquares');
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800&family=Poppins:wght@400;600;700;800&display=swap');
 
 :root {
   /* Brand Colors */
@@ -19,7 +20,7 @@
 
   /* Refined Scaling */
   --game-radius-md: 8px;
-  --game-font-family: 'Outfit', sans-serif;
+  --game-font-family: 'TT Octosquares', 'Poppins', sans-serif;
 }
 
 /* ============================================
@@ -183,7 +184,7 @@ body {
 
 /* Customizing the SweetAlert2 Container */
 .swal2-popup {
-  font-family: 'Outfit', sans-serif !important;
+  font-family: var(--game-font-family) !important;
   border-radius: 20px !important;
   padding: 2rem !important;
   background: #ffffff !important;

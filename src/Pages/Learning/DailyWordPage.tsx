@@ -92,7 +92,7 @@ const DailyWordPage: React.FC = () => {
                         </section>
 
                         <section className="p-4 border-start border-4" style={{ borderColor: '#FACC15', backgroundColor: '#fdfdfd' }}>
-                            <h6 className="fw-bold text-uppercase text-muted small ls-2 mb-3">Tsumbo (Example)</h6>
+                            <h6 className="fw-bold text-uppercase text-muted small ls-2 mb-3">Example</h6>
                             <p className="fs-4 fst-italic mb-1" style={{ color: '#111827' }}>"{wordData?.example}"</p>
                             <p className="small text-muted mb-0">Listen and repeat to perfect your accent.</p>
                         </section>
@@ -105,7 +105,7 @@ const DailyWordPage: React.FC = () => {
                         className="btn game-btn-primary w-100 py-3 fw-bold ls-1"
                         onClick={() => navigate('/')}
                     >
-                        PHANDA NA PFUNZO (CONTINUE)
+                        CONTINUE LEARNING
                     </button>
                 </footer>
             </div>

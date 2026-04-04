@@ -102,9 +102,7 @@ export const useGameLogic = ({
         if (onCorrect) {
             onCorrect(result, newScore, newCorrect, currentQIndex + 1);
         }
-
-        setTimeout(() => moveNext(newScore, newCorrect), 1200);
-    }, [difficulty, streak, questionStartTime, score, correctCount, currentQIndex, onCorrect, moveNext]);
+    }, [difficulty, streak, questionStartTime, score, correctCount, currentQIndex, onCorrect]);
 
     const awardConsolation = useCallback(() => {
         const newScore = score + CONSOLATION_POINTS;
@@ -122,13 +120,14 @@ export const useGameLogic = ({
 
     const handleCorrect = useCallback(() => {
         awardCorrectAnswer();
+        setTimeout(() => setShowExplanation(true), 400);
     }, [awardCorrectAnswer]);
 
     const handleWrong = useCallback(() => {
         setAnswerStatus('wrong');
         setStreak(0);
         if (onWrong) onWrong();
-        setTimeout(() => setShowExplanation(true), 600);
+        setTimeout(() => setShowExplanation(true), 400);
     }, [onWrong]);
 
     return {

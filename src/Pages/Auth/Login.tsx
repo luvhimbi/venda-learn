@@ -4,7 +4,7 @@ import { doc, getDoc, setDoc, type Firestore } from 'firebase/firestore';
 import { signInAnonymously, signInWithEmailAndPassword, signInWithPopup } from 'firebase/auth';
 import { auth, db, googleProvider } from '../../services/firebaseConfig';
 import { Loader2, Eye, EyeOff } from 'lucide-react';
-import ReCAPTCHA from 'react-google-recaptcha';
+import { useGoogleReCaptcha } from 'react-google-recaptcha-v3';
 import BaobabAuthHeader from '../../components/BaobabAuthHeader';
 
 const Login: React.FC = () => {
@@ -13,7 +13,7 @@ const Login: React.FC = () => {
     const [showPassword, setShowPassword] = useState<boolean>(false);
     const [loading, setLoading] = useState<boolean>(false);
     const [error, setError] = useState<string | null>(null);
-    const [captchaValue, setCaptchaValue] = useState<string | null>(null);
+    const { executeRecaptcha } = useGoogleReCaptcha();
 
     const navigate = useNavigate();
 
@@ -22,7 +22,20 @@ const Login: React.FC = () => {
         setError(null);
         setLoading(true);
 
+        if (!executeRecaptcha) {
+            setError("reCAPTCHA is not ready yet. Please try again.");
+            setLoading(false);
+            return;
+        }
+
         try {
+            const token = await executeRecaptcha("login");
+            if (!token) {
+                setError("reCAPTCHA verification failed.");
+                setLoading(false);
+                return;
+            }
+
             const userCredential = await signInWithEmailAndPassword(auth, email, password);
             const uid = userCredential.user.uid;
 
@@ -33,7 +46,6 @@ const Login: React.FC = () => {
                     username: userCredential.user.displayName || email.split('@')[0],
                     email: email,
                     points: 0,
-                    level: 1,
                     streak: 0,
                     completedLessons: [],
                     isNativeSpeaker: false,
@@ -83,7 +95,6 @@ const Login: React.FC = () => {
                     username: user.displayName || 'Learner',
                     email: user.email,
                     points: 0,
-                    level: 1,
                     streak: 0,
                     completedLessons: [],
                     isNativeSpeaker: false,
@@ -138,7 +149,7 @@ const Login: React.FC = () => {
 
                 <div className="text-center mb-5 animate__animated animate__fadeInDown">
                     <h2 className="fw-bold ls-tight text-dark mb-2">Welcome Back!</h2>
-                    <p className="text-muted mb-0 small">Sign in to continue your language learning journey.</p>
+                    <p className="text-muted mb-0 small">Sign in to continue learning South African languages.</p>
                 </div>
 
                 {error && (
@@ -192,17 +203,10 @@ const Login: React.FC = () => {
                         </div>
                     </div>
 
-                    <div className="mb-4 d-flex justify-content-center">
-                        <ReCAPTCHA
-                            sitekey="6LeKx2ssAAAAAHk2f6trCWqsFxx7OkbceJFsGsFW" // Test key
-                            onChange={(value) => setCaptchaValue(value)}
-                        />
-                    </div>
-
                     <button 
                         type="submit" 
                         className="btn w-100 fw-bold py-2.5 mb-2 game-btn-primary d-flex align-items-center justify-content-center" 
-                        disabled={loading || !captchaValue}
+                        disabled={loading}
                     >
                         {loading ? <Loader2 className="animate-spin me-2" size={18} /> : 'SIGN IN'}
                     </button>
@@ -232,7 +236,7 @@ const Login: React.FC = () => {
                         disabled={loading}
                     >
                         <i className="bi bi-person-bounding-box me-2"></i>
-                        Continue as Guest
+                        Continue as Guest Learner
                     </button>
                 </div>
 

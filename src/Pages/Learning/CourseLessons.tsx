@@ -1,9 +1,22 @@
 import React, { useEffect, useState } from 'react';
 import { auth } from '../../services/firebaseConfig';
 import { onAuthStateChanged } from 'firebase/auth';
-import { useNavigate, useParams, Link } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { fetchLessons, fetchUserData, getMicroLessons } from '../../services/dataCache';
-import { Sprout, Shield, Flame, BookOpen, PartyPopper } from 'lucide-react';
+import { BookOpen, MessageSquare, Star, Lightbulb, CheckSquare, Zap, ChevronRight, ArrowLeft, Check, ClipboardEdit } from 'lucide-react';
+import { motion } from 'framer-motion';
+import Skeleton from 'react-loading-skeleton';
+import 'react-loading-skeleton/dist/skeleton.css';
+import JuicyButton from '../../components/JuicyButton';
+import '../../styles/learning-grid.css';
+
+const CARD_THEMES = [
+    { bg: '#A3E635', border: '#65A30D', icon: <MessageSquare size={32} color="white" fill="white" strokeWidth={1} />, progress: '#84CC16' },
+    { bg: '#7DD3FC', border: '#0284C7', icon: <Star size={36} color="#FEF08A" fill="#FEF08A" strokeWidth={1} />, progress: '#38BDF8' },
+    { bg: '#F87171', border: '#DC2626', icon: <Lightbulb size={32} color="#FEF08A" fill="#FEF08A" strokeWidth={1} />, progress: '#EF4444' },
+    { bg: '#FB923C', border: '#EA580C', icon: <CheckSquare size={32} color="white" fill="white" strokeWidth={1} />, progress: '#F97316' },
+    { bg: '#FACC15', border: '#CA8A04', icon: <Zap size={32} color="white" fill="white" strokeWidth={1} />, progress: '#EAB308' }
+];
 
 const CourseLessons: React.FC = () => {
     const { courseId } = useParams();
@@ -45,18 +58,42 @@ const CourseLessons: React.FC = () => {
         return () => unsubAuth();
     }, [courseId]);
 
-    const getDifficultyStyle = (d: string) => {
-        const diff = d?.toLowerCase();
-        if (diff === 'beginner') return { color: '#10B981', bg: '#EDFDF5', label: 'BEGINNER', icon: <Sprout size={14} className="me-1" /> };
-        if (diff === 'intermediate') return { color: '#F59E0B', bg: '#FFFBEB', label: 'INTERMEDIATE', icon: <Shield size={14} className="me-1" /> };
-        return { color: '#EF4444', bg: '#FEF2F2', label: 'ADVANCED', icon: <Flame size={14} className="me-1" /> };
-    };
-
     if (loading) return (
-        <div className="min-vh-100 bg-white d-flex justify-content-center align-items-center">
-            <div className="text-center">
-                <div className="spinner-border mb-3" style={{ color: '#FACC15', width: 48, height: 48 }}></div>
-                <p className="smallest fw-bold text-muted ls-2 text-uppercase">LOADING COURSE...</p>
+        <div className="learning-container animate__animated animate__fadeIn">
+            <div className="container pt-2 pb-4" style={{ maxWidth: '1000px' }}>
+                {/* Header skeleton */}
+                <div className="learning-header">
+                    <Skeleton height={16} width={120} borderRadius={6} style={{ marginBottom: 12 }} />
+                    <Skeleton height={36} width={300} borderRadius={8} />
+                    <Skeleton height={18} width={200} borderRadius={6} style={{ marginTop: 6 }} />
+                    <div className="mt-4" style={{ maxWidth: 220 }}>
+                        <Skeleton height={10} width={160} borderRadius={4} style={{ marginBottom: 6 }} />
+                        <Skeleton height={14} borderRadius={7} />
+                        <Skeleton height={10} width={100} borderRadius={4} style={{ marginTop: 6 }} />
+                    </div>
+                </div>
+                {/* Card skeletons */}
+                <div className="course-grid">
+                    {[...Array(5)].map((_, i) => (
+                        <div key={i} className="course-card-professional" style={{ border: '2px solid #e2e8f0' }}>
+                            <div className="d-flex justify-content-between align-items-start mb-3">
+                                <div style={{ flex: 1 }}>
+                                    <Skeleton height={12} width={80} borderRadius={4} style={{ marginBottom: 6 }} />
+                                    <Skeleton height={22} width="75%" borderRadius={6} />
+                                </div>
+                                <Skeleton circle height={40} width={40} />
+                            </div>
+                            <div className="card-footer-progress">
+                                <div className="d-flex gap-3 mb-3">
+                                    <Skeleton height={12} width={70} borderRadius={4} />
+                                    <Skeleton height={12} width={60} borderRadius={4} />
+                                </div>
+                                <Skeleton height={14} borderRadius={7} />
+                                <Skeleton height={10} width="40%" borderRadius={4} style={{ marginTop: 6 }} />
+                            </div>
+                        </div>
+                    ))}
+                </div>
             </div>
         </div>
     );
@@ -68,7 +105,7 @@ const CourseLessons: React.FC = () => {
                     <BookOpen size={80} className="mx-auto" />
                 </div>
                 <h4 className="fw-bold text-dark">Course not found</h4>
-                <button className="btn btn-dark rounded-pill px-4 mt-3" onClick={() => navigate('/courses')}>Back to Courses</button>
+                <button className="btn btn-dark rounded-pill px-4 mt-3" onClick={() => navigate('/courses')}>Back to Path</button>
             </div>
         </div>
     );
@@ -76,184 +113,146 @@ const CourseLessons: React.FC = () => {
     const completedCount = microLessons.filter(ml => completedMlIds.includes(ml.id)).length;
     const totalCount = microLessons.length;
     const courseProgress = totalCount > 0 ? Math.round((completedCount / totalCount) * 100) : 0;
-    const allDone = completedCount === totalCount && totalCount > 0;
-    const diffStyle = getDifficultyStyle(course.difficulty);
-
-    // Sequential unlock: find the highest completed micro lesson index
     const maxCompletedIdx = microLessons.reduce((max: number, ml: any, i: number) =>
         completedMlIds.includes(ml.id) ? i : max, -1);
 
     return (
-        <div className="bg-white min-vh-100">
-            {/* HERO HEADER */}
-            <div className="position-relative overflow-hidden" style={{
-                background: '#ffffff',
-                padding: '2rem 1rem 3rem',
-                borderBottom: '1px solid #f3f4f6'
-            }}>
-                {/* Decorative circles */}
-                <div className="position-absolute" style={{ width: 200, height: 200, borderRadius: '50%', background: 'rgba(250,204,21,.04)', top: -60, right: -40 }}></div>
-                <div className="position-absolute" style={{ width: 120, height: 120, borderRadius: '50%', background: 'rgba(250,204,21,.02)', bottom: -30, left: -20 }}></div>
-
-                <div className="container" style={{ maxWidth: '700px' }}>
-                    <button
-                        className="btn btn-link text-decoration-none p-0 mb-4 d-flex align-items-center gap-2 fw-bold smallest ls-1 text-uppercase"
-                        style={{ color: 'rgba(0,0,0,.4)' }}
+        <div className="learning-container animate__animated animate__fadeIn">
+            <div className="container pt-2 pb-4" style={{ maxWidth: '1000px' }}>
+                
+                {/* HEADER */}
+                <header className="learning-header">
+                    <JuicyButton
+                        className="btn btn-link text-decoration-none p-0 d-flex align-items-center gap-2 text-dark fw-bold smallest ls-1 text-uppercase mb-2"
                         onClick={() => navigate('/courses')}
                     >
-                        <i className="bi bi-arrow-left"></i> All Courses
-                    </button>
+                        <ArrowLeft size={16} /> Course Path
+                    </JuicyButton>
 
-                    <div className="d-flex align-items-center gap-2 mb-2">
-                        <span className="smallest fw-bold ls-1 px-2 py-1 rounded-pill"
-                            style={{ color: diffStyle.color, backgroundColor: `${diffStyle.color}10`, border: `1px solid ${diffStyle.color}40` }}>
-                            {diffStyle.icon} {diffStyle.label}
-                        </span>
-                        {allDone && <span className="smallest fw-bold ls-1 text-success">✓ COMPLETED</span>}
-                    </div>
-
-                    <h2 className="fw-bold text-dark mb-1 ls-tight" style={{ fontSize: '2rem' }}>{course.title}</h2>
-                    <p className="mb-3" style={{ color: 'rgba(0,0,0,.4)', fontSize: '0.95rem' }}>{course.vendaTitle}</p>
-
-                    {/* Progress */}
-                    <div className="d-flex align-items-center gap-3">
+                    <div className="d-md-flex align-items-end justify-content-between gap-4">
                         <div className="flex-grow-1">
-                            <div className="progress" style={{ height: '8px', borderRadius: 10, backgroundColor: 'rgba(0,0,0,.04)' }}>
-                                <div className="progress-bar" style={{
-                                    width: `${courseProgress}%`,
-                                    backgroundColor: allDone ? '#6EE7B7' : '#FACC15',
-                                    transition: '0.5s ease',
-                                    borderRadius: 10
-                                }}></div>
+                            <div className="d-flex align-items-center gap-2 mb-2">
+                                <span className="badge bg-warning text-dark px-3 mt-1 py-1 fw-bold smallest ls-1 rounded-3">
+                                    CURRENT MISSION
+                                </span>
                             </div>
+                            <h2 className="mb-1">{course.title}</h2>
+                            <p className="mb-0 text-muted">{course.vendaTitle}</p>
                         </div>
-                        <span className="smallest fw-bold" style={{ color: allDone ? '#6EE7B7' : '#FACC15' }}>
-                            {completedCount}/{totalCount}
-                        </span>
+                        <div className="text-md-end mt-4 mt-md-0" style={{ minWidth: '220px' }}>
+                            <div className="d-flex justify-content-between smallest fw-bold text-muted ls-1 uppercase mb-2">
+                                <span>MISSION PROGRESS</span>
+                                <span>{courseProgress}%</span>
+                            </div>
+                            <div className="professional-progress-container mb-1 shadow-sm">
+                                <div 
+                                    className="professional-progress-bar" 
+                                    style={{ 
+                                        width: `${courseProgress}%`,
+                                        backgroundColor: '#FACC15'
+                                    }}
+                                ></div>
+                            </div>
+                            <div className="smallest fw-bold text-muted opacity-50 uppercase">{completedCount} / {totalCount} MASTERED</div>
+                        </div>
                     </div>
-                </div>
-            </div>
+                </header>
 
-            {/* MICRO LESSONS PATH */}
-            <div className="container py-4" style={{ maxWidth: '700px', marginTop: '-1.5rem' }}>
-                <div className="position-relative">
-                    {/* Connector line */}
-                    <div className="position-absolute" style={{ left: '20px', top: 0, bottom: 0, width: '2px', background: 'linear-gradient(to bottom, #FACC15, #E5E7EB)', zIndex: 0 }}></div>
-
+                {/* LESSON GRID */}
+                <div className="course-grid">
                     {microLessons.map((ml, index) => {
                         const isDone = completedMlIds.includes(ml.id);
                         const isUnlocked = index <= (maxCompletedIdx + 1);
+                        const theme = CARD_THEMES[index % CARD_THEMES.length];
                         const slideCount = ml.slides?.length || 0;
                         const questionCount = ml.questions?.length || 0;
 
-                        return (
-                            <div key={ml.id} className="position-relative mb-4 ps-5 animate__animated animate__fadeInUp" style={{ animationDelay: `${index * 0.08}s` }}>
+                        const borderColor = isDone
+                            ? '#22c55e'
+                            : isUnlocked
+                                ? '#3b82f6'
+                                : '#cbd5e1';
 
-                                {/* Step Indicator */}
-                                <div className="position-absolute start-0 d-flex align-items-center justify-content-center rounded-circle"
-                                    style={{
-                                        width: '42px', height: '42px', zIndex: 1,
-                                        backgroundColor: isDone ? '#10B981' : (isUnlocked ? '#FACC15' : '#E5E7EB'),
-                                        border: '3px solid white',
-                                        boxShadow: isDone ? '0 0 12px rgba(16,185,129,.3)' : (isUnlocked ? '0 0 12px rgba(250,204,21,.3)' : 'none')
-                                    }}>
-                                    {isDone ? <i className="bi bi-check-lg text-white fw-bold"></i>
-                                        : isUnlocked ? <span className="fw-bold smallest text-dark">{index + 1}</span>
-                                            : <i className="bi bi-lock-fill text-muted small"></i>}
+                        return (
+                            <motion.div 
+                                key={ml.id}
+                                className={`course-card-professional ${!isUnlocked ? 'locked' : ''}`}
+                                onClick={() => { if (isUnlocked) navigate(`/game/${courseId}/${ml.id}`); }}
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ delay: index * 0.06, duration: 0.4, ease: 'easeOut' }}
+                                whileHover={isUnlocked ? { y: -4, boxShadow: '0 12px 24px -8px rgba(0,0,0,0.12)' } : {}}
+                                style={{ 
+                                    '--theme-color': theme.bg,
+                                    '--theme-hover': theme.border,
+                                    borderColor: borderColor,
+                                    borderBottomColor: isDone ? '#16a34a' : isUnlocked ? '#2563eb' : '#94a3b8',
+                                } as any}
+                            >
+                                <div className="d-flex justify-content-between align-items-start mb-2">
+                                    <div>
+                                        <div className="smallest fw-bold ls-1 text-muted uppercase opacity-50 mb-1">
+                                            SECTION {index + 1}
+                                        </div>
+                                        <div className="card-title text-truncate-2 mb-0" style={{ minHeight: 'auto' }}>{ml.title}</div>
+                                    </div>
+                                    {isDone && (
+                                        <div className="bg-success bg-opacity-10 text-success p-2 rounded-circle">
+                                            <Check size={20} />
+                                        </div>
+                                    )}
                                 </div>
 
-                                {/* Micro Lesson Card */}
-                                <div className={`p-4 rounded-4 border ${!isUnlocked ? 'opacity-50' : ''}`}
-                                    style={{
-                                        backgroundColor: isDone ? '#F0FDF4' : 'white',
-                                        borderColor: isDone ? '#BBF7D0' : '#E5E7EB',
-                                        transition: 'all 0.2s',
-                                    }}>
-                                    <div className="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
-                                        <div className="flex-grow-1">
-                                            <div className="d-flex align-items-center gap-2 mb-2">
-                                                <span className="smallest fw-bold ls-1 px-2 py-1 rounded-pill"
-                                                    style={{ color: '#6B7280', backgroundColor: '#F3F4F6' }}>
-                                                    MICRO LESSON {index + 1}
-                                                </span>
-                                                {isDone && <span className="smallest fw-bold text-success ls-1">✓ DONE</span>}
-                                            </div>
-                                            <h5 className="fw-bold mb-1 text-dark">{ml.title}</h5>
-                                            <div className="d-flex gap-3">
-                                                <span className="smallest text-muted fw-bold d-flex align-items-center gap-1">
-                                                    <BookOpen size={12} /> {slideCount} slides
-                                                </span>
-                                                <span className="smallest text-muted fw-bold d-flex align-items-center gap-1">
-                                                    <i className="bi bi-pencil-square"></i> {questionCount} questions
-                                                </span>
-                                            </div>
-                                        </div>
-
-                                        <div className="text-md-end flex-shrink-0">
-                                            {isUnlocked ? (
-                                                <Link
-                                                    to={`/game/${courseId}/${ml.id}`}
-                                                    className={`btn ${isDone ? 'btn-outline-dark border-2' : 'game-btn-primary'} px-4 py-2 smallest fw-bold ls-1`}
-                                                >
-                                                    {isDone ? '🔄 REVIEW' : '▶ THOMA'}
-                                                </Link>
-                                            ) : (
-                                                <span className="smallest fw-bold text-muted ls-1"><i className="bi bi-lock-fill me-1"></i>LOCKED</span>
-                                            )}
-                                        </div>
+                                <div className="card-footer-progress">
+                                    <div className="d-flex gap-3 mb-3">
+                                        <span className="smallest text-muted fw-bold d-flex align-items-center gap-1">
+                                            <BookOpen size={14} /> {slideCount} Slides
+                                        </span>
+                                        <span className="smallest text-muted fw-bold d-flex align-items-center gap-1">
+                                            <ClipboardEdit size={14} /> {questionCount} Tasks
+                                        </span>
+                                    </div>
+                                    <div className="professional-progress-container mb-2">
+                                            <div 
+                                                className="professional-progress-bar" 
+                                                style={{ 
+                                                    width: isDone ? '100%' : '0%',
+                                                    '--theme-color': theme.progress 
+                                                } as any}
+                                            ></div>
+                                    </div>
+                                    <div className="d-flex align-items-center justify-content-between">
+                                        <span className="smallest fw-bold text-muted ls-1 uppercase opacity-50">
+                                            {isDone ? 'COMPLETED' : (isUnlocked ? 'READY TO START' : 'LOCKED')}
+                                        </span>
+                                        {isUnlocked && <ChevronRight size={16} className="text-warning" />}
                                     </div>
                                 </div>
-                            </div>
+                            </motion.div>
                         );
                     })}
                 </div>
 
-                {/* Course Complete Celebration */}
-                {allDone && (
-                    <div className="text-center py-5 animate__animated animate__fadeIn">
-                        <div className="mb-3 text-warning">
-                            <PartyPopper size={64} className="mx-auto" />
-                        </div>
-                        <h4 className="fw-bold text-dark mb-2">Course Completed!</h4>
-                        <p className="text-muted small">You've mastered all {totalCount} micro lessons in this course.</p>
-                        <button className="btn btn-dark rounded-pill px-5 py-2 fw-bold smallest ls-1 mt-2" onClick={() => navigate('/courses')}>
-                            BACK TO COURSES
-                        </button>
-                    </div>
-                )}
-
-                {/* Guest Footer */}
                 {!isLoggedIn && (
                     <footer className="mt-5 pt-5 text-center">
-                        <p className="text-muted small mb-4">You are browsing as a guest. Your progress will not be saved.</p>
-                        <button onClick={() => navigate('/login')} className="btn btn-dark rounded-pill px-5 py-2 fw-bold smallest ls-1">
+                        <p className="text-muted small mb-4">Sign in to ensure your learning progress is saved to your account.</p>
+                        <JuicyButton onClick={() => navigate('/login')} className="btn btn-dark rounded-pill px-5 py-2 fw-bold smallest ls-1">
                             SIGN IN NOW
-                        </button>
+                        </JuicyButton>
                     </footer>
                 )}
             </div>
 
             <style>{`
-                .ls-tight { letter-spacing: -1.5px; }
-                .ls-1 { letter-spacing: 1px; }
-                .ls-2 { letter-spacing: 2px; }
-                .smallest { font-size: 11px; }
-                
-                .game-btn-primary { 
-                    background-color: #FACC15 !important; 
-                    color: #1e293b !important; 
-                    border: none !important; 
-                    border-radius: 8px; 
-                    box-shadow: 0 4px 0 #EAB308 !important; 
-                    transition: all 0.2s; 
+                .text-truncate-2 {
+                    display: -webkit-box;
+                    -webkit-line-clamp: 2;
+                    -webkit-box-orient: vertical;
+                    overflow: hidden;
                 }
-                .game-btn-primary:active { transform: translateY(2px); box-shadow: 0 2px 0 #EAB308 !important; }
             `}</style>
         </div>
     );
 };
 
 export default CourseLessons;
-
-
-

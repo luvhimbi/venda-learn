@@ -107,6 +107,8 @@ const AdminUsers: React.FC = () => {
 
                 Swal.fire('Updated!', 'User records successfully updated.', 'success');
                 invalidateCache('allUsers');
+                invalidateCache('topLearners*'); // Invalidate leaderboard
+                invalidateCache(`user_${user.id}`); // Invalidate this specific user
                 loadUsers();
             } catch (error) {
                 console.error("Update error:", error);
@@ -147,6 +149,8 @@ const AdminUsers: React.FC = () => {
                 }
 
                 invalidateCache('allUsers');
+                invalidateCache('topLearners*'); // Invalidate leaderboard
+                invalidateCache(`user_${userId}`); // Invalidate this specific user
                 invalidateCache('auditLogs');
                 loadUsers();
             } catch (error) {

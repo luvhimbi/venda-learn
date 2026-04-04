@@ -7,8 +7,7 @@ const KNOWN_CACHES = [CACHE_NAME, AVATAR_CACHE, IMAGE_CACHE];
 // Pre-cache these on install (app shell)
 const PRECACHE_URLS = [
     '/',
-    '/images/ven.png',
-    '/images/VendaLearnLogo.png'
+    '/images/Logo.png'
 ];
 
 // Install: pre-cache shell

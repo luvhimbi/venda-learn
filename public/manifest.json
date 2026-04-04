@@ -1,28 +1,28 @@
 {
-  "short_name": "VendaLearn",
-  "name": "VendaLearn: Shumela Venda",
-  "description": "Learn Tshivenda through interactive stories, games, and lessons",
+  "short_name": "LanguageLearn SA",
+  "name": "LanguageLearn | Learn South African Languages",
+  "description": "A platform for people who want to learn South African languages through interactive lessons, stories, and games.",
   "icons": [
     {
-      "src": "/images/ven.png",
+      "src": "/images/Logo.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "/images/ven.png",
+      "src": "/images/Logo.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "maskable"
     },
     {
-      "src": "/images/ven.png",
+      "src": "/images/Logo.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "/images/ven.png",
+      "src": "/images/Logo.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "maskable"
@@ -39,5 +39,6 @@
     "language"
   ],
   "lang": "en",
-  "dir": "ltr"
+  "dir": "ltr",
+  "gcm_sender_id": "931595838430"
 }

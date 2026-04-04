@@ -101,6 +101,7 @@ const AdminDailyWords: React.FC = () => {
                     action: "DELETE", details: `Deleted daily word: ${w.word}`,
                     adminEmail: "Admin", targetId: w.id, timestamp: serverTimestamp()
                 });
+                invalidateCache('allDailyWords');
                 invalidateCache('auditLogs');
                 Swal.fire('Deleted!', 'Word removed.', 'success');
                 if (currentWords.length === 1 && currentPage > 1) setCurrentPage(currentPage - 1);

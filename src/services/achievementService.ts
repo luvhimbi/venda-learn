@@ -17,38 +17,38 @@ export const ALL_TROPHIES: Trophy[] = [
     {
         id: 'level_5',
         title: 'Aspiring Scholar',
-        description: 'Reach Level 5. You are building a strong foundation in Tshivenda.',
+        description: 'Earn 1,000 XP. You are building a strong foundation in Tshivenda.',
         icon: 'bi-patch-check-fill',
         color: '#4f46e5', // Indigo
         rarity: 'silver',
-        requirement: { type: 'level', value: 5 }
+        requirement: { type: 'points', value: 1000 }
     },
     {
         id: 'level_10',
         title: 'Rising Champion',
-        description: 'Reach Level 10. The community watches your ascent with pride.',
+        description: 'Earn 2,000 XP. The community watches your ascent with pride.',
         icon: 'bi-graph-up-arrow',
         color: '#a855f7', // Purple
         rarity: 'silver',
-        requirement: { type: 'level', value: 10 }
+        requirement: { type: 'points', value: 2000 }
     },
     {
         id: 'level_25',
         title: 'Noble Sage',
-        description: 'Reach Level 25. Your wisdom and dedication are recognized by the community.',
+        description: 'Earn 5,000 XP. Your wisdom and dedication are recognized by the community.',
         icon: 'bi-star-fill',
         color: '#8b5cf6', // Violet
         rarity: 'gold',
-        requirement: { type: 'level', value: 25 }
+        requirement: { type: 'points', value: 5000 }
     },
     {
         id: 'level_50',
         title: 'Living Legend',
-        description: 'Reach Level 50. You have achieved total mastery of the Tshivenda melody.',
+        description: 'Earn 10,000 XP. You have achieved total mastery of the Tshivenda melody.',
         icon: 'bi-stars',
         color: '#f43f5e', // Rose
         rarity: 'special',
-        requirement: { type: 'level', value: 50 }
+        requirement: { type: 'points', value: 10000 }
     },
     {
         id: 'points_1000',
@@ -202,8 +202,6 @@ export const checkAchievements = (userData: any, earnedIds: string[] = []): Trop
         switch (type) {
             case 'login':
                 return true; // Simple login trophy
-            case 'level':
-                return (userData.level || 1) >= value;
             case 'points':
                 return (userData.points || 0) >= value;
             case 'streak':

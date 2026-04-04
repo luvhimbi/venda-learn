@@ -10,7 +10,6 @@ interface Speaker {
     id: string;
     username: string;
     nativeSpeakerBio?: string;
-    level: number;
 }
 
 interface Chat {
@@ -203,7 +202,7 @@ const PracticeHub: React.FC = () => {
                 </div>
                 <h3 className="fw-bold fs-2 ls-tight mb-3">Join the Hub</h3>
                 <p className="text-muted mb-4">Please log in to discover speakers and manage your practice sessions.</p>
-                <button onClick={() => navigate('/login')} className="btn btn-dark px-5 py-3 rounded-pill fw-bold ls-1 shadow">DZHENA (LOGIN)</button>
+                <button onClick={() => navigate('/login')} className="btn btn-dark px-5 py-3 rounded-pill fw-bold ls-1 shadow">LOG IN</button>
             </div>
         );
     }
@@ -265,11 +264,11 @@ const PracticeHub: React.FC = () => {
                                             </div>
                                             <div>
                                                 <h5 className="fw-bold mb-0">{speaker.username}</h5>
-                                                <span className="badge bg-light text-muted border smallest fw-bold ls-1 uppercase">LEVEL {speaker.level || 1}</span>
+                                                <span className="badge bg-light text-muted border smallest fw-bold ls-1 uppercase">Native Speaker</span>
                                             </div>
                                         </div>
                                         <p className="text-muted small mb-4 flex-grow-1" style={{ lineHeight: '1.6' }}>
-                                            {speaker.nativeSpeakerBio || "Native Tshivenda speaker available for practice."}
+                                            {speaker.nativeSpeakerBio || "Native language speaker available for practice."}
                                         </p>
                                         <button
                                             onClick={() => startChat(speaker.id, speaker.username)}

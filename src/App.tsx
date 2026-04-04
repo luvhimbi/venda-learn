@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
+import { GoogleReCaptchaProvider } from 'react-google-recaptcha-v3';
 import Sidebar from "./components/Sidebar";
 import AuthNavbar from "./components/AuthNavbar";
 import Footer from "./components/Footer";
@@ -7,6 +8,7 @@ import GuestNudge from "./components/GuestNudge";
 import Login from "./Pages/Auth/Login";
 import Register from "./Pages/Auth/Register";
 import ResetPassword from "./Pages/Auth/ResetPassword";
+import Onboarding from "./Pages/Auth/Onboarding";
 import Home from "./Pages/Home";
 import Profile from "./Pages/Auth/Profile";
 import Muvhigo from "./Pages/Admin/Muvhigo";
@@ -18,6 +20,7 @@ import PrivacyPolicy from "./Pages/Policy/PrivacyPolicy";
 import TermsOfUse from "./Pages/Policy/TermsOfUse";
 import POPIAct from "./Pages/Policy/POPIAct";
 import DMCA from "./Pages/Policy/DMCA";
+import Legal from "./Pages/Policy/Legal";
 import Stories from "./Pages/Learning/Stories";
 import HistoryList from "./Pages/Records/HistoryList";
 import AddHistory from "./Pages/Admin/AddHistory";
@@ -44,14 +47,17 @@ import SentenceScramble from "./Pages/Games/SentenceScramble";
 import DailyChallenge from "./Pages/Games/DailyChallenge";
 import WordBomb from "./Pages/Games/WordBomb";
 import AdminWordBomb from "./Pages/Admin/AdminWordBomb";
+import AdminLanguages from "./Pages/Admin/AdminLanguages";
 import AdminPicturePuzzle from "./Pages/Admin/AdminPicturePuzzle";
-import CourseVisualizer from "./Pages/Admin/CourseVisualizer";
+
+import AdminReviews from "./Pages/Admin/AdminReviews";
 import NotFound from "./Pages/NotFound";
 import { auth, messaging } from './services/firebaseConfig';
 import { onAuthStateChanged } from 'firebase/auth';
 import { onMessage } from 'firebase/messaging';
 import { NotificationProvider } from './contexts/NotificationContext';
 import Swal from 'sweetalert2';
+import NotificationPrompt from './components/NotificationPrompt';
 
 /**
  * AppContent handles the conditional rendering of the UI.
@@ -60,15 +66,26 @@ import Swal from 'sweetalert2';
 const AppContent: React.FC = () => {
     const location = useLocation();
     const isAdminPath = location.pathname.startsWith('/admin');
-    const isAuthPath = ['/login', '/register', '/reset-password'].includes(location.pathname);
+    const isAuthPath = ['/login', '/register', '/reset-password', '/onboarding'].includes(location.pathname);
     const [user, setUser] = useState<any>(null);
+    const [showPushPrompt, setShowPushPrompt] = useState(false);
 
     useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth, (u) => {
             setUser(u);
+            
+            // Check if we should show the push notification prompt
+            if (u && !isAdminPath && !isAuthPath) {
+                const hasPrompted = sessionStorage.getItem('push_prompt_shown');
+                if (!hasPrompted && 'Notification' in window && Notification.permission !== 'granted') {
+                    // Slight delay to not overwhelm the user
+                    setTimeout(() => setShowPushPrompt(true), 3000);
+                    sessionStorage.setItem('push_prompt_shown', 'true');
+                }
+            }
         });
         return () => unsubscribe();
-    }, []);
+    }, [isAdminPath, isAuthPath]);
 
     // Foreground Push Notification Listener
     useEffect(() => {
@@ -102,11 +119,6 @@ const AppContent: React.FC = () => {
                 {/* Show minimalist AuthNavbar for Login/Register or public users */}
                 {!isAdminPath && (!user || isAuthPath) && <AuthNavbar user={user} />}
 
-                {!isAdminPath && !isAuthPath && user && (
-                    <div className="p-2 bg-white d-lg-none">
-                        {/* Mobile Spacer */}
-                    </div>
-                )}
 
                 <OfflineBanner />
                 <InstallBanner />
@@ -116,6 +128,7 @@ const AppContent: React.FC = () => {
                         {/* User & Public Routes */}
                         <Route path="/" element={<Home />} />
                         <Route path="/login" element={<Login />} />
+                        <Route path="/onboarding" element={<Onboarding />} />
                         <Route path="/register" element={<Register />} />
                         <Route path="/reset-password" element={<ResetPassword />} />
                         <Route path="/muvhigo" element={<Muvhigo />} />
@@ -138,6 +151,7 @@ const AppContent: React.FC = () => {
                         <Route path="/terms" element={<TermsOfUse />} />
                         <Route path="/popiact" element={<POPIAct />} />
                         <Route path="/dmca" element={<DMCA />} />
+                        <Route path="/legal" element={<Legal />} />
                         <Route path="/ngano" element={<Stories />} />
                         <Route path="/daily-challenge" element={<DailyChallenge />} />
                         <Route path="/word-bomb" element={<WordBomb />} />
@@ -168,12 +182,12 @@ const AppContent: React.FC = () => {
                             }
                         />
 
-                        {/* Course Visualizer & Designer */}
+                        {/* Review Management */}
                         <Route
-                            path="/admin/visualizer"
+                            path="/admin/reviews"
                             element={
                                 <AdminRoute>
-                                    <CourseVisualizer />
+                                    <AdminReviews />
                                 </AdminRoute>
                             }
                         />
@@ -225,6 +239,8 @@ const AppContent: React.FC = () => {
                         <Route path="/admin/history/add" element={<AdminRoute><AddHistory /></AdminRoute>} />
                         <Route path="/admin/history/edit/:storyId" element={<AdminRoute><AddHistory /></AdminRoute>} />
                         <Route path="/admin/word-bomb" element={<AdminRoute><AdminWordBomb /></AdminRoute>} />
+                        <Route path="/admin/languages" element={<AdminRoute><AdminLanguages /></AdminRoute>} />
+
 
                         {/* 404 Catch-All Route */}
                         <Route path="*" element={<NotFound />} />
@@ -233,6 +249,16 @@ const AppContent: React.FC = () => {
                 </main>
 
                 {!isAdminPath && !user && <Footer />}
+
+                {/* Push Notification Prompt Overlay */}
+                {showPushPrompt && (
+                    <NotificationPrompt 
+                        onClose={() => setShowPushPrompt(false)} 
+                        onStatusChange={(granted) => {
+                            if (granted) console.log("User granted notifications!");
+                        }}
+                    />
+                )}
 
                 <style>{`
                 @media (min-width: 992px) {
@@ -254,11 +280,13 @@ const AppContent: React.FC = () => {
 
 function App() {
     return (
-        <NotificationProvider>
-            <Router>
-                <AppContent />
-            </Router>
-        </NotificationProvider>
+        <GoogleReCaptchaProvider reCaptchaKey="6LeF_aYsAAAAAExxoPu1pQ9OUYrLqZdfGcfKH4Fj">
+            <NotificationProvider>
+                <Router>
+                    <AppContent />
+                </Router>
+            </NotificationProvider>
+        </GoogleReCaptchaProvider>
     );
 }
 

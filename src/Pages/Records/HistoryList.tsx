@@ -118,12 +118,12 @@ const HistoryList: React.FC = () => {
                         <div>
                             <span className="fw-bold ls-2 text-uppercase smallest d-block mb-1 text-warning">Cultural Heritage</span>
                             <h1 className="fw-bold ls-tight mb-0 text-dark">
-                                Venda <span style={{ color: '#FACC15' }}>History</span>
+                                South African <span style={{ color: '#FACC15' }}>History</span>
                             </h1>
                         </div>
                         <div className="d-flex align-items-center gap-3">
                             <div className="text-end d-none d-md-block">
-                                <p className="mb-0 fw-bold small text-muted">Vhalani!</p>
+                                <p className="mb-0 fw-bold small text-muted">Read!</p>
                                 <p className="smallest-print text-muted mb-0">Learn our shared story</p>
                             </div>
                             <Mascot width="70px" height="70px" mood="excited" />

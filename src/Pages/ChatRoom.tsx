@@ -104,13 +104,13 @@ const ChatRoom: React.FC = () => {
 
             // Core fun suggestions
             let bases = [
-                "Ndi matshelo! 🌞",
-                "Vho vuwa hani? 👋",
-                "Ndi a livhuwa! 🙏",
-                "Ni bva gai? 🌍",
-                "Zwino, ni khou ita mini? 🤔",
-                "Ndi khou funa u guda Tshivenda! 📚",
-                "Ndi nnyi ane a khou amba? 🎤"
+                "Good morning! 🌞",
+                "How are you doing? 👋",
+                "Thank you! 🙏",
+                "Where are you from? 🌍",
+                "What are you doing now? 🤔",
+                "I love learning languages! 📚",
+                "Who is speaking? 🎤"
             ];
 
             if (completedLessons.some((id: string) => id.toLowerCase().includes('food'))) {
@@ -341,7 +341,7 @@ const ChatRoom: React.FC = () => {
                                     <input
                                         type="text"
                                         className="form-control border-0 bg-light rounded-pill py-3 px-4 shadow-none fs-6"
-                                        placeholder="Practice Tshivenda..."
+                                        placeholder="Practice your language skills..."
                                         value={newMessage}
                                         onChange={(e) => setNewMessage(e.target.value)}
                                         style={{ paddingRight: '50px' }}

@@ -165,8 +165,8 @@ const CourseVisualizer: React.FC = () => {
                                         
                                         {/* Mock Header */}
                                         <div className="p-4 bg-white">
-                                            <p className="smallest fw-bold text-muted mb-1 text-uppercase" style={{ letterSpacing: '2px' }}>Tshivenda Learning Path</p>
-                                            <h2 className="fw-bold mb-2 text-dark" style={{ fontSize: '1.8rem', letterSpacing: '-1px' }}>PFUNZO DZOTHE</h2>
+                                            <p className="smallest fw-bold text-muted mb-1 text-uppercase" style={{ letterSpacing: '2px' }}>Language Learning Path</p>
+                                            <h2 className="fw-bold mb-2 text-dark" style={{ fontSize: '1.8rem', letterSpacing: '-1px' }}>ALL LESSONS</h2>
                                             <p className="text-muted small mb-0">Preview Mode • Real components shown</p>
                                         </div>
 

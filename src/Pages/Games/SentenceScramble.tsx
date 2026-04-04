@@ -194,7 +194,7 @@ const SentenceScramble: React.FC = () => {
                             <Hash size={40} className="text-warning" />
                         </div>
                         <h1 className="fw-bold mb-2 text-dark">Sentence Scramble</h1>
-                        <p className="text-muted">Master Tshivenda sentence structures!</p>
+                        <p className="text-muted">Master sentence structures!</p>
                     </div>
 
                     <div className="d-flex flex-column gap-3 w-100">
@@ -282,7 +282,7 @@ const SentenceScramble: React.FC = () => {
                             <h5 className="fw-bold m-0"><i className="bi bi-info-circle me-2" style={{ color: '#FACC15' }}></i>How to Play</h5>
                             <button onClick={() => setShowRules(false)} className="btn btn-close"></button>
                         </div>
-                        <p className="text-muted mb-3 small">Tap the words in the correct order to form a Tshivenda sentence.</p>
+                        <p className="text-muted mb-3 small">Tap the words in the correct order to form a sentence.</p>
                         <div className="p-3 bg-light rounded-3 mb-3 text-center">
                             <span className="badge bg-secondary me-1">zwili</span>
                             <span className="badge bg-secondary me-1">Ndi</span>
@@ -402,7 +402,7 @@ const SentenceScramble: React.FC = () => {
                     font-weight: 700;
                     cursor: pointer;
                     transition: all 0.15s ease;
-                    font-family: 'Poppins', sans-serif;
+                    font-family: var(--game-font-family);
                     outline: none;
                     white-space: nowrap;
                 }
@@ -484,7 +484,7 @@ const SentenceScramble: React.FC = () => {
                     color: #FACC15;
                     font-size: 14px;
                     font-weight: 800;
-                    font-family: 'Poppins', sans-serif;
+                    font-family: var(--game-font-family);
                     padding: 8px 20px;
                     border-radius: 20px;
                     margin-bottom: 6px;

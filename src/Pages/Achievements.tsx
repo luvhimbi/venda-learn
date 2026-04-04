@@ -60,23 +60,23 @@ const Achievements: React.FC = () => {
 
     return (
         <div className="achievements-page bg-light min-vh-100 pb-5">
-            <SEO 
-                title="Trophies & Achievements" 
-                description="View your VendaLearn collection and track your progress to mastery."
+            <SEO
+                title="Trophies & Achievements"
+                description="View your achievements and track your progress to mastery."
             />
 
             {/* TIGHTER HEADER */}
             <div className="bg-white border-bottom py-3 sticky-top shadow-sm">
                 <div className="container" style={{ maxWidth: '1000px' }}>
                     <div className="d-flex align-items-center justify-content-between">
-                        <button 
-                            onClick={() => navigate(-1)} 
+                        <button
+                            onClick={() => navigate(-1)}
                             className="btn btn-back-round d-flex align-items-center justify-content-center"
                         >
                             <ArrowLeft size={18} />
                         </button>
                         <div className="text-center">
-                            <h5 className="fw-bold mb-0 text-dark ls-tight">Venda Collection</h5>
+                            <h5 className="fw-bold mb-0 text-dark ls-tight">Achievement Collection</h5>
                             <p className="smallest fw-bold text-muted text-uppercase ls-1 mb-0">Trophies & Achievements</p>
                         </div>
                         <div className="px-3 py-1 bg-warning bg-opacity-10 rounded-pill border border-warning border-opacity-20 d-flex align-items-center gap-2">
@@ -88,22 +88,7 @@ const Achievements: React.FC = () => {
             </div>
 
             <div className="container mt-4" style={{ maxWidth: '1000px' }}>
-                {/* COMPACT HERO */}
-                <div className="row mb-4 g-4">
-                    <div className="col-12">
-                        <div className="card border-0 shadow-sm rounded-4 overflow-hidden bg-dark text-white p-4 position-relative">
-                            <div className="position-relative z-2">
-                                <h1 className="h2 fw-bold mb-1">Hall of Fame</h1>
-                                <p className="small opacity-75 mb-0">
-                                    Your journey of dedication to Venda heritage.
-                                </p>
-                            </div>
-                            <div className="position-absolute end-0 top-0 h-100 p-4 opacity-10">
-                                <TrophyIconLucide size={100} strokeWidth={1} />
-                            </div>
-                        </div>
-                    </div>
-                </div>
+
 
                 {/* GRID WITH BETTER DENSITY */}
                 <div className="row g-3 mb-5">
@@ -116,22 +101,22 @@ const Achievements: React.FC = () => {
                             return 0;
                         })
                         .map(trophy => {
-                        const isEarned = (userData?.trophies || []).includes(trophy.id);
-                        const progress = calculateProgress(trophy);
-                        
-                        return (
-                            <div key={trophy.id} className="col-12 col-md-4">
-                                <AchievementCard 
-                                    id={trophy.id}
-                                    color={trophy.color}
-                                    isEarned={isEarned}
-                                    progress={progress}
-                                    rarity={trophy.rarity as any}
-                                    onShare={handleShare}
-                                />
-                            </div>
-                        );
-                    })}
+                            const isEarned = (userData?.trophies || []).includes(trophy.id);
+                            const progress = calculateProgress(trophy);
+
+                            return (
+                                <div key={trophy.id} className="col-12 col-md-4">
+                                    <AchievementCard
+                                        id={trophy.id}
+                                        color={trophy.color}
+                                        isEarned={isEarned}
+                                        progress={progress}
+                                        rarity={trophy.rarity as any}
+                                        onShare={handleShare}
+                                    />
+                                </div>
+                            );
+                        })}
                 </div>
 
                 <div className="text-center pb-5">
@@ -142,7 +127,7 @@ const Achievements: React.FC = () => {
             </div>
 
             {/* SHARED MODAL */}
-            <SharePreviewModal 
+            <SharePreviewModal
                 isOpen={isShareModalOpen}
                 onClose={() => setIsShareModalOpen(false)}
                 title={selectedTrophy?.title}

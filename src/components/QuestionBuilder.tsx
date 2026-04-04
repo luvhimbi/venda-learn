@@ -1,5 +1,6 @@
 import React from 'react';
-import { GripVertical, Trash2 } from 'lucide-react';
+import { GripVertical, Trash2, Layers } from 'lucide-react';
+import Swal from 'sweetalert2';
 import {
     DndContext,
     closestCenter,
@@ -205,6 +206,58 @@ const QuestionBuilder: React.FC<Props> = ({ questions, onChange }) => {
         onChange(copy);
     };
 
+    const handleBulkAdd = async () => {
+        const { value: text } = await Swal.fire({
+            title: 'Bulk Add Questions',
+            input: 'textarea',
+            inputLabel: 'Paste questions',
+            inputPlaceholder: "How is it? | Good, Bad, Okay | Good | Meaning 'how'\\nNext question? | A, B, C | A | explanation",
+            showCancelButton: true,
+            confirmButtonColor: '#FACC15',
+            confirmButtonText: 'Add Questions',
+            footer: '<div class="text-start smallest text-muted"><b>Format:</b> Question | Option 1, Option 2, Option 3 | Correct Answer | Explanation (one per line)</div>',
+            customClass: {
+                input: 'smallest ls-tight shadow-none border-1'
+            }
+        });
+
+        if (text) {
+            const lines = text.split('\n').filter((l: string) => l.trim() && l.includes('|'));
+            const newQs = lines.map((line: string, i: number) => {
+                const parts = line.split('|').map((p: string) => p.trim());
+                const questionText = parts[0] || '';
+                const optionsString = parts[1] || '';
+                const correctAnswer = parts[2] || '';
+                const explanation = parts[3] || '';
+
+                const options = optionsString.split(',').map((o: string) => o.trim()).filter(Boolean);
+                
+                // If options are fewer than 2, it's probably not a good MC question, but we'll allow it if 1
+                const finalOptions = options.length > 0 ? options : ['', '', ''];
+
+                return {
+                    id: `q-${Date.now()}-${i}`,
+                    type: 'multiple-choice' as QuestionType,
+                    question: questionText,
+                    options: finalOptions,
+                    correctAnswer: correctAnswer || finalOptions[0] || '',
+                    explanation: explanation
+                };
+            });
+
+            if (newQs.length > 0) {
+                onChange([...questions, ...newQs]);
+                Swal.fire({
+                    title: 'Added!',
+                    text: `Successfully added ${newQs.length} multiple-choice questions.`,
+                    icon: 'success',
+                    timer: 2000,
+                    showConfirmButton: false
+                });
+            }
+        }
+    };
+
     const getTypeColor = (type: QuestionType) => {
         switch (type) {
             case 'multiple-choice': return '#3B82F6';
@@ -311,13 +364,13 @@ const QuestionBuilder: React.FC<Props> = ({ questions, onChange }) => {
                     <>
                         <div className="mb-3">
                             <label className="qb-label">Question</label>
-                            <input className="form-control qb-input" placeholder="e.g. Match the Venda greetings to their English meanings"
+                            <input className="form-control qb-input" placeholder="e.g. Match greetings to their English meanings"
                                 value={q.question || ''} onChange={e => update(idx, 'question', e.target.value)} />
                         </div>
                         <label className="qb-label">Pairs</label>
                         {(q.pairs || []).map((pair: any, pIdx: number) => (
                             <div key={pIdx} className="d-flex align-items-center gap-2 mb-2">
-                                <input className="form-control qb-input" placeholder="Venda word"
+                                <input className="form-control qb-input" placeholder="Target word"
                                     value={pair.venda || ''} onChange={e => updatePair(idx, pIdx, 'venda', e.target.value)} />
                                 <i className="bi bi-arrow-right text-muted"></i>
                                 <input className="form-control qb-input" placeholder="English meaning"
@@ -339,7 +392,7 @@ const QuestionBuilder: React.FC<Props> = ({ questions, onChange }) => {
                 return (
                     <>
                         <div className="mb-3">
-                            <label className="qb-label">Venda Word (played via TTS)</label>
+                            <label className="qb-label">Target Word (played via TTS)</label>
                             <input className="form-control qb-input" placeholder="e.g. Ndi madekwana"
                                 value={q.vendaWord || ''} onChange={e => update(idx, 'vendaWord', e.target.value)} />
                         </div>
@@ -413,9 +466,14 @@ const QuestionBuilder: React.FC<Props> = ({ questions, onChange }) => {
 
             {/* Add Question Controls */}
             <div className="bg-white border rounded-4 p-4 shadow-sm">
-                <p className="fw-bold mb-3" style={{ fontSize: 12, letterSpacing: 1, textTransform: 'uppercase', color: '#6B7280' }}>
-                    Add Question
-                </p>
+                <div className="d-flex align-items-center justify-content-between mb-3">
+                    <p className="fw-bold mb-0" style={{ fontSize: 12, letterSpacing: 1, textTransform: 'uppercase', color: '#6B7280' }}>
+                        Add Question
+                    </p>
+                    <button type="button" onClick={handleBulkAdd} className="btn btn-outline-dark btn-sm fw-bold smallest ls-1 rounded-pill px-3 py-1 shadow-sm d-flex align-items-center gap-2">
+                        <Layers size={14} /> BULK ADD MCQs
+                    </button>
+                </div>
                 <div className="d-flex flex-wrap gap-2">
                     {QUESTION_TYPES.map(t => (
                         <button key={t.value} type="button"

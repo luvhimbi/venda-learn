@@ -43,8 +43,8 @@ const ResetPassword: React.FC = () => {
                 {!submitted ? (
                     <div className="animate__animated animate__fadeIn">
                         <div className="mb-4 text-center">
-                            <h4 className="fw-bold text-dark mb-2">Forgot Password?</h4>
-                            <p className="text-muted small">Enter your email and we'll send you a recovery link.</p>
+                            <h4 className="fw-bold text-dark mb-2">Forgot your password?</h4>
+                            <p className="text-muted small">Enter your email and we will send you a password reset link.</p>
                         </div>
 
                         {error && (

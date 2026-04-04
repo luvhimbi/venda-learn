@@ -155,7 +155,7 @@ const AddHistory: React.FC = () => {
                         </div>
 
                         <div className="col-md-12">
-                            <label className="smallest-print fw-bold uppercase ls-1 mb-2 d-block text-muted">Tshivenda Title</label>
+                            <label className="smallest-print fw-bold uppercase ls-1 mb-2 d-block text-muted">Target Language Title</label>
                             <input
                                 type="text" name="vendaTitle" required
                                 className="form-control custom-input"
@@ -267,7 +267,7 @@ const AddHistory: React.FC = () => {
                     border-radius: 12px;
                     padding: 12px 15px;
                     font-size: 14px;
-                    font-family: 'Poppins', sans-serif;
+                    font-family: var(--game-font-family);
                     transition: all 0.2s;
                 }
 
@@ -280,7 +280,7 @@ const AddHistory: React.FC = () => {
                 .btn-game-primary { 
                     background-color: #FACC15 !important; 
                     color: #111827 !important; 
-                    font-family: 'Poppins', sans-serif;
+                    font-family: var(--game-font-family);
                     font-weight: 800;
                     border: none !important;
                     border-radius: 12px;
@@ -296,7 +296,7 @@ const AddHistory: React.FC = () => {
                 }
 
                 .swal2-venda-style {
-                    font-family: 'Poppins', sans-serif !important;
+                    font-family: var(--game-font-family) !important;
                     border-radius: 20px !important;
                     border: 3px solid #111827 !important;
                 }

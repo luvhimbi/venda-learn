@@ -45,16 +45,16 @@ const DailyWelcomeModal: React.FC<DailyWelcomeModalProps> = ({ username, streak,
 
     const getGreeting = () => {
         const hour = new Date().getHours();
-        if (hour >= 5 && hour < 12) return { title: "Ndi Matsheloni", sub: "Good Morning" };
-        if (hour >= 12 && hour < 17) return { title: "Ndi Masiari", sub: "Good Afternoon" };
-        if (hour >= 17 && hour <= 23) return { title: "Ndi Madekwana", sub: "Good Evening" };
-        return { title: "Ndi Madaucha", sub: "Greetings" };
+        if (hour >= 5 && hour < 12) return { title: "Good Morning", sub: "Welcome back" };
+        if (hour >= 12 && hour < 17) return { title: "Good Afternoon", sub: "Welcome back" };
+        if (hour >= 17 && hour <= 23) return { title: "Good Evening", sub: "Welcome back" };
+        return { title: "Hello", sub: "Welcome back" };
     };
 
     const getMotivation = () => {
         if (streak >= 7) return `Your ${streak}-day flame is blazing!`;
         if (streak > 0) return `You're on a ${streak}-day streak!`;
-        return `Start your Venda journey today!`;
+        return `Start your language journey today!`;
     };
 
     const greeting = getGreeting();
@@ -83,9 +83,9 @@ const DailyWelcomeModal: React.FC<DailyWelcomeModalProps> = ({ username, streak,
 
                 {/* ACTION CARD */}
                 {lastLesson ? (
-                    <div className="w-100 p-4 rounded-4 mb-4 text-start shadow-sm" style={{ backgroundColor: '#F8FAFC', border: '1px solid #E2E8F0' }}>
-                        <span className="smallest fw-bold ls-1 text-warning uppercase d-block mb-1">Pick up where you left off:</span>
-                        <h5 className="fw-bold text-dark mb-1">{lastLesson.title}</h5>
+                    <div className="w-100 p-3 rounded-4 mb-4 text-start shadow-sm" style={{ backgroundColor: '#F8FAFC', border: '1px solid #E2E8F0' }}>
+                        <span className="fw-bold ls-1 text-warning uppercase d-block mb-1" style={{ fontSize: '9px' }}>Pick up where you left off:</span>
+                        <h6 className="fw-bold text-dark mb-1">{lastLesson.title}</h6>
                         <p className="smallest text-muted fw-bold uppercase ls-1 mb-3">{lastLesson.courseTitle}</p>
                         
                         <a 

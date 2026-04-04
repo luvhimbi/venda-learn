@@ -430,7 +430,7 @@ const KnowledgeBattle: React.FC = () => {
                     <div className="text-white mb-5 pb-4">
                         <button className="btn btn-link text-decoration-none p-0 mb-4 d-flex align-items-center gap-2 text-white fw-bold smallest ls-2"
                             onClick={() => navigate('/mitambo')}>
-                            <ArrowLeft size={16} /> MURAHU
+                            <ArrowLeft size={16} /> BACK
                         </button>
                         <div className="d-flex align-items-center gap-3 mb-2">
                             <div className="battle-header-icon">

@@ -4,8 +4,9 @@
 
 import { db, auth } from './firebaseConfig';
 import type { Firestore } from 'firebase/firestore';
-import { collection, getDocs, doc, getDoc, setDoc, query, orderBy, limit, where } from 'firebase/firestore';
+import { collection, getDocs, doc, getDoc, setDoc, query, orderBy, limit, where, deleteDoc } from 'firebase/firestore';
 import { getCurrentWeekIdentifier } from './levelUtils';
+import { syncStreak } from './streakUtils';
 
 
 interface CacheEntry<T> {
@@ -71,11 +72,27 @@ const setCache = <T>(key: string, data: T): void => {
     }
 };
 
-// Invalidate a specific key (e.g. after completing a lesson)
+// Invalidate a specific key or keys by prefix (e.g. "topLearners*")
 export const invalidateCache = (key?: string) => {
     if (key) {
-        cache.delete(key);
-        try { localStorage.removeItem(STORAGE_PREFIX + key); } catch (e) { }
+        if (key.endsWith('*')) {
+            const prefix = key.slice(0, -1);
+            // 1. Clear in-memory
+            for (const k of cache.keys()) {
+                if (k.startsWith(prefix)) cache.delete(k);
+            }
+            // 2. Clear localStorage
+            try {
+                Object.keys(localStorage).forEach(k => {
+                    const actualKey = k.startsWith(STORAGE_PREFIX) ? k.slice(STORAGE_PREFIX.length) : k;
+                    if (actualKey.startsWith(prefix)) localStorage.removeItem(k);
+                });
+            } catch (e) { }
+        } else {
+            // Exact match
+            cache.delete(key);
+            try { localStorage.removeItem(STORAGE_PREFIX + key); } catch (e) { }
+        }
     } else {
         cache.clear();
         try {
@@ -108,6 +125,17 @@ export const fetchLessons = async (): Promise<any[]> => {
     return lessons;
 };
 
+export const fetchLanguages = async (): Promise<any[]> => {
+    const cached = getCached<any[]>('languages');
+    if (cached) return cached;
+
+    const snap = await getDocs(collection(db as Firestore, "languages"));
+    const languages = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+
+    setCache('languages', languages);
+    return languages;
+};
+
 /**
  * Normalize a course doc into micro lessons.
  * Supports both new `microLessons[]` format and legacy `slides/questions` format.
@@ -138,7 +166,13 @@ export const fetchUserData = async (): Promise<any | null> => {
     const snap = await getDoc(doc(db as Firestore, "users", user.uid));
     if (!snap.exists()) return null;
 
-    const data = { ...snap.data(), uid: user.uid };
+    // Maintain streak state (apply freezes or reset to 0) before returning
+    await syncStreak(user.uid);
+    
+    // Re-fetch since syncStreak might have modified the document
+    const updatedSnap = await getDoc(doc(db as Firestore, "users", user.uid));
+    const data = { ...updatedSnap.data(), uid: user.uid };
+    
     setCache(`user_${user.uid}`, data);
     return data;
 };
@@ -418,7 +452,6 @@ export const fetchLearnedStats = async (): Promise<any> => {
         coursesCount: completedCourseIds.length,
         points: userData.points || 0,
         streak: userData.streak || 0,
-        level: userData.level || 1,
         completedLessons: completedMlIds,
         completedCourses: completedCourseIds
     };
@@ -519,3 +552,19 @@ export const saveThemeSettings = async (settings: any): Promise<void> => {
 
 
 
+export const fetchReviews = async (): Promise<any[]> => {
+    const cached = getCached<any[]>('reviews');
+    if (cached) return cached;
+
+    const q = query(collection(db as Firestore, "reviews"), orderBy("timestamp", "desc"));
+    const snap = await getDocs(q);
+    const reviews = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+
+    setCache('reviews', reviews);
+    return reviews;
+};
+
+export const deleteReview = async (reviewId: string): Promise<void> => {
+    await deleteDoc(doc(db as Firestore, "reviews", reviewId));
+    invalidateCache('reviews');
+};

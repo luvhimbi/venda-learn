@@ -1,5 +1,13 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { Resend } from 'resend';
+import admin from 'firebase-admin';
+
+// Initialize Firebase Admin (Assumes credentials are in environment)
+if (!admin.apps.length) {
+    admin.initializeApp({
+        projectId: process.env.VITE_FIREBASE_PROJECT_ID,
+    });
+}
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
@@ -8,6 +16,22 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     if (req.method !== 'POST') {
         return res.status(405).json({ error: 'Method not allowed' });
     }
+
+    // --- SECURITY: Verify Firebase Auth Token ---
+    const authHeader = req.headers.authorization;
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+        return res.status(401).json({ error: 'Unauthorized: Missing or invalid token' });
+    }
+
+    const idToken = authHeader.split('Bearer ')[1];
+    try {
+        const decodedToken = await admin.auth().verifyIdToken(idToken);
+        console.log(`Verified request from user: ${decodedToken.uid}`);
+    } catch (authError) {
+        console.error('Auth verification failed:', authError);
+        return res.status(401).json({ error: 'Unauthorized: Invalid token' });
+    }
+    // --- END SECURITY ---
 
     const { email, username } = req.body;
 

@@ -1,14 +1,15 @@
 import React, { useState, useEffect, useRef } from 'react';
 import type { Firestore } from 'firebase/firestore';
 import { db } from '../../services/firebaseConfig';
-import { doc, setDoc, addDoc, collection, serverTimestamp } from 'firebase/firestore';
+import { doc, setDoc, addDoc, collection, serverTimestamp, getDocs, query, orderBy } from 'firebase/firestore';
+
 import { useNavigate } from 'react-router-dom';
 import AdminNavbar from '../../components/AdminNavbar';
 import QuestionBuilder from '../../components/QuestionBuilder';
 import { invalidateCache } from '../../services/dataCache';
 import useAutoSave from '../../hooks/useAutoSave';
 import Swal from 'sweetalert2';
-import { ArrowLeft, CloudCheck, RotateCcw, Plus, Book, Layers, Trash2, X, Rocket, GripVertical, MessageCircle } from 'lucide-react';
+import { ArrowLeft, CloudCheck, RotateCcw, Plus, Book, Layers, Trash2, X, Rocket, GripVertical } from 'lucide-react';
 import {
     DndContext,
     closestCenter,
@@ -117,7 +118,7 @@ const SortableSlide: React.FC<SortableSlideProps> = ({ id, index, slide, onUpdat
                 <div className="slide-card-body">
                     <div className="row g-3">
                         <div className="col-6">
-                            <label className="editor-label">Tshivenda</label>
+                            <label className="editor-label">Target Language</label>
                             <input className="editor-input" placeholder="e.g. Ndaa" value={slide.venda} onChange={(e) => onUpdate('venda', e.target.value)} />
                         </div>
                         <div className="col-6">
@@ -140,18 +141,39 @@ const AddLesson: React.FC = () => {
         id: '',
         title: '',
         vendaTitle: '',
-        difficulty: 'Easy',
+        languageId: 'venda',
+        difficulty: 'Beginner',
+
         microLessons: [
             {
                 id: `ml-${Date.now()}`,
                 title: 'Part 1',
                 slides: [{ id: `s-${Date.now()}`, venda: '', english: '', context: '' }],
-                scenes: [],
                 questions: []
             }
         ]
     });
+    const [languages, setLanguages] = useState<any[]>([]);
     const [activeMlIndex, setActiveMlIndex] = useState(0);
+
+    useEffect(() => {
+        const loadLanguages = async () => {
+            try {
+                const q = query(collection(db, "languages"), orderBy("name", "asc"));
+                const snap = await getDocs(q);
+                const list = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+                setLanguages(list);
+                if (list.length > 0 && !course.languageId) {
+                    setCourse((prev: any) => ({ ...prev, languageId: list[0].id }));
+                }
+
+            } catch (error) {
+                console.error("Error loading languages:", error);
+            }
+        };
+        loadLanguages();
+    }, []);
+
 
     const sensors = useSensors(
         useSensor(PointerSensor, {
@@ -249,8 +271,10 @@ const AddLesson: React.FC = () => {
                 id: courseRef,
                 title: course.title,
                 vendaTitle: course.vendaTitle,
+                languageId: course.languageId || 'venda',
                 difficulty: course.difficulty,
                 microLessons
+
             });
 
             await addDoc(collection(db as Firestore, "logs"), {
@@ -289,51 +313,12 @@ const AddLesson: React.FC = () => {
         setCourse({ ...course, microLessons: newMls });
     };
 
-    const addScene = () => updateMl('scenes', [...(currentMl.scenes || []), {
-        id: `scene-${Date.now()}`,
-        title: 'New Scene',
-        background: '',
-        dialogue: [{ characterName: '', venda: '', english: '', avatar: '' }]
-    }]);
-
-    const updateScene = (index: number, field: string, value: any) => {
-        const newScenes = [...(currentMl.scenes || [])];
-        newScenes[index] = { ...newScenes[index], [field]: value };
-        updateMl('scenes', newScenes);
-    };
-
-    const removeScene = (index: number) => updateMl('scenes', currentMl.scenes.filter((_: any, i: number) => i !== index));
-
-    const addDialogueLine = (sceneIndex: number) => {
-        const newScenes = [...currentMl.scenes];
-        newScenes[sceneIndex] = {
-            ...newScenes[sceneIndex],
-            dialogue: [...newScenes[sceneIndex].dialogue, { characterName: '', venda: '', english: '', avatar: '', position: 'left' }]
-        };
-        updateMl('scenes', newScenes);
-    };
-
-    const updateDialogueLine = (sceneIndex: number, lineIndex: number, field: string, value: string) => {
-        const newScenes = [...currentMl.scenes];
-        const newDialogue = [...newScenes[sceneIndex].dialogue];
-        newDialogue[lineIndex] = { ...newDialogue[lineIndex], [field]: value };
-        newScenes[sceneIndex] = { ...newScenes[sceneIndex], dialogue: newDialogue };
-        updateMl('scenes', newScenes);
-    };
-
-    const removeDialogueLine = (sceneIndex: number, lineIndex: number) => {
-        const newScenes = [...currentMl.scenes];
-        const newDialogue = newScenes[sceneIndex].dialogue.filter((_: any, i: number) => i !== lineIndex);
-        newScenes[sceneIndex] = { ...newScenes[sceneIndex], dialogue: newDialogue };
-        updateMl('scenes', newScenes);
-    };
 
     const addMicroLesson = () => {
         const newMl = {
             id: `ml-${Date.now()}`,
             title: `Part ${course.microLessons.length + 1}`,
             slides: [{ id: `s-${Date.now()}`, venda: '', english: '', context: '' }],
-            scenes: [],
             questions: []
         };
         setCourse({ ...course, microLessons: [...course.microLessons, newMl] });
@@ -367,12 +352,12 @@ const AddLesson: React.FC = () => {
         const { value: text } = await Swal.fire({
             title: 'Bulk Add Slides',
             input: 'textarea',
-            inputLabel: 'Paste words (Venda | English | Context)',
+            inputLabel: 'Paste words (Target Language | English | Context)',
             inputPlaceholder: 'Ndaa | Hello | Greeting\nVukani | Wake up\nMasiari | Afternoon',
             showCancelButton: true,
             confirmButtonColor: '#FACC15',
             confirmButtonText: 'Add Slides',
-            footer: '<small>Format: Venda | English | Context (one per line)</small>'
+            footer: '<small>Format: Target Language | English | Context (one per line)</small>'
         });
 
         if (text) {
@@ -393,7 +378,8 @@ const AddLesson: React.FC = () => {
         }
     };
 
-    const filledDetails = [course.id, course.title, course.vendaTitle].filter(Boolean).length;
+    const filledDetails = [course.id, course.title, course.vendaTitle, course.languageId].filter(Boolean).length;
+
 
     return (
         <div className="lesson-editor-page min-vh-100 pb-5">
@@ -466,9 +452,19 @@ const AddLesson: React.FC = () => {
                                     <input className="editor-input" placeholder="e.g. Family" value={course.title} onChange={(e) => setCourse({ ...course, title: e.target.value })} />
                                 </div>
                                 <div className="col-md-6">
-                                    <label className="editor-label">Tshivenda Title</label>
+                                    <label className="editor-label">Target Language</label>
+                                    <select className="editor-input" value={course.languageId} onChange={(e) => setCourse({ ...course, languageId: e.target.value })}>
+                                        {languages.length === 0 && <option value="venda">Venda (Default)</option>}
+                                        {languages.map(lang => (
+                                            <option key={lang.id} value={lang.id}>{lang.name}</option>
+                                        ))}
+                                    </select>
+                                </div>
+                                <div className="col-md-6">
+                                    <label className="editor-label">Target Language Title</label>
                                     <input className="editor-input" placeholder="e.g. Muta" value={course.vendaTitle} onChange={(e) => setCourse({ ...course, vendaTitle: e.target.value })} />
                                 </div>
+
                             </div>
                         </div>
                     </section>
@@ -561,135 +557,6 @@ const AddLesson: React.FC = () => {
                                 </div>
                             </div>
 
-                            {/* CONVERSATION SCENES */}
-                            <div className="mb-5 p-4 rounded-4" style={{
-                                background: 'linear-gradient(to bottom right, #ffffff, #f0f7ff)',
-                                border: '2px solid #e0e7ff',
-                                boxShadow: '0 4px 20px rgba(0,0,0,0.03)'
-                            }}>
-                                <div className="d-flex align-items-center justify-content-between mb-4">
-                                    <div className="d-flex align-items-center gap-3">
-                                        <div className="bg-primary bg-opacity-10 p-2 rounded-3 text-primary">
-                                            <MessageCircle size={24} />
-                                        </div>
-                                        <div>
-                                            <h5 className="fw-bold mb-0 text-dark d-flex align-items-center gap-2">
-                                                Conversation Scenes
-                                                <span className="badge bg-primary rounded-pill smallest ls-1 px-2 py-1" style={{ fontSize: '10px' }}>NEW</span>
-                                            </h5>
-                                            <p className="smallest text-muted fw-semi-bold ls-1 mb-0">{(currentMl.scenes || []).length} SCENE{(currentMl.scenes || []).length !== 1 ? 'S' : ''} • TEACH THROUGH DIALOGUE</p>
-                                        </div>
-                                    </div>
-                                    <button type="button" onClick={addScene} className="btn btn-primary fw-bold smallest ls-1 rounded-pill px-4 py-2 shadow-sm d-flex align-items-center gap-2 transition-transform hover-scale">
-                                        <Plus size={18} /> ADD NEW SCENE
-                                    </button>
-                                </div>
-
-                                <div className="space-y-4">
-                                    {(currentMl.scenes || []).map((scene: any, sIdx: number) => (
-                                        <div key={scene.id} className="bg-white p-4 rounded-4 border shadow-sm position-relative mb-4">
-                                            <button
-                                                type="button"
-                                                onClick={() => removeScene(sIdx)}
-                                                className="btn btn-link text-danger p-0 position-absolute"
-                                                style={{ top: '15px', right: '15px' }}
-                                            >
-                                                <X size={18} />
-                                            </button>
-
-                                            <div className="row g-3 mb-4">
-                                                <div className="col-md-6">
-                                                    <label className="smallest fw-bold ls-1 text-uppercase text-muted d-block mb-1">Scene Title</label>
-                                                    <input
-                                                        className="form-control form-control-sm fw-bold"
-                                                        value={scene.title}
-                                                        onChange={(e) => updateScene(sIdx, 'title', e.target.value)}
-                                                    />
-                                                </div>
-                                                <div className="col-md-6">
-                                                    <label className="smallest fw-bold ls-1 text-uppercase text-muted d-block mb-1">Background / Setting</label>
-                                                    <input
-                                                        className="form-control form-control-sm"
-                                                        placeholder="e.g. At the Market"
-                                                        value={scene.background}
-                                                        onChange={(e) => updateScene(sIdx, 'background', e.target.value)}
-                                                    />
-                                                </div>
-                                            </div>
-
-                                            <div className="ps-3 border-start border-3 border-light">
-                                                <h6 className="smallest fw-bold ls-2 text-uppercase text-muted mb-3">Dialogue</h6>
-                                                {scene.dialogue.map((line: any, lIdx: number) => (
-                                                    <div key={lIdx} className="bg-light p-3 rounded-3 mb-3 position-relative">
-                                                        <button
-                                                            type="button"
-                                                            onClick={() => removeDialogueLine(sIdx, lIdx)}
-                                                            className="btn btn-link text-muted p-0 position-absolute"
-                                                            style={{ top: '10px', right: '10px' }}
-                                                        >
-                                                            <X size={14} />
-                                                        </button>
-                                                        <div className="row g-2">
-                                                            <div className="col-md-3">
-                                                                <input
-                                                                    className="form-control form-control-sm smallest fw-bold"
-                                                                    placeholder="Name"
-                                                                    value={line.characterName}
-                                                                    onChange={(e) => updateDialogueLine(sIdx, lIdx, 'characterName', e.target.value)}
-                                                                />
-                                                            </div>
-                                                            <div className="col-md-9">
-                                                                <div className="d-flex align-items-center gap-2 mb-2">
-                                                                    <div className="btn-group btn-group-sm">
-                                                                        <button
-                                                                            type="button"
-                                                                            className={`btn btn-xs fw-bold ${line.position === 'left' ? 'btn-primary' : 'btn-outline-secondary'}`}
-                                                                            onClick={() => updateDialogueLine(sIdx, lIdx, 'position', 'left')}
-                                                                        >
-                                                                            LEFT
-                                                                        </button>
-                                                                        <button
-                                                                            type="button"
-                                                                            className={`btn btn-xs fw-bold ${line.position === 'right' ? 'btn-primary' : 'btn-outline-secondary'}`}
-                                                                            onClick={() => updateDialogueLine(sIdx, lIdx, 'position', 'right')}
-                                                                        >
-                                                                            RIGHT
-                                                                        </button>
-                                                                    </div>
-                                                                    <input
-                                                                        className="form-control form-control-sm mb-0"
-                                                                        placeholder="Venda text"
-                                                                        value={line.venda}
-                                                                        onChange={(e) => updateDialogueLine(sIdx, lIdx, 'venda', e.target.value)}
-                                                                    />
-                                                                </div>
-                                                                <input
-                                                                    className="form-control form-control-sm smallest"
-                                                                    placeholder="English translation"
-                                                                    value={line.english}
-                                                                    onChange={(e) => updateDialogueLine(sIdx, lIdx, 'english', e.target.value)}
-                                                                />
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                ))}
-                                                <button
-                                                    type="button"
-                                                    onClick={() => addDialogueLine(sIdx)}
-                                                    className="btn btn-outline-secondary btn-sm smallest fw-bold ls-1 w-100 mt-2"
-                                                >
-                                                    <Plus size={12} className="me-1" /> ADD DIALOGUE LINE
-                                                </button>
-                                            </div>
-                                        </div>
-                                    ))}
-                                </div>
-                                {(currentMl.scenes || []).length === 0 && (
-                                    <div className="text-center py-4 border-2 border-dashed rounded-4">
-                                        <p className="smallest fw-bold text-muted ls-1 mb-0">NO CONVERSATION SCENES ADDED YET</p>
-                                    </div>
-                                )}
-                            </div>
 
                             {/* QUESTIONS */}
                             <div>
