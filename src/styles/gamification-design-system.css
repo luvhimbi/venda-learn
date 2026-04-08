@@ -1,273 +1,459 @@
 /* ============================================
-   VENDA LEARN - GAMIFICATION DESIGN SYSTEM
-   Theme: High-Energy Amber (Poppins / Compact Scale)
+   VENDA LEARN - GAMIFIED DESIGN SYSTEM (UNIFIED)
+   Theme: High-Energy Amber + Munwenda Accents
+   
+   ARCHITECTURE:
+   1. Fonts & Variables
+   2. Typography Utilities
+   3. Munwenda Themes
+   4. Global & Type
+   5. Shadow System
+   6. Input Group System
+   7. Button System
+   8. Interaction Utilities
+   9. Game Components
+   10. Animation Keyframes
+   11. SweetAlert2 Theme
+   12. Accordion (Landing FAQ)
+   13. Responsive Overrides
    ============================================ */
 
+/* ============================================
+   1. FONTS
+   ============================================ */
 @import url('https://fonts.cdnfonts.com/css/tt-octosquares');
 @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800&family=Poppins:wght@400;600;700;800&display=swap');
-
-:root {
-  /* Brand Colors */
-  --game-primary: #f59e0b;
-  --game-primary-dark: #d97706;
-  --game-primary-light: #fbbf24;
-
-  --game-bg-primary: #0f172a;
-  --game-bg-secondary: #1e293b;
-
-  --game-text-light: #ffffff;
-  --game-text-inverse: #111827;
-
-  /* Refined Scaling */
-  --game-radius-md: 8px;
-  --game-font-family: 'TT Octosquares', 'Poppins', sans-serif;
-}
+@import url('https://fonts.googleapis.com/css2?family=Lexend:wght@400;700;900&display=swap');
 
 /* ============================================
-   MUNWENDA TRADITIONAL THEME
-   Vibrant Venda Stripes (Yellow, Red, Green, Blue, Black/White)
+   2. CSS VARIABLES (Design Tokens)
    ============================================ */
-.bg-munwenda {
-  background: repeating-linear-gradient(90deg,
-      #FACC15 0px, #FACC15 15px,
-      /* Yellow */
-      #15803D 15px, #15803D 20px,
-      /* Dark Green */
-      #FACC15 20px, #FACC15 25px,
-      /* Yellow */
-      #DC2626 25px, #DC2626 40px,
-      /* Red */
-      #1E3A8A 40px, #1E3A8A 45px,
-      /* Deep Blue */
-      #000000 45px, #000000 55px,
-      /* Black */
-      #FFFFFF 55px, #FFFFFF 58px,
-      /* White Accent */
-      #000000 58px, #000000 68px,
-      /* Black */
-      #1E3A8A 68px, #1E3A8A 73px,
-      /* Deep Blue */
-      #DC2626 73px, #DC2626 88px,
-      /* Red */
-      #FACC15 88px, #FACC15 93px,
-      /* Yellow */
-      #15803D 93px, #15803D 98px,
-      /* Dark Green */
-      #FACC15 98px, #FACC15 113px
-      /* Yellow */
-    );
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2) inset;
-}
+:root {
+  /* Core Palette */
+  --game-amber: #f59e0b;
+  --game-amber-dark: #d97706;
+  --game-amber-light: #fbbf24;
 
-/* Vertical Munwenda for side accents */
-.bg-munwenda-vertical {
-  background: repeating-linear-gradient(180deg,
-      #FACC15 0px, #FACC15 15px,
-      #15803D 15px, #15803D 20px,
-      #FACC15 20px, #FACC15 25px,
-      #DC2626 25px, #DC2626 40px,
-      #1E3A8A 40px, #1E3A8A 45px,
-      #000000 45px, #000000 55px,
-      #FFFFFF 55px, #FFFFFF 58px,
-      #000000 58px, #000000 68px,
-      #1E3A8A 68px, #1E3A8A 73px,
-      #DC2626 73px, #DC2626 88px,
-      #FACC15 88px, #FACC15 93px,
-      #15803D 93px, #15803D 98px,
-      #FACC15 98px, #FACC15 113px);
+  /* Venda Yellow (auth pages / public pages) */
+  --venda-yellow: #FACC15;
+  --venda-yellow-dark: #EAB308;
+  --venda-yellow-darker: #CA8A04;
+
+  /* Traditional Palette (Munwenda) */
+  --venda-green: #15803D;
+  --venda-red: #DC2626;
+  --venda-blue: #1E3A8A;
+
+  /* Neutrals - Dark Mode (Dashboard) */
+  --game-bg: #0f172a;
+  --game-surface: #1e293b;
+  --game-text: #ffffff;
+  --game-text-dark: #111827;
+
+  /* Neutrals - Light Mode (Public/Auth) */
+  --light-bg: #F8FAFC;
+  --light-surface: #FFFFFF;
+  --light-border: #E5E7EB;
+  --light-border-strong: #000000;
+  --light-text: #1a1a1a;
+  --light-text-muted: #64748B;
+  --light-text-secondary: #4B5563;
+
+  /* Typography & Shape */
+  --game-font: 'TT Octosquares', 'Poppins', sans-serif;
+  --auth-font: 'Lexend', sans-serif;
+  --game-radius: 8px;
+  --game-radius-soft: 12px;
+  --game-shadow-depth: 4px;
+
+  /* Shadow Tokens */
+  --shadow-brutalist: 10px 10px 0px 0px #000;
+  --shadow-brutalist-sm: 4px 4px 0px 0px #000;
+  --shadow-brutalist-light: 10px 10px 0px 0px #FACC15;
+  --shadow-soft: 0 4px 0 var(--venda-yellow-dark);
 }
 
 /* ============================================
-   GLOBAL TYPOGRAPHY - Reduced Size
+   3. TYPOGRAPHY UTILITIES
+   ============================================ */
+.fw-black { font-weight: 900; }
+.ls-tight { letter-spacing: -2px; }
+.ls-1 { letter-spacing: 1px; }
+.smallest { font-size: 11px; }
+.smallest-print { font-size: 10px; letter-spacing: 1px; }
+.font-auth { font-family: var(--auth-font); }
+
+/* ============================================
+   4. MUNWENDA STRIPED THEMES
+   ============================================ */
+.bg-munwenda, .bg-munwenda-vertical {
+  --stripe-yellow: var(--venda-yellow) 0px, var(--venda-yellow) 15px;
+  --stripe-green: var(--venda-green) 15px, var(--venda-green) 20px;
+  --stripe-red: var(--venda-red) 25px, var(--venda-red) 40px;
+  --stripe-blue: var(--venda-blue) 40px, var(--venda-blue) 45px;
+  --stripe-black: #000 45px, #000 55px;
+  --stripe-white: #FFF 55px, #FFF 58px;
+}
+
+.bg-munwenda {
+  background: repeating-linear-gradient(90deg, var(--stripe-yellow), var(--stripe-green), var(--venda-yellow) 20px, var(--venda-yellow) 25px, var(--stripe-red), var(--stripe-blue), var(--stripe-black), var(--stripe-white));
+  box-shadow: inset 0 2px 4px rgba(0,0,0,0.2);
+}
+
+.bg-munwenda-vertical {
+  background: repeating-linear-gradient(180deg, var(--stripe-yellow), var(--stripe-green), var(--venda-yellow) 20px, var(--venda-yellow) 25px, var(--stripe-red), var(--stripe-blue), var(--stripe-black), var(--stripe-white));
+}
+
+/* ============================================
+   5. GLOBAL & TYPE
    ============================================ */
 body {
-  font-family: var(--game-font-family);
+  font-family: var(--game-font);
   font-size: 14px;
-  /* Reduced from default 16px */
-  background-color: var(--game-bg-primary);
-  color: var(--game-text-light);
+  background-color: var(--game-bg);
+  color: var(--game-text);
   line-height: 1.5;
 }
 
+h1, h2, h3 { font-weight: 800; text-transform: uppercase; letter-spacing: -0.5px; }
+h1 { font-size: 1.75rem; }
+h2 { font-size: 1.5rem; }
+h3 { font-size: 1.25rem; }
+
 /* ============================================
-   BUTTONS - Compact & Tactile
+   6. SHADOW SYSTEM
    ============================================ */
+.shadow-action { box-shadow: var(--shadow-brutalist); }
+.shadow-action-sm { box-shadow: var(--shadow-brutalist-sm); }
+.shadow-action-light { box-shadow: var(--shadow-brutalist-light); }
+
+/* ============================================
+   7. INPUT GROUP SYSTEM
+   
+   Uses BEM-like pattern:
+   - .custom-input-group           → shared base (resets only)
+   - .custom-input-group--brutalist → Login style (4px black border, no radius)
+   - .custom-input-group--soft      → Register style (2px grey border, 12px radius)
+   - .custom-input-group--underline  → Reset Password style (bottom border only)
+   ============================================ */
+
+/* --- Shared Base: Just input resets, NO visual styling --- */
+.custom-input-group input {
+  border: none !important;
+  outline: none !important;
+  box-shadow: none !important;
+  width: 100%;
+}
+
+/* --- Variant A: Brutalist (Login page) --- */
+.custom-input-group--brutalist {
+  border: 4px solid #000;
+  background-color: #fff;
+  transition: 0.1s;
+}
+
+.custom-input-group--brutalist:focus-within {
+  transform: translate(-4px, -4px);
+  box-shadow: 8px 8px 0px 0px #000;
+}
+
+.custom-input-group--brutalist input {
+  padding: 0.9rem 1rem !important;
+  font-size: 14px;
+}
+
+/* --- Variant B: Soft (Register, general auth) --- */
+.custom-input-group--soft {
+  border: 2px solid var(--light-border);
+  border-radius: var(--game-radius-soft);
+  background-color: #F9FAFB;
+  transition: 0.2s;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+}
+
+.custom-input-group--soft:focus-within {
+  border-color: var(--venda-yellow);
+  background-color: var(--light-surface);
+}
+
+.custom-input-group--soft input {
+  border-radius: 0 !important;
+  background: transparent !important;
+  background-color: transparent !important;
+  padding: 1rem 1rem !important;
+}
+
+/* --- Variant C: Underline (Reset Password) --- */
+.custom-input-group--underline {
+  border-bottom: 2px solid #F3F4F6;
+  transition: 0.2s;
+  background: transparent;
+}
+
+.custom-input-group--underline:focus-within {
+  border-color: var(--venda-yellow);
+}
+
+/* Hide browser password reveal buttons */
+input::-ms-reveal, input::-ms-clear { display: none; }
+input[type="password"]::-webkit-contacts-auto-fill-button,
+input[type="password"]::-webkit-credentials-auto-fill-button { display: none !important; }
+
+/* ============================================
+   8. BUTTON SYSTEM
+   ============================================ */
+
+/* --- Base Game Button (Dashboard) --- */
 .btn-game {
-  font-family: var(--game-font-family);
+  font-family: var(--game-font);
   font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
   border: none;
-  border-radius: var(--game-radius-md);
-
-  /* Compact Padding */
-  padding: 0.5rem 1.1rem;
+  border-radius: var(--game-radius);
+  padding: 0.5rem 1.2rem;
   font-size: 0.75rem;
-  /* Small, sharp text */
-
-  transition: all 0.15s ease-in-out;
-  cursor: pointer;
+  transition: all 0.1s ease;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 6px;
-  position: relative;
+  gap: 8px;
 }
 
+/* Primary Amber Button (Dashboard) */
 .btn-game-primary {
-  background-color: var(--game-primary);
-  color: var(--game-text-inverse);
-  /* The "Game" Depth Effect */
-  box-shadow: 0 3px 0 var(--game-primary-dark);
+  background-color: var(--game-amber);
+  color: var(--game-text-dark);
+  box-shadow: 0 var(--game-shadow-depth) 0 var(--game-amber-dark);
 }
 
 .btn-game-primary:hover {
-  background-color: var(--game-primary-light);
+  background-color: var(--game-amber-light);
   transform: translateY(-1px);
-  box-shadow: 0 4px 0 var(--game-primary-dark);
 }
 
 .btn-game-primary:active {
-  transform: translateY(2px);
-  box-shadow: 0 1px 0 var(--game-primary-dark);
+  transform: translateY(3px);
+  box-shadow: 0 1px 0 var(--game-amber-dark);
 }
 
-/* Extra Small variant for Navbars */
+/* Compact Sidebar/Nav Button */
 .btn-game-xs {
   padding: 0.3rem 0.7rem;
   font-size: 0.65rem;
-  border-radius: 6px;
-  box-shadow: 0 2px 0 var(--game-primary-dark);
+  box-shadow: 0 2px 0 var(--game-amber-dark);
 }
 
-.btn-game-xs:active {
-  box-shadow: 0 0px 0 var(--game-primary-dark);
+/* --- Auth Primary Button (Register, Reset, Home, Games, etc.) --- */
+.game-btn-primary {
+  background-color: var(--venda-yellow) !important;
+  color: var(--game-text-dark) !important;
+  border: none !important;
+  border-radius: var(--game-radius-soft);
+  box-shadow: 0 4px 0 var(--venda-yellow-dark) !important;
+  transition: all 0.2s;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.game-btn-primary:hover {
+  background-color: var(--venda-yellow-dark) !important;
+}
+
+.game-btn-primary:active {
+  transform: translateY(2px);
+  box-shadow: 0 2px 0 var(--venda-yellow-dark) !important;
+}
+
+.game-btn-primary:disabled {
+  opacity: 0.6;
+  transform: none;
+  box-shadow: 0 4px 0 var(--venda-yellow-dark) !important;
+}
+
+/* --- Brutalist Press Button (Login) --- */
+.btn-press {
+  transition: all 0.05s ease;
+  color: var(--game-text-dark);
+}
+
+.btn-press:active {
+  color: black;
+  transform: translate(6px, 6px);
+  box-shadow: 0px 0px 0px 0px #000;
 }
 
 /* ============================================
-   COMPACT UI ELEMENTS
+   9. INTERACTION UTILITIES
    ============================================ */
 
-/* Streak Label */
+/* Hover-Press (Landing cards, footer social icons, navbar) */
+.hover-press {
+  transition: transform 0.1s ease, box-shadow 0.1s ease;
+}
+
+.hover-press:hover {
+  transform: translate(-2px, -2px);
+  box-shadow: 12px 12px 0px 0px #000;
+}
+
+.hover-press:active {
+  transform: translate(6px, 6px);
+  box-shadow: 0px 0px 0px 0px #000;
+}
+
+/* Hover-Yellow (Footer/Navbar link hover) */
+.hover-yellow:hover {
+  color: var(--venda-yellow) !important;
+  text-decoration: underline !important;
+  text-underline-offset: 4px;
+}
+
+/* ============================================
+   10. GAME COMPONENTS
+   ============================================ */
 .streak-container {
-  background-color: #f97316;
-  padding: 0.3rem 0.7rem;
+  background: #f97316;
+  padding: 4px 10px;
   border-radius: 6px;
   font-weight: 800;
   font-size: 0.7rem;
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
 }
 
-/* Level Badge (Smaller) */
 .level-badge {
   width: 32px;
   height: 32px;
-  background-color: var(--game-primary);
-  color: var(--game-text-inverse);
+  background: var(--game-amber);
+  color: var(--game-text-dark);
   border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
   font-weight: 800;
-  font-size: 0.8rem;
-  border: 2px solid var(--game-bg-primary);
+  border: 2px solid var(--game-bg);
 }
 
-/* XP Text */
-.xp-tag {
-  font-size: 0.75rem;
-  font-weight: 700;
-  color: #10b981;
+.xp-tag { font-size: 0.75rem; font-weight: 700; color: #10b981; }
+
+/* Error Alert - Soft (Register, Reset) */
+.alert-game-error {
+  background-color: #FEF2F2;
+  color: #B91C1C;
+  border-bottom: 2px solid #EF4444;
+  border-radius: var(--game-radius-soft);
+  padding: 0.75rem 1rem;
+  font-size: 0.875rem;
+  text-align: center;
 }
 
-/* Customizing the SweetAlert2 Container */
+/* Error Alert - Brutalist (Login) */
+.alert-game-error--brutalist {
+  background-color: #FFD1D1;
+  color: #000;
+  border: 4px solid #000;
+  font-size: 12px;
+  font-weight: 900;
+  text-transform: uppercase;
+  text-align: center;
+  padding: 0.75rem;
+  box-shadow: var(--shadow-brutalist-sm);
+}
+
+/* ============================================
+   11. ANIMATION KEYFRAMES
+   ============================================ */
+@keyframes shimmer {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+.animate-spin {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes floatBaobab {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+
+@keyframes pulse-glow {
+  0% { transform: scale(0.8); opacity: 0.5; }
+  100% { transform: scale(1.2); opacity: 1; }
+}
+
+@keyframes float-around {
+  0%, 100% { transform: translate(0, 0) rotate(0deg); }
+  33% { transform: translate(15px, -15px) rotate(10deg); }
+  66% { transform: translate(-10px, -20px) rotate(-5deg); }
+}
+
+@keyframes bounce-rotate {
+  0%, 100% { transform: translateY(0) rotate(5deg); }
+  50% { transform: translateY(-10px) rotate(8deg); }
+}
+
+@keyframes fire-flicker {
+  0% { transform: scale(1) skewX(0deg); }
+  50% { transform: scale(1.1) skewX(2deg); }
+  100% { transform: scale(1) skewX(-2deg); }
+}
+
+@keyframes pulse-custom {
+  0% { opacity: 1; }
+  50% { opacity: 0.5; }
+  100% { opacity: 1; }
+}
+
+/* ============================================
+   12. SWEETALERT2 GAMIFICATION
+   ============================================ */
 .swal2-popup {
-  font-family: var(--game-font-family) !important;
+  font-family: var(--game-font) !important;
   border-radius: 20px !important;
-  padding: 2rem !important;
-  background: #ffffff !important;
-  border: 3px solid #111827 !important;
-  /* Coal border */
+  border: 3px solid var(--game-text-dark) !important;
 }
 
-/* Customizing the Title */
-.swal2-title {
+.swal2-confirm {
+  background-color: var(--venda-yellow) !important;
+  color: var(--game-text-dark) !important;
   font-weight: 800 !important;
   text-transform: uppercase !important;
-  letter-spacing: -0.5px !important;
-  color: #111827 !important;
-  font-size: 1.5rem !important;
-}
-
-/* Customizing the Content/Text */
-.swal2-html-container {
-  font-size: 14px !important;
-  color: #475569 !important;
-}
-
-/* The Success/Error Icons */
-.swal2-icon.swal2-success {
-  border-color: #10B981 !important;
-}
-
-.swal2-icon.swal2-success [class^='swal2-success-line'] {
-  background-color: #10B981 !important;
-}
-
-.swal2-backdrop-show {
-  background: rgba(15, 23, 42, 0.8) !important;
-  /* Dark Slate transparent */
-  backdrop-filter: blur(4px);
-  /* Modern blur effect */
-}
-
-/* Customizing the Confirm Button to match your Game Buttons */
-.swal2-confirm {
-  background-color: #FACC15 !important;
-  color: #111827 !important;
-  font-weight: 700 !important;
-  text-transform: uppercase !important;
-  letter-spacing: 1px !important;
   font-size: 11px !important;
   border-radius: 10px !important;
-  padding: 12px 30px !important;
-  box-shadow: 0 4px 0 #EAB308 !important;
-  /* 3D effect */
-  border: none !important;
+  box-shadow: 0 4px 0 var(--game-amber-dark) !important;
 }
 
-.swal2-confirm:focus {
-  box-shadow: 0 4px 0 #EAB308 !important;
+/* ============================================
+   13. ACCORDION (Landing Page FAQ)
+   ============================================ */
+.accordion-button:not(.collapsed) {
+  background-color: #f8fafc;
+  color: #000;
 }
 
-.swal2-confirm:active {
-  transform: translateY(2px) !important;
-  box-shadow: 0 2px 0 #EAB308 !important;
+.accordion-button::after {
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%23000'%3e%3cpath fill-rule='evenodd' d='M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z'/%3e%3c/svg%3e");
+  width: 1.5rem;
+  height: 1.5rem;
+  background-size: 1.5rem;
 }
 
-/* Small Headings */
-h1,
-.h1 {
-  font-size: 1.75rem;
-  font-weight: 800;
+/* ============================================
+   14. RESPONSIVE OVERRIDES
+   ============================================ */
+@media (max-width: 768px) {
+  .display-2 { font-size: 2.5rem; }
+  .display-3 { font-size: 2rem; }
+  .shadow-action { box-shadow: 6px 6px 0px 0px #000; }
+  .smallest-print { font-size: 9px; }
 }
 
-h2,
-.h2 {
-  font-size: 1.5rem;
-  font-weight: 700;
-}
-
-h3,
-.h3 {
-  font-size: 1.25rem;
-  font-weight: 700;
-}
-
-h4,
-.h4 {
-  font-size: 1rem;
-  font-weight: 700;
+@media (max-width: 420px) {
+  body { font-size: 13px; }
+  h1 { font-size: 1.5rem !important; }
+  h2 { font-size: 1.25rem !important; }
 }

@@ -200,10 +200,7 @@ const Navbar: React.FC = () => {
             </div>
 
             <style>{`
-                .ls-tight { letter-spacing: -1.5px; }
-                .ls-1 { letter-spacing: 1px; }
                 .ls-2 { letter-spacing: 2px; }
-                .smallest { font-size: 11px; }
                 .smallest-pill { font-size: 9px; padding: 0.35em 0.65em; }
                 
                 .nav-custom-link {
@@ -250,21 +247,6 @@ const Navbar: React.FC = () => {
                     0% { opacity: 0.6; transform: scale(1); }
                     50% { opacity: 1; color: #FACC15; transform: scale(1.02); }
                     100% { opacity: 0.6; transform: scale(1); }
-                }
-
-                .game-btn-primary { 
-                    background-color: #FACC15 !important; 
-                    color: #111827 !important; 
-                    border: none !important; 
-                    border-radius: 8px; 
-                    box-shadow: 0 3px 0 #EAB308 !important; 
-                    transition: all 0.2s; 
-                    text-decoration: none;
-                }
-
-                .game-btn-primary:active { 
-                    transform: translateY(1px); 
-                    box-shadow: 0 1px 0 #EAB308 !important; 
                 }
                 
                 .dropdown-toggle::after { display: none; }

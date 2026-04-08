@@ -1,470 +1,183 @@
-/* Import Gamification Design System */
+/* ============================================
+   VENDA LEARN - GLOBAL STYLES
+   INTEGRATED WITH GAMIFICATION DESIGN SYSTEM
+
+   This file imports the unified design system and
+   provides Bootstrap overrides + app-level globals.
+   
+   DO NOT duplicate utilities here that exist in
+   gamification-design-system.css
+   ============================================ */
+
+/* Import Unified Design System (fonts, tokens, 
+   utilities, buttons, inputs, shadows, animations) */
 @import './styles/gamification-design-system.css';
 
-/* ============================================
-   GLOBAL GAMIFICATION THEME
-   Professional Amber & Slate (Zero Purple)
-   ============================================ */
 body {
-    background-color: var(--game-bg-light);
-    color: var(--game-text-primary);
-    font-family: var(--game-font-family);
+    background-color: var(--game-bg);
+    color: var(--game-text);
+    font-family: var(--game-font);
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     min-height: 100vh;
-    overflow-x: hidden; /* Prevent horizontal stretching from badges/animations */
+    overflow-x: hidden;
 }
 
 /* ReCAPTCHA Badge Positioning Fix */
 .grecaptcha-badge {
-    bottom: 90px !important; /* Move it up slightly to avoid bottom constraints */
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06) !important;
+    bottom: 90px !important;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3) !important;
     z-index: 9999 !important;
 }
 
 /* ============================================
-   ENHANCED BOOTSTRAP COMPATIBILITY
+   BOOTSTRAP CARD OVERRIDES
    ============================================ */
-
-/* Buttons moved to end of file to override form-control conflicts */
-
-/* Cards - Enhanced with Game Style */
 .card {
-    background: var(--game-bg-card, #ffffff);
-    border: 2px solid var(--game-border, #e5e7eb);
-    border-radius: var(--game-radius-lg) !important;
-    box-shadow: var(--game-shadow-md) !important;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    background: var(--game-surface);
+    border: 2px solid rgba(255, 255, 255, 0.05) !important;
+    border-radius: var(--game-radius) !important;
+    box-shadow: 0 4px 0 rgba(0, 0, 0, 0.2) !important;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
     overflow: hidden;
     position: relative;
 }
 
-.card::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 4px;
-    background-color: var(--game-primary);
-    opacity: 0;
-    transition: opacity 0.3s;
-}
-
-.card:hover::before {
-    opacity: 1;
-}
-
 .card:hover {
     transform: translateY(-4px) !important;
-    box-shadow: var(--game-shadow-lg) !important;
-    border-color: var(--game-primary) !important;
+    border-color: var(--game-amber) !important;
+    box-shadow: 0 8px 0 rgba(0, 0, 0, 0.3) !important;
 }
 
 .card-header {
-    background-color: var(--game-bg-light) !important;
-    border-bottom: 2px solid var(--game-border) !important;
+    background-color: rgba(255, 255, 255, 0.03) !important;
+    border-bottom: 2px solid rgba(255, 255, 255, 0.05) !important;
     padding: 1rem 1.5rem !important;
-    font-weight: 700 !important;
+    font-weight: 800 !important;
+    text-transform: uppercase;
+    font-size: 0.8rem;
+    letter-spacing: 0.5px;
 }
 
-/* Form Controls - Enhanced */
+/* ============================================
+   BOOTSTRAP FORM OVERRIDES (Dashboard Context)
+   ============================================ */
 .form-label {
-    font-size: 0.875rem;
-    font-weight: 600;
-    color: var(--game-text-primary);
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--game-amber);
     margin-bottom: 0.5rem;
     text-transform: uppercase;
     letter-spacing: 0.05em;
 }
 
-.form-control {
+.form-control, .form-select {
     padding: 0.75rem 1rem !important;
     font-size: 0.875rem;
-    border: 2px solid #E5E7EB !important;
-    /* Ensure visible border */
-    border-radius: var(--game-radius-md) !important;
-    transition: all 0.3s !important;
-    box-shadow: var(--game-shadow-sm) !important;
-    background: var(--game-bg-card) !important;
+    background: var(--game-surface) !important;
+    border: 2px solid #334155 !important;
+    border-radius: var(--game-radius) !important;
+    color: var(--game-text) !important;
+    transition: all 0.2s !important;
 }
 
-.form-control:focus {
-    border-color: var(--game-primary) !important;
-    box-shadow: 0 0 0 4px var(--game-primary-glow) !important;
+.form-control:focus, .form-select:focus {
+    border-color: var(--game-amber) !important;
+    box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.2) !important;
     outline: none !important;
 }
 
 .form-control::placeholder {
-    color: var(--game-text-muted);
+    color: #64748b;
 }
 
-.form-select {
-    padding: 0.75rem 1rem !important;
-    font-size: 0.875rem;
-    border: 2px solid #E5E7EB !important;
-    border-radius: var(--game-radius-md) !important;
-    transition: all 0.3s !important;
-    box-shadow: var(--game-shadow-sm) !important;
-    background: var(--game-bg-card) !important;
-    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23343a40' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M2 5l6 6 6-6'/%3e%3c/svg%3e") !important;
-    background-repeat: no-repeat !important;
-    background-position: right 0.75rem center !important;
-    background-size: 16px 12px !important;
-}
-
-.form-select:focus {
-    border-color: var(--game-primary) !important;
-    box-shadow: 0 0 0 4px var(--game-primary-glow) !important;
-    outline: none !important;
-}
-
-/* Links - Enhanced */
+/* ============================================
+   BOOTSTRAP LINK OVERRIDES
+   ============================================ */
 a {
-    color: var(--game-primary-dark);
-    /* Using dark amber for links on light bg */
+    color: var(--game-amber-light);
     text-decoration: none;
-    font-weight: 600;
-    transition: all 0.3s;
+    font-weight: 700;
+    transition: all 0.2s;
 }
 
 a:hover {
-    color: var(--game-primary);
+    color: var(--game-amber);
     text-decoration: underline;
 }
 
-/* Progress Bars - Enhanced */
+/* ============================================
+   BOOTSTRAP PROGRESS BAR OVERRIDES
+   ============================================ */
 .progress {
-    height: 16px !important;
-    background: var(--game-bg-secondary) !important;
-    border-radius: var(--game-radius-full) !important;
+    height: 14px !important;
+    background: rgba(255, 255, 255, 0.1) !important;
+    border-radius: 20px !important;
     overflow: hidden;
-    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1) !important;
 }
 
 .progress-bar {
-    background-color: var(--game-primary) !important;
-    border-radius: var(--game-radius-full) !important;
-    transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1) !important;
-    box-shadow: 0 0 10px var(--game-primary-glow) !important;
+    background-color: var(--game-amber) !important;
+    transition: width 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
     position: relative;
-    overflow: hidden;
 }
 
 .progress-bar::after {
     content: '';
     position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(255, 255, 255, 0.3);
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
     animation: shimmer 2s infinite;
 }
 
-.progress-bar.bg-success {
-    background-color: var(--game-success) !important;
-    box-shadow: 0 0 10px var(--game-success-glow) !important;
-}
-
-.progress-bar.bg-warning {
-    background-color: var(--game-warning) !important;
-    box-shadow: 0 0 10px var(--game-warning-glow) !important;
-}
-
-/* Badges - Enhanced */
-.badge {
-    padding: 0.5rem 1rem !important;
-    border-radius: var(--game-radius-full) !important;
-    font-weight: 700 !important;
-    font-size: 0.75rem !important;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    box-shadow: var(--game-shadow-sm) !important;
-}
-
-.badge.bg-primary {
-    background-color: var(--game-primary) !important;
-    color: #000000 !important;
-}
-
-.badge.bg-success {
-    background-color: var(--game-success) !important;
-    color: white !important;
-}
-
-.badge.bg-warning {
-    background-color: var(--game-warning) !important;
-    color: white !important;
-}
-
-/* Game Card - Enhanced */
-.game-card {
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
-    cursor: pointer;
-}
-
-.game-card:hover {
-    transform: translateY(-8px) !important;
-    box-shadow: var(--game-shadow-lg), var(--game-shadow-glow) !important;
-}
-
-/* Utility Classes */
-.uppercase-tracking {
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    font-size: 0.75rem;
-    font-weight: 700;
-}
-
-/* Background */
-.bg-light {
-    background-color: var(--game-bg-light) !important;
-}
-
-/* Navbar Enhancement */
-.navbar {
-    backdrop-filter: blur(10px);
-    background: rgba(255, 255, 255, 0.95) !important;
-    box-shadow: var(--game-shadow-md) !important;
-    border-bottom: 2px solid var(--game-primary);
-}
-
-/* Smooth Scrolling */
-html {
-    scroll-behavior: smooth;
-}
-
-/* Selection Color */
-::selection {
-    background: var(--game-primary);
-    color: #000000;
-}
-
-::moz-selection {
-    background: var(--game-primary);
-    color: #000000;
-}
-
-@keyframes shimmer {
-    0% {
-        transform: translateX(-100%);
-    }
-
-    100% {
-        transform: translateX(100%);
-    }
-}
-
 /* ============================================
-   BUTTON STYLES (Moved to end for precedence)
+   BOOTSTRAP BUTTON OVERRIDES
    ============================================ */
 .btn-primary {
-    background-color: var(--game-primary) !important;
+    background-color: var(--game-amber) !important;
     border: none !important;
-    border-radius: var(--game-radius-md) !important;
+    border-radius: var(--game-radius) !important;
     padding: 0.75rem 1.5rem !important;
     font-weight: 800 !important;
-    font-size: 0.875rem !important;
+    font-size: 0.8rem !important;
     text-transform: uppercase;
-    letter-spacing: 0.05em;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
-    box-shadow: var(--game-shadow-glow) !important;
-    position: relative;
-    overflow: hidden;
-    color: #000000 !important;
-}
-
-.btn-primary::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: -100%;
-    width: 100%;
-    height: 100%;
-    background: rgba(255, 255, 255, 0.3);
-    transition: left 0.5s;
-}
-
-.btn-primary:hover::before {
-    left: 100%;
+    letter-spacing: 0.5px;
+    color: var(--game-text-dark) !important;
+    box-shadow: 0 4px 0 var(--game-amber-dark) !important;
+    transition: all 0.1s ease !important;
 }
 
 .btn-primary:hover {
-    background-color: var(--game-primary-light) !important;
-    transform: translateY(-2px) !important;
-    box-shadow: var(--game-shadow-lg), var(--game-shadow-glow) !important;
-    color: #000000 !important;
+    background-color: var(--game-amber-light) !important;
+    transform: translateY(-1px) !important;
+    box-shadow: 0 5px 0 var(--game-amber-dark) !important;
 }
 
 .btn-primary:active {
-    transform: translateY(0) !important;
-    box-shadow: var(--game-shadow-sm) !important;
-}
-
-.btn-success {
-    background-color: var(--game-success) !important;
-    border: none !important;
-    box-shadow: var(--game-shadow-glow-success) !important;
-    color: var(--game-text-light) !important;
-}
-
-.btn-success:hover {
-    background-color: var(--game-success-dark) !important;
-    box-shadow: var(--game-shadow-lg), var(--game-shadow-glow-success) !important;
-}
-
-.btn-warning {
-    background-color: var(--game-warning) !important;
-    border: none !important;
-    box-shadow: var(--game-shadow-glow-warning) !important;
-    color: var(--game-text-light) !important;
-}
-
-.btn-warning:hover {
-    background-color: var(--game-warning-dark) !important;
-    box-shadow: var(--game-shadow-lg), var(--game-shadow-glow-warning) !important;
+    transform: translateY(3px) !important;
+    box-shadow: 0 1px 0 var(--game-amber-dark) !important;
 }
 
 .btn-outline-primary {
-    border: 2px solid var(--game-primary) !important;
-    color: var(--game-primary) !important;
+    border: 2px solid var(--game-amber) !important;
+    color: var(--game-amber) !important;
     background: transparent !important;
-    border-radius: var(--game-radius-md) !important;
-    font-weight: 700 !important;
-    transition: all 0.3s !important;
+    font-weight: 800 !important;
+    text-transform: uppercase;
 }
 
 .btn-outline-primary:hover {
-    background: var(--game-primary) !important;
-    color: #000000 !important;
-    transform: translateY(-2px) !important;
-    box-shadow: var(--game-shadow-glow) !important;
-}
-
-@keyframes spin {
-    from {
-        transform: rotate(0deg);
-    }
-
-    to {
-        transform: rotate(360deg);
-    }
-}
-
-.animate-spin {
-    animation: spin 1s linear infinite;
+    background: var(--game-amber) !important;
+    color: var(--game-text-dark) !important;
 }
 
 /* ============================================
-   VISUAL JUICE & EMOTIONAL FEEDBACK
+   MOBILE FINE-TUNING
+   (Additional to design system responsive rules)
    ============================================ */
-@keyframes shake {
-
-    0%,
-    100% {
-        transform: translateX(0);
-    }
-
-    10%,
-    30%,
-    50%,
-    70%,
-    90% {
-        transform: translateX(-5px);
-    }
-
-    20%,
-    40%,
-    60%,
-    80% {
-        transform: translateX(5px);
-    }
-}
-
-.shake {
-    animation: shake 0.5s cubic-bezier(.36, .07, .19, .97) both;
-}
-
-@keyframes glowPulse {
-    0% {
-        filter: drop-shadow(0 0 2px rgba(239, 68, 68, 0.4));
-        transform: scale(1);
-    }
-
-    50% {
-        filter: drop-shadow(0 0 12px rgba(239, 68, 68, 0.8));
-        transform: scale(1.1);
-    }
-
-    100% {
-        filter: drop-shadow(0 0 2px rgba(239, 68, 68, 0.4));
-        transform: scale(1);
-    }
-}
-
-.glow-pulse {
-    animation: glowPulse 2s infinite ease-in-out;
-}
-
-/* ============================================
-   EXTREME MOBILE FINE-TUNING (Xiaomi, Pixel, etc.)
-   Catering for widths: 360, 380, 393, 412
-   ============================================ */
-
 @media (max-width: 420px) {
-    .container { 
-        padding-left: 1.25rem !important; 
-        padding-right: 1.25rem !important; 
-    }
-    
-    h1, .display-4, .h1-mobile { 
-        font-size: 2.22rem !important; 
-        line-height: 1.15 !important;
-    }
-    
-    h2, .display-5 { 
-        font-size: 1.85rem !important; 
-    }
-    
-    .lead { 
-        font-size: 1rem !important; 
-        line-height: 1.5 !important;
-    }
-
     .btn-lg {
-        padding: 0.8rem 1.25rem !important;
-        font-size: 1rem !important;
-    }
-
-    /* Reduce vertical padding to fit more "Above the Fold" on tall screens */
-    .py-5 {
-        padding-top: 2rem !important;
-        padding-bottom: 2rem !important;
-    }
-    
-    .my-5 {
-        margin-top: 2rem !important;
-        margin-bottom: 2rem !important;
-    }
-}
-
-/* Very Narrow Devices (360px and below) */
-@media (max-width: 370px) {
-    h1, .display-4, .h1-mobile { 
-        font-size: 2.05rem !important; 
-    }
-    
-    h2, .display-5 { 
-        font-size: 1.65rem !important; 
-    }
-
-    .btn-lg {
-        padding: 0.75rem 1.1rem !important;
-        font-size: 0.92rem !important;
-    }
-
-    .lead {
-        font-size: 0.92rem !important;
+        padding: 0.6rem 1rem !important;
+        font-size: 0.85rem !important;
     }
 }

@@ -156,7 +156,7 @@ const Profile: React.FC = () => {
     const handleCopyLink = () => {
         navigator.clipboard.writeText(inviteLink);
         Swal.fire({
-            title: 'Khopi!',
+            title: 'Copy!',
             text: 'Invite link copied to clipboard.',
             icon: 'success',
             timer: 2000,
@@ -347,18 +347,18 @@ const Profile: React.FC = () => {
                             </div>
                             <div>
                                 <div className="d-flex flex-wrap align-items-center justify-content-center justify-content-md-start gap-2 mb-1">
-                                    <h1 className="fw-bold mb-0 ls-tight" style={{ fontSize: '1.75rem' }}>{userData?.username}</h1>
-                                    {userData?.isNativeSpeaker && (
-                                        <span className="badge bg-success text-white smallest fw-bold ls-1 rounded-pill px-2 py-1">
-                                            <i className="bi bi-patch-check-fill me-1"></i> VERIFIED
-                                        </span>
-                                    )}
-                                    {userData?.nativeVerificationStatus === 'pending' && (
-                                        <span className="badge bg-warning text-dark smallest fw-bold ls-1 rounded-pill px-2 py-1">PENDING</span>
-                                    )}
-                                    {userData?.nativeVerificationStatus === 'rejected' && (
-                                        <span className="badge bg-danger text-white smallest fw-bold ls-1 rounded-pill px-2 py-1">REJECTED</span>
-                                    )}
+                                    <h1 className="fw-bold mb-0 text-black ls-tight" style={{ fontSize: '1.75rem' }}>{userData?.username}</h1>
+                                    {/*{userData?.isNativeSpeaker && (*/}
+                                    {/*    <span className="badge bg-success text-white smallest fw-bold ls-1 rounded-pill px-2 py-1">*/}
+                                    {/*        <i className="bi bi-patch-check-fill me-1"></i> VERIFIED*/}
+                                    {/*    </span>*/}
+                                    {/*)}*/}
+                                    {/*{userData?.nativeVerificationStatus === 'pending' && (*/}
+                                    {/*    <span className="badge bg-warning text-dark smallest fw-bold ls-1 rounded-pill px-2 py-1">PENDING</span>*/}
+                                    {/*)}*/}
+                                    {/*{userData?.nativeVerificationStatus === 'rejected' && (*/}
+                                    {/*    <span className="badge bg-danger text-white smallest fw-bold ls-1 rounded-pill px-2 py-1">REJECTED</span>*/}
+                                    {/*)}*/}
                                 </div>
                                 <p className="small text-muted mb-0">{userData?.email}</p>
                                 

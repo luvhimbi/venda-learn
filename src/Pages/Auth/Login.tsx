@@ -23,7 +23,7 @@ const Login: React.FC = () => {
         setLoading(true);
 
         if (!executeRecaptcha) {
-            setError("reCAPTCHA is not ready yet. Please try again.");
+            setError("Eish! reCAPTCHA isn't ready. Try again, chommie.");
             setLoading(false);
             return;
         }
@@ -39,7 +39,6 @@ const Login: React.FC = () => {
             const userCredential = await signInWithEmailAndPassword(auth, email, password);
             const uid = userCredential.user.uid;
 
-            // 1. Ensure user document exists (Prevents permission errors in listeners)
             const userDoc = await getDoc(doc(db as Firestore, 'users', uid));
             if (!userDoc.exists()) {
                 await setDoc(doc(db as Firestore, 'users', uid), {
@@ -54,12 +53,9 @@ const Login: React.FC = () => {
                 });
             }
 
-
-            // 3. Check Admin Status
             const userData = userDoc.exists() ? userDoc.data() : { role: 'user' };
             const isAdmin = userData?.role === 'admin';
 
-            // 4. Handle Redirection
             if (isAdmin) {
                 navigate('/admin/dashboard');
             } else {
@@ -73,7 +69,7 @@ const Login: React.FC = () => {
             }
         } catch (err: any) {
             console.error("Login Error:", err);
-            setError(err.code === 'auth/user-not-found' ? "User not found." : "Login failed. Please try again.");
+            setError(err.code === 'auth/user-not-found' ? "Account not found. Maybe register?" : "Login failed. Check your details and try again.");
         } finally {
             setLoading(false);
         }
@@ -85,12 +81,9 @@ const Login: React.FC = () => {
         try {
             const result = await signInWithPopup(auth, googleProvider);
             const user = result.user;
-
-            // 1. Check if user exists in Firestore
             const userDoc = await getDoc(doc(db as Firestore, 'users', user.uid));
 
             if (!userDoc.exists()) {
-                // Create user profile for new Google users
                 await setDoc(doc(db as Firestore, 'users', user.uid), {
                     username: user.displayName || 'Learner',
                     email: user.email,
@@ -103,8 +96,6 @@ const Login: React.FC = () => {
                 });
             }
 
-
-            // 3. Handle Redirection
             const userData = !userDoc.exists() ? null : userDoc.data();
             const isAdmin = userData?.role === 'admin';
 
@@ -121,7 +112,7 @@ const Login: React.FC = () => {
             }
         } catch (err: any) {
             console.error("Google Sign-In Error:", err);
-            setError("Tshivhumbeo tsha Google tsho kundwa. Kha vha dovhe hafhu.");
+            setError("Google login failed. Try again, boet.");
         } finally {
             setLoading(false);
         }
@@ -135,37 +126,37 @@ const Login: React.FC = () => {
             navigate('/');
         } catch (err: any) {
             console.error("Guest Sign-In Error:", err);
-            setError("Tsho kundwa u dzhena sa mueni. Kha vha dovhe hafhu.");
+            setError("Couldn't jump in. Try again.");
         } finally {
             setLoading(false);
         }
     };
 
     return (
-        <div className="min-vh-100 d-flex align-items-center justify-content-center bg-white px-3 py-5">
-            <div className="w-100" style={{ maxWidth: '400px' }}>
+        <div className="min-vh-100 d-flex align-items-center justify-content-center bg-white px-3 py-5" style={{ fontFamily: '"Lexend", sans-serif' }}>
+            <div className="w-100" style={{ maxWidth: '440px' }}>
 
                 <BaobabAuthHeader />
 
-                <div className="text-center mb-5 animate__animated animate__fadeInDown">
-                    <h2 className="fw-bold ls-tight text-dark mb-2">Welcome Back!</h2>
-                    <p className="text-muted mb-0 small">Sign in to continue learning South African languages.</p>
+                <div className="text-center mb-5 mt-4">
+                    <h2 className="display-5 fw-black text-uppercase ls-tight text-dark mb-2">Aweh! Back Again?</h2>
+                    <p className="fw-bold text-muted mb-0 small text-uppercase">Log in to keep your streak burning bright!</p>
                 </div>
 
                 {error && (
-                    <div className="alert border-0 py-3 small mb-4 text-center"
-                        style={{ backgroundColor: '#FEF2F2', color: '#B91C1C', borderBottom: '2px solid #EF4444' }}>
+                    <div className="border border-4 border-dark p-3 mb-4 text-center fw-black text-uppercase shadow-action-sm"
+                         style={{ backgroundColor: '#FFD1D1', color: '#000', fontSize: '12px' }}>
                         {error}
                     </div>
                 )}
 
                 <form onSubmit={handleSubmit}>
-                    <div className="mb-3">
-                        <label className="form-label small fw-bold text-uppercase text-muted ls-1">Email</label>
-                        <div className="custom-input-group">
+                    <div className="mb-4">
+                        <label className="form-label smallest fw-black text-uppercase ls-1">Email</label>
+                        <div className="custom-input-group custom-input-group--brutalist">
                             <input
                                 type="email"
-                                className="border-0 bg-transparent fs-6 flex-grow-1"
+                                className="fw-bold"
                                 placeholder="vhadau@example.com"
                                 value={email}
                                 onChange={(e) => setEmail(e.target.value)}
@@ -175,17 +166,17 @@ const Login: React.FC = () => {
                         </div>
                     </div>
 
-                    <div className="mb-3">
-                        <div className="d-flex justify-content-between">
-                            <label className="form-label small fw-bold text-uppercase text-muted ls-1">Password</label>
-                            <Link to="/reset-password" intrinsic-name="reset" className="small text-decoration-none fw-bold" style={{ color: '#111827' }}>
+                    <div className="mb-4">
+                        <div className="d-flex justify-content-between align-items-end">
+                            <label className="form-label smallest fw-black text-uppercase ls-1">Password</label>
+                            <Link to="/reset-password" intrinsic-name="reset" className="smallest text-decoration-none fw-black text-uppercase mb-2 text-dark">
                                 Forgot?
                             </Link>
                         </div>
-                        <div className="custom-input-group d-flex align-items-center">
+                        <div className="custom-input-group custom-input-group--brutalist position-relative d-flex align-items-center">
                             <input
                                 type={showPassword ? "text" : "password"}
-                                className="border-0 bg-transparent fs-6 flex-grow-1"
+                                className="fw-bold"
                                 placeholder="••••••••"
                                 value={password}
                                 onChange={(e) => setPassword(e.target.value)}
@@ -194,110 +185,60 @@ const Login: React.FC = () => {
                             />
                             <button
                                 type="button"
-                                className="btn border-0 p-0 text-muted me-3 shadow-none"
+                                className="btn border-0 p-0 text-dark me-3 shadow-none position-absolute end-0"
                                 onClick={() => setShowPassword(!showPassword)}
                                 tabIndex={-1}
                             >
-                                {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                                {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
                             </button>
                         </div>
                     </div>
 
-                    <button 
-                        type="submit" 
-                        className="btn w-100 fw-bold py-2.5 mb-2 game-btn-primary d-flex align-items-center justify-content-center" 
+                    <button
+                        type="submit"
+                        className="btn w-100 fw-black py-3 mb-4 btn-primary border border-4 border-dark rounded-0 shadow-action text-uppercase ls-1 btn-press"
                         disabled={loading}
                     >
-                        {loading ? <Loader2 className="animate-spin me-2" size={18} /> : 'SIGN IN'}
+                        {loading ? <Loader2 className="animate-spin" size={20} /> : 'Login Sharp-Sharp'}
                     </button>
                 </form>
 
-                <div className="d-flex align-items-center my-3">
-                    <hr className="flex-grow-1" />
-                    <span className="mx-3 text-muted smallest fw-bold text-uppercase ls-1" style={{ fontSize: '10px' }}>Or use</span>
-                    <hr className="flex-grow-1" />
+                <div className="d-flex align-items-center my-4">
+                    <div className="flex-grow-1 border-top border-4 border-dark"></div>
+                    <span className="mx-3 text-dark smallest fw-black text-uppercase ls-1">OR USE</span>
+                    <div className="flex-grow-1 border-top border-4 border-dark"></div>
                 </div>
 
-                <div className="d-grid gap-2">
+                <div className="d-grid gap-3">
                     <button
                         onClick={handleGoogleSignIn}
-                        className="btn w-100 fw-bold py-2.5 btn-outline-dark d-flex align-items-center justify-content-center border-2 shadow-none"
-                        style={{ borderRadius: '12px' }}
+                        className="btn w-100 fw-black py-3 bg-white border border-4 border-dark rounded-0 shadow-action d-flex align-items-center justify-content-center text-uppercase smallest ls-1 btn-press"
                         disabled={loading}
                     >
-                        <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google" className="me-2" style={{ width: '18px' }} />
-                        CONTINUE WITH GOOGLE
+                        <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google" className="me-2" style={{ width: '20px' }} />
+                        Google Sign-In
                     </button>
 
                     <button
                         onClick={handleGuestSignIn}
-                        className="btn w-100 fw-bold py-2.5 btn-outline-secondary d-flex align-items-center justify-content-center border-2 shadow-none text-uppercase ls-1"
-                        style={{ borderRadius: '12px', fontSize: '13px' }}
+                        className="btn w-100 fw-black py-3 bg-white border border-4 border-dark rounded-0 shadow-action d-flex align-items-center justify-content-center text-uppercase smallest ls-1 btn-press"
                         disabled={loading}
                     >
-                        <i className="bi bi-person-bounding-box me-2"></i>
-                        Continue as Guest Learner
+                        <i className="bi bi-person-bounding-box fs-5 me-2"></i>
+                        Explore as Guest
                     </button>
                 </div>
 
-                <div className="text-center mt-4">
-                    <p className="text-muted small">
-                        New here? <Link to="/register" className="fw-bold text-decoration-none" style={{ color: '#111827' }}>Create an Account</Link>
+                <div className="text-center mt-5">
+                    <p className="fw-bold smallest text-uppercase">
+                        New crew? <Link to="/register" className="fw-black text-decoration-underline" style={{ color: '#000' }}>Create an Account</Link>
                     </p>
                 </div>
             </div>
 
-            <style>{`
-                .ls-1 { letter-spacing: 1px; }
-                .game-btn-primary { 
-                    background-color: #FACC15 !important; 
-                    color: #111827 !important; 
-                    border: none !important; 
-                    border-radius: 12px; 
-                    box-shadow: 0 4px 0 #EAB308 !important; 
-                    transition: all 0.2s; 
-                }
-                .game-btn-primary:active { transform: translateY(2px); box-shadow: 0 2px 0 #EAB308 !important; }
-                
-                .custom-input-group { 
-                    border: 2px solid #F3F4F6; 
-                    border-radius: 12px;
-                    background-color: #F9FAFB;
-                    transition: 0.2s; 
-                    overflow: hidden;
-                    display: flex;
-                    align-items: center;
-                }
-                .custom-input-group:focus-within { 
-                    border-color: #FACC15; 
-                    background-color: #FFFFFF;
-                }
-                .custom-input-group input {
-                    border: none !important;
-                    border-radius: 0 !important;
-                    background: transparent !important;
-                    background-color: transparent !important;
-                    box-shadow: none !important;
-                    outline: none !important;
-                    padding: 0.75rem 1rem !important;
-                    width: 100%;
-                }
-                
-                /* Hide default browser password reveal icon */
-                input::-ms-reveal,
-                input::-ms-clear {
-                    display: none;
-                }
-                input[type="password"]::-webkit-contacts-auto-fill-button,
-                input[type="password"]::-webkit-credentials-auto-fill-button {
-                    display: none !important;
-                }
-            `}</style>
+
         </div>
     );
 };
 
 export default Login;
-
-
-
