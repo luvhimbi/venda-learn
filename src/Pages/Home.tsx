@@ -355,22 +355,11 @@ const Home: React.FC = () => {
                 .text-slate-500 { color: #64748b; }
                 .text-slate-400 { color: #94a3b8; }
                 .bg-red-50 { background-color: #fef2f2; }
-                .ls-1 { letter-spacing: 1px; }
                 .ls-2 { letter-spacing: 2px; }
-                .smallest { font-size: 10px; font-family: var(--game-font-family); }
                 .uppercase { text-transform: uppercase; }
                 
                 .transition-all { transition: all 0.2s ease-in-out; }
                 .hover-lift:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,.08); }
-                
-                .game-btn-primary { 
-                    background-color: #FACC15 !important; 
-                    color: #1e293b !important; 
-                    border: none !important; 
-                    border-radius: 8px; 
-                    box-shadow: 0 3px 0 #EAB308 !important; 
-                }
-                .game-btn-primary:active { transform: translateY(2px); box-shadow: 0 1px 0 #EAB308 !important; }
 
                 .btn-slate {
                     background-color: #1e293b;

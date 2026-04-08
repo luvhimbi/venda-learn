@@ -85,46 +85,8 @@ const Footer: React.FC = () => {
             </div>
 
             <style>{`
-                @import url('https://fonts.googleapis.com/css2?family=Lexend:wght@400;700;900&display=swap');
-
                 footer {
                     font-family: 'Lexend', sans-serif;
-                }
-                .fw-black { font-weight: 900; }
-                .ls-tight { letter-spacing: -1.5px; }
-                
-                .smallest-print {
-                    font-size: 10px;
-                    letter-spacing: 1px;
-                }
-
-                .shadow-action-sm { box-shadow: 4px 4px 0px 0px #000; }
-
-                .hover-press {
-                    transition: all 0.1s ease;
-                }
-
-                .hover-press:hover {
-                    transform: translate(-2px, -2px);
-                    box-shadow: 6px 6px 0px 0px #000;
-                    background-color: #FACC15 !important;
-                }
-
-                .hover-press:active {
-                    transform: translate(2px, 2px);
-                    box-shadow: 0px 0px 0px 0px #000;
-                }
-
-                .hover-yellow:hover {
-                    color: #FACC15 !important;
-                    text-decoration: underline !important;
-                    text-underline-offset: 4px;
-                }
-                
-                @media (max-width: 768px) {
-                    .smallest-print {
-                        font-size: 9px;
-                    }
                 }
             `}</style>
         </footer>

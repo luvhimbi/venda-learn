@@ -48,36 +48,8 @@ const AuthNavbar: React.FC<AuthNavbarProps> = ({ user }) => {
             </div>
 
             <style>{`
-                @import url('https://fonts.googleapis.com/css2?family=Lexend:wght@900&display=swap');
-
                 nav {
                     font-family: 'Lexend', sans-serif;
-                }
-
-                .fw-black { font-weight: 900; }
-                .ls-1 { letter-spacing: 1px; }
-                .smallest { font-size: 11px; }
-                
-                .shadow-action-sm { 
-                    box-shadow: 4px 4px 0px 0px #000; 
-                }
-
-                .hover-press {
-                    transition: all 0.1s ease;
-                }
-
-                .hover-press:hover {
-                    transform: translate(-1px, -1px);
-                    box-shadow: 6px 6px 0px 0px #000;
-                }
-
-                .hover-press:active {
-                    transform: translate(3px, 3px);
-                    box-shadow: 0px 0px 0px 0px #000;
-                }
-
-                .hover-yellow:hover {
-                    color: #FACC15 !important;
                 }
 
                 @keyframes pulse-custom {
@@ -86,7 +58,7 @@ const AuthNavbar: React.FC<AuthNavbarProps> = ({ user }) => {
                     100% { opacity: 1; }
                 }
 
-                .bg-warning {
+                nav .bg-warning {
                     animation: pulse-custom 2s infinite ease-in-out;
                 }
             `}</style>
