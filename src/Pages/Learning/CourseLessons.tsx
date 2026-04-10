@@ -123,7 +123,7 @@ const CourseLessons: React.FC = () => {
                 {/* HEADER */}
                 <header className="learning-header">
                     <JuicyButton
-                        className="btn btn-link text-decoration-none p-0 d-flex align-items-center justify-content-center justify-content-md-start gap-2 text-dark fw-bold smallest ls-1 text-uppercase mb-3 mb-md-2"
+                        className="btn btn-link text-decoration-none p-0 d-flex align-items-center justify-content-start gap-2 text-dark fw-bold smallest ls-1 text-uppercase mb-3 mb-md-2"
                         onClick={() => navigate('/courses')}
                     >
                         <ArrowLeft size={16} /> Course Path

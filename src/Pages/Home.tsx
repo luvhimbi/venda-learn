@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { doc, updateDoc, type Firestore } from 'firebase/firestore';
 import { onAuthStateChanged } from 'firebase/auth';
 import { auth, db } from '../services/firebaseConfig';
-import { fetchLessons, refreshUserData, getMicroLessons } from '../services/dataCache';
+import { fetchLessons, refreshUserData, getMicroLessons, fetchLanguages } from '../services/dataCache';
 import { useRetentionEngine } from '../hooks/useRetentionEngine';
 import { ALL_TROPHIES } from '../services/achievementService';
 import LandingPage from './LandingPage';
@@ -14,6 +14,7 @@ import TrophyIcon from '../components/TrophyIcon';
 import JuicyButton from '../components/JuicyButton';
 import PremiumStreakModal from '../components/PremiumStreakModal';
 import NotificationNudge from '../components/NotificationNudge';
+import LanguageCharacter from '../components/illustrations/LanguageCharacters';
 
 
 const Home: React.FC = () => {
@@ -25,6 +26,7 @@ const Home: React.FC = () => {
     const [loading, setLoading] = useState(true);
     const [isTourOpen, setIsTourOpen] = useState(false);
     const [showStreakModal, setShowStreakModal] = useState(false);
+    const [currentLanguage, setCurrentLanguage] = useState<any>(null);
 
 
 
@@ -50,14 +52,19 @@ const Home: React.FC = () => {
             if (user) {
                 setIsLoggedIn(true);
                 try {
-                    const [userData, lessons] = await Promise.all([
+                    const [userData, lessons, languages] = await Promise.all([
                         refreshUserData(),
                         fetchLessons(),
+                        fetchLanguages(),
                     ]);
 
                     if (userData) {
                         setUserData(userData);
                         const prefId = userData.preferredLanguageId || localStorage.getItem('venda_student_lang');
+                        if (prefId) {
+                            const lang = languages.find((l: any) => l.id === prefId);
+                            if (lang) setCurrentLanguage(lang);
+                        }
 
 
 
@@ -188,35 +195,36 @@ const Home: React.FC = () => {
 
 
                             {/* Clean Stat Chips */}
-                            <div className="d-flex flex-wrap gap-4 mt-3">
-                                {/* XP */}
-                                <div className="d-flex align-items-center gap-3">
-                                    <div className="d-inline-flex align-items-center justify-content-center rounded-3"
-                                        style={{ width: 44, height: 44, backgroundColor: 'rgba(250,204,21,.15)' }}>
+                            {/* Clean Stat Chips */}
+                            <div className="d-flex flex-wrap align-items-center gap-3 mt-3">
+                                {/* XP Card */}
+                                <div className="stat-card-premium d-flex align-items-center gap-2 p-2 pe-3 rounded-4 shadow-sm border bg-white transition-all hover-lift">
+                                    <div className="stat-icon-box rounded-3 d-flex align-items-center justify-content-center"
+                                        style={{ width: 40, height: 40, backgroundColor: 'rgba(250,204,21,.1)' }}>
                                         <i className="bi bi-gem fs-5" style={{ color: '#FACC15' }}></i>
                                     </div>
-                                    <div>
-                                        <p className="mb-0 fw-bold fs-5 text-slate-800 lh-1">{userData?.points || 0}</p>
-                                        <p className="mb-0 smallest text-slate-400 uppercase ls-1">Total XP</p>
+                                    <div className="lh-1">
+                                        <p className="mb-0 fw-black text-dark" style={{ fontSize: '1.2rem' }}>{userData?.points || 0}</p>
+                                        <p className="mb-0 smallest text-muted uppercase fw-bold ls-1" style={{ fontSize: '9px' }}>Total XP</p>
                                     </div>
                                 </div>
 
-                                {/* Streak */}
+                                {/* Streak Card */}
                                 <div
-                                    className="d-flex align-items-center gap-3 position-relative streak-trigger-area"
+                                    className="stat-card-premium d-flex align-items-center gap-2 p-2 pe-3 rounded-4 shadow-sm border bg-white position-relative streak-trigger-area transition-all hover-lift"
                                     onClick={(e) => {
                                         e.stopPropagation();
                                         setShowStreakModal(!showStreakModal);
                                     }}
                                     style={{ cursor: 'pointer' }}
                                 >
-                                    <div className={`d-inline-flex align-items-center justify-content-center rounded-3 transition-all ${userData?.streak > 0 ? 'active-streak-fire' : ''}`}
-                                        style={{ width: 44, height: 44, backgroundColor: userData?.streak > 0 ? '#EF4444' : 'rgba(239,68,68,.15)' }}>
+                                    <div className={`stat-icon-box rounded-3 d-flex align-items-center justify-content-center transition-all ${userData?.streak > 0 ? 'bg-danger shadow-sm' : ''}`}
+                                        style={{ width: 40, height: 40, backgroundColor: userData?.streak > 0 ? '#EF4444' : 'rgba(239,68,68,.1)' }}>
                                         <i className={`bi bi-fire fs-5 ${userData?.streak > 0 ? 'fire-shake text-white' : 'text-danger'}`}></i>
                                     </div>
-                                    <div>
-                                        <p className={`mb-0 fw-bold fs-5 lh-1 ${userData?.streak > 0 ? 'text-danger' : 'text-slate-800'}`}>{userData?.streak || 0}</p>
-                                        <p className="mb-0 smallest text-slate-400 uppercase ls-1">Day Streak</p>
+                                    <div className="lh-1">
+                                        <p className={`mb-0 fw-black ${userData?.streak > 0 ? 'text-danger' : 'text-dark'}`} style={{ fontSize: '1.2rem' }}>{userData?.streak || 0}</p>
+                                        <p className="mb-0 smallest text-muted uppercase fw-bold ls-1" style={{ fontSize: '9px' }}>Day Streak</p>
                                     </div>
 
                                     <PremiumStreakModal
@@ -229,6 +237,25 @@ const Home: React.FC = () => {
                                         onClose={() => setShowStreakModal(false)}
                                     />
                                 </div>
+
+                                {/* Learning Language Card */}
+                                {currentLanguage && (
+                                    <div className="stat-card-premium d-flex align-items-center gap-2 p-2 pe-3 rounded-4 shadow-sm border bg-white transition-all hover-lift"
+                                         onClick={() => navigate('/courses')}
+                                         style={{ cursor: 'pointer' }}>
+                                        <div className="stat-icon-box rounded-3 bg-light d-flex align-items-center justify-content-center overflow-hidden"
+                                            style={{ width: 40, height: 40, border: '1px solid #eee' }}>
+                                            <LanguageCharacter 
+                                                languageName={currentLanguage.name} 
+                                                style={{ width: '130%', height: '130%', transform: 'translateY(15%)' }} 
+                                            />
+                                        </div>
+                                        <div className="lh-1">
+                                            <p className="mb-0 fw-black text-dark" style={{ fontSize: '1.2rem' }}>{currentLanguage.name?.toUpperCase()}</p>
+                                            <p className="mb-0 smallest text-muted uppercase fw-bold ls-1" style={{ fontSize: '9px' }}>Learning</p>
+                                        </div>
+                                    </div>
+                                )}
                             </div>
                         </div>
                     </div>
@@ -357,10 +384,23 @@ const Home: React.FC = () => {
                 .bg-red-50 { background-color: #fef2f2; }
                 .ls-2 { letter-spacing: 2px; }
                 .uppercase { text-transform: uppercase; }
+                .fw-black { font-weight: 900; }
                 
                 .transition-all { transition: all 0.2s ease-in-out; }
-                .hover-lift:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,.08); }
+                .hover-lift:hover { transform: translateY(-3px); box-shadow: 0 8px 20px rgba(0,0,0,.08) !important; }
 
+                .stat-card-premium {
+                    min-width: 120px;
+                    background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+                }
+
+                @media (max-width: 575.98px) {
+                    .stat-card-premium {
+                        flex: 1 1 calc(50% - 1rem);
+                        min-width: 0;
+                    }
+                }
+                
                 .btn-slate {
                     background-color: #1e293b;
                     color: white;
