@@ -196,7 +196,8 @@ const Login: React.FC = () => {
 
                     <button
                         type="submit"
-                        className="btn w-100 fw-black py-3 mb-4 btn-primary border border-4 border-dark rounded-0 shadow-action text-uppercase ls-1 btn-press"
+                        className="btn w-100 fw-black py-3 mb-4 text-dark border border-4 border-dark rounded-0 shadow-action text-uppercase ls-1 hover-press"
+                        style={{ backgroundColor: 'var(--venda-yellow)' }}
                         disabled={loading}
                     >
                         {loading ? <Loader2 className="animate-spin" size={20} /> : 'Login Sharp-Sharp'}
@@ -212,7 +213,7 @@ const Login: React.FC = () => {
                 <div className="d-grid gap-3">
                     <button
                         onClick={handleGoogleSignIn}
-                        className="btn w-100 fw-black py-3 bg-white border border-4 border-dark rounded-0 shadow-action d-flex align-items-center justify-content-center text-uppercase smallest ls-1 btn-press"
+                        className="btn w-100 fw-black py-3 bg-white border border-4 border-dark rounded-0 shadow-action d-flex align-items-center justify-content-center text-uppercase smallest ls-1 hover-press text-dark"
                         disabled={loading}
                     >
                         <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google" className="me-2" style={{ width: '20px' }} />
@@ -221,7 +222,7 @@ const Login: React.FC = () => {
 
                     <button
                         onClick={handleGuestSignIn}
-                        className="btn w-100 fw-black py-3 bg-white border border-4 border-dark rounded-0 shadow-action d-flex align-items-center justify-content-center text-uppercase smallest ls-1 btn-press"
+                        className="btn w-100 fw-black py-3 bg-white border border-4 border-dark rounded-0 shadow-action d-flex align-items-center justify-content-center text-uppercase smallest ls-1 hover-press text-dark"
                         disabled={loading}
                     >
                         <i className="bi bi-person-bounding-box fs-5 me-2"></i>
@@ -230,8 +231,8 @@ const Login: React.FC = () => {
                 </div>
 
                 <div className="text-center mt-5">
-                    <p className="fw-bold smallest text-uppercase">
-                        New crew? <Link to="/register" className="fw-black text-decoration-underline" style={{ color: '#000' }}>Create an Account</Link>
+                    <p className="fw-bold smallest text-uppercase text-dark">
+                        New crew? <Link to="/register" className="fw-black text-decoration-underline text-dark">Create an Account</Link>
                     </p>
                 </div>
             </div>

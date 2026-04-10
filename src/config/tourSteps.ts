@@ -1,98 +1,89 @@
-
 export interface TourStep {
     target: string;
     title?: string;
     content: string;
     position?: 'top' | 'bottom' | 'left' | 'right' | 'center';
     mood?: 'happy' | 'excited' | 'sad';
-    path?: string; // Support navigating between pages during the tour
+    path?: string;
 }
 
 export const tourSteps: TourStep[] = [
     {
         target: 'body',
-        title: "Ndaa!",
-        content: "Welcome to Venda Learn! I'm Ndou, your guide. Let's get you ready for your journey to becoming a Venda Master!",
+        title: "Heita, Chommie! 🇿🇦",
+        content: "Welcome to the Chommie Language Companion! I'm Elphie, your guide for this epic cross-country trip. Ready to chat to all 60 million of us? Let's go!",
         position: 'center',
         mood: 'excited',
         path: '/'
     },
     {
         target: '.tour-sidebar-home',
-        title: "Command Center",
-        content: "This is your Home base. It's where you'll spend most of your time tracking progress.",
+        title: "The Rank",
+        content: "This is your main taxi rank! Whether you're heading to KZN for Zulu or the Cape for Xhosa, you start your journey right here.",
         position: 'right',
         mood: 'happy',
         path: '/'
     },
     {
-        target: '.game-btn-primary', // Resuming now
-        title: "Resume Learning",
-        content: "Clicking here takes you right back to your last lesson. Consistency is key, warrior!",
+        target: '.game-btn-primary',
+        title: "Keep the Engine Running!",
+        content: "Don't stall now! Hit this to jump back into your last lesson. Consistency is how you become a local legend!",
         position: 'top',
         mood: 'excited',
         path: '/'
     },
     {
         target: '.tour-sidebar-lessons',
-        title: "Lessons",
-        content: "Explore our collection of lessons and improve your Venda skills step by step.",
-        position: 'right',
-        mood: 'happy',
-        path: '/'
-    },
-    {
-        target: '.tour-sidebar-culture',
-        title: "Ḓivhazwakale",
-        content: "Dive into Venda stories and history. You can even share your favorite parts with friends!",
+        title: "The Route Map",
+        content: "Every language has its own road. Check out the lessons to see the stops you'll make along the way. Sharp-sharp!",
         position: 'right',
         mood: 'happy',
         path: '/'
     },
     {
         target: '.tour-sidebar-games',
-        title: "Games",
-        content: "Learning should be fun! Practice your vocabulary with exciting minigames like Word Bomb.",
+        title: "Shisanyama & Games",
+        content: "Time for a break? Head over here to play minigames. It's the fun way to make sure the words actually stick in your head!",
         position: 'right',
         mood: 'excited',
         path: '/'
     },
     {
         target: '.tour-sidebar-progress',
-        title: "Deep Insights",
-        content: "Track your detailed stats and see how far you've come on your journey.",
+        title: "The Logbook",
+        content: "Want to see how much petrol you've got in the tank? Track your stats and see how you're climbing the national leaderboard.",
         position: 'right',
         mood: 'happy',
         path: '/'
     },
     {
-        target: '.tour-sidebar-footer', // The new clickable user profile card
-        title: "Your Profile",
-        content: "This is where you manage your growth. Let's take a look at the new redesigned layout!",
+        target: '.tour-sidebar-footer',
+        title: "Your Passport",
+        content: "This is your personal corner. We've redesigned it so you can see your 'Visa Stamps' for every language you're mastering. Take a look!",
         position: 'right',
         mood: 'happy',
         path: '/'
     },
     {
-        target: '.tour-profile-tabs', // The new tabs
-        title: "Focused Views",
-        content: "We've organized everything into three tabs: Overview for stats, Mastery for your path, and Gear for settings.",
+        target: '.tour-profile-tabs',
+        title: "The Breakdown",
+        content: "We've got 'Overview' for your stats, 'Mastery' for your language progress, and 'Gear' to customize your trip.",
         position: 'bottom',
         mood: 'excited',
         path: '/profile'
     },
     {
-        target: '.tour-gear-tab', // Selecting the gear tab
-        title: "Warrior Gear",
-        content: "The Gear tab is where you set reminders and manage rewards. Don't forget to enable notifications!",
+        target: '.tour-gear-tab',
+        title: "Custom Gear",
+        content: "The Gear tab is where you set your reminders and pimp your profile. Make sure those notifications are ON so you don't lose your streak!",
         position: 'bottom',
         mood: 'happy',
         path: '/profile'
     },
     {
         target: 'body',
-        title: "Ready to Start?",
-        content: "You're all set! Go forth and learn. I'll be here if you need any help. Shumela Venda!",
+        title: "Aitse! You’re Ready! ",
+        content: "The road is open and the vibes are high. Go forth, learn a new tongue, and make some new chommies. Hosh!",
         position: 'center',
         mood: 'excited',
         path: '/'

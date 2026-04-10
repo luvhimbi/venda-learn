@@ -24,7 +24,6 @@ const Leaderboard: React.FC = () => {
     const [communityStats, setCommunityStats] = useState({ totalXP: 0 });
 
     useEffect(() => {
-        // Track Auth State for the sidebar display
         const unsubAuth = onAuthStateChanged(auth, (user: any) => {
             setIsLoggedIn(!!user);
         });
@@ -39,35 +38,29 @@ const Leaderboard: React.FC = () => {
 
                 if (playersData && Array.isArray(playersData)) {
                     playersData.forEach((player, index) => {
-                        if (index < 10) {
-                            totalXP += (player.points || 0);
-                        }
-
+                        if (index < 10) totalXP += (player.points || 0);
                         if (player.id === auth.currentUser?.uid) {
                             setCurrentUserRank({ rank: index + 1, player });
                         }
                     });
 
-                    // Special case: if current user is not in top 20, but is active this week
-                    if (currentUserData && 
-                        currentUserData.lastActiveWeek === currentWeek && 
+                    if (currentUserData &&
+                        currentUserData.lastActiveWeek === currentWeek &&
                         (currentUserData.weeklyXP || 0) > 0 &&
                         !playersData.find(p => p.id === auth.currentUser?.uid)) {
-                        setCurrentUserRank({ 
+                        setCurrentUserRank({
                             rank: 0,
-                            player: { 
-                                id: auth.currentUser?.uid || '', 
-                                username: currentUserData.username || 'Anonymous', 
+                            player: {
+                                id: auth.currentUser?.uid || '',
+                                username: currentUserData.username || 'Anonymous',
                                 points: currentUserData.weeklyXP || 0,
-                                avatarId: currentUserData.avatarId 
-                            } 
+                                avatarId: currentUserData.avatarId
+                            }
                         });
                     }
 
                     setPlayers(playersData);
-                    setCommunityStats({
-                        totalXP
-                    });
+                    setCommunityStats({ totalXP });
                 }
             } catch (error) {
                 console.error("Error fetching leaderboard:", error);
@@ -80,81 +73,121 @@ const Leaderboard: React.FC = () => {
 
         const handleShowGuide = () => {
             Swal.fire({
-                title: '<span class="fw-bold ls-tight">HOW TO RANK UP</span>',
+                title: '<span class="fw-black ls-tight text-dark">HOW TO RANK UP</span>',
                 html: `
-                    <div class="text-start p-2">
-                        <div class="mb-4 d-flex align-items-start gap-3">
-                            <div class="bg-light p-3 rounded-4 text-primary"><i class="bi bi-book-half fs-4"></i></div>
-                            <div>
-                                <p class="smallest fw-bold text-dark mb-1 ls-1 text-uppercase">Lessons</p>
-                                <p class="small text-muted mb-0">Earn base points for every successfully completed module.</p>
-                            </div>
-                        </div>
-                        <div class="mb-4 d-flex align-items-start gap-3">
-                            <div class="bg-light p-3 rounded-4 text-warning"><i class="bi bi-zap-fill fs-4"></i></div>
-                            <div>
-                                <p class="smallest fw-bold text-dark mb-1 ls-1 text-uppercase">Streaks</p>
-                                <p class="small text-muted mb-0">Maintain a daily learning streak to multiply your rewards.</p>
-                            </div>
-                        </div>
-                        <div class="mb-0 d-flex align-items-start gap-3">
-                            <div class="bg-light p-3 rounded-4 text-danger"><i class="bi bi-target fs-4"></i></div>
-                            <div>
-                                <p class="smallest fw-bold text-dark mb-1 ls-1 text-uppercase">Accuracy</p>
-                                <p class="small text-muted mb-0">Perfect scores in quizzes grant the "Muhali" bonus points.</p>
-                            </div>
-                        </div>
+            <div class="text-start p-2">
+                <div class="mb-4 d-flex align-items-start gap-3">
+                    <div class="bg-light p-3 rounded-4 border border-2 border-dark shadow-action-sm text-primary">
+                        <i class="bi bi-book-half fs-4"></i>
                     </div>
-                `,
+                    <div>
+                        <p class="smallest fw-black text-dark mb-1 ls-1 text-uppercase">Lessons</p>
+                        <p class="small text-muted mb-0">Earn base points for every successfully completed module.</p>
+                    </div>
+                </div>
+
+                <div class="mb-4 d-flex align-items-start gap-3">
+                    <div class="bg-light p-3 rounded-4 border border-2 border-dark shadow-action-sm text-warning">
+                        <i class="bi bi-zap-fill fs-4"></i>
+                    </div>
+                    <div>
+                        <p class="smallest fw-black text-dark mb-1 ls-1 text-uppercase">Streaks</p>
+                        <p class="small text-muted mb-0">Maintain a daily learning streak to multiply your rewards.</p>
+                    </div>
+                </div>
+
+                <div class="mb-0 d-flex align-items-start gap-3">
+                    <div class="bg-light p-3 rounded-4 border border-2 border-dark shadow-action-sm text-danger">
+                        <i class="bi bi-target fs-4"></i>
+                    </div>
+                    <div>
+                        <p class="smallest fw-black text-dark mb-1 ls-1 text-uppercase">Accuracy</p>
+                        <p class="small text-muted mb-0">Perfect scores in quizzes grant the "Muhali" bonus points.</p>
+                    </div>
+                </div>
+            </div>
+        `,
                 confirmButtonText: 'GOT IT',
-                confirmButtonColor: '#FACC15',
+                confirmButtonColor: '#000',
                 customClass: {
-                    popup: 'rounded-5 border-0 shadow-lg',
-                    confirmButton: 'rounded-pill px-5 fw-bold text-dark ls-1'
+                    popup: 'rounded-4 border border-4 border-dark shadow-action',
+                    confirmButton: 'rounded-pill px-5 fw-black text-white ls-1'
                 }
             });
         };
-
-        // Add to window for the icon click
         (window as any).showScoringGuide = handleShowGuide;
 
         const handleShowLeaguesGuide = () => {
-            Swal.fire({
-                title: '<span class="fw-bold ls-tight">LEAGUES EXPLAINED</span>',
-                html: `
-                    <div class="text-start p-2">
-                        <div class="mb-4 d-flex align-items-start gap-3">
-                            <div class="bg-light p-3 rounded-4" style="color: #0284c7;"><i class="bi bi-gem fs-4"></i></div>
-                            <div>
-                                <p class="smallest fw-bold text-dark mb-1 ls-1 text-uppercase">The Podium (Top 3)</p>
-                                <p class="small text-muted mb-0">The elite learners. Your avatar is displayed dynamically at the top of the leaderboard.</p>
-                            </div>
-                        </div>
-                        <div class="mb-4 d-flex align-items-start gap-3">
-                            <div class="bg-light p-3 rounded-4" style="color: #CA8A04;"><i class="bi bi-star-fill fs-4"></i></div>
-                            <div>
-                                <p class="smallest fw-bold text-dark mb-1 ls-1 text-uppercase">Gold League</p>
-                                <p class="small text-muted mb-0">The rising stars. Place between Rank 4 and Rank 10 to earn your gold shield.</p>
-                            </div>
-                        </div>
-                        <div class="mb-0 d-flex align-items-start gap-3">
-                            <div class="bg-light p-3 rounded-4 text-secondary"><i class="bi bi-shield-fill fs-4"></i></div>
-                            <div>
-                                <p class="smallest fw-bold text-dark mb-1 ls-1 text-uppercase">Silver League</p>
-                                <p class="small text-muted mb-0">The active challengers. Secure a spot between Rank 11 and Rank 20 to maintain Silver League status.</p>
-                            </div>
-                        </div>
-                    </div>
-                `,
-                confirmButtonText: 'GOT IT',
-                confirmButtonColor: '#FACC15',
-                customClass: {
-                    popup: 'rounded-5 border-0 shadow-lg',
-                    confirmButton: 'rounded-pill px-5 fw-bold text-dark ls-1'
-                }
-            });
-        };
 
+            Swal.fire({
+
+                title: '<span class="fw-bold ls-tight">LEAGUES EXPLAINED</span>',
+
+                html: `
+
+<div class="text-start p-2">
+
+<div class="mb-4 d-flex align-items-start gap-3">
+
+<div class="bg-light p-3 rounded-4" style="color: #0284c7;"><i class="bi bi-gem fs-4"></i></div>
+
+<div>
+
+<p class="smallest fw-bold text-dark mb-1 ls-1 text-uppercase">The Podium (Top 3)</p>
+
+<p class="small text-muted mb-0">The elite learners. Your avatar is displayed dynamically at the top of the leaderboard.</p>
+
+</div>
+
+</div>
+
+<div class="mb-4 d-flex align-items-start gap-3">
+
+<div class="bg-light p-3 rounded-4" style="color: #CA8A04;"><i class="bi bi-star-fill fs-4"></i></div>
+
+<div>
+
+<p class="smallest fw-bold text-dark mb-1 ls-1 text-uppercase">Gold League</p>
+
+<p class="small text-muted mb-0">The rising stars. Place between Rank 4 and Rank 10 to earn your gold shield.</p>
+
+</div>
+
+</div>
+
+<div class="mb-0 d-flex align-items-start gap-3">
+
+<div class="bg-light p-3 rounded-4 text-secondary"><i class="bi bi-shield-fill fs-4"></i></div>
+
+<div>
+
+<p class="smallest fw-bold text-dark mb-1 ls-1 text-uppercase">Silver League</p>
+
+<p class="small text-muted mb-0">The active challengers. Secure a spot between Rank 11 and Rank 20 to maintain Silver League status.</p>
+
+</div>
+
+</div>
+
+</div>
+
+`,
+
+                confirmButtonText: 'GOT IT',
+
+                confirmButtonColor: '#FACC15',
+
+                customClass: {
+
+                    popup: 'rounded-5 border-0 shadow-lg',
+
+                    confirmButton: 'rounded-pill px-5 fw-bold text-dark ls-1'
+
+                }
+
+            });
+
+        };
         (window as any).showLeaguesGuide = handleShowLeaguesGuide;
 
         return () => unsubAuth();
@@ -162,7 +195,7 @@ const Leaderboard: React.FC = () => {
 
     if (loading) return (
         <div className="d-flex justify-content-center align-items-center vh-100 bg-white">
-            <Loader2 className="animate-spin" style={{ color: '#FACC15' }} size={48} />
+            <Loader2 className="animate-spin text-warning" size={48} />
         </div>
     );
 
@@ -172,30 +205,20 @@ const Leaderboard: React.FC = () => {
 
     const renderPlayer = (player: Player, globalIndex: number, leagueColor: string) => {
         const isMe = isLoggedIn && player.id === auth.currentUser?.uid;
-
         return (
-            <div key={player.id} className={`list-group-item bg-transparent border-0 px-3 py-3 d-flex align-items-center ${isMe ? 'border-start border-4' : ''}`} style={isMe ? { borderLeftColor: leagueColor, backgroundColor: 'rgba(0,0,0,0.02)' } : {}}>
-                <span className="me-3 fw-bold text-muted smallest" style={{ width: '25px', textAlign: 'left' }}>#{globalIndex + 1}</span>
-
+            <div key={player.id} className={`list-group-item bg-transparent border-0 px-3 py-3 d-flex align-items-center ${isMe ? 'border-start border-4' : ''}`} style={isMe ? { borderLeftColor: leagueColor, backgroundColor: 'rgba(0,0,0,0.04)' } : {}}>
+                <span className="me-3 fw-black text-muted smallest" style={{ width: '25px' }}>#{globalIndex + 1}</span>
                 <div className="me-3">
-                    {player.id === 'community_avg' ? null : (
-                        <AvatarDisplay
-                            avatarId={player.avatarId || 'adventurer'}
-                            seed={player.username}
-                            size={40}
-                        />
-                    )}
+                    <AvatarDisplay avatarId={player.avatarId || 'adventurer'} seed={player.username} size={40} />
                 </div>
-
                 <div className="flex-grow-1 text-start">
                     <div className="d-flex align-items-center gap-2">
-                        <span className={`fw-bold text-dark`}>{player.username || 'Anonymous Learner'}</span>
-                        {isMe && <span className="smallest fw-bold ls-1 text-uppercase" style={{ color: leagueColor }}> (YOU)</span>}
+                        <span className="fw-black text-dark">{player.username || 'Anonymous Learner'}</span>
+                        {isMe && <span className="smallest fw-black ls-1 text-uppercase" style={{ color: leagueColor }}> (YOU)</span>}
                     </div>
                 </div>
-
                 <div className="text-end">
-                    <div className="fw-bold text-dark">{player.points.toLocaleString()} XP</div>
+                    <div className="fw-black text-dark">{player.points.toLocaleString()} XP</div>
                 </div>
             </div>
         );
@@ -207,189 +230,121 @@ const Leaderboard: React.FC = () => {
 
                 {/* BACK NAVIGATION */}
                 <button
-                    className="btn btn-link text-decoration-none p-0 mb-4 d-flex align-items-center gap-2 text-dark fw-bold smallest ls-2 text-uppercase"
+                    className="btn btn-link text-decoration-none p-0 mb-4 d-flex align-items-center gap-2 text-dark fw-black smallest ls-2 text-uppercase"
                     onClick={() => navigate('/')}
                 >
                     <ArrowLeft size={16} /> Murahu
                 </button>
 
                 {/* HEADER SECTION */}
-                <header className="mb-4 border-bottom pb-4 d-flex flex-column flex-md-row justify-content-between align-items-md-end gap-3">
+                <header className="mb-4 border-bottom border-4 border-dark pb-4 d-flex flex-column flex-md-row justify-content-between align-items-md-end gap-3">
                     <div>
-                        <p className="smallest fw-bold text-muted mb-1 ls-2 text-uppercase">Weekly Standings</p>
-                        <h2 className="fw-bold mb-0 ls-tight">THE WEEKLY TRIBE</h2>
+                        <p className="smallest fw-black text-muted mb-1 ls-2 text-uppercase">Weekly Standings</p>
+                        <h2 className="fw-black mb-0 ls-tight text-dark" style={{ fontSize: '2.5rem' }}>THE WEEKLY TRIBE</h2>
                     </div>
                     <div className="d-flex align-items-center gap-4">
                         <div className="d-none d-md-block text-end">
-                            <span className="smallest fw-bold text-muted ls-1 uppercase d-block">Community Effort:</span>
-                            <span className="fw-bold text-dark">{communityStats.totalXP.toLocaleString()} XP</span>
+                            <span className="smallest fw-black text-muted ls-1 uppercase d-block">Community Effort:</span>
+                            <span className="fw-black text-dark">{communityStats.totalXP.toLocaleString()} XP</span>
                         </div>
                         <div className="d-flex align-items-center gap-2">
                             <button
-                                className="btn btn-outline-dark rounded-pill py-2 px-3 fw-bold smallest ls-1 d-flex align-items-center gap-2 transition-all"
+                                className="btn btn-outline-dark rounded-pill py-2 px-3 fw-black smallest ls-1 d-flex align-items-center gap-2 border-2"
                                 onClick={() => (window as any).showScoringGuide()}
                             >
-                                <Info size={16} className="d-none d-sm-block" /> <span className="d-none d-sm-block">HOW TO RANK UP</span><span className="d-sm-none"><Info size={16} /> INFO</span>
+                                <Info size={16} /> <span className="d-none d-sm-block text-uppercase">Scoring</span>
                             </button>
                             <button
-                                className="btn btn-dark rounded-pill py-2 px-3 fw-bold smallest ls-1 d-flex align-items-center gap-2 transition-all border border-dark"
+                                className="btn btn-dark rounded-pill py-2 px-3 fw-black smallest ls-1 d-flex align-items-center gap-2 shadow-action-sm"
                                 onClick={() => (window as any).showLeaguesGuide()}
                             >
-                                <Trophy size={16} className="d-none d-sm-block text-warning" /> <span className="d-none d-sm-block">LEAGUES</span><span className="d-sm-none"><Trophy size={16} className="text-warning"/></span>
+                                <Trophy size={16} className="text-warning" /> <span className="d-none d-sm-block text-uppercase">Leagues</span>
                             </button>
                         </div>
                     </div>
                 </header>
 
                 <div className="row justify-content-center">
-                    {/* CENTERED COLUMN: PODIUM & HALL OF FAME */}
                     <main className="col-lg-10 col-xl-8">
 
-                        {/* DYNAMIC AUTH STATE CARD */}
                         {!isLoggedIn ? (
-                            <section className="p-4 bg-dark text-white rounded-4 shadow-lg mb-5 text-center animate__animated animate__fadeIn">
-                                <p className="smallest fw-bold ls-2 text-uppercase mb-2" style={{ color: '#FACC15' }}>Join the Tribe</p>
-                                <h4 className="fw-bold mb-3">Ready to climb the ranks?</h4>
-                                <p className="small opacity-75 mb-4">Log in to track your personal ranking, earn badges, and climb the Hall of Fame.</p>
-                                <button onClick={() => navigate('/login')} className="btn game-btn-primary px-5 py-3 fw-bold smallest ls-1">
+                            <section className="p-5 bg-dark text-white rounded-4 border border-4 border-dark shadow-action mb-5 text-center">
+                                <p className="smallest fw-black ls-2 text-uppercase mb-2 text-warning">Join the Tribe</p>
+                                <h2 className="fw-black mb-4">Ready to climb the ranks?</h2>
+                                <button onClick={() => navigate('/login')} className="btn btn-game-primary px-5 py-3 fw-black smallest ls-1">
                                     SIGN IN TO RANK
                                 </button>
                             </section>
+                        ) : !currentUserRank ? (
+                            <section className="p-5 bg-white border border-4 border-dark rounded-4 shadow-action mb-5 text-center">
+                                <Award size={64} className="mx-auto mb-3 text-warning animate-heartbeat" />
+                                <h3 className="fw-black text-dark mb-2">Leaderboard Locked!</h3>
+                                <p className="text-muted fw-bold mb-4">Complete a lesson this week to join the rankings.</p>
+                                <button onClick={() => navigate('/courses')} className="btn btn-dark rounded-pill px-5 py-3 fw-black smallest ls-2 shadow-action-sm">
+                                    START YOUR FIRST LESSON
+                                </button>
+                            </section>
                         ) : (
-                            !currentUserRank ? (
-                                <section className="p-5 bg-white border rounded-5 shadow-sm mb-5 text-center animate__animated animate__fadeIn">
-                                    <div className="mb-4 text-warning">
-                                        <Award size={64} className="mx-auto heartbeat-sm" />
-                                    </div>
-                                    <h4 className="fw-bold mb-2">Weekly Leaderboard is Locked!</h4>
-                                    <p className="text-muted mb-4 opacity-75">You must complete a lesson this week in order to be shown on the leaderboard or to see the rankings.</p>
-                                    <button onClick={() => navigate('/courses')} className="btn btn-dark rounded-pill px-5 py-3 fw-bold smallest ls-2">
-                                        START YOUR FIRST LESSON
-                                    </button>
+                            <>
+                                {/* PODIUM */}
+                                <div className="row align-items-end mb-5 g-0 text-center border-bottom border-4 border-dark pb-5 mx-auto" style={{ maxWidth: '600px' }}>
+                                    {topThree[1] && (
+                                        <div className="col-4 px-2">
+                                            <AvatarDisplay avatarId={topThree[1].avatarId || 'adventurer'} seed={topThree[1].username} size={60} className="shadow-action-sm border-2 border-dark mb-3" />
+                                            <Award className="text-secondary mx-auto mb-2" size={32} />
+                                            <div className="fw-black text-dark text-truncate small">{topThree[1].username}</div>
+                                            <div className="rounded-top-3 border-top border-start border-end border-4 border-dark" style={{ height: '80px', backgroundColor: '#9CA3AF' }}></div>
+                                        </div>
+                                    )}
+                                    {topThree[0] && (
+                                        <div className="col-4 px-2">
+                                            <AvatarDisplay avatarId={topThree[0].avatarId || 'adventurer'} seed={topThree[0].username} size={85} className="shadow-action border-4 border-dark mb-3" />
+                                            <Trophy className="text-warning mx-auto mb-2" size={48} />
+                                            <div className="fw-black text-dark text-truncate">{topThree[0].username}</div>
+                                            <div className="rounded-top-3 border-top border-start border-end border-4 border-dark" style={{ height: '140px', backgroundColor: '#FACC15' }}></div>
+                                        </div>
+                                    )}
+                                    {topThree[2] && (
+                                        <div className="col-4 px-2">
+                                            <AvatarDisplay avatarId={topThree[2].avatarId || 'adventurer'} seed={topThree[2].username} size={50} className="shadow-action-sm border-2 border-dark mb-3" />
+                                            <Award style={{ color: '#CD7F32' }} className="mx-auto mb-2" size={24} />
+                                            <div className="fw-black text-dark text-truncate small">{topThree[2].username}</div>
+                                            <div className="rounded-top-3 border-top border-start border-end border-4 border-dark" style={{ height: '50px', backgroundColor: '#CD7F32' }}></div>
+                                        </div>
+                                    )}
+                                </div>
+
+                                {/* LEAGUES */}
+                                <section className="text-center mt-5">
+                                    {goldLeague.length > 0 && (
+                                        <div className="mb-5 mx-auto" style={{ maxWidth: '600px' }}>
+                                            <div className="d-flex align-items-center gap-2 mb-3 bg-white py-2 px-4 rounded-pill d-inline-flex border border-4 border-dark shadow-action-sm">
+                                                <i className="bi bi-star-fill text-warning"></i>
+                                                <h6 className="mb-0 fw-black ls-1 text-uppercase text-dark" style={{ fontSize: "12px" }}>Gold League</h6>
+                                            </div>
+                                            <div className="list-group shadow-action rounded-4 border border-4 border-dark bg-white overflow-hidden">
+                                                {goldLeague.map((player, index) => renderPlayer(player, index + 3, '#CA8A04'))}
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {silverLeague.length > 0 && (
+                                        <div className="mb-5 mx-auto" style={{ maxWidth: '600px' }}>
+                                            <div className="d-flex align-items-center gap-2 mb-3 bg-white py-2 px-4 rounded-pill d-inline-flex border border-4 border-dark shadow-action-sm">
+                                                <i className="bi bi-shield-fill text-muted"></i>
+                                                <h6 className="mb-0 fw-black ls-1 text-uppercase text-muted" style={{ fontSize: "12px" }}>Silver League</h6>
+                                            </div>
+                                            <div className="list-group shadow-action rounded-4 border border-4 border-dark bg-white overflow-hidden">
+                                                {silverLeague.map((player, index) => renderPlayer(player, index + 10, '#6B7280'))}
+                                            </div>
+                                        </div>
+                                    )}
                                 </section>
-                            ) : (
-                                <>
-                                    {/* THE PODIUM */}
-                                    <div className="row align-items-end mb-5 g-0 text-center border-bottom pb-5 mx-auto" style={{ maxWidth: '600px' }}>
-                                        {topThree[1] && (
-                                            <div className="col-4 px-2">
-                                                <div className="mb-3 d-flex justify-content-center">
-                                                    <AvatarDisplay
-                                                        avatarId={topThree[1].avatarId || 'adventurer'}
-                                                        seed={topThree[1].username}
-                                                        size={60}
-                                                        className="shadow-sm border-secondary"
-                                                        style={{ borderWidth: '2px' }}
-                                                    />
-                                                </div>
-                                                <div className="mb-2"><Award className="text-secondary mx-auto" size={32} /></div>
-                                                <div className="fw-bold text-truncate small">{topThree[1].username || 'Learner'}</div>
-                                                <div className="smallest fw-bold text-muted mb-3">{topThree[1].points} XP</div>
-                                                <div className="rounded-top-3 shadow-sm" style={{ height: '80px', backgroundColor: '#9CA3AF' }}></div>
-                                            </div>
-                                        )}
-                                        {topThree[0] && (
-                                            <div className="col-4 px-2">
-                                                <div className="mb-3 d-flex justify-content-center">
-                                                    <AvatarDisplay
-                                                        avatarId={topThree[0].avatarId || 'adventurer'}
-                                                        seed={topThree[0].username}
-                                                        size={80}
-                                                        className="shadow border-warning"
-                                                        style={{ borderWidth: '3px' }}
-                                                    />
-                                                </div>
-                                                <div className="mb-2"><Trophy className="text-warning mx-auto" size={48} /></div>
-                                                <div className="fw-bold text-truncate">{topThree[0].username || 'Learner'}</div>
-                                                <div className="small fw-bold mb-3" style={{ color: '#FACC15' }}>{topThree[0].points} XP</div>
-                                                <div className="rounded-top-3" style={{ height: '140px', backgroundColor: '#FACC15' }}></div>
-                                            </div>
-                                        )}
-                                        {topThree[2] && (
-                                            <div className="col-4 px-2">
-                                                <div className="mb-3 d-flex justify-content-center">
-                                                    <AvatarDisplay
-                                                        avatarId={topThree[2].avatarId || 'adventurer'}
-                                                        seed={topThree[2].username}
-                                                        size={50}
-                                                        className="shadow-sm border-bronze"
-                                                        style={{ borderWidth: '2px', borderColor: '#CD7F32' }}
-                                                    />
-                                                </div>
-                                                <div className="mb-2"><Award size={24} style={{ color: '#CD7F32' }} className="mx-auto" /></div>
-                                                <div className="fw-bold text-truncate small">{topThree[2].username || 'Learner'}</div>
-                                                <div className="smallest fw-bold text-muted mb-3">{topThree[2].points} XP</div>
-                                                <div className="rounded-top-3 shadow-sm" style={{ height: '50px', backgroundColor: '#CD7F32' }}></div>
-                                            </div>
-                                        )}
-                                    </div>
-
-                                    {/* LEAGUES */}
-                                    <section className="text-center mt-5">
-                                        <h6 className="fw-bold text-uppercase text-muted small ls-2 mb-4">League Standings</h6>
-
-                                        {/* GOLD LEAGUE */}
-                                        {goldLeague.length > 0 && (
-                                            <div className="mb-5 mx-auto animate__animated animate__fadeInUp" style={{ maxWidth: '600px' }}>
-                                                <div className="d-flex align-items-center justify-content-center gap-2 mb-3 bg-light py-2 px-4 rounded-pill d-inline-flex mx-auto border" style={{ borderColor: '#FDE047' }}>
-                                                    <div style={{ width: "24px", height: "24px", backgroundColor: "#FEF08A", color: "#CA8A04", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                                                        <i className="bi bi-star-fill fs-6"></i>
-                                                    </div>
-                                                    <h6 className="mb-0 fw-bold ls-1 text-uppercase" style={{ color: "#CA8A04", fontSize: "12px" }}>Gold League</h6>
-                                                </div>
-                                                <div className="list-group list-group-flush shadow-sm rounded-4 border bg-white overflow-hidden">
-                                                    {goldLeague.map((player, index) => renderPlayer(player, index + 3, '#CA8A04'))}
-                                                </div>
-                                            </div>
-                                        )}
-
-                                        {/* SILVER LEAGUE */}
-                                        {silverLeague.length > 0 && (
-                                            <div className="mb-5 mx-auto animate__animated animate__fadeInUp" style={{ maxWidth: '600px' }}>
-                                                <div className="d-flex align-items-center justify-content-center gap-2 mb-3 bg-light py-2 px-4 rounded-pill d-inline-flex mx-auto border" style={{ borderColor: '#E5E7EB' }}>
-                                                    <div style={{ width: "24px", height: "24px", backgroundColor: "#F3F4F6", color: "#9CA3AF", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                                                        <i className="bi bi-shield-fill fs-6"></i>
-                                                    </div>
-                                                    <h6 className="mb-0 fw-bold ls-1 text-uppercase" style={{ color: "#6B7280", fontSize: "12px" }}>Silver League</h6>
-                                                </div>
-                                                <div className="list-group list-group-flush shadow-sm rounded-4 border bg-white overflow-hidden">
-                                                    {silverLeague.map((player, index) => renderPlayer(player, index + 10, '#6B7280'))}
-                                                </div>
-                                            </div>
-                                        )}
-                                    </section>
-                                </>
-                            )
+                            </>
                         )}
                     </main>
                 </div>
             </div>
-
-            <style>{`
-                .ls-tight { letter-spacing: -1.5px; }
-                .ls-1 { letter-spacing: 1px; }
-                .ls-2 { letter-spacing: 2px; }
-                .smallest { font-size: 11px; }
-                .game-btn-primary { 
-                    background-color: #FACC15 !important; 
-                    color: #111827 !important; 
-                    border: none !important; 
-                    border-radius: 12px; 
-                    box-shadow: 0 4px 0 #EAB308 !important; 
-                    transition: all 0.2s; 
-                }
-                .game-btn-primary:active { transform: translateY(2px); box-shadow: 0 2px 0 #EAB308 !important; }
-
-                .heartbeat-sm {
-                   animation: heartbeat 2s infinite ease-in-out;
-                }
-
-                @keyframes heartbeat {
-                    0% { transform: scale(1); }
-                    50% { transform: scale(1.1); }
-                    100% { transform: scale(1); }
-                }
-            `}</style>
         </div>
     );
 };

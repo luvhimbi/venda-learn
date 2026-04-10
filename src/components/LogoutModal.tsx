@@ -8,55 +8,56 @@ interface LogoutModalProps {
 }
 
 const LogoutModal: React.FC<LogoutModalProps> = ({ onClose, onConfirm }) => (
-    <div className="position-fixed top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center bg-black bg-opacity-50" style={{ zIndex: 2000 }}>
-        <div className="bg-white p-5 rounded-4 shadow-lg text-center animate__animated animate__zoomIn" style={{ maxWidth: '450px', width: '90%' }}>
-            <div className="mb-4 d-flex justify-content-center">
-                <Mascot mood="sad" width="180px" height="180px" />
+    <div
+        className="position-fixed top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center"
+        style={{
+            zIndex: 9999,
+            backdropFilter: 'blur(8px)',
+            backgroundColor: 'rgba(255, 255, 255, 0.4)'
+        }}
+    >
+        {/* Using shadow-action and rounded-4 from your global CSS Section 6 & 2 */}
+        <div
+            className="bg-white p-5 rounded-4 text-center animate__animated animate__zoomIn border border-4 border-dark shadow-action"
+            style={{
+                maxWidth: '420px',
+                width: '90%'
+            }}
+        >
+
+            {/* MASCOT CONTAINER - Relying on animate-chommie or float-around from Section 11 */}
+            <div className="mb-4 d-flex justify-content-center animate-chommie">
+                <Mascot mood="sad" width="160px" height="160px" />
             </div>
-            <h4 className="fw-bold mb-3 text-dark">Leaving so soon?</h4>
-            <p className="text-muted mb-4 opacity-75">Vho khwaṱha uri vha khou fhedza u shumisa system?</p>
-            <div className="d-flex flex-column flex-sm-row gap-3 mt-2">
-                <JuicyButton 
-                    className="btn flex-grow-1 fw-bold py-3 px-4 rounded-4 btn-juicy-stay shadow-none" 
+
+            <h3 className="fw-black mb-2 text-dark ls-tight text-uppercase">
+                Parking already?
+            </h3>
+
+            <p className="text-dark fw-bold mb-4 opacity-75" style={{ fontSize: '1.1rem', lineHeight: '1.3' }}>
+                Are you sure you want to log out, chommie? The road is still open and we're making such good time!
+            </p>
+
+            <div className="d-flex flex-column gap-3 mt-2">
+                {/* Section 8: game-btn-primary handles the yellow, the border, and the 4px shadow */}
+                <JuicyButton
+                    className="btn game-btn-primary w-100 py-3 px-4"
                     onClick={onClose}
                 >
-                    STAY
+                    NO, KEEP ROLLING! 🚀
                 </JuicyButton>
-                <JuicyButton 
-                    className="btn flex-grow-1 fw-bold py-3 px-4 rounded-4 btn-juicy-logout shadow-none" 
+
+                {/* Section 3 & 5: Using utility classes for the secondary link */}
+                <JuicyButton
+                    className="btn border-0 text-muted fw-bold smallest-print text-uppercase ls-1"
+                    style={{ background: 'none', textDecoration: 'underline' }}
                     onClick={onConfirm}
                     hapticType="heavy"
                 >
-                    LOGOUT
+                    Log out for now
                 </JuicyButton>
             </div>
         </div>
-
-        <style>{`
-            .btn-juicy-stay {
-                background-color: #f8fafc !important;
-                color: #475569 !important;
-                border: 2px solid #e2e8f0 !important;
-                border-bottom: 5px solid #cbd5e1 !important;
-                transition: all 0.1s ease;
-            }
-            .btn-juicy-stay:active {
-                transform: translateY(3px) !important;
-                border-bottom-width: 2px !important;
-            }
-
-            .btn-juicy-logout {
-                background-color: #FACC15 !important;
-                color: #111827 !important;
-                border: 2px solid #EAB308 !important;
-                border-bottom: 5px solid #CA8A04 !important;
-                transition: all 0.1s ease;
-            }
-            .btn-juicy-logout:active {
-                transform: translateY(3px) !important;
-                border-bottom-width: 2px !important;
-            }
-        `}</style>
     </div>
 );
 

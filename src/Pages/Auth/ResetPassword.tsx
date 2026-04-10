@@ -70,7 +70,8 @@ const ResetPassword: React.FC = () => {
 
                             <button
                                 type="submit"
-                                className="btn w-100 fw-black py-3 mb-4 btn-primary border border-4 border-dark rounded-0 shadow-action text-uppercase ls-1 btn-press"
+                                className="btn w-100 fw-black py-3 mb-4 text-dark border border-4 border-dark rounded-0 shadow-action text-uppercase ls-1 hover-press"
+                                style={{ backgroundColor: 'var(--venda-yellow)' }}
                                 disabled={loading}
                             >
                                 {loading ? <Loader2 className="animate-spin" size={20} /> : 'Send Reset Link'}
@@ -91,7 +92,7 @@ const ResetPassword: React.FC = () => {
 
                         <button
                             onClick={() => navigate('/login')}
-                            className="btn btn-dark w-100 py-3 fw-black rounded-0 mb-3 shadow-action text-uppercase ls-1 btn-press"
+                            className="btn btn-dark w-100 py-3 fw-black rounded-0 mb-3 shadow-action text-uppercase ls-1 hover-press"
                         >
                             Back to Login
                         </button>

@@ -13,6 +13,7 @@ import StreakCalendar from '../../components/StreakCalendar';
 import JuicyButton from '../../components/JuicyButton';
 import { invalidateCache, refreshUserData, fetchUserData, fetchLearnedStats, fetchLanguages } from '../../services/dataCache';
 import ReviewModal from '../../components/ReviewModal';
+import AvatarBuilder from '../../components/AvatarBuilder';
 
 import { updateReminderSettings, requestNotificationPermission, getUserTokens } from '../../services/reminderService';
 import Swal from 'sweetalert2';
@@ -62,6 +63,7 @@ const Profile: React.FC = () => {
     const [soundEnabled, setSoundEnabled] = useState(true);
     const [hapticEnabled, setHapticEnabled] = useState(true);
     const [showReviewModal, setShowReviewModal] = useState(false);
+    const [showCustomBuilder, setShowCustomBuilder] = useState(false);
     const [languages, setLanguages] = useState<any[]>([]);
     const navigate = useNavigate();
     const inviteLink = `${window.location.origin}/register?ref=${auth.currentUser?.uid}`;
@@ -87,7 +89,7 @@ const Profile: React.FC = () => {
                     setUserData(normalizedProfile);
                     setEditUsername(profile.username || '');
                     setEditAvatarId(profile.avatarId || 'adventurer');
-                    
+
                     // Default states for inputs
                     setReminderEnabled(profile.reminderEnabled ?? false);
                     setReminderTime(profile.reminderTime || '18:00');
@@ -328,7 +330,7 @@ const Profile: React.FC = () => {
                 {/* PROFILE HEADER & SETTINGS */}
                 <header className={`mb-5 pb-4 border-bottom transition-all ${isEditing ? 'bg-light p-4 rounded-4 border-warning shadow-sm' : ''}`}>
                     <div className="d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-4">
-                        
+
                         {/* LEFT COMPONENT - Avatar & Identity */}
                         <div className="d-flex flex-column flex-md-row align-items-center gap-3 gap-md-4 text-center text-md-start">
                             <div className="position-relative">
@@ -361,7 +363,7 @@ const Profile: React.FC = () => {
                                     {/*)}*/}
                                 </div>
                                 <p className="small text-muted mb-0">{userData?.email}</p>
-                                
+
                                 {/* JOIN DATE & CURRENT LESSON BADGES */}
                                 <div className="d-flex flex-wrap align-items-center justify-content-center gap-2 mt-3">
                                     {userData?.createdAt && (
@@ -394,7 +396,7 @@ const Profile: React.FC = () => {
                                             Edit Profile
                                         </button>
                                     )}
-                                    
+
                                     <div className="dropdown">
                                         <button className="btn btn-light rounded-circle shadow-sm border border-light-subtle d-flex align-items-center justify-content-center" style={{ width: '42px', height: '42px' }} data-bs-toggle="dropdown" aria-expanded="false">
                                             <MoreVertical size={18} className="text-secondary" />
@@ -448,13 +450,31 @@ const Profile: React.FC = () => {
                                         />
                                     </div>
 
-                                    <div className="p-4 rounded-4 bg-white border border-light-subtle shadow-sm" style={{ maxWidth: '500px' }}>
-                                        <p className="small fw-bold text-muted mb-3 ls-1 text-uppercase">Choose your style</p>
+                                    <div className="p-4 rounded-4 bg-white border border-light-subtle shadow-sm flex-grow-1" style={{ maxWidth: '500px' }}>
+                                        <div className="d-flex flex-column flex-sm-row justify-content-between align-items-sm-center mb-3 gap-2">
+                                            <p className="small fw-bold text-muted mb-0 ls-1 text-uppercase">Choose Style</p>
+                                            <button 
+                                                type="button" 
+                                                onClick={() => setShowCustomBuilder(true)}
+                                                className="btn btn-sm btn-dark text-warning fw-bold rounded-pill shadow-sm ls-1 px-3 py-2 d-flex align-items-center gap-2"
+                                            >
+                                                <i className="bi bi-palette"></i> BUILD CUSTOM AVATAR
+                                            </button>
+                                        </div>
                                         <AvatarPicker
                                             selectedStyle={editAvatarId}
                                             seed={editUsername || 'warrior'}
                                             onSelect={setEditAvatarId}
                                         />
+                                        {editAvatarId.startsWith('{') && (
+                                            <div className="mt-3 p-3 bg-light rounded-3 border d-flex align-items-center gap-3">
+                                                 <div className="bg-success rounded-circle" style={{ width: 12, height: 12 }}></div>
+                                                 <div>
+                                                     <p className="small fw-bold text-dark mb-0">Custom Avatar Base</p>
+                                                     <p className="smallest text-muted mb-0">Your uniquely crafted character applies here.</p>
+                                                 </div>
+                                            </div>
+                                        )}
                                     </div>
 
                                     <div className="d-flex gap-2 mt-2">
@@ -526,31 +546,31 @@ const Profile: React.FC = () => {
                                                 })
                                                 .slice(0, 3)
                                                 .map(trophy => {
-                                                const isEarned = (userData?.trophies || []).includes(trophy.id);
-                                                return (
-                                                    <div key={trophy.id} style={{ width: '100px' }}>
-                                                        <div
-                                                            className="d-flex flex-column align-items-center gap-2 w-100"
-                                                            title={trophy.description}
-                                                            style={{ 
-                                                                cursor: 'pointer',
-                                                                opacity: isEarned ? 1 : 0.5,
-                                                                filter: isEarned ? 'none' : 'grayscale(1)'
-                                                            }}
-                                                            onClick={() => navigate('/achievements')}
-                                                        >
-                                                            <div className={`p-3 rounded-4 w-100 d-flex justify-content-center transition-all ${isEarned ? 'bg-white shadow-sm border border-warning' : 'bg-white border'}`}>
-                                                                <TrophyIcon
-                                                                    rarity={trophy.rarity as any}
-                                                                    size={56}
-                                                                    animate={isEarned}
-                                                                    color={trophy.color}
-                                                                />
+                                                    const isEarned = (userData?.trophies || []).includes(trophy.id);
+                                                    return (
+                                                        <div key={trophy.id} style={{ width: '100px' }}>
+                                                            <div
+                                                                className="d-flex flex-column align-items-center gap-2 w-100"
+                                                                title={trophy.description}
+                                                                style={{
+                                                                    cursor: 'pointer',
+                                                                    opacity: isEarned ? 1 : 0.5,
+                                                                    filter: isEarned ? 'none' : 'grayscale(1)'
+                                                                }}
+                                                                onClick={() => navigate('/achievements')}
+                                                            >
+                                                                <div className={`p-3 rounded-4 w-100 d-flex justify-content-center transition-all ${isEarned ? 'bg-white shadow-sm border border-warning' : 'bg-white border'}`}>
+                                                                    <TrophyIcon
+                                                                        rarity={trophy.rarity as any}
+                                                                        size={56}
+                                                                        animate={isEarned}
+                                                                        color={trophy.color}
+                                                                    />
+                                                                </div>
                                                             </div>
                                                         </div>
-                                                    </div>
-                                                );
-                                            })}
+                                                    );
+                                                })}
                                         </div>
                                     </div>
 
@@ -590,23 +610,22 @@ const Profile: React.FC = () => {
                                 <div className="row g-3">
                                     {languages.map((lang, idx) => (
                                         <div key={lang.id} className="col-6 col-md-4 animate__animated animate__fadeInUp" style={{ animationDelay: `${idx * 0.1}s` }}>
-                                            <div 
+                                            <div
                                                 onClick={() => handleLanguageChange(lang.id)}
-                                                className={`p-3 rounded-4 border-2 text-center cursor-pointer transition-all h-100 d-flex flex-column justify-content-center hover-up ${
-                                                    userData?.preferredLanguageId === lang.id 
-                                                    ? 'border-warning bg-white shadow' 
-                                                    : 'border-light bg-light bg-opacity-50'
-                                                }`}
+                                                className={`p-3 rounded-4 border-2 text-center cursor-pointer transition-all h-100 d-flex flex-column justify-content-center hover-up ${userData?.preferredLanguageId === lang.id
+                                                        ? 'border-warning bg-white shadow'
+                                                        : 'border-light bg-light bg-opacity-50'
+                                                    }`}
                                             >
                                                 <h6 className={`fw-bold mb-1 ${userData?.preferredLanguageId === lang.id ? 'text-dark' : 'text-secondary'}`}>{lang.name}</h6>
                                                 <span className="smallest fw-extrabold ls-1 opacity-50 mb-2">{lang.code.toUpperCase()}</span>
                                                 {userData?.preferredLanguageId === lang.id ? (
                                                     <div className="mt-1">
-                                                        <span 
-                                                            className="badge smallest fw-bold ls-1 rounded-pill px-3 py-1 shadow-sm border border-warning" 
-                                                            style={{ 
-                                                                fontSize: '9px', 
-                                                                backgroundColor: '#FACC15', 
+                                                        <span
+                                                            className="badge smallest fw-bold ls-1 rounded-pill px-3 py-1 shadow-sm border border-warning"
+                                                            style={{
+                                                                fontSize: '9px',
+                                                                backgroundColor: '#FACC15',
                                                                 color: '#000000',
                                                                 display: 'inline-block'
                                                             }}
@@ -689,10 +708,10 @@ const Profile: React.FC = () => {
 
                                             {reminderEnabled && (
                                                 <div className="d-flex flex-column gap-2 mt-2 animate__animated animate__fadeIn">
-                                                    <button 
+                                                    <button
                                                         onClick={async () => {
                                                             if (!('Notification' in window)) return;
-                                                            
+
                                                             // Local test notification (simulates the look)
                                                             new Notification("Test Notification", {
                                                                 body: "This is a test of your pop-up notifications! It works! 🎉",
@@ -701,7 +720,7 @@ const Profile: React.FC = () => {
 
                                                             const tokens = await getUserTokens(auth.currentUser!.uid);
                                                             const latestToken = tokens[tokens.length - 1];
-                                                            
+
                                                             if (latestToken) {
                                                                 Swal.fire({
                                                                     title: 'Test Sent!',
@@ -822,7 +841,7 @@ const Profile: React.FC = () => {
                             </div>
 
                             {/* LEGAL SECTION */}
-                            <Link 
+                            <Link
                                 to="/legal"
                                 className="card border-0 shadow-sm rounded-4 p-4 bg-white overflow-hidden position-relative mb-4 text-decoration-none hover-up transition-all"
                             >
@@ -841,7 +860,7 @@ const Profile: React.FC = () => {
                             </Link>
 
                             {/* REVIEW / FEEDBACK SECTION */}
-                            <button 
+                            <button
                                 onClick={() => setShowReviewModal(true)}
                                 className="w-100 text-start border-0 p-0 bg-transparent mb-4"
                             >
@@ -853,7 +872,7 @@ const Profile: React.FC = () => {
                                             </div>
                                             <div>
                                                 <h5 className="fw-bold mb-1 text-dark">Leave a Review</h5>
-                                            <p className="smallest text-muted mb-0">Help us improve your South African languages learning journey</p>
+                                                <p className="smallest text-muted mb-0">Help us improve your South African languages learning journey</p>
                                             </div>
                                         </div>
                                         <ChevronRight size={20} className="text-muted" />
@@ -908,9 +927,9 @@ const Profile: React.FC = () => {
 
             {/* REVIEW MODAL */}
             {showReviewModal && (
-                <ReviewModal 
-                    username={userData?.username || 'Learner'} 
-                    onClose={() => setShowReviewModal(false)} 
+                <ReviewModal
+                    username={userData?.username || 'Learner'}
+                    onClose={() => setShowReviewModal(false)}
                 />
             )}
 
@@ -1005,8 +1024,8 @@ const Profile: React.FC = () => {
                 }
             `}</style>
             {showLogout && (
-                <LogoutModal 
-                    onClose={() => setShowLogout(false)} 
+                <LogoutModal
+                    onClose={() => setShowLogout(false)}
                     onConfirm={async () => {
                         await signOut(auth);
                         invalidateCache();
@@ -1015,19 +1034,35 @@ const Profile: React.FC = () => {
                 />
             )}
 
-            <ShareProfileModal 
-                isOpen={isShareModalOpen} 
-                onClose={() => setIsShareModalOpen(false)} 
-                userData={userData} 
-                inviteLink={inviteLink}
-            />
-
-            <ShareStreakModal 
-                isOpen={isShareStreakOpen} 
-                onClose={() => setIsShareStreakOpen(false)} 
+            <ShareProfileModal
+                isOpen={isShareModalOpen}
+                onClose={() => setIsShareModalOpen(false)}
                 userData={userData}
                 inviteLink={inviteLink}
             />
+
+            <ShareStreakModal
+                isOpen={isShareStreakOpen}
+                onClose={() => setIsShareStreakOpen(false)}
+                userData={userData}
+                inviteLink={inviteLink}
+            />
+
+            {/* CUSTOM AVATAR BUILDER MODAL */}
+            {showCustomBuilder && (
+                <div className="position-fixed top-0 start-0 w-100 h-100 bg-dark bg-opacity-75" style={{ zIndex: 1055, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem', backdropFilter: 'blur(5px)' }}>
+                     <div className="w-100 bg-white rounded-4 overflow-hidden shadow-lg animate__animated animate__zoomIn" style={{ maxWidth: '1000px' }}>
+                        <AvatarBuilder
+                             initialConfig={editAvatarId.startsWith('{') ? JSON.parse(editAvatarId) : undefined}
+                             onSave={(config) => {
+                                 setEditAvatarId(JSON.stringify(config));
+                                 setShowCustomBuilder(false);
+                             }}
+                             onCancel={() => setShowCustomBuilder(false)}
+                        />
+                     </div>
+                </div>
+            )}
         </div>
     );
 };

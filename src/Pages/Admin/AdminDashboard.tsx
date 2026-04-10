@@ -163,7 +163,7 @@ const AdminDashboard: React.FC = () => {
 
                         <div className="row g-4 px-2">
                             <div className="col-lg-7">
-                                <div className="bg-white p-4 rounded-4 border shadow-sm h-100">
+                                <div className="bg-white text-black p-4 rounded-4 border shadow-sm h-100">
                                     <h6 className="fw-bold ls-1 text-uppercase text-muted mb-4 border-bottom pb-2">Lesson Breakdown</h6>
                                     <div className="d-flex flex-column gap-4 mt-3">
                                         {Object.entries(stats.difficultyBreakdown).map(([level, count]) => (

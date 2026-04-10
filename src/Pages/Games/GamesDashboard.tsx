@@ -33,7 +33,7 @@ const GamesDashboard: React.FC = () => {
     const games = [
         {
             id: 'word-puzzle',
-            title: 'Guess The correct venda word',
+            title: 'Guess The correct language word',
             description: 'Guess the 5-letter target word. A daily challenge to test your vocabulary.',
             icon: <Puzzle size={64} />,
             route: '/word-puzzle',
@@ -42,7 +42,7 @@ const GamesDashboard: React.FC = () => {
         },
         {
             id: 'picture-puzzle',
-            title: 'Match the pictures with venda words',
+            title: 'Match the pictures with the south african words',
             description: 'Race against the clock and match pictures to the correct words.',
             icon: <Image size={64} />,
             route: '/picture-puzzle',
@@ -51,7 +51,7 @@ const GamesDashboard: React.FC = () => {
         },
         {
             id: 'syllable-builder',
-            title: 'Build the venda Words(Syllables)',
+            title: 'Build the  Words(Syllables)',
             description: 'Learn how to build words! Arrange the blocks in the correct order.',
             icon: <Layout size={64} />,
             route: '/syllable-builder',
@@ -99,7 +99,7 @@ const GamesDashboard: React.FC = () => {
 
     if (isLoggedIn === null) {
         return (
-            <div className="min-vh-100 d-flex align-items-center justify-content-center bg-light">
+            <div className="min-vh-100 d-flex align-items-center justify-content-center bg-white">
                 <div className="spinner-border text-primary" role="status"></div>
             </div>
         );
@@ -107,7 +107,7 @@ const GamesDashboard: React.FC = () => {
 
     if (!isLoggedIn) {
         return (
-            <div className="min-vh-100 d-flex align-items-center justify-content-center bg-light px-4">
+            <div className="min-vh-100 d-flex align-items-center justify-content-center bg-white px-4">
                 <div className="text-center p-5 bg-white rounded-5 shadow-sm" style={{ maxWidth: '500px' }}>
                     <div className="mb-4 text-warning d-flex justify-content-center">
                         <Gamepad2 size={80} strokeWidth={1.5} />
@@ -128,7 +128,7 @@ const GamesDashboard: React.FC = () => {
     }
 
     return (
-        <div className="min-vh-100 bg-light py-5">
+        <div className="min-vh-100 bg-white py-5">
             <div className="container">
                 <div className="text-center mb-5">
                     <h1 className="fw-bold display-4 text-dark mb-3">Games</h1>
