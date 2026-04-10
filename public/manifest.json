@@ -47,35 +47,35 @@
       "short_name": "Home",
       "description": "Go to the Home Screen",
       "url": "/",
-      "icons": [{ "src": "/images/Logo.png", "sizes": "192x192" }]
+      "icons": [{ "src": "/images/ven.png", "sizes": "192x192" }]
     },
     {
       "name": "Lessons",
       "short_name": "Lessons",
       "description": "Continue your learning journey",
       "url": "/courses",
-      "icons": [{ "src": "/images/Logo.png", "sizes": "192x192" }]
+      "icons": [{ "src": "/images/ven.png", "sizes": "192x192" }]
     },
     {
       "name": "Games",
       "short_name": "Games",
       "description": "Play educational games",
       "url": "/mitambo",
-      "icons": [{ "src": "/images/Logo.png", "sizes": "192x192" }]
+      "icons": [{ "src": "/images/ven.png", "sizes": "192x192" }]
     },
     {
       "name": "Leaderboard",
       "short_name": "Leaderboard",
       "description": "Check the rankings",
       "url": "/muvhigo",
-      "icons": [{ "src": "/images/Logo.png", "sizes": "192x192" }]
+      "icons": [{ "src": "/images/ven.png", "sizes": "192x192" }]
     },
     {
       "name": "Profile",
       "short_name": "Profile",
       "description": "View your achievements",
       "url": "/profile",
-      "icons": [{ "src": "/images/Logo.png", "sizes": "192x192" }]
+      "icons": [{ "src": "/images/ven.png", "sizes": "192x192" }]
     }
   ]
 }

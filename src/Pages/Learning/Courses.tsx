@@ -31,7 +31,9 @@ const Courses: React.FC = () => {
     const [loading, setLoading] = useState(true);
     const [isLoggedIn, setIsLoggedIn] = useState(false);
     const [currentPage, setCurrentPage] = useState(1);
+    const [currentLangPage, setCurrentLangPage] = useState(1);
     const coursesPerPage = 6;
+    const langsPerPage = 5;
 
     useEffect(() => {
         const unsubAuth = onAuthStateChanged(auth, (user) => {
@@ -135,9 +137,9 @@ const Courses: React.FC = () => {
             <div className="container pt-2 pb-4" style={{ maxWidth: '1000px' }}>
 
                 {/* NAVIGATION */}
-                <div className="d-flex flex-column flex-md-row justify-content-between align-items-center gap-3 mb-4 mb-md-3">
+                <div className="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-3 mb-4 mb-md-3">
                     <JuicyButton
-                        className="btn btn-link text-decoration-none p-0 d-flex align-items-center justify-content-center justify-content-md-start gap-2 text-dark fw-bold smallest ls-1 text-uppercase"
+                        className="btn btn-link text-decoration-none p-0 d-flex align-items-center justify-content-start gap-2 text-dark fw-bold smallest ls-1 text-uppercase"
                         onClick={() => navigate('/')}
                     >
                         <ArrowLeft size={16} /> Home
@@ -161,36 +163,75 @@ const Courses: React.FC = () => {
                             <p className="text-muted small">Choose a language course to begin your learning journey.</p>
                         </header>
 
-                        <div className="d-flex flex-column gap-3 mx-auto" style={{ maxWidth: '600px' }}>
-                            {languages.map((lang) => (
-                                <div key={lang.id} className="w-100">
-                                    <div
-                                        onClick={() => handleLanguageSelect(lang.id)}
-                                        className="course-card-professional p-4 shadow-sm"
-                                        style={{ transition: 'all 0.3s ease', minHeight: '120px' }}
-                                    >
-                                        <div className="d-flex flex-column flex-md-row align-items-center justify-content-between gap-3 text-center text-md-start">
-                                            <div className="d-flex flex-column flex-md-row align-items-center gap-3 gap-md-4">
-                                                <div className="bg-white p-0 rounded-4 border overflow-hidden d-flex align-items-center justify-content-center" 
-                                                     style={{ width: '100px', height: '100px', flexShrink: 0 }}>
-                                                    <LanguageCharacter languageName={lang.name} style={{ height: '90%', width: 'auto' }} />
-                                                </div>
-                                                <div>
-                                                    <h4 className="fw-bold text-dark mb-1" style={{ fontSize: '1.6rem' }}>{lang.name}</h4>
-                                                    <p className="smallest text-muted fw-bold ls-1 uppercase opacity-75 mb-0">Explore {lang.name} Library</p>
+                        {(() => {
+                            const totalLangPages = Math.ceil(languages.length / langsPerPage);
+                            const startIdx = (currentLangPage - 1) * langsPerPage;
+                            const paginatedLangs = languages.slice(startIdx, startIdx + langsPerPage);
+
+                            return (
+                                <>
+                                    <div className="d-flex flex-column gap-3 mx-auto" style={{ maxWidth: '600px' }}>
+                                        {paginatedLangs.map((lang) => (
+                                            <div key={lang.id} className="w-100">
+                                                <div
+                                                    onClick={() => handleLanguageSelect(lang.id)}
+                                                    className="course-card-professional p-4 shadow-sm"
+                                                    style={{ transition: 'all 0.3s ease', minHeight: '120px' }}
+                                                >
+                                                    <div className="d-flex flex-column flex-md-row align-items-center justify-content-between gap-3 text-center text-md-start">
+                                                        <div className="d-flex flex-column flex-md-row align-items-center gap-3 gap-md-4">
+                                                            <div className="bg-white p-0 rounded-4 border overflow-hidden d-flex align-items-center justify-content-center" 
+                                                                 style={{ width: '100px', height: '100px', flexShrink: 0 }}>
+                                                                <LanguageCharacter languageName={lang.name} style={{ height: '90%', width: 'auto' }} />
+                                                            </div>
+                                                            <div>
+                                                                <h4 className="fw-bold text-dark mb-1" style={{ fontSize: '1.6rem' }}>{lang.name}</h4>
+                                                                <p className="smallest text-muted fw-bold ls-1 uppercase opacity-75 mb-0">Explore {lang.name} Library</p>
+                                                            </div>
+                                                        </div>
+                                                        <div className="d-flex align-items-center gap-3 mt-2 mt-md-0">
+                                                            <span className="badge bg-light text-muted border fw-bold ls-1 px-3 py-2" style={{ fontSize: '12px' }}>
+                                                                {lang.code?.toUpperCase()}
+                                                            </span>
+                                                            <ChevronRight size={24} className="text-warning d-none d-md-block" />
+                                                        </div>
+                                                    </div>
                                                 </div>
                                             </div>
-                                            <div className="d-flex align-items-center gap-3 mt-2 mt-md-0">
-                                                <span className="badge bg-light text-muted border fw-bold ls-1 px-3 py-2" style={{ fontSize: '12px' }}>
-                                                    {lang.code?.toUpperCase()}
-                                                </span>
-                                                <ChevronRight size={24} className="text-warning d-none d-md-block" />
-                                            </div>
-                                        </div>
+                                        ))}
                                     </div>
-                                </div>
-                            ))}
-                        </div>
+
+                                    {/* LANGUAGE PAGINATION */}
+                                    {totalLangPages > 1 && (
+                                        <div className="d-flex justify-content-center align-items-center gap-2 mt-4">
+                                            <JuicyButton
+                                                className="btn pagination-btn px-4 py-2"
+                                                disabled={currentLangPage === 1}
+                                                onClick={() => setCurrentLangPage(p => p - 1)}
+                                            >
+                                                ← PREV
+                                            </JuicyButton>
+                                            {[...Array(totalLangPages)].map((_, i) => (
+                                                <JuicyButton
+                                                    key={i}
+                                                    className={`btn pagination-btn px-3 py-2 ${currentLangPage === i + 1 ? 'active' : ''}`}
+                                                    onClick={() => setCurrentLangPage(i + 1)}
+                                                >
+                                                    {i + 1}
+                                                </JuicyButton>
+                                            ))}
+                                            <JuicyButton
+                                                className="btn pagination-btn px-4 py-2"
+                                                disabled={currentLangPage === totalLangPages}
+                                                onClick={() => setCurrentLangPage(p => p + 1)}
+                                            >
+                                                NEXT →
+                                            </JuicyButton>
+                                        </div>
+                                    )}
+                                </>
+                            );
+                        })()}
                     </div>
                 ) : (
                     <>
