@@ -37,7 +37,7 @@ const DailyChallenge: React.FC = () => {
         }
     };
 
-    const speakVenda = (text: string) => {
+    const speakNative = (text: string) => {
         // Simple fallback to browser speech, or use existing hook if available
         if ('speechSynthesis' in window) {
             const utterance = new SpeechSynthesisUtterance(text);
@@ -223,7 +223,7 @@ const DailyChallenge: React.FC = () => {
                                         selected={selectedAnswer}
                                         status={status}
                                         onSelect={(ans) => handleAnswer(ans)}
-                                        speakVenda={speakVenda}
+                                        speakNative={speakNative}
                                     />
                                 )}
                             </div>

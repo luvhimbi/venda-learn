@@ -6,24 +6,26 @@ import { Loader2, Eye, EyeOff, ArrowLeft } from 'lucide-react';
 import { useGoogleReCaptcha } from 'react-google-recaptcha-v3';
 import { auth, db, googleProvider } from '../../services/firebaseConfig';
 import BaobabAuthHeader from '../../components/BaobabAuthHeader';
+import Onboarding from './Onboarding';
 
 const Register: React.FC = () => {
+    const navigate = useNavigate();
+    const [searchParams] = useSearchParams();
+    const referrerId = searchParams.get('ref');
+    const skipIntro = searchParams.get('skipIntro') === 'true';
+
     const [formData, setFormData] = useState({
         username: '',
         email: '',
         password: '',
         confirmPassword: ''
     });
-    const [step, setStep] = useState(1);
+    const [step, setStep] = useState(skipIntro ? 1 : 0);
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const { executeRecaptcha } = useGoogleReCaptcha();
-
-    const navigate = useNavigate();
-    const [searchParams] = useSearchParams();
-    const referrerId = searchParams.get('ref');
 
     const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
@@ -125,8 +127,13 @@ const Register: React.FC = () => {
         } finally { setLoading(false); }
     };
 
+    // If step 0, show Onboarding
+    if (step === 0) {
+        return <Onboarding onComplete={() => setStep(1)} />;
+    }
+
     return (
-        <div className="min-vh-100 d-flex align-items-center justify-content-center bg-white px-3 py-5" style={{ fontFamily: '"Lexend", sans-serif' }}>
+        <div className="min-vh-100 d-flex align-items-center justify-content-center bg-white px-3 py-5 font-auth">
             <div className="w-100" style={{ maxWidth: '440px' }}>
 
                 <BaobabAuthHeader />

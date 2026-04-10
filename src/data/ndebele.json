@@ -1,0 +1,1180 @@
+{
+  "name": "Ndebele",
+  "code": "nr",
+  "picturePuzzles": [
+    {
+      "english": "Sun",
+      "word": "Ilanga"
+    },
+    {
+      "english": "Moon",
+      "word": "Inyanga"
+    },
+    {
+      "english": "Tree",
+      "word": "Isihlahla"
+    },
+    {
+      "english": "Fire",
+      "word": "Umlilo"
+    },
+    {
+      "english": "Water",
+      "word": "Amanzi"
+    },
+    {
+      "english": "Dog",
+      "word": "Inja"
+    },
+    {
+      "english": "Cat",
+      "word": "Ikati"
+    },
+    {
+      "english": "Person",
+      "word": "Umuntu"
+    },
+    {
+      "english": "Bird",
+      "word": "Inyoni"
+    },
+    {
+      "english": "Fish",
+      "word": "Inhlanzi"
+    },
+    {
+      "english": "Cow",
+      "word": "Inkomo"
+    },
+    {
+      "english": "Goat",
+      "word": "Imbuzi"
+    },
+    {
+      "english": "Car",
+      "word": "Imoto"
+    },
+    {
+      "english": "House",
+      "word": "Indlu"
+    },
+    {
+      "english": "Food",
+      "word": "Ukudla"
+    },
+    {
+      "english": "Rain",
+      "word": "Imvula"
+    },
+    {
+      "english": "Star",
+      "word": "Inkanyezi"
+    },
+    {
+      "english": "Flower",
+      "word": "Imbali"
+    },
+    {
+      "english": "Mountain",
+      "word": "Intaba"
+    },
+    {
+      "english": "River",
+      "word": "Umfula"
+    },
+    {
+      "english": "Road",
+      "word": "Umugwa"
+    },
+    {
+      "english": "Chair",
+      "word": "Isihlalo"
+    },
+    {
+      "english": "Table",
+      "word": "Itafula"
+    },
+    {
+      "english": "Door",
+      "word": "Umnyango"
+    },
+    {
+      "english": "Window",
+      "word": "Iwindi"
+    },
+    {
+      "english": "Apple",
+      "word": "Ihabhula"
+    },
+    {
+      "english": "Bread",
+      "word": "Isinkwa"
+    },
+    {
+      "english": "Milk",
+      "word": "Ubisi"
+    },
+    {
+      "english": "Egg",
+      "word": "Iqanda"
+    },
+    {
+      "english": "Heart",
+      "word": "Inhliziyo"
+    },
+    {
+      "english": "Hand",
+      "word": "Isandla"
+    },
+    {
+      "english": "Foot",
+      "word": "Unyawo"
+    },
+    {
+      "english": "Eye",
+      "word": "Iso"
+    },
+    {
+      "english": "Mouth",
+      "word": "Umlomo"
+    },
+    {
+      "english": "Head",
+      "word": "Ikhanda"
+    },
+    {
+      "english": "Sky",
+      "word": "Izulu"
+    }
+  ],
+  "wordBombWords": [
+    {
+      "english": "Book",
+      "word": "Incwadi",
+      "difficulty": "Easy"
+    },
+    {
+      "english": "School",
+      "word": "Isikolo",
+      "difficulty": "Easy"
+    },
+    {
+      "english": "Teacher",
+      "word": "Umfundisi",
+      "difficulty": "Easy"
+    },
+    {
+      "english": "Mother",
+      "word": "Umama",
+      "difficulty": "Easy"
+    },
+    {
+      "english": "Computer",
+      "word": "Ikhompyutha",
+      "difficulty": "Easy"
+    },
+    {
+      "english": "Father",
+      "word": "Ubaba",
+      "difficulty": "Easy"
+    },
+    {
+      "english": "Child",
+      "word": "Umntwana",
+      "difficulty": "Easy"
+    },
+    {
+      "english": "Friend",
+      "word": "Umngani",
+      "difficulty": "Easy"
+    },
+    {
+      "english": "Love",
+      "word": "Uthando",
+      "difficulty": "Medium"
+    },
+    {
+      "english": "Peace",
+      "word": "Ukuthula",
+      "difficulty": "Medium"
+    },
+    {
+      "english": "Freedom",
+      "word": "Inkululeko",
+      "difficulty": "Medium"
+    },
+    {
+      "english": "Happiness",
+      "word": "Injabulo",
+      "difficulty": "Medium"
+    },
+    {
+      "english": "Family",
+      "word": "Umndeni",
+      "difficulty": "Medium"
+    },
+    {
+      "english": "Garden",
+      "word": "Insimu",
+      "difficulty": "Easy"
+    },
+    {
+      "english": "Kitchen",
+      "word": "Ikhishi",
+      "difficulty": "Medium"
+    },
+    {
+      "english": "Bedroom",
+      "word": "Igumbi",
+      "difficulty": "Medium"
+    },
+    {
+      "english": "Bathroom",
+      "word": "Indlu yokugezela",
+      "difficulty": "Hard"
+    },
+    {
+      "english": "Work",
+      "word": "Umsebenzi",
+      "difficulty": "Medium"
+    },
+    {
+      "english": "Health",
+      "word": "Impilo",
+      "difficulty": "Medium"
+    },
+    {
+      "english": "Community",
+      "word": "Umphakathi",
+      "difficulty": "Hard"
+    },
+    {
+      "english": "Leadership",
+      "word": "Ubuholi",
+      "difficulty": "Hard"
+    },
+    {
+      "english": "Wisdom",
+      "word": "Ukuhlakanipha",
+      "difficulty": "Hard"
+    },
+    {
+      "english": "Strength",
+      "word": "Amandla",
+      "difficulty": "Medium"
+    },
+    {
+      "english": "Courage",
+      "word": "Isibindi",
+      "difficulty": "Medium"
+    },
+    {
+      "english": "Chief",
+      "word": "Inkosi",
+      "difficulty": "Hard"
+    },
+    {
+      "english": "Village",
+      "word": "Umuzi",
+      "difficulty": "Easy"
+    },
+    {
+      "english": "Animal",
+      "word": "Isilwane",
+      "difficulty": "Medium"
+    },
+    {
+      "english": "Time",
+      "word": "Isikhathi",
+      "difficulty": "Easy"
+    },
+    {
+      "english": "Day",
+      "word": "Usuku",
+      "difficulty": "Easy"
+    },
+    {
+      "english": "Night",
+      "word": "Ubusuku",
+      "difficulty": "Easy"
+    },
+    {
+      "english": "Truth",
+      "word": "Iqiniso",
+      "difficulty": "Medium"
+    }
+  ],
+  "puzzleWords": [
+    {
+      "english": "WATER",
+      "word": "AMANZI",
+      "difficulty": "Easy",
+      "hint": "Type the NDEBELE word for WATER"
+    },
+    {
+      "english": "APPLE",
+      "word": "IHABHULA",
+      "difficulty": "Easy",
+      "hint": "Type the NDEBELE word for APPLE"
+    },
+    {
+      "english": "HOUSE",
+      "word": "INDLU",
+      "difficulty": "Easy",
+      "hint": "Type the NDEBELE word for HOUSE"
+    },
+    {
+      "english": "TRAIN",
+      "word": "ISITIMELA",
+      "difficulty": "Easy",
+      "hint": "Type the NDEBELE word for TRAIN"
+    },
+    {
+      "english": "SNAKE",
+      "word": "INYOKA",
+      "difficulty": "Easy",
+      "hint": "Type the NDEBELE word for SNAKE"
+    },
+    {
+      "english": "BIRD",
+      "word": "INYONI",
+      "difficulty": "Easy",
+      "hint": "Type the NDEBELE word for BIRD"
+    },
+    {
+      "english": "FISH",
+      "word": "INHLANZI",
+      "difficulty": "Medium",
+      "hint": "Type the NDEBELE word for FISH"
+    },
+    {
+      "english": "COW",
+      "word": "INKOMO",
+      "difficulty": "Easy",
+      "hint": "Type the NDEBELE word for COW"
+    },
+    {
+      "english": "GOAT",
+      "word": "IMBUZI",
+      "difficulty": "Easy",
+      "hint": "Type the NDEBELE word for GOAT"
+    },
+    {
+      "english": "CAR",
+      "word": "IMOTO",
+      "difficulty": "Easy",
+      "hint": "Type the NDEBELE word for CAR"
+    },
+    {
+      "english": "RAIN",
+      "word": "IMVULA",
+      "difficulty": "Medium",
+      "hint": "Type the NDEBELE word for RAIN"
+    },
+    {
+      "english": "STAR",
+      "word": "INKANYEZI",
+      "difficulty": "Hard",
+      "hint": "Type the NDEBELE word for STAR"
+    },
+    {
+      "english": "FLOWER",
+      "word": "IMBALI",
+      "difficulty": "Medium",
+      "hint": "Type the NDEBELE word for FLOWER"
+    },
+    {
+      "english": "MOUNTAIN",
+      "word": "INTABA",
+      "difficulty": "Medium",
+      "hint": "Type the NDEBELE word for MOUNTAIN"
+    },
+    {
+      "english": "RIVER",
+      "word": "UMFULA",
+      "difficulty": "Medium",
+      "hint": "Type the NDEBELE word for RIVER"
+    },
+    {
+      "english": "FOOD",
+      "word": "UKUDLA",
+      "difficulty": "Easy",
+      "hint": "Type the NDEBELE word for FOOD"
+    },
+    {
+      "english": "LOVE",
+      "word": "UTHANDO",
+      "difficulty": "Medium",
+      "hint": "Type the NDEBELE word for LOVE"
+    },
+    {
+      "english": "PEACE",
+      "word": "UKUTHULA",
+      "difficulty": "Medium",
+      "hint": "Type the NDEBELE word for PEACE"
+    },
+    {
+      "english": "FREEDOM",
+      "word": "INKULULEKO",
+      "difficulty": "Hard",
+      "hint": "Type the NDEBELE word for FREEDOM"
+    },
+    {
+      "english": "FAMILY",
+      "word": "UMNDENI",
+      "difficulty": "Medium",
+      "hint": "Type the NDEBELE word for FAMILY"
+    },
+    {
+      "english": "MILK",
+      "word": "UBISI",
+      "difficulty": "Easy",
+      "hint": "Type the NDEBELE word for MILK"
+    },
+    {
+      "english": "BREAD",
+      "word": "ISINKWA",
+      "difficulty": "Medium",
+      "hint": "Type the NDEBELE word for BREAD"
+    },
+    {
+      "english": "EGG",
+      "word": "IQANDA",
+      "difficulty": "Medium",
+      "hint": "Type the NDEBELE word for EGG"
+    },
+    {
+      "english": "HEART",
+      "word": "INHLIZIYO",
+      "difficulty": "Hard",
+      "hint": "Type the NDEBELE word for HEART"
+    },
+    {
+      "english": "STRENGTH",
+      "word": "AMANDLA",
+      "difficulty": "Medium",
+      "hint": "Type the NDEBELE word for STRENGTH"
+    },
+    {
+      "english": "WORK",
+      "word": "UMSEBENZI",
+      "difficulty": "Medium",
+      "hint": "Type the NDEBELE word for WORK"
+    },
+    {
+      "english": "GARDEN",
+      "word": "INSIMU",
+      "difficulty": "Medium",
+      "hint": "Type the NDEBELE word for GARDEN"
+    },
+    {
+      "english": "CHAIR",
+      "word": "ISIHLALO",
+      "difficulty": "Medium",
+      "hint": "Type the NDEBELE word for CHAIR"
+    },
+    {
+      "english": "TABLE",
+      "word": "ITAFULA",
+      "difficulty": "Easy",
+      "hint": "Type the NDEBELE word for TABLE"
+    },
+    {
+      "english": "DOOR",
+      "word": "UMNYANGO",
+      "difficulty": "Medium",
+      "hint": "Type the NDEBELE word for DOOR"
+    },
+    {
+      "english": "CHIEF",
+      "word": "INKOSI",
+      "difficulty": "Hard",
+      "hint": "Type the NDEBELE word for CHIEF"
+    },
+    {
+      "english": "HAND",
+      "word": "ISANDLA",
+      "difficulty": "Medium",
+      "hint": "Type the NDEBELE word for HAND"
+    },
+    {
+      "english": "EYE",
+      "word": "ISO",
+      "difficulty": "Easy",
+      "hint": "Type the NDEBELE word for EYE"
+    },
+    {
+      "english": "HEAD",
+      "word": "IKHANDA",
+      "difficulty": "Easy",
+      "hint": "Type the NDEBELE word for HEAD"
+    },
+    {
+      "english": "MOUTH",
+      "word": "UMLOMO",
+      "difficulty": "Medium",
+      "hint": "Type the NDEBELE word for MOUTH"
+    },
+    {
+      "english": "TREE",
+      "word": "ISIHLABLA",
+      "difficulty": "Hard",
+      "hint": "Type the NDEBELE word for TREE"
+    },
+    {
+      "english": "FIRE",
+      "word": "UMLILO",
+      "difficulty": "Easy",
+      "hint": "Type the NDEBELE word for FIRE"
+    },
+    {
+      "english": "MOON",
+      "word": "INYANGA",
+      "difficulty": "Medium",
+      "hint": "Type the NDEBELE word for MOON"
+    },
+    {
+      "english": "SUN",
+      "word": "ILANGA",
+      "difficulty": "Easy",
+      "hint": "Type the NDEBELE word for SUN"
+    },
+    {
+      "english": "CAT",
+      "word": "IKATI",
+      "difficulty": "Easy",
+      "hint": "Type the NDEBELE word for CAT"
+    }
+  ],
+  "syllablePuzzles": [
+    {
+      "translation": "water",
+      "word": "Amanzi",
+      "syllables": [
+        "A",
+        "ma",
+        "nzi"
+      ],
+      "difficulty": "Beginner"
+    },
+    {
+      "translation": "fire",
+      "word": "Umlilo",
+      "syllables": [
+        "U",
+        "mli",
+        "lo"
+      ],
+      "difficulty": "Intermediate"
+    },
+    {
+      "translation": "person",
+      "word": "Umuntu",
+      "syllables": [
+        "U",
+        "mu",
+        "ntu"
+      ],
+      "difficulty": "Advanced"
+    },
+    {
+      "translation": "dog",
+      "word": "Inja",
+      "syllables": [
+        "I",
+        "nja"
+      ],
+      "difficulty": "Beginner"
+    },
+    {
+      "translation": "cat",
+      "word": "Ikati",
+      "syllables": [
+        "I",
+        "ka",
+        "ti"
+      ],
+      "difficulty": "Beginner"
+    },
+    {
+      "translation": "tree",
+      "word": "Isihlahla",
+      "syllables": [
+        "I",
+        "si",
+        "hla",
+        "hla"
+      ],
+      "difficulty": "Advanced"
+    },
+    {
+      "translation": "moon",
+      "word": "Inyanga",
+      "syllables": [
+        "I",
+        "nya",
+        "nga"
+      ],
+      "difficulty": "Intermediate"
+    },
+    {
+      "translation": "sun",
+      "word": "Ilanga",
+      "syllables": [
+        "I",
+        "la",
+        "nga"
+      ],
+      "difficulty": "Beginner"
+    },
+    {
+      "translation": "mother",
+      "word": "Umama",
+      "syllables": [
+        "U",
+        "ma",
+        "ma"
+      ],
+      "difficulty": "Beginner"
+    },
+    {
+      "translation": "father",
+      "word": "Ubaba",
+      "syllables": [
+        "U",
+        "ba",
+        "ba"
+      ],
+      "difficulty": "Beginner"
+    },
+    {
+      "translation": "teacher",
+      "word": "Umfundisi",
+      "syllables": [
+        "U",
+        "mfu",
+        "ndi",
+        "si"
+      ],
+      "difficulty": "Intermediate"
+    },
+    {
+      "translation": "book",
+      "word": "Incwadi",
+      "syllables": [
+        "I",
+        "ncwa",
+        "di"
+      ],
+      "difficulty": "Intermediate"
+    },
+    {
+      "translation": "school",
+      "word": "Isikolo",
+      "syllables": [
+        "I",
+        "si",
+        "ko",
+        "lo"
+      ],
+      "difficulty": "Intermediate"
+    },
+    {
+      "translation": "freedom",
+      "word": "Inkululeko",
+      "syllables": [
+        "I",
+        "nku",
+        "lu",
+        "le",
+        "ko"
+      ],
+      "difficulty": "Advanced"
+    },
+    {
+      "translation": "happiness",
+      "word": "Injabulo",
+      "syllables": [
+        "I",
+        "nja",
+        "bu",
+        "lo"
+      ],
+      "difficulty": "Advanced"
+    },
+    {
+      "translation": "love",
+      "word": "Uthando",
+      "syllables": [
+        "U",
+        "tha",
+        "ndo"
+      ],
+      "difficulty": "Intermediate"
+    },
+    {
+      "translation": "peace",
+      "word": "Ukuthula",
+      "syllables": [
+        "U",
+        "ku",
+        "thu",
+        "la"
+      ],
+      "difficulty": "Intermediate"
+    },
+    {
+      "translation": "family",
+      "word": "Umndeni",
+      "syllables": [
+        "U",
+        "mnde",
+        "ni"
+      ],
+      "difficulty": "Intermediate"
+    },
+    {
+      "translation": "bird",
+      "word": "Inyoni",
+      "syllables": [
+        "I",
+        "nyo",
+        "ni"
+      ],
+      "difficulty": "Beginner"
+    },
+    {
+      "translation": "fish",
+      "word": "Inhlanzi",
+      "syllables": [
+        "I",
+        "nhla",
+        "nzi"
+      ],
+      "difficulty": "Intermediate"
+    },
+    {
+      "translation": "cow",
+      "word": "Inkomo",
+      "syllables": [
+        "I",
+        "nko",
+        "mo"
+      ],
+      "difficulty": "Beginner"
+    },
+    {
+      "translation": "goat",
+      "word": "Imbuzi",
+      "syllables": [
+        "I",
+        "mbu",
+        "zi"
+      ],
+      "difficulty": "Beginner"
+    },
+    {
+      "translation": "car",
+      "word": "Imoto",
+      "syllables": [
+        "I",
+        "mo",
+        "to"
+      ],
+      "difficulty": "Beginner"
+    },
+    {
+      "translation": "house",
+      "word": "Indlu",
+      "syllables": [
+        "I",
+        "ndlu"
+      ],
+      "difficulty": "Beginner"
+    },
+    {
+      "translation": "rain",
+      "word": "Imvula",
+      "syllables": [
+        "I",
+        "mvu",
+        "la"
+      ],
+      "difficulty": "Intermediate"
+    },
+    {
+      "translation": "star",
+      "word": "Inkanyezi",
+      "syllables": [
+        "I",
+        "nka",
+        "nye",
+        "zi"
+      ],
+      "difficulty": "Advanced"
+    },
+    {
+      "translation": "mountain",
+      "word": "Intaba",
+      "syllables": [
+        "I",
+        "nta",
+        "ba"
+      ],
+      "difficulty": "Intermediate"
+    },
+    {
+      "translation": "river",
+      "word": "Umfula",
+      "syllables": [
+        "U",
+        "mfu",
+        "la"
+      ],
+      "difficulty": "Intermediate"
+    },
+    {
+      "translation": "bread",
+      "word": "Isinkwa",
+      "syllables": [
+        "I",
+        "si",
+        "nkwa"
+      ],
+      "difficulty": "Intermediate"
+    },
+    {
+      "translation": "milk",
+      "word": "Ubisi",
+      "syllables": [
+        "U",
+        "bi",
+        "si"
+      ],
+      "difficulty": "Beginner"
+    },
+    {
+      "translation": "egg",
+      "word": "Iqanda",
+      "syllables": [
+        "I",
+        "qa",
+        "nda"
+      ],
+      "difficulty": "Intermediate"
+    },
+    {
+      "translation": "heart",
+      "word": "Inhliziyo",
+      "syllables": [
+        "I",
+        "nhli",
+        "zi",
+        "yo"
+      ],
+      "difficulty": "Advanced"
+    },
+    {
+      "translation": "chief",
+      "word": "Inkosi",
+      "syllables": [
+        "I",
+        "nko",
+        "si"
+      ],
+      "difficulty": "Advanced"
+    },
+    {
+      "translation": "hand",
+      "word": "Isandla",
+      "syllables": [
+        "I",
+        "sa",
+        "ndla"
+      ],
+      "difficulty": "Intermediate"
+    },
+    {
+      "translation": "head",
+      "word": "Ikhanda",
+      "syllables": [
+        "I",
+        "kha",
+        "nda"
+      ],
+      "difficulty": "Beginner"
+    },
+    {
+      "translation": "strength",
+      "word": "Amandla",
+      "syllables": [
+        "A",
+        "ma",
+        "ndla"
+      ],
+      "difficulty": "Intermediate"
+    },
+    {
+      "translation": "eye",
+      "word": "Iso",
+      "syllables": [
+        "I",
+        "so"
+      ],
+      "difficulty": "Beginner"
+    },
+    {
+      "translation": "mouth",
+      "word": "Umlomo",
+      "syllables": [
+        "U",
+        "mlo",
+        "mo"
+      ],
+      "difficulty": "Intermediate"
+    }
+  ],
+  "sentencePuzzles": [
+    {
+      "translation": "I see the dog",
+      "words": [
+        "Ngi",
+        "bona",
+        "inja"
+      ],
+      "difficulty": "Beginner"
+    },
+    {
+      "translation": "The sun is hot",
+      "words": [
+        "Ilanga",
+        "liyatshisa"
+      ],
+      "difficulty": "Intermediate"
+    },
+    {
+      "translation": "Knowledge is power",
+      "words": [
+        "Ulwazi",
+        "ngamandla"
+      ],
+      "difficulty": "Advanced"
+    },
+    {
+      "translation": "I eat food",
+      "words": [
+        "Ngiyadla",
+        "ukudla"
+      ],
+      "difficulty": "Beginner"
+    },
+    {
+      "translation": "The child is crying",
+      "words": [
+        "Umntwana",
+        "uyakhala"
+      ],
+      "difficulty": "Intermediate"
+    },
+    {
+      "translation": "We love peace",
+      "words": [
+        "Siyathanda",
+        "ukuthula"
+      ],
+      "difficulty": "Intermediate"
+    },
+    {
+      "translation": "The car is fast",
+      "words": [
+        "Imoto",
+        "iyashesha"
+      ],
+      "difficulty": "Intermediate"
+    },
+    {
+      "translation": "The bird flies",
+      "words": [
+        "Inyoni",
+        "iyandiza"
+      ],
+      "difficulty": "Intermediate"
+    },
+    {
+      "translation": "She is my mother",
+      "words": [
+        "Ungumama",
+        "wami"
+      ],
+      "difficulty": "Advanced"
+    },
+    {
+      "translation": "The rain is falling",
+      "words": [
+        "Imvula",
+        "iyana"
+      ],
+      "difficulty": "Intermediate"
+    },
+    {
+      "translation": "Come here",
+      "words": [
+        "Woza",
+        "lapha"
+      ],
+      "difficulty": "Beginner"
+    },
+    {
+      "translation": "I want water",
+      "words": [
+        "Ngifuna",
+        "amanzi"
+      ],
+      "difficulty": "Beginner"
+    },
+    {
+      "translation": "The teacher is reading",
+      "words": [
+        "Umfundisi",
+        "uyafunda"
+      ],
+      "difficulty": "Intermediate"
+    },
+    {
+      "translation": "They are building a house",
+      "words": [
+        "Bakha",
+        "indlu"
+      ],
+      "difficulty": "Advanced"
+    },
+    {
+      "translation": "Unity is strength",
+      "words": [
+        "Ubunye",
+        "ngamandla"
+      ],
+      "difficulty": "Advanced"
+    },
+    {
+      "translation": "I love you",
+      "words": [
+        "Ngiyakuthanda"
+      ],
+      "difficulty": "Intermediate"
+    },
+    {
+      "translation": "Good morning",
+      "words": [
+        "Livukile"
+      ],
+      "difficulty": "Beginner"
+    },
+    {
+      "translation": "Thank you",
+      "words": [
+        "Ngiyabonga"
+      ],
+      "difficulty": "Beginner"
+    },
+    {
+      "translation": "How are you?",
+      "words": [
+        "Unjani?"
+      ],
+      "difficulty": "Beginner"
+    },
+    {
+      "translation": "The cat sleeps on the chair",
+      "words": [
+        "Ikati",
+        "lilele",
+        "esihlalweni"
+      ],
+      "difficulty": "Advanced"
+    },
+    {
+      "translation": "My father works hard",
+      "words": [
+        "Ubaba",
+        "usebenza",
+        "kakhulu"
+      ],
+      "difficulty": "Advanced"
+    },
+    {
+      "translation": "The flowers are beautiful",
+      "words": [
+        "Izimbali",
+        "zihle"
+      ],
+      "difficulty": "Intermediate"
+    },
+    {
+      "translation": "We drink milk every day",
+      "words": [
+        "Siphuza",
+        "ubisi",
+        "nsuku",
+        "zonke"
+      ],
+      "difficulty": "Advanced"
+    },
+    {
+      "translation": "The mountain is high",
+      "words": [
+        "Intaba",
+        "yinde"
+      ],
+      "difficulty": "Intermediate"
+    },
+    {
+      "translation": "The chief is wise",
+      "words": [
+        "Inkosi",
+        "ihlakaniphile"
+      ],
+      "difficulty": "Advanced"
+    },
+    {
+      "translation": "Let us go home",
+      "words": [
+        "Asiye",
+        "ekhaya"
+      ],
+      "difficulty": "Intermediate"
+    },
+    {
+      "translation": "I am happy",
+      "words": [
+        "Ngijabulile"
+      ],
+      "difficulty": "Beginner"
+    },
+    {
+      "translation": "What is your name?",
+      "words": [
+        "Igama",
+        "lakho",
+        "ngubani?"
+      ],
+      "difficulty": "Intermediate"
+    },
+    {
+      "translation": "The dog is barking",
+      "words": [
+        "Inja",
+        "iyakhonkotha"
+      ],
+      "difficulty": "Intermediate"
+    },
+    {
+      "translation": "We are going to school",
+      "words": [
+        "Siya",
+        "esikolweni"
+      ],
+      "difficulty": "Intermediate"
+    }
+  ]
+}

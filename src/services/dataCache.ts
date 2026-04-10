@@ -388,11 +388,12 @@ export const fetchPicturePuzzles = async (): Promise<any[]> => {
         const snap = await getDocs(collection(db as Firestore, "picturePuzzles"));
         snap.docs.forEach(d => {
             const data = d.data();
-            if (data.imageUrl && data.venda) {
+            if (data.imageUrl && data.nativeWord) {
                 slides.push({
                     imageUrl: data.imageUrl,
-                    venda: data.venda,
-                    english: data.english || ''
+                    nativeWord: data.nativeWord,
+                    english: data.english || '',
+                    languageId: data.languageId
                 });
             }
         });
@@ -407,10 +408,10 @@ export const fetchPicturePuzzles = async (): Promise<any[]> => {
         mls.forEach((ml: any) => {
             if (ml.slides) {
                 ml.slides.forEach((slide: any) => {
-                    if (slide.imageUrl && slide.venda) {
+                    if (slide.imageUrl && slide.nativeWord) {
                         slides.push({
                             imageUrl: slide.imageUrl,
-                            venda: slide.venda,
+                            nativeWord: slide.nativeWord,
                             english: slide.english || ''
                         });
                     }
@@ -437,10 +438,10 @@ export const fetchLearnedStats = async (): Promise<any> => {
         mls.forEach((ml: any) => {
             if (completedMlIds.includes(ml.id)) {
                 if (ml.slides) {
-                    ml.slides.forEach((s: any) => { if (s.venda) learnedWords.add(s.venda.toLowerCase().trim()); });
+                    ml.slides.forEach((s: any) => { if (s.nativeWord) learnedWords.add(s.nativeWord.toLowerCase().trim()); });
                 }
                 if (ml.questions) {
-                    ml.questions.forEach((q: any) => { if (q.venda) learnedWords.add(q.venda.toLowerCase().trim()); });
+                    ml.questions.forEach((q: any) => { if (q.nativeWord) learnedWords.add(q.nativeWord.toLowerCase().trim()); });
                 }
             }
         });

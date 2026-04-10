@@ -141,14 +141,15 @@ const AddLesson: React.FC = () => {
         id: '',
         title: '',
         vendaTitle: '',
-        languageId: 'venda',
+        nativeTitle: '',
+        languageId: '',
         difficulty: 'Beginner',
 
         microLessons: [
             {
                 id: `ml-${Date.now()}`,
                 title: 'Part 1',
-                slides: [{ id: `s-${Date.now()}`, venda: '', english: '', context: '' }],
+                slides: [{ id: `s-${Date.now()}`, nativeWord: '', english: '', context: '' }],
                 questions: []
             }
         ]
@@ -221,7 +222,7 @@ const AddLesson: React.FC = () => {
     const { recovered, lastSaved, clearSaved, dismissRecovery } = useAutoSave('draft-add-lesson', course, setCourse);
     const publishedRef = useRef(false);
 
-    const hasWork = Boolean(course.id || course.title || course.vendaTitle ||
+    const hasWork = Boolean(course.id || course.title || course.nativeTitle ||
         course.microLessons.some((ml: any) => ml.title || ml.slides.some((s: any) => s.venda || s.english || s.context) || ml.questions.length > 0));
 
     useEffect(() => {
@@ -270,8 +271,8 @@ const AddLesson: React.FC = () => {
             await setDoc(doc(db as Firestore, "lessons", courseRef), {
                 id: courseRef,
                 title: course.title,
-                vendaTitle: course.vendaTitle,
-                languageId: course.languageId || 'venda',
+                nativeTitle: course.nativeTitle || course.vendaTitle,
+                languageId: course.languageId || '',
                 difficulty: course.difficulty,
                 microLessons
 
@@ -318,7 +319,7 @@ const AddLesson: React.FC = () => {
         const newMl = {
             id: `ml-${Date.now()}`,
             title: `Part ${course.microLessons.length + 1}`,
-            slides: [{ id: `s-${Date.now()}`, venda: '', english: '', context: '' }],
+            slides: [{ id: `s-${Date.now()}`, nativeWord: '', english: '', context: '' }],
             questions: []
         };
         setCourse({ ...course, microLessons: [...course.microLessons, newMl] });
@@ -341,7 +342,7 @@ const AddLesson: React.FC = () => {
         updateMl('slides', newSlides);
     };
 
-    const addSlide = () => updateMl('slides', [...currentMl.slides, { id: `s-${Date.now()}`, venda: '', english: '', context: '' }]);
+    const addSlide = () => updateMl('slides', [...currentMl.slides, { id: `s-${Date.now()}`, nativeWord: '', english: '', context: '' }]);
 
     const removeSlide = (index: number) => {
         if (currentMl.slides.length <= 1) return Swal.fire('Notice', 'A micro lesson must have at least one slide.', 'info');
@@ -364,7 +365,7 @@ const AddLesson: React.FC = () => {
             const lines = text.split('\n').filter((l: string) => l.trim());
             const newSlides = lines.map((line: string, i: number) => {
                 const parts = line.split('|').map((p: string) => p.trim());
-                return { id: `s-${Date.now()}-${i}`, venda: parts[0] || '', english: parts[1] || '', context: parts[2] || '' };
+                return { id: `s-${Date.now()}-${i}`, nativeWord: parts[0] || '', english: parts[1] || '', context: parts[2] || '' };
             });
             if (newSlides.length > 0) {
                 const current = [...currentMl.slides];
@@ -378,7 +379,7 @@ const AddLesson: React.FC = () => {
         }
     };
 
-    const filledDetails = [course.id, course.title, course.vendaTitle, course.languageId].filter(Boolean).length;
+    const filledDetails = [course.id, course.title, course.nativeTitle || course.vendaTitle, course.languageId].filter(Boolean).length;
 
 
     return (
@@ -454,7 +455,7 @@ const AddLesson: React.FC = () => {
                                 <div className="col-md-6">
                                     <label className="editor-label">Target Language</label>
                                     <select className="editor-input" value={course.languageId} onChange={(e) => setCourse({ ...course, languageId: e.target.value })}>
-                                        {languages.length === 0 && <option value="venda">Venda (Default)</option>}
+                                        {languages.length === 0 && <option value="">Select Language</option>}
                                         {languages.map(lang => (
                                             <option key={lang.id} value={lang.id}>{lang.name}</option>
                                         ))}
@@ -462,7 +463,7 @@ const AddLesson: React.FC = () => {
                                 </div>
                                 <div className="col-md-6">
                                     <label className="editor-label">Target Language Title</label>
-                                    <input className="editor-input" placeholder="e.g. Muta" value={course.vendaTitle} onChange={(e) => setCourse({ ...course, vendaTitle: e.target.value })} />
+                                    <input className="editor-input" placeholder="e.g. Muta" value={course.nativeTitle || course.vendaTitle} onChange={(e) => setCourse({ ...course, nativeTitle: e.target.value })} />
                                 </div>
 
                             </div>

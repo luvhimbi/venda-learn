@@ -1,0 +1,946 @@
+{
+  "name": "Afrikaans",
+  "code": "af",
+  "picturePuzzles": [
+    {
+      "english": "Sun",
+      "word": "Son"
+    },
+    {
+      "english": "Moon",
+      "word": "Maan"
+    },
+    {
+      "english": "Tree",
+      "word": "Boom"
+    },
+    {
+      "english": "Fire",
+      "word": "Vuur"
+    },
+    {
+      "english": "Water",
+      "word": "Water"
+    },
+    {
+      "english": "Dog",
+      "word": "Hond"
+    },
+    {
+      "english": "Cat",
+      "word": "Kat"
+    },
+    {
+      "english": "Person",
+      "word": "Persoon"
+    },
+    {
+      "english": "Bird",
+      "word": "Voël"
+    },
+    {
+      "english": "Fish",
+      "word": "Vis"
+    },
+    {
+      "english": "Cow",
+      "word": "Koei"
+    },
+    {
+      "english": "Goat",
+      "word": "Bok"
+    },
+    {
+      "english": "Car",
+      "word": "Motor"
+    },
+    {
+      "english": "House",
+      "word": "Huis"
+    },
+    {
+      "english": "Food",
+      "word": "Kos"
+    },
+    {
+      "english": "Rain",
+      "word": "Reën"
+    },
+    {
+      "english": "Star",
+      "word": "Ster"
+    },
+    {
+      "english": "Flower",
+      "word": "Blom"
+    },
+    {
+      "english": "Mountain",
+      "word": "Berg"
+    },
+    {
+      "english": "River",
+      "word": "Rivier"
+    },
+    {
+      "english": "Road",
+      "word": "Pad"
+    },
+    {
+      "english": "Chair",
+      "word": "Stoel"
+    },
+    {
+      "english": "Table",
+      "word": "Tafel"
+    },
+    {
+      "english": "Door",
+      "word": "Deur"
+    },
+    {
+      "english": "Window",
+      "word": "Venster"
+    },
+    {
+      "english": "Apple",
+      "word": "Appel"
+    },
+    {
+      "english": "Bread",
+      "word": "Brood"
+    },
+    {
+      "english": "Milk",
+      "word": "Melk"
+    },
+    {
+      "english": "Egg",
+      "word": "Eier"
+    },
+    {
+      "english": "Heart",
+      "word": "Hart"
+    }
+  ],
+  "wordBombWords": [
+    {
+      "english": "Book",
+      "word": "Boek",
+      "difficulty": "Easy"
+    },
+    {
+      "english": "School",
+      "word": "Skool",
+      "difficulty": "Easy"
+    },
+    {
+      "english": "Teacher",
+      "word": "Onderwyser",
+      "difficulty": "Easy"
+    },
+    {
+      "english": "Mother",
+      "word": "Moeder",
+      "difficulty": "Easy"
+    },
+    {
+      "english": "Computer",
+      "word": "Rekenaar",
+      "difficulty": "Easy"
+    },
+    {
+      "english": "Father",
+      "word": "Vader",
+      "difficulty": "Easy"
+    },
+    {
+      "english": "Child",
+      "word": "Kind",
+      "difficulty": "Easy"
+    },
+    {
+      "english": "Friend",
+      "word": "Vriend",
+      "difficulty": "Easy"
+    },
+    {
+      "english": "Love",
+      "word": "Liefde",
+      "difficulty": "Medium"
+    },
+    {
+      "english": "Peace",
+      "word": "Vrede",
+      "difficulty": "Medium"
+    },
+    {
+      "english": "Freedom",
+      "word": "Vryheid",
+      "difficulty": "Medium"
+    },
+    {
+      "english": "Happiness",
+      "word": "Geluk",
+      "difficulty": "Medium"
+    },
+    {
+      "english": "Family",
+      "word": "Gesin",
+      "difficulty": "Medium"
+    },
+    {
+      "english": "Garden",
+      "word": "Tuin",
+      "difficulty": "Easy"
+    },
+    {
+      "english": "Kitchen",
+      "word": "Kombuis",
+      "difficulty": "Medium"
+    },
+    {
+      "english": "Bedroom",
+      "word": "Slaapkamer",
+      "difficulty": "Medium"
+    },
+    {
+      "english": "Bathroom",
+      "word": "Badkamer",
+      "difficulty": "Medium"
+    },
+    {
+      "english": "Work",
+      "word": "Werk",
+      "difficulty": "Easy"
+    },
+    {
+      "english": "Health",
+      "word": "Gesondheid",
+      "difficulty": "Hard"
+    },
+    {
+      "english": "Community",
+      "word": "Gemeenskap",
+      "difficulty": "Hard"
+    },
+    {
+      "english": "Leadership",
+      "word": "Leierskap",
+      "difficulty": "Hard"
+    },
+    {
+      "english": "Wisdom",
+      "word": "Wysheid",
+      "difficulty": "Hard"
+    },
+    {
+      "english": "Strength",
+      "word": "Sterkte",
+      "difficulty": "Medium"
+    },
+    {
+      "english": "Courage",
+      "word": "Moed",
+      "difficulty": "Medium"
+    }
+  ],
+  "puzzleWords": [
+    {
+      "english": "WATER",
+      "word": "WATER",
+      "difficulty": "Easy",
+      "hint": "Type the AFRIKAANS word for WATER"
+    },
+    {
+      "english": "APPLE",
+      "word": "APPEL",
+      "difficulty": "Easy",
+      "hint": "Type the AFRIKAANS word for APPLE"
+    },
+    {
+      "english": "HOUSE",
+      "word": "HUIS",
+      "difficulty": "Easy",
+      "hint": "Type the AFRIKAANS word for HOUSE"
+    },
+    {
+      "english": "TRAIN",
+      "word": "TREIN",
+      "difficulty": "Easy",
+      "hint": "Type the AFRIKAANS word for TRAIN"
+    },
+    {
+      "english": "SNAKE",
+      "word": "SLANG",
+      "difficulty": "Easy",
+      "hint": "Type the AFRIKAANS word for SNAKE"
+    },
+    {
+      "english": "BIRD",
+      "word": "VOËL",
+      "difficulty": "Easy",
+      "hint": "Type the AFRIKAANS word for BIRD (includes ë)"
+    },
+    {
+      "english": "FISH",
+      "word": "VIS",
+      "difficulty": "Easy",
+      "hint": "Type the AFRIKAANS word for FISH"
+    },
+    {
+      "english": "COW",
+      "word": "KOEI",
+      "difficulty": "Easy",
+      "hint": "Type the AFRIKAANS word for COW"
+    },
+    {
+      "english": "GOAT",
+      "word": "BOK",
+      "difficulty": "Easy",
+      "hint": "Type the AFRIKAANS word for GOAT"
+    },
+    {
+      "english": "CAR",
+      "word": "MOTOR",
+      "difficulty": "Easy",
+      "hint": "Type the AFRIKAANS word for CAR"
+    },
+    {
+      "english": "RAIN",
+      "word": "REËN",
+      "difficulty": "Medium",
+      "hint": "Type the AFRIKAANS word for RAIN (has ë)"
+    },
+    {
+      "english": "STAR",
+      "word": "STER",
+      "difficulty": "Easy",
+      "hint": "Type the AFRIKAANS word for STAR"
+    },
+    {
+      "english": "FLOWER",
+      "word": "BLOM",
+      "difficulty": "Easy",
+      "hint": "Type the AFRIKAANS word for FLOWER"
+    },
+    {
+      "english": "MOUNTAIN",
+      "word": "BERG",
+      "difficulty": "Easy",
+      "hint": "Type the AFRIKAANS word for MOUNTAIN"
+    },
+    {
+      "english": "RIVER",
+      "word": "RIVIER",
+      "difficulty": "Medium",
+      "hint": "Type the AFRIKAANS word for RIVER"
+    },
+    {
+      "english": "FOOD",
+      "word": "KOS",
+      "difficulty": "Easy",
+      "hint": "Type the AFRIKAANS word for FOOD"
+    },
+    {
+      "english": "LOVE",
+      "word": "LIEFDE",
+      "difficulty": "Medium",
+      "hint": "Type the AFRIKAANS word for LOVE"
+    },
+    {
+      "english": "PEACE",
+      "word": "VREDE",
+      "difficulty": "Medium",
+      "hint": "Type the AFRIKAANS word for PEACE"
+    },
+    {
+      "english": "FREEDOM",
+      "word": "VRYHEID",
+      "difficulty": "Hard",
+      "hint": "Type the AFRIKAANS word for FREEDOM"
+    },
+    {
+      "english": "FAMILY",
+      "word": "GESIN",
+      "difficulty": "Medium",
+      "hint": "Type the AFRIKAANS word for FAMILY"
+    },
+    {
+      "english": "MILK",
+      "word": "MELK",
+      "difficulty": "Easy",
+      "hint": "Type the AFRIKAANS word for MILK"
+    },
+    {
+      "english": "BREAD",
+      "word": "BROOD",
+      "difficulty": "Easy",
+      "hint": "Type the AFRIKAANS word for BREAD"
+    },
+    {
+      "english": "EGG",
+      "word": "EIER",
+      "difficulty": "Easy",
+      "hint": "Type the AFRIKAANS word for EGG"
+    },
+    {
+      "english": "HEART",
+      "word": "HART",
+      "difficulty": "Easy",
+      "hint": "Type the AFRIKAANS word for HEART"
+    },
+    {
+      "english": "STRENGTH",
+      "word": "STERKTE",
+      "difficulty": "Hard",
+      "hint": "Type the AFRIKAANS word for STRENGTH"
+    },
+    {
+      "english": "WORK",
+      "word": "WERK",
+      "difficulty": "Easy",
+      "hint": "Type the AFRIKAANS word for WORK"
+    },
+    {
+      "english": "GARDEN",
+      "word": "TUIN",
+      "difficulty": "Easy",
+      "hint": "Type the AFRIKAANS word for GARDEN"
+    },
+    {
+      "english": "CHAIR",
+      "word": "STOEL",
+      "difficulty": "Easy",
+      "hint": "Type the AFRIKAANS word for CHAIR"
+    },
+    {
+      "english": "TABLE",
+      "word": "TAFEL",
+      "difficulty": "Easy",
+      "hint": "Type the AFRIKAANS word for TABLE"
+    },
+    {
+      "english": "DOOR",
+      "word": "DEUR",
+      "difficulty": "Easy",
+      "hint": "Type the AFRIKAANS word for DOOR"
+    }
+  ],
+  "syllablePuzzles": [
+    {
+      "translation": "water",
+      "word": "Water",
+      "syllables": [
+        "Wa",
+        "ter"
+      ],
+      "difficulty": "Beginner"
+    },
+    {
+      "translation": "fire",
+      "word": "Vuur",
+      "syllables": [
+        "Vuur"
+      ],
+      "difficulty": "Intermediate"
+    },
+    {
+      "translation": "person",
+      "word": "Persoon",
+      "syllables": [
+        "Per",
+        "soon"
+      ],
+      "difficulty": "Advanced"
+    },
+    {
+      "translation": "sun",
+      "word": "Son",
+      "syllables": [
+        "Son"
+      ],
+      "difficulty": "Beginner"
+    },
+    {
+      "translation": "moon",
+      "word": "Maan",
+      "syllables": [
+        "Maan"
+      ],
+      "difficulty": "Beginner"
+    },
+    {
+      "translation": "tree",
+      "word": "Boom",
+      "syllables": [
+        "Boom"
+      ],
+      "difficulty": "Beginner"
+    },
+    {
+      "translation": "dog",
+      "word": "Hond",
+      "syllables": [
+        "Hond"
+      ],
+      "difficulty": "Beginner"
+    },
+    {
+      "translation": "cat",
+      "word": "Kat",
+      "syllables": [
+        "Kat"
+      ],
+      "difficulty": "Beginner"
+    },
+    {
+      "translation": "bird",
+      "word": "Voël",
+      "syllables": [
+        "Voël"
+      ],
+      "difficulty": "Beginner"
+    },
+    {
+      "translation": "fish",
+      "word": "Vis",
+      "syllables": [
+        "Vis"
+      ],
+      "difficulty": "Beginner"
+    },
+    {
+      "translation": "cow",
+      "word": "Koei",
+      "syllables": [
+        "Koei"
+      ],
+      "difficulty": "Beginner"
+    },
+    {
+      "translation": "car",
+      "word": "Motor",
+      "syllables": [
+        "Mo",
+        "tor"
+      ],
+      "difficulty": "Beginner"
+    },
+    {
+      "translation": "house",
+      "word": "Huis",
+      "syllables": [
+        "Huis"
+      ],
+      "difficulty": "Beginner"
+    },
+    {
+      "translation": "rain",
+      "word": "Reën",
+      "syllables": [
+        "Reën"
+      ],
+      "difficulty": "Intermediate"
+    },
+    {
+      "translation": "flower",
+      "word": "Blom",
+      "syllables": [
+        "Blom"
+      ],
+      "difficulty": "Beginner"
+    },
+    {
+      "translation": "mountain",
+      "word": "Berg",
+      "syllables": [
+        "Berg"
+      ],
+      "difficulty": "Beginner"
+    },
+    {
+      "translation": "river",
+      "word": "Rivier",
+      "syllables": [
+        "Ri",
+        "vier"
+      ],
+      "difficulty": "Intermediate"
+    },
+    {
+      "translation": "teacher",
+      "word": "Onderwyser",
+      "syllables": [
+        "On",
+        "der",
+        "wy",
+        "ser"
+      ],
+      "difficulty": "Advanced"
+    },
+    {
+      "translation": "mother",
+      "word": "Moeder",
+      "syllables": [
+        "Moe",
+        "der"
+      ],
+      "difficulty": "Beginner"
+    },
+    {
+      "translation": "father",
+      "word": "Vader",
+      "syllables": [
+        "Va",
+        "der"
+      ],
+      "difficulty": "Beginner"
+    },
+    {
+      "translation": "book",
+      "word": "Boek",
+      "syllables": [
+        "Boek"
+      ],
+      "difficulty": "Beginner"
+    },
+    {
+      "translation": "school",
+      "word": "Skool",
+      "syllables": [
+        "Skool"
+      ],
+      "difficulty": "Beginner"
+    },
+    {
+      "translation": "freedom",
+      "word": "Vryheid",
+      "syllables": [
+        "Vry",
+        "heid"
+      ],
+      "difficulty": "Advanced"
+    },
+    {
+      "translation": "happiness",
+      "word": "Geluk",
+      "syllables": [
+        "Ge",
+        "luk"
+      ],
+      "difficulty": "Intermediate"
+    },
+    {
+      "translation": "love",
+      "word": "Liefde",
+      "syllables": [
+        "Lief",
+        "de"
+      ],
+      "difficulty": "Intermediate"
+    },
+    {
+      "translation": "peace",
+      "word": "Vrede",
+      "syllables": [
+        "Vre",
+        "de"
+      ],
+      "difficulty": "Intermediate"
+    },
+    {
+      "translation": "computer",
+      "word": "Rekenaar",
+      "syllables": [
+        "Re",
+        "ke",
+        "naar"
+      ],
+      "difficulty": "Advanced"
+    },
+    {
+      "translation": "bread",
+      "word": "Brood",
+      "syllables": [
+        "Brood"
+      ],
+      "difficulty": "Beginner"
+    },
+    {
+      "translation": "milk",
+      "word": "Melk",
+      "syllables": [
+        "Melk"
+      ],
+      "difficulty": "Beginner"
+    },
+    {
+      "translation": "egg",
+      "word": "Eier",
+      "syllables": [
+        "Ei",
+        "er"
+      ],
+      "difficulty": "Beginner"
+    },
+    {
+      "translation": "heart",
+      "word": "Hart",
+      "syllables": [
+        "Hart"
+      ],
+      "difficulty": "Beginner"
+    },
+    {
+      "translation": "strength",
+      "word": "Sterkte",
+      "syllables": [
+        "Sterk",
+        "te"
+      ],
+      "difficulty": "Advanced"
+    },
+    {
+      "translation": "wisdom",
+      "word": "Wysheid",
+      "syllables": [
+        "Wys",
+        "heid"
+      ],
+      "difficulty": "Advanced"
+    }
+  ],
+  "sentencePuzzles": [
+    {
+      "translation": "I see the dog",
+      "words": [
+        "Ek",
+        "sien",
+        "die",
+        "hond"
+      ],
+      "difficulty": "Beginner"
+    },
+    {
+      "translation": "The sun is hot",
+      "words": [
+        "Die",
+        "son",
+        "is",
+        "warm"
+      ],
+      "difficulty": "Intermediate"
+    },
+    {
+      "translation": "Knowledge is power",
+      "words": [
+        "Kennis",
+        "is",
+        "mag"
+      ],
+      "difficulty": "Advanced"
+    },
+    {
+      "translation": "I eat food",
+      "words": [
+        "Ek",
+        "eet",
+        "kos"
+      ],
+      "difficulty": "Beginner"
+    },
+    {
+      "translation": "The child is crying",
+      "words": [
+        "Die",
+        "kind",
+        "huil"
+      ],
+      "difficulty": "Intermediate"
+    },
+    {
+      "translation": "We love peace",
+      "words": [
+        "Ons",
+        "lief",
+        "vrede"
+      ],
+      "difficulty": "Intermediate"
+    },
+    {
+      "translation": "The car is fast",
+      "words": [
+        "Die",
+        "motor",
+        "is",
+        "vinnig"
+      ],
+      "difficulty": "Intermediate"
+    },
+    {
+      "translation": "The bird flies",
+      "words": [
+        "Die",
+        "voël",
+        "vlieg"
+      ],
+      "difficulty": "Intermediate"
+    },
+    {
+      "translation": "She is my mother",
+      "words": [
+        "Sy",
+        "is",
+        "my",
+        "moeder"
+      ],
+      "difficulty": "Advanced"
+    },
+    {
+      "translation": "The rain is falling",
+      "words": [
+        "Die",
+        "reën",
+        "val"
+      ],
+      "difficulty": "Intermediate"
+    },
+    {
+      "translation": "Come here",
+      "words": [
+        "Kom",
+        "hier"
+      ],
+      "difficulty": "Beginner"
+    },
+    {
+      "translation": "I want water",
+      "words": [
+        "Ek",
+        "wil",
+        "water",
+        "hê"
+      ],
+      "difficulty": "Beginner"
+    },
+    {
+      "translation": "The teacher is reading",
+      "words": [
+        "Die",
+        "onderwyser",
+        "lees"
+      ],
+      "difficulty": "Intermediate"
+    },
+    {
+      "translation": "They are building a house",
+      "words": [
+        "Hulle",
+        "bou",
+        "'n",
+        "huis"
+      ],
+      "difficulty": "Advanced"
+    },
+    {
+      "translation": "Unity is strength",
+      "words": [
+        "Eenheid",
+        "is",
+        "sterkte"
+      ],
+      "difficulty": "Advanced"
+    },
+    {
+      "translation": "I love you",
+      "words": [
+        "Ek",
+        "is",
+        "lief",
+        "vir",
+        "jou"
+      ],
+      "difficulty": "Beginner"
+    },
+    {
+      "translation": "Good morning",
+      "words": [
+        "Goeie",
+        "more"
+      ],
+      "difficulty": "Beginner"
+    },
+    {
+      "translation": "Thank you",
+      "words": [
+        "Dankie"
+      ],
+      "difficulty": "Beginner"
+    },
+    {
+      "translation": "How are you?",
+      "words": [
+        "Hoe",
+        "gaan",
+        "dit",
+        "met",
+        "jou?"
+      ],
+      "difficulty": "Intermediate"
+    },
+    {
+      "translation": "The cat sleeps on the chair",
+      "words": [
+        "Die",
+        "kat",
+        "slaap",
+        "op",
+        "die",
+        "stoel"
+      ],
+      "difficulty": "Intermediate"
+    },
+    {
+      "translation": "My father works hard",
+      "words": [
+        "My",
+        "vader",
+        "werk",
+        "hard"
+      ],
+      "difficulty": "Intermediate"
+    },
+    {
+      "translation": "The flowers are beautiful",
+      "words": [
+        "Die",
+        "blomme",
+        "is",
+        "mooi"
+      ],
+      "difficulty": "Intermediate"
+    },
+    {
+      "translation": "We drink milk every day",
+      "words": [
+        "Ons",
+        "drink",
+        "melk",
+        "elke",
+        "dag"
+      ],
+      "difficulty": "Advanced"
+    },
+    {
+      "translation": "The mountain is high",
+      "words": [
+        "Die",
+        "berg",
+        "is",
+        "hoog"
+      ],
+      "difficulty": "Intermediate"
+    }
+  ]
+}

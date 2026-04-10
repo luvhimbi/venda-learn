@@ -6,11 +6,11 @@ import {
 } from 'lucide-react';
 
 /* ───── Types ───── */
-interface StoryPage { pageId: number; venda: string; english: string; image?: string; }
+interface StoryPage { pageId: number; nativeWord: string; english: string; image?: string; }
 export interface Story {
     id: string; title: string; level: string;
     coverImage?: string;
-    pages?: StoryPage[]; vendaText?: string; englishText?: string;
+    pages?: StoryPage[]; nativeText?: string; englishText?: string;
     vocabulary: { word: string; mean: string }[];
     lpReward: number;
 }
@@ -39,7 +39,7 @@ const StoryReader: React.FC<Props> = ({ story, onClose, onFinish, alreadyClaimed
     const [rate, setRate] = useState(0.9);
 
     const pages: StoryPage[] = story.pages || [
-        { pageId: 1, venda: story.vendaText || '', english: story.englishText || '' }
+        { pageId: 1, nativeWord: story.nativeText || '', english: story.englishText || '' }
     ];
 
     /* Cleanup on unmount */
@@ -105,7 +105,7 @@ const StoryReader: React.FC<Props> = ({ story, onClose, onFinish, alreadyClaimed
     }
 
     /* ─── Helpers ─── */
-    const text = (showEnglish ? pages[currentPage]?.english : pages[currentPage]?.venda) || '';
+    const text = (showEnglish ? pages[currentPage]?.english : pages[currentPage]?.nativeWord) || '';
     const firstLetter = text.charAt(0);
     const restText = text.slice(1);
     const img = pages[currentPage]?.image || FALLBACK_IMG;
@@ -237,7 +237,7 @@ const StoryReader: React.FC<Props> = ({ story, onClose, onFinish, alreadyClaimed
 
                     {/* Text page */}
                     <div className="ngano-pg-txt" ref={textRef}>
-                        <div className="ngano-pg-label">NGANO DZA TSHIVENDA</div>
+                        <div className="ngano-pg-label">NGANO DZA NATIVE</div>
                         <div className="ngano-pg-body">
                             <span className="ngano-drop">{firstLetter}</span>
                             {restText}

@@ -24,12 +24,12 @@ export interface FBQuestion extends QuestionBase {
 
 export interface MPQuestion extends QuestionBase {
     type: 'match-pairs';
-    pairs: { venda: string; english: string }[];
+    pairs: { nativeWord: string; english: string }[];
 }
 
 export interface LCQuestion extends QuestionBase {
     type: 'listen-and-choose';
-    vendaWord: string;
+    nativeWord: string;
     options: string[];
     correctAnswer: string;
 }
@@ -47,7 +47,7 @@ export interface DialogueLine {
     characterName: string;
     avatar?: string;
     position?: 'left' | 'right';
-    venda: string;
+    nativeWord: string;
     english: string;
     audioUrl?: string;
 }

@@ -5,43 +5,51 @@ import { collection, addDoc, getDocs, deleteDoc, doc, serverTimestamp } from 'fi
 const picturePuzzleData = [
     { 
         imageUrl: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=500&auto=format&fit=crop',
-        venda: 'Mmbwa',
-        english: 'Dog'
+        nativeWord: 'Mmbwa',
+        english: 'Dog',
+        difficulty: 'Beginner'
     },
     { 
         imageUrl: 'https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?w=500&auto=format&fit=crop',
-        venda: 'Phathi',
-        english: 'Cat'
+        nativeWord: 'Phathi',
+        english: 'Cat',
+        difficulty: 'Beginner'
     },
     { 
         imageUrl: 'https://images.unsplash.com/photo-1444464666168-49d633b867ad?w=500&auto=format&fit=crop',
-        venda: 'Zwinoni',
-        english: 'Bird'
+        nativeWord: 'Zwinoni',
+        english: 'Bird',
+        difficulty: 'Beginner'
     },
     { 
         imageUrl: 'https://images.unsplash.com/photo-1544526226-d4568090ffb8?w=500&auto=format&fit=crop',
-        venda: 'Maḓi',
-        english: 'Water'
+        nativeWord: 'Maḓi',
+        english: 'Water',
+        difficulty: 'Beginner'
     },
     { 
         imageUrl: 'https://images.unsplash.com/photo-1502082553048-f009c37129b9?w=500&auto=format&fit=crop',
-        venda: 'Muri',
-        english: 'Tree'
+        nativeWord: 'Muri',
+        english: 'Tree',
+        difficulty: 'Beginner'
     },
     { 
         imageUrl: 'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=500&auto=format&fit=crop',
-        venda: 'Thavha',
-        english: 'Mountain'
+        nativeWord: 'Thavha',
+        english: 'Mountain',
+        difficulty: 'Beginner'
     },
     { 
         imageUrl: 'https://images.unsplash.com/photo-1534067783941-51c9c23ecefd?w=500&auto=format&fit=crop',
-        venda: 'Ḓuvha',
-        english: 'Sun/Day'
+        nativeWord: 'Ḓuvha',
+        english: 'Sun/Day',
+        difficulty: 'Beginner'
     },
     { 
         imageUrl: 'https://images.unsplash.com/photo-1529736571195-42ed9e1734f4?w=500&auto=format&fit=crop',
-        venda: 'Ṅwedzi',
-        english: 'Moon'
+        nativeWord: 'Ṅwedzi',
+        english: 'Moon',
+        difficulty: 'Beginner'
     }
 ];
 
