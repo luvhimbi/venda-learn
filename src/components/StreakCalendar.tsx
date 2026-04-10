@@ -66,67 +66,69 @@ const StreakCalendar: React.FC<StreakCalendarProps> = ({
     const FREEZE_COST = 100;
 
     return (
-        <div className="unified-streak-calendar rounded-3xl overflow-hidden border border-slate-200 bg-white shadow-sm animate__animated animate__fadeIn">
-
-
-            <div className="p-4">
+        <div className="brutalist-card overflow-hidden shadow-action animate__animated animate__fadeIn p-0">
+            <div className="p-4 p-md-5">
                 {/* Header with Streak and Stats */}
-                <div className="d-flex flex-column flex-md-row justify-content-between align-items-center gap-4 mb-4 pb-4 border-bottom border-slate-100">
-                    <div className="d-flex align-items-center gap-3">
-                        <div className="fire-badge-large p-3 rounded-2xl bg-danger bg-opacity-10 d-flex align-items-center justify-content-center">
-                            <Flame className={`text-danger ${streak > 0 ? 'fire-animate' : ''}`} size={32} fill={streak > 0 ? "currentColor" : "none"} />
+                <div className="d-flex flex-column flex-md-row justify-content-between align-items-center gap-4 mb-5 pb-5 border-bottom border-dark border-2">
+                    <div className="d-flex align-items-center gap-4 text-center text-md-start">
+                        <div className="fire-badge-large p-3 brutalist-card--sm bg-warning shadow-none">
+                            <Flame className={`text-dark ${streak > 0 ? 'fire-animate' : ''}`} size={40} fill={streak > 0 ? "currentColor" : "none"} />
                         </div>
                         <div>
-                            <h3 className="fw-bold mb-0 text-slate-900 ls-tight">{streak} Day Streak</h3>
-                            <div className="d-flex align-items-center gap-2 mt-1">
-                                <Trophy size={14} className="text-warning-emphasis" />
-                                <span className="smallest fw-bold text-warning-emphasis uppercase tracking-widest">{points} XP EARNED</span>
+                            <h2 className="fw-black mb-0 text-dark ls-tight uppercase" style={{ fontSize: '2rem' }}>{streak} Day Streak</h2>
+                            <div className="d-flex align-items-center justify-content-center justify-content-md-start gap-2 mt-2">
+                                <Trophy size={16} className="text-dark" />
+                                <span className="smallest fw-black text-dark uppercase ls-1">{points} XP EARNED</span>
                             </div>
                         </div>
                     </div>
 
-                    <div className="d-flex gap-2">
+                    <div className="d-flex gap-3 w-100 w-md-auto">
                         {onShareClick && (
                             <button
                                 onClick={onShareClick}
-                                className="btn btn-danger d-flex align-items-center gap-2 px-3 py-2 rounded-xl border-0 shadow-sm transition-all"
+                                className="btn btn-game btn-game-primary flex-fill"
                             >
-                                <Flame size={16} fill="currentColor" />
-                                <span className="small fw-bold">Share</span>
+                                <Flame size={18} fill="currentColor" className="me-2" />
+                                <span className="fw-black">SHARE</span>
                             </button>
                         )}
-                        <div className="d-flex align-items-center gap-2 px-3 py-2 bg-slate-50 border border-slate-100 rounded-xl">
-                            <Shield size={16} className="text-info" />
-                            <span className="small fw-bold text-info">{streakFreezes} Freezes</span>
+                        <div className="d-flex align-items-center gap-2 px-4 py-2 bg-white border border-dark border-3 rounded-pill shadow-action-sm">
+                            <Shield size={18} className="text-dark" />
+                            <span className="fw-black text-dark uppercase ls-1" style={{ fontSize: '12px' }}>{streakFreezes} Freezes</span>
                         </div>
                     </div>
                 </div>
 
                 <div className="calendar-section">
-                    <div className="d-flex justify-content-between align-items-center mb-4">
-                        <div className="d-flex align-items-center gap-2">
-                            <CalendarIcon size={16} className="text-slate-400" />
-                            <span className="small fw-bold text-slate-600 uppercase tracking-widest">{monthName} {year}</span>
+                    <div className="d-flex justify-content-between align-items-center mb-5">
+                        <div className="d-flex align-items-center gap-3">
+                            <div className="bg-dark p-2 rounded-circle d-flex align-items-center justify-content-center" style={{ width: 36, height: 36 }}>
+                                <CalendarIcon size={20} className="text-white" />
+                            </div>
+                            <span className="fw-black text-dark uppercase ls-2" style={{ fontSize: '1.25rem' }}>{monthName} {year}</span>
                         </div>
-                        <div className="d-flex align-items-center gap-1">
+                        <div className="d-flex align-items-center gap-2">
                             <button
                                 onClick={() => setViewDate(new Date(viewDate.getFullYear(), viewDate.getMonth() - 1, 1))}
-                                className="btn btn-light btn-sm rounded-lg p-1 border-slate-200"
+                                className="btn btn-game-white p-2 rounded-3 border-dark border-2"
+                                style={{ width: 44, height: 44 }}
                             >
-                                <ChevronLeft size={18} />
+                                <ChevronLeft size={24} />
                             </button>
                             <button
                                 onClick={() => setViewDate(new Date(viewDate.getFullYear(), viewDate.getMonth() + 1, 1))}
-                                className="btn btn-light btn-sm rounded-lg p-1 border-slate-200"
+                                className="btn btn-game-white p-2 rounded-3 border-dark border-2"
+                                style={{ width: 44, height: 44 }}
                             >
-                                <ChevronRight size={18} />
+                                <ChevronRight size={24} />
                             </button>
                         </div>
                     </div>
 
                     <div className="calendar-grid-v2">
                         {weekDays.map((wd, i) => (
-                            <div key={i} className="text-center smallest fw-bold text-slate-400 uppercase mb-2">{wd}</div>
+                            <div key={i} className="text-center smallest fw-black text-muted uppercase mb-3 ls-1">{wd}</div>
                         ))}
 
                         {days.map((day, idx) => {
@@ -136,10 +138,10 @@ const StreakCalendar: React.FC<StreakCalendarProps> = ({
                                     key={idx}
                                     className={`calendar-node-cell d-flex flex-column align-items-center justify-content-center`}
                                 >
-                                    <div className={`calendar-node ${day.active ? 'active' : ''} ${day.frozen ? 'frozen' : ''} ${day.isToday ? 'today' : ''}`}>
-                                        {day.active ? <Check size={16} strokeWidth={4} /> : (day.frozen ? <Shield size={16} fill="currentColor" opacity={0.5} /> : <span className="node-day-num">{day.day}</span>)}
+                                    <div className={`calendar-node ${day.active ? 'active' : ''} ${day.frozen ? 'frozen' : ''} ${day.isToday ? 'today' : ''} shadow-action-sm`}>
+                                        {day.active ? <Check size={20} strokeWidth={4} /> : (day.frozen ? <Shield size={20} fill="currentColor" /> : <span className="node-day-num">{day.day}</span>)}
                                     </div>
-                                    {(day.active || day.frozen) && <div className={day.active ? "active-dot mt-1" : "frozen-dot mt-1"}></div>}
+                                    {(day.active || day.frozen) && <div className={day.active ? "active-dot mt-2" : "frozen-dot mt-2"}></div>}
                                 </div>
                             );
                         })}
@@ -147,26 +149,26 @@ const StreakCalendar: React.FC<StreakCalendarProps> = ({
                 </div>
 
                 {/* Premium Freeze Section */}
-                <div className="mt-4 pt-4 border-top border-slate-100">
-                    <div className="d-flex flex-column flex-md-row align-items-center justify-content-between gap-4 p-4 rounded-3xl bg-slate-50 border border-slate-100 shadow-sm">
-                        <div className="d-flex align-items-center gap-3">
-                            <div className="p-3 rounded-2xl bg-white border border-slate-200 text-info d-flex align-items-center justify-content-center shadow-sm">
-                                <Shield size={24} fill="currentColor" opacity={0.15} strokeWidth={2} />
+                <div className="mt-5 pt-5 border-top border-dark border-2">
+                    <div className="d-flex flex-column flex-md-row align-items-center justify-content-between gap-4 p-4 p-md-5 brutalist-card shadow-action-light bg-light">
+                        <div className="d-flex align-items-center gap-4">
+                            <div className="p-3 bg-white border border-dark border-3 rounded-4 shadow-action-sm text-dark d-flex align-items-center justify-content-center">
+                                <Shield size={32} fill={streakFreezes > 0 ? "#FACC15" : "none"} strokeWidth={3} />
                             </div>
-                            <div>
-                                <h5 className="fw-bold mb-0 text-dark">{streakFreezes} Streak Freezes</h5>
-                                <p className="smallest fw-bold text-secondary uppercase tracking-widest mb-0 mt-1">Status: {streakFreezes > 0 ? 'Protected' : 'At Risk'}</p>
+                            <div className="text-center text-md-start">
+                                <h4 className="fw-black mb-1 text-dark uppercase ls-tight">{streakFreezes} STREAK FREEZES</h4>
+                                <p className="smallest fw-black text-muted uppercase ls-2 mb-0">Status: {streakFreezes > 0 ? <span className="text-success">Protected</span> : <span className="text-danger">At Risk</span>}</p>
                             </div>
                         </div>
 
-                        <div className="d-flex flex-column gap-2 align-items-stretch min-w-[140px]">
+                        <div className="w-100 w-md-auto">
                             <button
                                 onClick={onBuyFreeze}
                                 disabled={points < FREEZE_COST || streak === 0}
-                                className={`btn ${points >= FREEZE_COST && streak > 0 ? 'btn-dark' : 'btn-slate-200'} rounded-2xl px-4 py-3 fw-bold small ls-1 transition-all d-flex align-items-center justify-content-center gap-2`}
+                                className={`btn btn-game ${points >= FREEZE_COST && streak > 0 ? 'btn-game-primary' : 'bg-secondary text-white opacity-50'} w-100 px-5 py-3 shadow-action-sm`}
                             >
-                                <span className="opacity-75">Buy Freeze</span>
-                                <span className={points >= FREEZE_COST ? 'badge bg-warning text-dark' : ''}>{FREEZE_COST} XP</span>
+                                <span className="fw-black me-2">BUY FREEZE</span>
+                                <span className={`badge ${points >= FREEZE_COST ? 'bg-dark text-warning' : 'bg-dark'}`} style={{ fontSize: '12px' }}>{FREEZE_COST} XP</span>
                             </button>
                         </div>
                     </div>
@@ -174,90 +176,82 @@ const StreakCalendar: React.FC<StreakCalendarProps> = ({
             </div>
 
             <style>{`
-                .unified-streak-calendar {
-                    font-family: 'Inter', sans-serif;
-                }
-                
-
-
                 .fire-animate {
                     animation: fireFlicker 1.5s infinite ease-in-out;
                 }
 
                 @keyframes fireFlicker {
                     0%, 100% { transform: scale(1); opacity: 1; }
-                    50% { transform: scale(1.1); opacity: 0.8; }
+                    50% { transform: scale(1.15); opacity: 0.9; }
                 }
 
                 .calendar-grid-v2 {
                     display: grid;
                     grid-template-columns: repeat(7, 1fr);
-                    gap: 8px;
+                    gap: 12px;
                 }
 
                 .calendar-node-cell {
                     aspect-ratio: 1;
-                    min-height: 48px;
+                    min-height: 52px;
                 }
 
                 .calendar-node {
-                    width: 40px;
-                    height: 40px;
+                    width: 44px;
+                    height: 44px;
                     border-radius: 12px;
-                    background: #f8fafc;
-                    border: 1.5px solid #f1f5f9;
+                    background: #fff;
+                    border: 3px solid #000;
                     display: flex;
                     align-items: center;
                     justify-content: center;
-                    transition: all 0.2s ease;
-                    color: #94a3b8;
-                    font-size: 14px;
-                    font-weight: 700;
+                    transition: all 0.1s ease;
+                    color: #000;
+                    font-size: 15px;
+                    font-weight: 900;
                     position: relative;
                 }
 
                 .calendar-node.active {
-                    background: #EF4444;
+                    background: #22c55e;
                     color: white;
-                    border-color: #EF4444;
-                    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.25);
-                    transform: scale(1.05);
+                    border-color: #000;
                 }
 
                 .calendar-node.frozen {
                     background: #0ea5e9;
                     color: white;
-                    border-color: #0ea5e9;
-                    box-shadow: 0 4px 12px rgba(14, 165, 233, 0.25);
+                    border-color: #000;
                 }
 
                 .calendar-node.today {
-                    border-color: #FACC15;
-                    border-width: 2px;
-                    color: #334155;
+                    background: #FACC15;
+                    border-width: 4px;
+                    color: #000;
                 }
                 
-                .calendar-node.today:not(.active):not(.frozen) {
-                    background: #fffbeb;
-                }
-
                 .active-dot {
-                    width: 5px;
-                    height: 5px;
-                    background: #EF4444;
+                    width: 8px;
+                    height: 8px;
+                    background: #22c55e;
+                    border: 1px solid #000;
                     border-radius: 50%;
                 }
 
                 .frozen-dot {
-                    width: 5px;
-                    height: 5px;
+                    width: 8px;
+                    height: 8px;
                     background: #0ea5e9;
+                    border: 1px solid #000;
                     border-radius: 50%;
                 }
 
-                .ls-tight { letter-spacing: -0.5px; }
-                .tracking-widest { letter-spacing: 0.1em; }
+                .ls-tight { letter-spacing: -1px; }
+                .ls-1 { letter-spacing: 1px; }
+                .ls-2 { letter-spacing: 2px; }
                 .smallest { font-size: 10px; }
+                .fw-black { font-weight: 900; }
+                .uppercase { text-transform: uppercase; }
             `}</style>
         </div>
     );

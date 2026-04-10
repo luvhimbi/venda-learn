@@ -3,8 +3,6 @@ import html2canvas from 'html2canvas';
 import { QRCodeSVG } from 'qrcode.react';
 import { X, Copy, Check, Share2 } from 'lucide-react';
 import { AvatarDisplay } from './AvatarPicker';
-import TrophyIcon from './TrophyIcon';
-import { ALL_TROPHIES } from '../services/achievementService';
 
 interface ShareProfileModalProps {
     isOpen: boolean;
@@ -100,95 +98,79 @@ const ShareProfileModal: React.FC<ShareProfileModalProps> = ({ isOpen, onClose, 
         setTimeout(() => setIsCopied(false), 2000);
     };
 
-    // Get top 3 trophies
-    const topTrophies = [...ALL_TROPHIES]
-        .filter(t => (userData.trophies || []).includes(t.id))
-        .slice(0, 3);
 
     return (
-        <div className="modal-overlay d-flex align-items-center justify-content-center" onClick={onClose} style={{ zIndex: 9999 }}>
-            <div className="modal-content-wrapper rounded-4 bg-white p-4 shadow-lg position-relative" style={{ maxWidth: '400px', width: '90%' }} onClick={e => e.stopPropagation()}>
-                <button onClick={onClose} className="btn-close-modal border-0 bg-light text-muted rounded-circle position-absolute top-0 end-0 m-3 d-flex align-items-center justify-content-center transition-all" style={{ width: 32, height: 32 }}>
-                    <X size={18} />
+        <div className="modal-overlay d-flex align-items-center justify-content-center p-3" onClick={onClose} style={{ zIndex: 9999 }}>
+            <div className="brutalist-card bg-white p-3 p-md-4 shadow-action position-relative w-100" style={{ maxWidth: '340px' }} onClick={e => e.stopPropagation()}>
+                <button onClick={onClose} className="btn-game-white rounded-circle position-absolute top-0 end-0 m-2 d-flex align-items-center justify-content-center transition-all border border-dark border-2" style={{ width: 32, height: 32 }}>
+                    <X size={16} strokeWidth={3} />
                 </button>
 
-                <div className="text-center mb-4">
-                    <h5 className="fw-bold text-dark ls-tight mb-1">Share Your Journey</h5>
-                    <p className="small text-muted mb-0">Download or share your profile card.</p>
+                <div className="text-center mb-3">
+                    <h5 className="fw-black text-dark uppercase ls-tight mb-1" style={{ fontSize: '1.25rem' }}>Share Your Journey</h5>
+                    <p className="smallest fw-bold text-muted uppercase ls-1 mb-0">Your profile card is ready!</p>
                 </div>
 
                 {/* THE CARD TO BE SNAPSHOTTED */}
                 <div 
                     ref={cardRef} 
-                    className="share-card-container position-relative overflow-hidden rounded-4 shadow-sm mb-4"
-                    style={{ background: 'linear-gradient(135deg, #1e293b 0%, #0f172a 100%)', color: 'white', padding: '24px 16px' }}
+                    className="share-card-container position-relative overflow-hidden border border-dark border-4 rounded-3 mb-3 shadow-sm"
+                    style={{ background: '#000', color: 'white', padding: '20px 14px' }}
                 >
-                    {/* Background Accents */}
-                    <div className="position-absolute rounded-circle" style={{ width: 200, height: 200, background: 'radial-gradient(circle, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0) 70%)', top: '-50px', right: '-50px' }}></div>
-                    <div className="position-absolute rounded-circle" style={{ width: 300, height: 300, background: 'radial-gradient(circle, rgba(255, 255, 255, 0.03) 0%, rgba(255, 255, 255, 0) 70%)', bottom: '-100px', left: '-100px' }}></div>
+                    {/* Background Accents (Brutalist style) */}
+                    <div className="position-absolute" style={{ top: -20, right: -20, width: 100, height: 100, border: '15px solid rgba(255,255,255,0.05)', borderRadius: '50%' }}></div>
 
                     {/* Download Icon (Top-Left) */}
                     <button 
                         onClick={(e) => { e.stopPropagation(); handleManualDownload(); }}
-                        className="position-absolute top-0 start-0 m-3 btn btn-white bg-white rounded-circle shadow-sm d-flex align-items-center justify-content-center z-2 p-0"
-                        style={{ width: '32px', height: '32px', border: 'none' }}
-                        title="Download Image"
+                        className="position-absolute top-0 start-0 m-2 btn-game-white rounded-circle d-flex align-items-center justify-content-center z-2 p-0 border border-dark border-2"
+                        style={{ width: '28px', height: '28px' }}
+                        title="Download"
                         disabled={isDownloading}
                     >
-                        <i className={`bi bi-download text-dark ${isDownloading ? 'opacity-50' : ''}`} style={{ fontSize: '14px' }}></i>
+                        <i className={`bi bi-download text-dark ${isDownloading ? 'opacity-50' : ''}`} style={{ fontSize: '12px' }}></i>
                     </button>
 
                     <div className="position-relative z-1 d-flex flex-column align-items-center text-center">
-                        {/* Logo / Header */}
-                        <div className="d-flex align-items-center justify-content-center mb-4">
-                            <div className="bg-white p-2 rounded-3 shadow-sm d-inline-block">
-                                <img src="/images/Logo.png" alt="Language Platform" height="32" className="object-fit-contain" />
-                            </div>
+                        {/* Logo */}
+                        <div className="bg-white p-1.5 px-3 border border-dark border-2 rounded-2 mb-3 shadow-none">
+                            <img src="/images/Logo.png" alt="Logo" height="18" className="object-fit-contain" />
                         </div>
 
                         {/* Avatar */}
-                        <div className="bg-white rounded-circle p-1 mb-3" style={{ width: 80, height: 80 }}>
-                            <AvatarDisplay avatarId={userData.avatarId || 'adventurer'} seed={userData.username} size={72} />
+                        <div className="bg-white rounded-circle p-1 mb-2 border border-dark border-3" style={{ width: 70, height: 70 }}>
+                            <AvatarDisplay avatarId={userData.avatarId || 'adventurer'} seed={userData.username} size={60} />
                         </div>
 
                         {/* User Info */}
-                        <h3 className="fw-bold mb-1">{userData.username?.split(' ')[0]}</h3>
-                        <div className="d-inline-flex bg-warning bg-opacity-25 text-warning px-3 py-1 rounded-pill smallest fw-bold ls-1 mb-4">
-                            LEVEL {userData.level || 1} SCHOLAR
+                        <h3 className="fw-black mb-1 uppercase ls-tight" style={{ fontSize: '1.5rem' }}>{userData.username?.split(' ')[0]}</h3>
+                        <div className="smallest fw-black text-warning uppercase ls-2 mb-3">
+                            {userData.level || 1} SCHOLAR
                         </div>
 
                         {/* Stats Row */}
-                        <div className="d-flex justify-content-center gap-4 mb-4 pb-3 border-bottom border-secondary border-opacity-50 w-100">
+                        <div className="d-flex justify-content-center gap-4 mb-3 pb-3 border-bottom border-white border-opacity-20 w-100">
                             <div>
-                                <h4 className="fw-bold text-white mb-0">{userData.points || 0}</h4>
-                                <p className="smallest text-white-50 text-uppercase ls-1 mb-0">Total XP</p>
+                                <h4 className="fw-black text-white mb-0" style={{ fontSize: '1.1rem' }}>{userData.points || 0}</h4>
+                                <p className="smallest text-white-50 text-uppercase ls-1 mb-0">XP</p>
                             </div>
                             <div>
-                                <h4 className="fw-bold text-danger mb-0 d-flex align-items-center justify-content-center gap-1">
+                                <h4 className="fw-black text-warning mb-0 d-flex align-items-center justify-content-center gap-1" style={{ fontSize: '1.1rem' }}>
                                     <i className="bi bi-fire"></i> {userData.streak || 0}
                                 </h4>
-                                <p className="smallest text-white-50 text-uppercase ls-1 mb-0">Day Streak</p>
+                                <p className="smallest text-white-50 text-uppercase ls-1 mb-0">STREAK</p>
                             </div>
                         </div>
 
-                        {/* Badges / QR Area */}
+                        {/* QR Area */}
                         <div className="d-flex align-items-center justify-content-between w-100">
-                            <div className="d-flex flex-column align-items-start">
-                                <p className="smallest text-white-50 text-uppercase ls-1 mb-2">Top Trophies</p>
-                                <div className="d-flex gap-2">
-                                    {topTrophies.length > 0 ? topTrophies.map(t => (
-                                        <div key={t.id} className="bg-white bg-opacity-10 p-2 rounded-3">
-                                            <TrophyIcon rarity={t.rarity as any} size={28} color={t.color} animate={false} />
-                                        </div>
-                                    )) : (
-                                        <p className="smallest text-muted italic mb-0">Just started learning!</p>
-                                    )}
-                                </div>
+                            <div className="text-start">
+                                <p className="smallest-print text-white-50 text-uppercase ls-1 mb-1">Language Scholar</p>
+                                <p className="smallest text-white fw-bold mb-0">@{userData.username?.split(' ')[0].toLowerCase()}</p>
                             </div>
                             
-                            <div className="bg-white p-2 rounded-3 text-center">
-                                <QRCodeSVG value={inviteLink} size={60} level="M" includeMargin={false} />
-                                <p className="mb-0 text-dark fw-bold" style={{ fontSize: '7px', marginTop: '4px' }}>SCAN TO JOIN</p>
+                            <div className="bg-white p-1.5 border border-dark border-2 rounded-2 text-center">
+                                <QRCodeSVG value={inviteLink} size={44} level="M" />
                             </div>
                         </div>
                     </div>
@@ -199,21 +181,20 @@ const ShareProfileModal: React.FC<ShareProfileModalProps> = ({ isOpen, onClose, 
                     <button 
                         onClick={handleShareImage} 
                         disabled={isDownloading}
-                        className="btn w-100 py-3 rounded-3 fw-bold ls-1 d-flex align-items-center justify-content-center gap-2 transition-all hover-lift"
-                        style={{ backgroundColor: '#FACC15', border: 'none', color: '#111827' }}
+                        className="btn btn-game btn-game-primary w-100 py-2.5 shadow-action-sm"
                     >
                         {isDownloading ? (
                             <span className="spinner-border spinner-border-sm"></span>
                         ) : (
-                            <><Share2 size={18} /> SHARE TO SOCIALS</>
+                            <><Share2 size={16} /> SHARE TO SOCIALS</>
                         )}
                     </button>
                     
                     <button 
                         onClick={handleCopyLink} 
-                        className={`btn ${isCopied ? 'btn-success' : 'btn-outline-dark'} w-100 py-3 rounded-3 fw-bold ls-1 d-flex align-items-center justify-content-center gap-2 transition-all`}
+                        className={`btn btn-game ${isCopied ? 'bg-success text-white' : 'btn-game-white'} w-100 py-2.5 shadow-action-sm`}
                     >
-                        {isCopied ? <><Check size={18} /> COPIED!</> : <><Copy size={18} /> COPY INVITE LINK</>}
+                        {isCopied ? <><Check size={16} /> COPIED!</> : <><Copy size={16} /> COPY INVITE LINK</>}
                     </button>
                 </div>
             </div>

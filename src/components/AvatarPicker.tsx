@@ -79,21 +79,22 @@ const AvatarPicker: React.FC<AvatarPickerProps> = ({ selectedStyle, seed, onSele
     const selectedStyleData = DICEBEAR_STYLES.find(s => s.id === selectedStyle);
 
     return (
-        <div className="avatar-picker-container">
-            <div className="avatar-picker-grid mb-4">
+        <div className="avatar-picker-container shadow-sm">
+            <div className="avatar-picker-grid mb-5">
                 {DICEBEAR_STYLES.map((style) => {
                     const isSelected = selectedStyle === style.id;
                     const clothingColor = style.themeColor.replace('#', '');
-                    const avatarUrl = `https://api.dicebear.com/9.x/${style.id}/svg?seed=${seed}&backgroundColor=f8fafc&clothingColor=${clothingColor}&topColor=${clothingColor}`;
+                    const avatarUrl = `https://api.dicebear.com/9.x/${style.id}/svg?seed=${seed}&backgroundColor=f1f5f9&clothingColor=${clothingColor}&topColor=${clothingColor}`;
 
                     return (
                         <button
                             key={style.id}
                             type="button"
-                            className={`avatar-choice-btn ${isSelected ? 'selected' : ''}`}
+                            className={`avatar-choice-btn ${isSelected ? 'selected shadow-action-sm' : ''}`}
                             onClick={() => onSelect(style.id)}
+                            style={{ borderColor: isSelected ? style.themeColor : 'transparent' }}
                         >
-                            <div className="avatar-preview-wrapper position-relative" style={{ border: `3px solid ${style.themeColor}` }}>
+                            <div className="avatar-preview-wrapper position-relative" style={{ border: `3px solid ${isSelected ? style.themeColor : '#000'}` }}>
                                 <img
                                     src={avatarUrl}
                                     alt={style.label}
@@ -104,30 +105,30 @@ const AvatarPicker: React.FC<AvatarPickerProps> = ({ selectedStyle, seed, onSele
                                 <div className="minwenda-accent" style={{ background: style.themeColor }}></div>
                             </div>
                             <span className="style-label">{style.vendaName}</span>
-                            {isSelected && <div className="selection-indicator" style={{ backgroundColor: style.themeColor }}></div>}
+                            {isSelected && <div className="selection-indicator bg-dark border-white animate__animated animate__zoomIn"></div>}
                         </button>
                     );
                 })}
             </div>
 
             {selectedStyleData && (
-                <div className="selected-avatar-card p-4 rounded-4 animate__animated animate__fadeIn">
+                <div className="selected-avatar-card brutalist-card p-4 p-md-5 animate__animated animate__fadeIn shadow-action-light">
                     <div className="minwenda-pattern-header"></div>
-                    <div className="card-content d-flex align-items-center gap-4">
-                        <div className="avatar-large flex-shrink-0 position-relative">
+                    <div className="card-content d-flex flex-column flex-md-row align-items-center gap-4 gap-md-5">
+                        <div className="avatar-large flex-shrink-0 position-relative shadow-action-sm">
                              <img 
                                 src={`https://api.dicebear.com/9.x/${selectedStyleData.id}/svg?seed=${seed}&backgroundColor=FACC15&clothingColor=${selectedStyleData.themeColor.replace('#', '')}&topColor=${selectedStyleData.themeColor.replace('#', '')}`} 
-                                className="rounded-circle border-4 border-white shadow w-100 h-100" 
-                                style={{ objectFit: 'cover' }}
+                                className="border-4 border-dark h-100 w-100" 
+                                style={{ objectFit: 'cover', borderRadius: '16px' }}
                                 alt="preview" 
                              />
                         </div>
-                        <div className="text-dark">
-                            <h4 className="fw-bold mb-0 ls-1" style={{ color: '#1e293b' }}>{selectedStyleData.vendaName}</h4>
-                            <p className="smallest fw-bold text-uppercase ls-2 mb-2" style={{ color: selectedStyleData.themeColor }}>{selectedStyleData.label}</p>
-                            <p className="small mb-0 opacity-75 italic text-secondary" style={{ borderLeft: `3px solid ${selectedStyleData.themeColor}`, paddingLeft: '12px', fontStyle: 'italic' }}>
-                                "{selectedStyleData.story}"
-                            </p>
+                        <div className="text-dark text-center text-md-start">
+                            <h2 className="fw-black mb-1 ls-tight uppercase" style={{ fontSize: '1.75rem' }}>{selectedStyleData.vendaName}</h2>
+                            <p className="small fw-black text-uppercase ls-2 mb-3" style={{ color: selectedStyleData.themeColor }}>{selectedStyleData.label}</p>
+                            <div className="p-3 bg-light border-start border-4 border-dark italic text-secondary" style={{ borderLeftColor: selectedStyleData.themeColor + ' !important' }}>
+                                <p className="small mb-0 fw-bold">"{selectedStyleData.story}"</p>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -136,42 +137,44 @@ const AvatarPicker: React.FC<AvatarPickerProps> = ({ selectedStyle, seed, onSele
             <style>{`
                 .avatar-picker-grid {
                     display: grid;
-                    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
-                    gap: 15px;
-                    padding: 15px;
-                    background: #f1f5f9;
+                    grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+                    gap: 10px;
+                    padding: 12px;
+                    background: #f8fafc;
+                    border: 3px solid #000;
                     border-radius: 20px;
                 }
                 .avatar-choice-btn {
                     position: relative;
-                    border: 2px solid transparent;
+                    border: 3px solid transparent;
                     background: white;
-                    border-radius: 18px;
-                    padding: 12px;
+                    border-radius: 12px;
+                    padding: 10px 5px;
                     cursor: pointer;
-                    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+                    transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
                     display: flex;
                     flex-direction: column;
                     align-items: center;
-                    gap: 10px;
-                    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+                    gap: 8px;
                 }
                 .avatar-choice-btn:hover {
-                    transform: translateY(-5px);
-                    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+                    transform: translateY(-4px);
+                    border-color: #000;
                 }
                 .avatar-choice-btn.selected {
-                    border-color: currentColor;
+                    border-color: #000;
+                    border-width: 4px;
                     transform: scale(1.05);
+                    z-index: 2;
                 }
                 .avatar-preview-wrapper {
                     width: 70px;
                     height: 70px;
                     flex-shrink: 0;
-                    border-radius: 50%;
+                    border-radius: 12px;
                     overflow: hidden;
-                    background: #f1f5f9;
-                    box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
+                    background: #fff;
+                    transition: all 0.2s ease;
                 }
                 .avatar-img {
                     width: 100%;
@@ -183,21 +186,19 @@ const AvatarPicker: React.FC<AvatarPickerProps> = ({ selectedStyle, seed, onSele
                     bottom: 0;
                     width: 100%;
                     height: 6px;
-                    opacity: 0.8;
+                    opacity: 0.9;
                 }
                 .style-label {
                     font-size: 11px;
-                    font-weight: 800;
+                    font-weight: 900;
                     text-transform: uppercase;
                     letter-spacing: 1px;
-                    color: #475569;
+                    color: #000;
                 }
                 .selected-avatar-card {
                     position: relative;
                     background: #ffffff;
-                    border: 1px solid #e2e8f0;
                     overflow: hidden;
-                    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05);
                 }
                 .minwenda-pattern-header {
                     position: absolute;
@@ -216,9 +217,10 @@ const AvatarPicker: React.FC<AvatarPickerProps> = ({ selectedStyle, seed, onSele
                     );
                 }
                 .avatar-large {
-                    width: 80px;
-                    height: 80px;
+                    width: 100px;
+                    height: 100px;
                     flex-shrink: 0;
+                    border-radius: 16px;
                 }
                 .avatar-large img {
                     width: 100%;
@@ -228,13 +230,13 @@ const AvatarPicker: React.FC<AvatarPickerProps> = ({ selectedStyle, seed, onSele
                 }
                 .selection-indicator {
                     position: absolute;
-                    top: -6px;
-                    right: -6px;
-                    width: 22px;
-                    height: 22px;
-                    border: 4px solid white;
+                    top: -8px;
+                    right: -8px;
+                    width: 24px;
+                    height: 24px;
+                    border: 3px solid #fff;
                     border-radius: 50%;
-                    box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+                    box-shadow: 0 4px 0 rgba(0,0,0,1);
                 }
             `}</style>
         </div>
@@ -263,12 +265,13 @@ export const AvatarDisplay: React.FC<{
         
         return (
             <div
-                className={`d-flex align-items-center justify-content-center rounded-circle flex-shrink-0 overflow-hidden shadow-sm ${className}`}
+                className={`d-flex align-items-center justify-content-center flex-shrink-0 overflow-hidden shadow-action-sm ${className}`}
                 style={{
                     width: `${size}px`,
                     height: `${size}px`,
-                    border: `2px solid ${config.bgColor}`,
+                    border: `3px solid #000`,
                     backgroundColor: config.bgColor,
+                    borderRadius: '16px',
                     ...style
                 }}
             >
@@ -284,12 +287,13 @@ export const AvatarDisplay: React.FC<{
 
     return (
         <div
-            className={`d-flex align-items-center justify-content-center rounded-circle flex-shrink-0 overflow-hidden shadow-sm ${className}`}
+            className={`d-flex align-items-center justify-content-center flex-shrink-0 overflow-hidden shadow-action-sm ${className}`}
             style={{
                 width: `${size}px`,
                 height: `${size}px`,
-                border: `2px solid ${styleData.themeColor}`,
+                border: `3px solid #000`,
                 backgroundColor: 'white',
+                borderRadius: '16px',
                 ...style
             }}
         >

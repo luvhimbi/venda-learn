@@ -5,7 +5,7 @@ import { auth } from '../../services/firebaseConfig';
 import { onAuthStateChanged } from 'firebase/auth';
 import { Puzzle, Image, Layout, FileText, Gamepad2, Calendar, Bomb } from 'lucide-react';
 import { popupService } from '../../services/popupService';
-import JuicyButton from '../../components/JuicyButton';
+
 
 const GamesDashboard: React.FC = () => {
     const navigate = useNavigate();
@@ -107,18 +107,20 @@ const GamesDashboard: React.FC = () => {
 
     if (!isLoggedIn) {
         return (
-            <div className="min-vh-100 d-flex align-items-center justify-content-center bg-white px-4">
-                <div className="text-center p-5 bg-white rounded-5 shadow-sm" style={{ maxWidth: '500px' }}>
+            <div className="min-vh-100 d-flex align-items-center justify-content-center bg-white px-4 py-5">
+                <div className="brutalist-card bg-white p-4 p-md-5 text-center shadow-action" style={{ maxWidth: '500px' }}>
                     <div className="mb-4 text-warning d-flex justify-content-center">
-                        <Gamepad2 size={80} strokeWidth={1.5} />
+                        <div className="p-4 bg-warning bg-opacity-10 border border-dark border-3 rounded-circle shadow-action-sm">
+                            <Gamepad2 size={60} strokeWidth={2.5} className="text-dark" />
+                        </div>
                     </div>
-                    <h1 className="fw-bold mb-3 ls-tight">Ready to Play?</h1>
-                    <p className="text-muted mb-5">Log in to track your scores, earn XP, and climb the leaderboard while practicing South African languages.</p>
+                    <h1 className="fw-black mb-3 ls-tight text-dark" style={{ fontSize: '2.5rem' }}>READY TO PLAY?</h1>
+                    <p className="fw-bold text-muted mb-5 px-md-4">Log in to track your scores, earn XP, and climb the leaderboard while practicing South African languages.</p>
                     <div className="d-grid gap-3">
-                        <button onClick={() => navigate('/login')} className="btn btn-dark py-3 fw-bold ls-1 rounded-pill">
+                        <button onClick={() => navigate('/login')} className="btn btn-game btn-game-primary py-3 smallest fw-black">
                             LOG IN TO PLAY
                         </button>
-                        <button onClick={() => navigate('/register')} className="btn btn-outline-dark py-3 fw-bold ls-1 rounded-pill">
+                        <button onClick={() => navigate('/register')} className="btn btn-game btn-game-white py-3 smallest fw-black">
                             CREATE ACCOUNT
                         </button>
                     </div>
@@ -130,35 +132,37 @@ const GamesDashboard: React.FC = () => {
     return (
         <div className="min-vh-100 bg-white py-5">
             <div className="container">
-                <div className="text-center mb-5">
-                    <h1 className="fw-bold display-4 text-dark mb-3">Games</h1>
-                    <p className="lead text-muted">Play games to practice and earn XP.</p>
+                <div className="text-center mb-5 mt-4">
+                    <h1 className="fw-black display-3 text-dark mb-0 ls-tight">GAMES</h1>
+                    <p className="fw-bold text-muted uppercase tracking-widest smallest">Practice and earn XP!</p>
                 </div>
 
                 <div className="row g-4 justify-content-center">
                     {shuffledGames.map((game) => (
-                        <div key={game.id} className="col-md-6 col-lg-5">
+                        <div key={game.id} className="col-md-6">
                             <div
-                                className="card border-0 h-100 shadow-sm overflow-hidden game-card"
+                                className="brutalist-card h-100 shadow-action-sm transition-all hover-lift overflow-hidden"
                                 onClick={() => {
                                     if (isLoggedIn) navigate(game.route);
                                     else handleLoginNagger();
                                 }}
-                                style={{ cursor: 'pointer', transition: 'transform 0.2s' }}
+                                style={{ cursor: 'pointer' }}
                             >
-                                <div className="card-body p-0 d-flex flex-column">
+                                <div className="d-flex flex-column h-100">
                                     <div
-                                        className="p-4 d-flex align-items-center justify-content-center text-white"
+                                        className="p-4 d-flex align-items-center justify-content-center text-white border-bottom border-dark border-4"
                                         style={{ background: game.gradient, height: '150px' }}
                                     >
-                                        <span style={{ fontSize: '4rem' }}>{game.icon}</span>
+                                        <span style={{ fontSize: '4rem' }}>
+                                            {game.icon}
+                                        </span>
                                     </div>
                                     <div className="p-4 flex-grow-1 bg-white">
-                                        <h3 className="fw-bold mb-2">{game.title}</h3>
-                                        <p className="text-muted mb-4">{game.description}</p>
-                                        <JuicyButton className="btn btn-juicy-play w-100 rounded-4 fw-bold py-3 shadow-none">
-                                            PLAY NOW <i className="bi bi-arrow-right ms-2"></i>
-                                        </JuicyButton>
+                                        <h3 className="fw-black mb-2 text-dark uppercase ls-1" style={{ fontSize: '1.2rem' }}>{game.title}</h3>
+                                        <p className="small fw-bold text-muted mb-4">{game.description}</p>
+                                        <button className="btn btn-game btn-game-primary w-100 py-3 smallest fw-black">
+                                            PLAY NOW <i className="bi bi-arrow-right ms-2 mt-1"></i>
+                                        </button>
                                     </div>
                                 </div>
                             </div>
@@ -168,26 +172,12 @@ const GamesDashboard: React.FC = () => {
             </div>
 
             <style>{`
-                .game-card:hover {
-                    transform: translateY(-5px);
-                    box-shadow: 0 10px 20px rgba(0,0,0,0.1) !important;
+                .hover-lift:hover {
+                    transform: translate(-4px, -4px);
+                    box-shadow: 10px 10px 0px #000 !important;
                 }
                 
-                .btn-juicy-play {
-                    background-color: #1e293b !important;
-                    color: #fff !important;
-                    border: 2px solid #0f172a !important;
-                    border-bottom: 5px solid #0f172a !important;
-                    transition: all 0.1s ease;
-                    letter-spacing: 1px;
-                    text-transform: uppercase;
-                    font-size: 13px;
-                }
-                
-                .btn-juicy-play:active {
-                    transform: translateY(3px) !important;
-                    border-bottom-width: 2px !important;
-                }
+                .tracking-widest { letter-spacing: 0.2em; }
             `}</style>
         </div>
     );

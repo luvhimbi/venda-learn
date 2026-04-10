@@ -25,7 +25,6 @@ import Stories from "./Pages/Learning/Stories";
 import HistoryList from "./Pages/Records/HistoryList";
 import AddHistory from "./Pages/Admin/AddHistory";
 import HistoryDetail from "./Pages/Records/HistoryDetail";
-import Achievements from "./Pages/Achievements";
 import OfflineBanner from "./components/OfflineBanner";
 import InstallBanner from "./components/InstallBanner.tsx";
 import AdminRoute from "./components/AdminRoute.tsx";
@@ -49,6 +48,7 @@ import WordBomb from "./Pages/Games/WordBomb";
 import AdminWordBomb from "./Pages/Admin/AdminWordBomb";
 import AdminLanguages from "./Pages/Admin/AdminLanguages";
 import AdminPicturePuzzle from "./Pages/Admin/AdminPicturePuzzle";
+import Achievements from "./Pages/Achievements";
 
 import AdminReviews from "./Pages/Admin/AdminReviews";
 import NotFound from "./Pages/NotFound";
@@ -145,7 +145,6 @@ const AppContent: React.FC = () => {
                         <Route path="/courses/:courseId" element={<CourseLessons />} />
                         <Route path="/history/add" element={<AddHistory />} />
                         <Route path="/history/:storyId" element={<HistoryDetail />} />
-                        <Route path="/achievements" element={<Achievements />} />
                         <Route path="/profile" element={<Profile />} />
                         <Route path="/privacy" element={<PrivacyPolicy />} />
                         <Route path="/terms" element={<TermsOfUse />} />
@@ -155,6 +154,7 @@ const AppContent: React.FC = () => {
                         <Route path="/ngano" element={<Stories />} />
                         <Route path="/daily-challenge" element={<DailyChallenge />} />
                         <Route path="/word-bomb" element={<WordBomb />} />
+                        <Route path="/achievements" element={<Achievements />} />
 
                         {/* Protected Admin Routes */}
                         <Route

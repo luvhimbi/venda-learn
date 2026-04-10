@@ -3,7 +3,6 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import Mascot from '../../components/Mascot';
 import JuicyButton from '../../components/JuicyButton';
 import { ArrowRight, Flame, Sparkles, Star } from 'lucide-react';
-import TrophyIcon from '../../components/TrophyIcon';
 
 const Onboarding: React.FC = () => {
     const navigate = useNavigate();
@@ -50,7 +49,7 @@ const Onboarding: React.FC = () => {
                     <div className="floating-badge badge-rank">Rank Up!</div>
 
                     <div className="trophy-showcase">
-                        <TrophyIcon rarity="special" size={100} animate={true} />
+                        <Star size={100} color="#FACC15" fill="#FACC15" />
                     </div>
                 </div>
             )

@@ -45,7 +45,6 @@ const Footer: React.FC = () => {
                         <ul className="list-unstyled d-flex flex-column gap-3 mb-0">
                             <li><Link to="/#faq" className="text-decoration-none text-dark small fw-black text-uppercase hover-yellow transition-all">FAQ</Link></li>
                             <li><Link to="/#contact" className="text-decoration-none text-dark small fw-black text-uppercase hover-yellow transition-all">Contact Us</Link></li>
-                            <li><Link to="/achievements" className="text-decoration-none text-dark small fw-black text-uppercase hover-yellow transition-all">Community</Link></li>
                         </ul>
                     </div>
 

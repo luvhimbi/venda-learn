@@ -20,75 +20,65 @@ const AchievementCard: React.FC<AchievementCardProps> = ({
     onShare
 }) => {
     
-    // Determine rarity color for the shadow/glow
-    const rarityColors = {
-        bronze: 'rgba(205, 127, 50, 0.1)',
-        silver: 'rgba(148, 163, 184, 0.1)',
-        gold: 'rgba(250, 204, 21, 0.1)',
-        special: 'rgba(139, 92, 246, 0.1)'
-    };
-
-    const glowColor = isEarned ? (rarityColors[rarity] || 'rgba(0,0,0,0.05)') : 'transparent';
-
     return (
         <div 
-            className={`achievement-card h-100 rounded-4 transition-all p-3 ${isEarned ? 'earned' : 'locked'}`}
+            className={`achievement-card h-100 brutalist-card transition-all p-3 ${isEarned ? 'earned' : 'locked'}`}
             style={{ 
-                backgroundColor: isEarned ? 'white' : '#fcfcfc',
-                border: isEarned ? `1px solid ${color}40` : '1px dashed #e2e8f0',
-                boxShadow: isEarned ? `0 10px 20px -5px ${glowColor}` : 'none'
+                backgroundColor: isEarned ? 'white' : '#f3f4f6',
+                borderWidth: '3px',
+                borderColor: isEarned ? '#000' : '#9ca3af',
+                boxShadow: isEarned ? '6px 6px 0px #000' : 'none',
+                opacity: isEarned ? 1 : 0.6
             }}
         >
             <div className="d-flex flex-column align-items-center text-center">
-                <div className="mb-4 position-relative">
+                <div className="mb-3 position-relative">
                     <TrophyIcon 
                         rarity={rarity} 
-                        size={80} 
+                        size={70} 
                         color={color}
                         animate={isEarned}
                     />
                     {isEarned && (
                         <div 
-                            className="position-absolute bg-success rounded-circle d-flex align-items-center justify-content-center border border-white"
-                            style={{ width: 24, height: 24, bottom: 0, right: -5 }}
+                            className="position-absolute bg-success rounded-circle d-flex align-items-center justify-content-center border border-dark border-2 shadow-sm"
+                            style={{ width: 22, height: 22, bottom: -2, right: -2, zIndex: 1 }}
                         >
-                            <i className="bi bi-check text-white fw-bold"></i>
+                            <i className="bi bi-check text-white fw-bold" style={{ fontSize: '12px' }}></i>
                         </div>
                     )}
                     {isEarned && onShare && (
                         <button 
                             onClick={(e) => { e.stopPropagation(); onShare(id); }}
-                            className="position-absolute btn btn-warning rounded-circle d-flex align-items-center justify-content-center border border-white shadow-sm share-badge transition-all"
-                            style={{ width: 32, height: 32, top: -10, right: -15, zIndex: 5 }}
-                            title="Share Achievement"
+                            className="position-absolute btn-game-white rounded-circle d-flex align-items-center justify-content-center border border-dark border-2 shadow-action-sm share-badge transition-all"
+                            style={{ width: 32, height: 32, top: -8, right: -12, zIndex: 5 }}
+                            title="Share"
                         >
-                            <i className="bi bi-share-fill smallest text-dark"></i>
+                            <i className="bi bi-share-fill text-dark" style={{ fontSize: '12px' }}></i>
                         </button>
                     )}
                 </div>
 
-
+                <h6 className="fw-black text-dark uppercase ls-1 mb-2" style={{ fontSize: '0.85rem' }}>{id.replace(/_/g, ' ')}</h6>
 
                 {!isEarned && progress > 0 && (
-                    <div className="w-100 mt-auto">
-                        <div className="d-flex justify-content-between mb-2">
-                            <span className="smallest fw-bold text-muted ls-1 uppercase">Progress</span>
-                            <span className="smallest fw-bold text-dark">{progress}%</span>
+                    <div className="w-100 mt-2 px-1">
+                        <div className="d-flex justify-content-between mb-1">
+                            <span className="smallest fw-black text-muted uppercase ls-1" style={{ fontSize: '8px' }}>PROGRESS</span>
+                            <span className="smallest fw-black text-dark" style={{ fontSize: '8px' }}>{progress}%</span>
                         </div>
-                        <div className="progress overflow-hidden" style={{ height: '6px', backgroundColor: '#e2e8f0', borderRadius: '10px' }}>
+                        <div className="progress border border-dark border-1 shadow-none" style={{ height: '8px', backgroundColor: '#e5e7eb', borderRadius: '4px' }}>
                             <div 
                                 className="progress-bar" 
-                                style={{ width: `${progress}%`, backgroundColor: color, borderRadius: '10px' }}
+                                style={{ width: `${progress}%`, backgroundColor: color, borderRadius: '0px' }}
                             ></div>
                         </div>
                     </div>
                 )}
 
                 {!isEarned && progress === 0 && (
-                    <div className="mt-auto">
-                        <span className="badge bg-light text-muted border border-light-subtle rounded-pill smallest px-3 py-2 fw-bold ls-1">
-                            <i className="bi bi-lock-fill me-1"></i> LOCKED
-                        </span>
+                    <div className="mt-1">
+                        <span className="smallest fw-black text-muted uppercase ls-2 opacity-50">LOCKED</span>
                     </div>
                 )}
             </div>
@@ -98,33 +88,15 @@ const AchievementCard: React.FC<AchievementCardProps> = ({
                     cursor: default;
                 }
                 .achievement-card.earned:hover {
-                    background-color: white !important;
-                    transform: translateY(-8px);
-                    box-shadow: 0 30px 60px -12px ${glowColor} !important;
-                    border-color: ${color} !important;
-                }
-                .achievement-card.locked {
-                    filter: grayscale(1);
-                    opacity: 0.5;
-                    border-style: solid;
-                    border-color: #f1f5f9;
-                }
-                .achievement-card.locked:hover {
-                    filter: grayscale(0.5);
-                    opacity: 0.8;
-                    background-color: #fff !important;
-                    border-color: #e2e8f0;
+                    transform: translate(-2px, -2px);
+                    box-shadow: 8px 8px 0px #000 !important;
                 }
                 .share-badge:hover {
-                    transform: scale(1.1);
-                    background-color: #111827 !important;
-                }
-                .share-badge:hover i {
-                    color: #FACC15 !important;
+                    transform: scale(1.1) rotate(15deg);
+                    background-color: #FACC15 !important;
                 }
                 .smallest { font-size: 11px; }
                 .ls-1 { letter-spacing: 1px; }
-                .ls-tight { letter-spacing: -0.5px; }
                 .uppercase { text-transform: uppercase; }
             `}</style>
         </div>

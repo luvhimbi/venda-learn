@@ -96,79 +96,74 @@ const ShareStreakModal: React.FC<ShareStreakModalProps> = ({ isOpen, onClose, us
     };
 
     return (
-        <div className="modal-overlay d-flex align-items-center justify-content-center" onClick={onClose} style={{ zIndex: 9999 }}>
-            <div className="modal-content-wrapper rounded-4 bg-white p-4 shadow-lg position-relative" style={{ maxWidth: '400px', width: '90%' }} onClick={e => e.stopPropagation()}>
-                <button onClick={onClose} className="btn-close-modal border-0 bg-light text-muted rounded-circle position-absolute top-0 end-0 m-3 d-flex align-items-center justify-content-center transition-all" style={{ width: 32, height: 32 }}>
-                    <X size={18} />
+        <div className="modal-overlay d-flex align-items-center justify-content-center p-3" onClick={onClose} style={{ zIndex: 9999 }}>
+            <div className="brutalist-card bg-white p-3 p-md-4 shadow-action position-relative w-100" style={{ maxWidth: '340px' }} onClick={e => e.stopPropagation()}>
+                <button onClick={onClose} className="btn-game-white rounded-circle position-absolute top-0 end-0 m-2 d-flex align-items-center justify-content-center transition-all border border-dark border-2" style={{ width: 32, height: 32 }}>
+                    <X size={16} strokeWidth={3} />
                 </button>
 
-                <div className="text-center mb-4">
-                    <h5 className="fw-bold text-dark ls-tight mb-1">Flex Your Streak</h5>
-                    <p className="small text-muted mb-0">Share your persistence with the world!</p>
+                <div className="text-center mb-3">
+                    <h5 className="fw-black text-dark uppercase ls-tight mb-1" style={{ fontSize: '1.25rem' }}>Flex Your Streak</h5>
+                    <p className="smallest fw-bold text-muted uppercase ls-1 mb-0">Share your persistence!</p>
                 </div>
 
                 {/* THE CARD TO BE SNAPSHOTTED */}
                 <div
                     ref={cardRef}
-                    className="share-card-container position-relative overflow-hidden rounded-4 shadow-sm mb-4"
-                    style={{ background: 'linear-gradient(135deg, #ef4444 0%, #7f1d1d 100%)', color: 'white', padding: '24px 16px' }}
+                    className="share-card-container position-relative overflow-hidden border border-dark border-3 rounded-3 mb-3 shadow-sm"
+                    style={{ background: '#000', color: 'white', padding: '20px 14px' }}
                 >
-                    {/* Background Accents */}
-                    <div className="position-absolute rounded-circle" style={{ width: 250, height: 250, background: 'radial-gradient(circle, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0) 70%)', top: '-80px', right: '-50px' }}></div>
-                    <div className="position-absolute rounded-circle" style={{ width: 300, height: 300, background: 'radial-gradient(circle, rgba(255, 255, 255, 0.03) 0%, rgba(255, 255, 255, 0) 70%)', bottom: '-100px', left: '-100px' }}></div>
+                    {/* Background Accents (Brutalist style) */}
+                    <div className="position-absolute" style={{ top: -20, right: -20, width: 100, height: 100, border: '15px solid rgba(255,255,255,0.05)', borderRadius: '50%' }}></div>
 
                     {/* Download Icon (Top-Left) */}
                     <button
                         onClick={(e) => { e.stopPropagation(); handleManualDownload(); }}
-                        className="position-absolute top-0 start-0 m-3 btn btn-white bg-white rounded-circle shadow-sm d-flex align-items-center justify-content-center z-2 p-0"
-                        style={{ width: '32px', height: '32px', border: 'none' }}
-                        title="Download Image"
+                        className="position-absolute top-0 start-0 m-2 btn-game-white rounded-circle d-flex align-items-center justify-content-center z-2 p-0 border border-dark border-2"
+                        style={{ width: '28px', height: '28px' }}
+                        title="Download"
                         disabled={isDownloading}
                     >
-                        <i className={`bi bi-download text-danger ${isDownloading ? 'opacity-50' : ''}`} style={{ fontSize: '14px' }}></i>
+                        <i className={`bi bi-download text-dark ${isDownloading ? 'opacity-50' : ''}`} style={{ fontSize: '12px' }}></i>
                     </button>
 
                     <div className="position-relative z-1 d-flex flex-column align-items-center text-center">
-                        {/* Logo / Header */}
-                        <div className="d-flex align-items-center justify-content-center mb-3">
-                            <div className="bg-white p-2 rounded-3 shadow-sm d-inline-block">
-                                <img src="/images/Logo.png" alt="Language Platform" height="24" className="object-fit-contain" />
-                            </div>
+                        {/* Logo */}
+                        <div className="bg-white p-1.5 px-3 border border-dark border-2 rounded-2 mb-3 shadow-none">
+                            <img src="/images/Logo.png" alt="Logo" height="18" className="object-fit-contain" />
                         </div>
 
                         {/* Fire Icon */}
                         <div className="mb-1">
-                            <Flame size={56} className="text-warning" fill="#facc15" strokeWidth={1.5} style={{ filter: 'drop-shadow(0 0 15px rgba(250,204,21,0.5))' }} />
+                            <Flame size={48} className="text-warning" fill="#facc15" strokeWidth={2.5} />
                         </div>
 
-                        <h1 className="fw-bold mb-0 text-white" style={{ fontSize: '3.5rem', lineHeight: '1', letterSpacing: '-2px', textShadow: '0 2px 10px rgba(0,0,0,0.3)' }}>
+                        <h1 className="fw-black mb-0 text-white ls-tight" style={{ fontSize: '3rem' }}>
                             {userData.streak || 0}
                         </h1>
-                        <h4 className="fw-bold text-white-50 text-uppercase ls-2 mb-3" style={{ letterSpacing: '4px', fontSize: '1rem' }}>DAY STREAK</h4>
+                        <h4 className="fw-black text-warning uppercase ls-2 mb-3" style={{ fontSize: '0.9rem' }}>DAY STREAK</h4>
 
-                        <div className="d-flex align-items-center gap-3 bg-white bg-opacity-10 shadow-sm p-2 rounded-4 w-100 justify-content-between mb-3 border border-white border-opacity-10 backdrop-blur-sm">
-                            <div className="d-flex align-items-center gap-3">
-                                <div className="bg-white rounded-circle p-1 shadow-sm" style={{ width: 44, height: 44 }}>
-                                    <AvatarDisplay avatarId={userData.avatarId || 'adventurer'} seed={userData.username} size={36} />
+                        <div className="d-flex align-items-center gap-2 bg-white bg-opacity-10 border border-white border-opacity-20 p-2 rounded-3 w-100 justify-content-between mb-3">
+                            <div className="d-flex align-items-center gap-2">
+                                <div className="bg-white rounded-circle p-0.5 border border-dark border-1" style={{ width: 36, height: 36 }}>
+                                    <AvatarDisplay avatarId={userData.avatarId || 'adventurer'} seed={userData.username} size={30} />
                                 </div>
                                 <div className="text-start">
-                                    <p className="mb-0 fw-bold">{userData.username?.split(' ')[0]}</p>
-                                    <p className="smallest text-white-50 mb-0 ls-1 text-uppercase">Scholar</p>
+                                    <p className="mb-0 fw-black smallest uppercase ls-1 text-white">{userData.username?.split(' ')[0]}</p>
+                                    <p className="mb-0 text-white-50" style={{ fontSize: '8px' }}>SCHOLAR</p>
                                 </div>
                             </div>
-                            <div className="text-end pe-1">
-                                <p className="mb-0 fw-bold text-warning d-flex align-items-center gap-1 justify-content-end">
-                                    {userData.points || 0} <span className="smallest text-white-50">XP</span>
+                            <div className="text-end">
+                                <p className="mb-0 fw-black text-warning smallest ls-1">
+                                    {userData.points || 0} XP
                                 </p>
                             </div>
                         </div>
 
-                        {/* Badges / QR Area */}
-                        <div className="d-flex align-items-center justify-content-center w-100 mt-1">
-                            <div className="bg-white p-2 text-center shadow" style={{ borderRadius: '12px' }}>
-                                <QRCodeSVG value={inviteLink} size={52} level="M" includeMargin={false} />
-                                <p className="mb-0 text-dark fw-bold" style={{ fontSize: '7.5px', marginTop: '6px', letterSpacing: '1px' }}>SCAN TO JOIN</p>
-                            </div>
+                        {/* QR Area */}
+                        <div className="bg-white p-1.5 border border-dark border-2 rounded-2 text-center">
+                            <QRCodeSVG value={inviteLink} size={44} level="M" />
+                            <p className="mb-0 text-dark fw-black" style={{ fontSize: '6.5px', marginTop: '4px', letterSpacing: '0.5px' }}>SCAN TO JOIN</p>
                         </div>
                     </div>
                 </div>
@@ -178,21 +173,20 @@ const ShareStreakModal: React.FC<ShareStreakModalProps> = ({ isOpen, onClose, us
                     <button
                         onClick={handleShareImage}
                         disabled={isDownloading}
-                        className="btn w-100 py-3 rounded-3 fw-bold ls-1 d-flex align-items-center justify-content-center gap-2 transition-all hover-lift shadow-sm"
-                        style={{ backgroundColor: '#FACC15', border: 'none', color: '#111827' }}
+                        className="btn btn-game btn-game-primary w-100 py-2.5 shadow-action-sm"
                     >
                         {isDownloading ? (
                             <span className="spinner-border spinner-border-sm"></span>
                         ) : (
-                            <><Share2 size={18} /> SHARE TO SOCIALS</>
+                            <><Share2 size={16} /> SHARE TO SOCIALS</>
                         )}
                     </button>
 
                     <button
                         onClick={handleCopyLink}
-                        className={`btn ${isCopied ? 'btn-success' : 'btn-outline-dark'} w-100 py-3 rounded-3 fw-bold ls-1 d-flex align-items-center justify-content-center gap-2 transition-all`}
+                        className={`btn btn-game ${isCopied ? 'bg-success text-white' : 'btn-game-white'} w-100 py-2.5 shadow-action-sm`}
                     >
-                        {isCopied ? <><Check size={18} /> COPIED!</> : <><Copy size={18} /> COPY INVITE LINK</>}
+                        {isCopied ? <><Check size={16} /> COPIED!</> : <><Copy size={16} /> COPY INVITE LINK</>}
                     </button>
                 </div>
             </div>
