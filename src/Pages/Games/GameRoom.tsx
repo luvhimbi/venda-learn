@@ -16,14 +16,13 @@ import Mascot, { type MascotMood } from '../../components/Mascot';
 import { useVisualJuice } from '../../hooks/useVisualJuice';
 import { updateStreak } from '../../services/streakUtils';
 import { popupService } from '../../services/popupService';
-import { Trophy, HelpCircle, X, Bookmark, CheckCircle2, Volume2, Play, Flame, Zap, Users, Circle } from 'lucide-react';
+import { HelpCircle, X, Bookmark, CheckCircle2, Volume2, Play, Flame, Zap, Users, Circle } from 'lucide-react';
 import { db, auth } from '../../services/firebaseConfig';
 import { doc, updateDoc, arrayUnion, increment } from 'firebase/firestore';
 import { onAuthStateChanged } from 'firebase/auth';
 import { getCurrentWeekIdentifier } from "../../services/levelUtils.ts";
 import { type Difficulty } from "../../services/scoringUtils.ts";
 import { fetchLessons, fetchUserData, refreshUserData, invalidateCache, getMicroLessons } from '../../services/dataCache';
-import { checkAchievements, awardTrophies } from '../../services/achievementService';
 import Swal from 'sweetalert2';
 
 const MASCOT_CHEERS = [
@@ -196,30 +195,6 @@ const GameRoom: React.FC = () => {
                     }, 1300);
                 }
 
-                const newTrophies = checkAchievements(
-                    {
-                        ...currentData,
-                        points: (currentData.points || 0) + finalScore,
-                        completedLessons: [...(currentData.completedLessons || []), mlId]
-                    },
-                    currentData.trophies || []
-                );
-                if (newTrophies.length > 0) {
-                    await awardTrophies(auth.currentUser.uid, newTrophies.map(t => t.id));
-                    setTimeout(() => {
-                        const first = newTrophies[0];
-                        Swal.fire({
-                            title: 'Trophy Unlocked!',
-                            text: `New Achievement: ${first.title}!`,
-                            icon: 'success',
-                            imageUrl: 'https://cdn-icons-png.flaticon.com/512/3112/3112946.png',
-                            imageWidth: 80,
-                            confirmButtonColor: '#FACC15',
-                            confirmButtonText: 'Awesome!',
-                            customClass: { popup: 'rounded-4' }
-                        });
-                    }, 1000);
-                }
                 if (isFirstTime) {
                     popupService.innerSuccess(
                         'Quiz Finished!',
@@ -427,31 +402,29 @@ const GameRoom: React.FC = () => {
         const modeLabel = gameState === 'STUDY' ? 'STUDY' : (gameState === 'QUIZ' ? 'QUIZ' : 'COMPLETE');
 
         return (
-            <div className="bg-white px-3 pt-3 pb-2 sticky-top border-bottom" style={{ zIndex: 1000 }}>
-                <div className="container" style={{ maxWidth: '600px' }}>
-                    <div className="d-flex justify-content-end align-items-center mb-2">
-                        <div className="d-flex align-items-center gap-3">
-                            <div className="d-flex align-items-center gap-2 bg-light px-3 py-1 rounded-pill">
-                                <Trophy size={14} className="text-warning" />
-                                <span className="smallest fw-bold" style={{ color: '#111827' }}>{userData?.points || 0} XP</span>
-                            </div>
-                            <button className="btn p-0 border-0" onClick={() => setShowExitModal(true)}>
-                                <X size={20} className="text-secondary" />
-                            </button>
+            <div className="bg-white px-3 pt-3 pb-3 sticky-top border-bottom border-dark border-3" style={{ zIndex: 1000 }}>
+                <div className="container" style={{ maxWidth: '650px' }}>
+                    <div className="d-flex justify-content-between align-items-center mb-3">
+                        <div className="d-flex align-items-center gap-2 bg-warning border border-dark border-2 px-3 py-1 rounded-pill shadow-action-sm">
+                            <Zap size={16} className="text-dark" />
+                            <span className="smallest fw-black uppercase ls-1" style={{ color: '#000' }}>{userData?.points || 0} XP</span>
                         </div>
+                        <button className="btn p-0 btn-game-white brutalist-card--sm rounded-circle d-flex align-items-center justify-content-center" onClick={() => setShowExitModal(true)} style={{ width: 36, height: 36 }}>
+                            <X size={20} className="text-dark" />
+                        </button>
                     </div>
-                    <div className="d-flex flex-column gap-1">
-                        <div className="progress" style={{ height: '4px', borderRadius: 10, backgroundColor: 'rgba(0,0,0,.05)' }}>
-                            <div className="progress-bar" style={{ width: `${progress}%`, backgroundColor: '#FACC15', transition: '0.6s cubic-bezier(0.34, 1.56, 0.64, 1)', borderRadius: 10 }}></div>
+                    <div className="d-flex flex-column gap-2">
+                        <div className="progress brutalist-card--sm p-0 overflow-hidden" style={{ height: '12px', borderRadius: 20, backgroundColor: '#eee', border: '3px solid #000' }}>
+                            <div className="progress-bar" style={{ width: `${progress}%`, backgroundColor: '#FACC15', transition: '0.6s cubic-bezier(0.34, 1.56, 0.64, 1)' }}></div>
                         </div>
-                        <div className="d-flex justify-content-between mt-1">
-                            <span className="smallest fw-bold text-muted ls-1">{modeLabel}</span>
+                        <div className="d-flex justify-content-between align-items-center">
+                            <span className="smallest fw-black text-dark uppercase ls-1">{modeLabel}</span>
                             {gameState === 'STUDY' ? (
-                                <button className="btn btn-link p-0 text-decoration-none smallest fw-bold text-success ls-1" onClick={() => saveStateToStorage(true)}>
-                                    {showSavedHint ? 'SAVED!' : 'SAVE PROGRESS'}
+                                <button className="btn btn-link p-0 text-decoration-none smallest fw-black text-success uppercase ls-1" onClick={() => saveStateToStorage(true)}>
+                                    {showSavedHint ? 'PROGRESS SAVED!' : 'SAVE SESSION'}
                                 </button>
                             ) : (
-                                <span className="smallest fw-bold text-warning ls-1">{streak > 1 ? `🔥 ${streak} STREAK` : ''}</span>
+                                <span className="smallest fw-black text-danger uppercase ls-1">{streak > 1 ? `🔥 ${streak} STREAK` : ''}</span>
                             )}
                         </div>
                     </div>
@@ -474,67 +447,67 @@ const GameRoom: React.FC = () => {
                             <div key={currentSlide} className="animate__animated animate__fadeIn animate__faster px-2">
                                 
                                 {/* Main Lesson Card */}
-                                <div className="bg-white rounded-5 shadow-sm border border-light p-4 p-md-5 w-100 position-relative" style={{ overflow: 'hidden' }}>
+                                <div className="brutalist-card p-4 p-md-5 w-100 position-relative shadow-action" style={{ overflow: 'hidden' }}>
                                     
                                     {/* Mascot Tutoring */}
-                                    <div className="d-flex align-items-start gap-3 mb-5 mt-2">
-                                        <Mascot width="60px" height="60px" mood={mascotMood} />
-                                        <div className="bg-light p-3 rounded-4 position-relative" style={{ fontSize: '0.9rem', color: '#111827' }}>
-                                            <div className="position-absolute" style={{ width: 12, height: 12, backgroundColor: '#f8f9fa', top: 15, left: -6, transform: 'rotate(45deg)' }}></div>
-                                            <strong>Tip:</strong> {currentSlide === 0 ? "Let's start with basic greetings!" : "You're doing great, keep going!"}
+                                    <div className="d-flex align-items-start gap-4 mb-5 mt-2">
+                                        <Mascot width="70px" height="70px" mood={mascotMood} />
+                                        <div className="bg-warning brutalist-card--sm p-3 rounded-4 position-relative shadow-action-sm" style={{ fontSize: '0.95rem', color: '#000' }}>
+                                            <div className="position-absolute border-start border-top border-dark border-3" style={{ width: 14, height: 14, backgroundColor: '#FACC15', top: 15, left: -9, transform: 'rotate(-45deg)' }}></div>
+                                            <strong className="fw-black uppercase ls-1 d-block mb-1">Tip:</strong> {currentSlide === 0 ? "Let's start with basic greetings!" : "You're doing great, keep going!"}
                                         </div>
                                     </div>
 
                                     {/* Section 1: Phrase Display */}
                                     <div className="text-center mb-5">
-                                        <h1 className="fw-900 mb-2" style={{ fontSize: 'clamp(2.5rem, 10vw, 4.5rem)', color: '#111827', letterSpacing: '-2px' }}>{slide.venda}</h1>
-                                        <h4 className="text-secondary fw-bold mb-0" style={{ opacity: 0.6 }}>{slide.english}</h4>
+                                        <h1 className="fw-black mb-1 text-dark ls-tight uppercase" style={{ fontSize: 'clamp(2rem, 8vw, 4rem)' }}>{slide.venda}</h1>
+                                        <h4 className="text-muted fw-black uppercase ls-1" style={{ fontSize: '1.25rem' }}>{slide.english}</h4>
                                     </div>
 
                                     {/* Section 2: Audio Interaction */}
                                     <div className="text-center mb-5">
-                                        <div className="d-flex flex-column align-items-center gap-3">
-                                            <div className="d-flex align-items-center gap-3">
-                                                <button className="btn rounded-circle d-flex align-items-center justify-content-center shadow-lg hover-scale" 
+                                        <div className="d-flex flex-column align-items-center gap-4">
+                                            <div className="d-flex align-items-center gap-4">
+                                                <button className="btn rounded-circle d-flex align-items-center justify-content-center shadow-action-light hover-scale" 
                                                     onClick={() => speakVenda(slide.venda)}
-                                                    style={{ width: 64, height: 64, backgroundColor: isPlayingAudio ? '#FACC15' : '#111827', border: 'none', transition: 'all 0.3s' }}>
-                                                    <Play size={24} fill={isPlayingAudio ? '#111827' : '#FFFFFF'} className={isPlayingAudio ? 'text-dark' : 'text-white'} />
+                                                    style={{ width: 80, height: 80, backgroundColor: isPlayingAudio ? '#FACC15' : '#111827', border: '5px solid #000', transition: 'all 0.1s' }}>
+                                                    <Play size={32} fill={isPlayingAudio ? '#000' : '#FFFFFF'} className={isPlayingAudio ? 'text-dark' : 'text-white'} />
                                                 </button>
-                                                <button className="btn bg-light rounded-circle shadow-sm d-flex align-items-center justify-content-center hover-scale" 
+                                                <button className="btn bg-white brutalist-card--sm rounded-circle d-flex align-items-center justify-content-center hover-scale" 
                                                     onClick={() => speakVenda(slide.venda)}
-                                                    style={{ width: 42, height: 42, border: 'none' }}>
-                                                    <span className="fw-bold text-dark" style={{ fontSize: '10px' }}>0.5x</span>
+                                                    style={{ width: 50, height: 50 }}>
+                                                    <span className="fw-black text-dark uppercase ls-1" style={{ fontSize: '11px' }}>0.5x</span>
                                                 </button>
                                             </div>
-                                            <span className="smallest fw-bold text-muted ls-2 text-uppercase">Listen to pronunciation</span>
+                                            <span className="smallest fw-black text-muted ls-2 text-uppercase">Tap to hear pronunciation</span>
                                         </div>
                                     </div>
 
                                     <div className="hr-fade mb-5"></div>
 
                                     {/* Section 3: Usage Explanation */}
-                                    <div className="mb-5 px-md-4">
-                                        <p className="smallest fw-bold text-muted ls-2 mb-4 text-uppercase d-flex align-items-center gap-2">
-                                            <HelpCircle size={14} className="text-warning" /> USAGE EXPLAINER
+                                    <div className="mb-2 px-md-4">
+                                        <p className="smallest fw-black text-dark ls-2 mb-4 text-uppercase d-flex align-items-center gap-2">
+                                            <HelpCircle size={16} className="text-warning" /> USAGE CONTEXT
                                         </p>
                                         <div className="d-flex flex-column gap-4">
                                             {slide.context.split('. ').map((point: string, idx: number) => {
                                                 if (!point.trim()) return null;
                                                 const isGenderSpecific = point.toLowerCase().includes('men') || point.toLowerCase().includes('women');
                                                 return (
-                                                    <div key={idx} className="d-flex align-items-start gap-3">
+                                                    <div key={idx} className="d-flex align-items-start gap-3 p-3 bg-light brutalist-card--sm border-dark border-2 rounded-4">
                                                         <div className="mt-1">
                                                             {isGenderSpecific ? (
-                                                                <div className="rounded-pill bg-warning-subtle p-2 d-flex align-items-center justify-content-center" style={{ width: 32, height: 32 }}>
-                                                                    <Users size={16} className="text-warning" />
+                                                                <div className="rounded-circle bg-warning border border-dark border-2 p-2 d-flex align-items-center justify-content-center" style={{ width: 36, height: 36 }}>
+                                                                    <Users size={18} className="text-dark" />
                                                                 </div>
                                                             ) : (
-                                                                <div className="rounded-pill bg-blue-subtle p-2 d-flex align-items-center justify-content-center" style={{ width: 32, height: 32 }}>
-                                                                    <Circle size={10} fill="currentColor" className="text-primary" />
+                                                                <div className="rounded-circle bg-white border border-dark border-2 p-2 d-flex align-items-center justify-content-center" style={{ width: 36, height: 36 }}>
+                                                                    <Circle size={12} fill="#000" className="text-dark" />
                                                                 </div>
                                                             )}
                                                         </div>
-                                                        <p className="mb-0 text-dark-emphasis" style={{ lineHeight: 1.6, fontSize: '1.05rem' }}>{point.endsWith('.') ? point : point + '.'}</p>
+                                                        <p className="mb-0 text-dark fw-bold uppercase ls-1" style={{ lineHeight: 1.4, fontSize: '0.9rem' }}>{point.endsWith('.') ? point : point + '.'}</p>
                                                     </div>
                                                 );
                                             })}
@@ -547,26 +520,23 @@ const GameRoom: React.FC = () => {
                     </div>
 
                     {/* Navigation Controls */}
-                    <div className="bg-white px-4 py-3 border-top pb-5">
-                        <div className="container" style={{ maxWidth: '600px' }}>
+                    <div className="bg-white px-4 py-4 border-top border-dark border-3 pb-5">
+                        <div className="container" style={{ maxWidth: '650px' }}>
                             <div className="d-flex gap-3">
-                                <button className="btn border-2 py-1.5 px-3 rounded-4 d-flex flex-column align-items-center justify-content-center flex-grow-1"
+                                <button className="btn btn-game btn-game-white px-3 fw-black ls-1 flex-grow-1"
                                     disabled={currentSlide === 0}
-                                    onClick={() => { setAudioUrl(null); const prev = currentSlide - 1; setCurrentSlide(prev); saveProgress(prev, 'STUDY'); }}
-                                    style={{ borderColor: '#E5E7EB', color: '#6B7280', minHeight: '44px' }}>
-                                    <span className="fw-900 ls-1" style={{ fontSize: '0.75rem' }}>BACK</span>
-                                    <span className="smallest opacity-50 fw-bold" style={{ fontSize: '8px' }}>BACK</span>
+                                    onClick={() => { setAudioUrl(null); const prev = currentSlide - 1; setCurrentSlide(prev); saveProgress(prev, 'STUDY'); }}>
+                                    BACK
                                 </button>
                                 {!isLastSlide ? (
-                                    <button className="btn game-btn-primary py-1.5 px-3 d-flex flex-column align-items-center justify-content-center flex-grow-2"
+                                    <button className="btn btn-game btn-game-primary px-3 fw-black ls-1 flex-grow-2"
                                         onClick={() => { setAudioUrl(null); const next = currentSlide + 1; setCurrentSlide(next); saveProgress(next, 'STUDY'); }}
-                                        style={{ backgroundColor: '#FACC15', border: 'none', borderRadius: '12px', boxShadow: '0 3px 0 #EAB308', flex: 2, minHeight: '44px' }}>
-                                        <span className="fw-900 ls-1" style={{ fontSize: '0.85rem' }}>NEXT</span>
-                                        <span className="smallest opacity-70 fw-900" style={{ fontSize: '8px' }}>NEXT</span>
+                                        style={{ flex: 2 }}>
+                                        NEXT SLIDE
                                     </button>
                                 ) : (
-                                    <button className="btn py-1.5 px-3 d-flex flex-column align-items-center justify-content-center text-white flex-grow-2"
-                                        style={{ background: '#111827', borderRadius: '12px', boxShadow: '0 3px 0 #000', flex: 2, minHeight: '44px' }}
+                                    <button className="btn btn-game btn-game-dark px-3 fw-black ls-1 flex-grow-2 shadow-action-light"
+                                        style={{ flex: 2 }}
                                         onClick={() => {
                                             if (lesson.questions && lesson.questions.length > 0) {
                                                 send({ type: 'START_QUIZ' });
@@ -576,8 +546,7 @@ const GameRoom: React.FC = () => {
                                                 setMascotMood('excited');
                                             }
                                         }}>
-                                        <span className="fw-900 ls-1" style={{ fontSize: '0.85rem' }}>{lesson.questions?.length > 0 ? 'START QUIZ' : 'FINISH LESSON'}</span>
-                                        <span className="smallest opacity-50 fw-bold" style={{ fontSize: '8px' }}>{lesson.questions?.length > 0 ? "LET'S PLAY" : "WELL DONE"}</span>
+                                        {lesson.questions?.length > 0 ? 'START QUIZ' : 'FINISH LESSON'}
                                     </button>
                                 )}
                             </div>
@@ -632,13 +601,13 @@ const GameRoom: React.FC = () => {
             };
 
             const typeLabel: Record<string, { label: string, icon: any }> = {
-                'multiple-choice': { label: 'MULTIPLE CHOICE', icon: <Bookmark size={12} /> },
-                'true-false': { label: 'TRUE OR FALSE', icon: <CheckCircle2 size={12} /> },
-                'fill-in-the-blank': { label: 'FILL IN THE BLANK', icon: <HelpCircle size={12} /> },
-                'match-pairs': { label: 'MATCH PAIRS', icon: <Users size={12} /> },
-                'listen-and-choose': { label: 'LISTEN & CHOOSE', icon: <Volume2 size={12} /> },
+                'multiple-choice': { label: 'CHOOSE CORRECT', icon: <Bookmark size={14} /> },
+                'true-false': { label: 'TRUE OR FALSE', icon: <CheckCircle2 size={14} /> },
+                'fill-in-the-blank': { label: 'COMPLETE SENTENCE', icon: <HelpCircle size={14} /> },
+                'match-pairs': { label: 'MATCH PHRASES', icon: <Users size={14} /> },
+                'listen-and-choose': { label: 'LISTEN & SELECT', icon: <Volume2 size={14} /> },
             };
-            const currentLabel = typeLabel[q.type] || { label: 'QUESTION', icon: <HelpCircle size={12} /> };
+            const currentLabel = typeLabel[q.type] || { label: 'CHALLENGE', icon: <HelpCircle size={14} /> };
 
             return (
                 <div className="min-vh-100 d-flex flex-column" style={{ background: '#FFFFFF' }}>
@@ -651,22 +620,22 @@ const GameRoom: React.FC = () => {
                         </div>
                     )}
                     <div className="flex-grow-1 overflow-auto bg-light">
-                        <div className="container py-4" style={{ maxWidth: '600px' }}>
+                        <div className="container py-4" style={{ maxWidth: '650px' }}>
                             <div className="animate__animated animate__fadeIn px-2">
-                                <div className="bg-white rounded-5 shadow-sm border border-light p-4 p-md-5 w-100 text-center">
+                                <div className="brutalist-card p-4 p-md-5 w-100 text-center shadow-action">
                                     <div className="d-flex justify-content-center mb-4">
-                                        <span className="badge rounded-pill bg-light text-dark border smallest d-flex align-items-center gap-2 py-2 px-3">
+                                        <span className="badge brutalist-card--sm bg-white text-dark border-dark border-2 p-3 smallest fw-black uppercase ls-1 d-flex align-items-center gap-2">
                                             {currentLabel.icon} {currentLabel.label}
                                         </span>
                                     </div>
 
                                     <div className="mb-4">
-                                        <Mascot width="80px" height="80px" mood={mascotMood} />
+                                        <Mascot width="100px" height="100px" mood={mascotMood} />
                                     </div>
 
-                                    <h2 className="fw-900 text-dark mb-5 ls-tight" style={{ fontSize: 'clamp(1.5rem, 5vw, 2.25rem)' }}>{q.question}</h2>
+                                    <h2 className="fw-black text-dark mb-5 ls-tight uppercase" style={{ fontSize: 'clamp(1.5rem, 5vw, 2.5rem)' }}>{q.question}</h2>
 
-                                    <div className="w-100 text-start pb-5" style={{ marginBottom: showExplanation ? '180px' : '0', transition: 'margin-bottom 0.3s' }}>
+                                    <div className="w-100 text-start pb-5" style={{ marginBottom: showExplanation ? '200px' : '0', transition: 'margin-bottom 0.3s' }}>
                                         {renderQuestion()}
                                     </div>
                                 </div>
@@ -677,48 +646,48 @@ const GameRoom: React.FC = () => {
                     {/* Feedback Panel */}
                     {showExplanation && (
                         <div className="position-fixed bottom-0 start-0 end-0 animate__animated animate__slideInUp animate__faster" 
-                             style={{ zIndex: 9999, borderTopLeftRadius: 36, borderTopRightRadius: 36, backgroundColor: answerStatus === 'correct' ? '#dcfce7' : '#fee2e2', boxShadow: '0 -10px 40px rgba(0,0,0,0.1)' }}>
-                            <div className="container pt-4 pb-sm-4 pb-5 mb-2" style={{ maxWidth: '600px' }}>
+                             style={{ zIndex: 9999, borderTop: '6px solid #000', backgroundColor: answerStatus === 'correct' ? '#dcfce7' : '#fee2e2', boxShadow: '0 -20px 60px rgba(0,0,0,0.2)' }}>
+                            <div className="container pt-4 pb-sm-5 pb-5 mb-3" style={{ maxWidth: '650px' }}>
                                 {answerStatus === 'correct' ? (
                                     <div className="d-flex flex-column gap-4">
-                                        <div className="d-flex align-items-center gap-3 px-2">
-                                            <div className="bg-white rounded-circle d-flex align-items-center justify-content-center shadow-sm" style={{ width: 56, height: 56 }}>
-                                                <CheckCircle2 size={36} color="#16a34a" />
+                                        <div className="d-flex align-items-center gap-4 px-2">
+                                            <div className="bg-white brutalist-card--sm rounded-circle d-flex align-items-center justify-content-center" style={{ width: 64, height: 64 }}>
+                                                <CheckCircle2 size={40} color="#16a34a" />
                                             </div>
-                                            <h2 className="fw-900 mb-0 ls-tight" style={{ color: '#16a34a', fontSize: '1.8rem' }}>Amazing!</h2>
+                                            <h2 className="fw-black mb-0 ls-tight uppercase" style={{ color: '#16a34a', fontSize: '2.5rem' }}>Perfect!</h2>
                                         </div>
-                                        <button className="btn w-100 py-3 fw-900 ls-1 text-white hover-scale border-0" 
-                                            style={{ borderRadius: '20px', backgroundColor: '#22c55e', boxShadow: '0 6px 0 #16a34a', fontSize: '1.2rem', transition: 'all 0.2s' }} 
+                                        <button className="btn btn-game w-100 py-3 text-white border-0" 
+                                            style={{ backgroundColor: '#22c55e', boxShadow: '0 8px 0 #16a34a', fontSize: '1.4rem' }} 
                                             onClick={() => nextQuestion(score, correctCount)}>
-                                            CONTINUE
+                                            CONTINUE QUEST
                                         </button>
                                     </div>
                                 ) : (
                                     <div className="d-flex flex-column gap-4">
-                                        <div className="d-flex align-items-center gap-3 px-2">
-                                            <div className="bg-white rounded-circle d-flex align-items-center justify-content-center shadow-sm" style={{ width: 56, height: 56 }}>
-                                                <X size={36} color="#dc2626" />
+                                        <div className="d-flex align-items-center gap-4 px-2">
+                                            <div className="bg-white brutalist-card--sm rounded-circle d-flex align-items-center justify-content-center" style={{ width: 64, height: 64 }}>
+                                                <X size={40} color="#dc2626" />
                                             </div>
                                             <div>
-                                                <h2 className="fw-900 mb-0 ls-tight" style={{ color: '#dc2626', fontSize: '1.8rem' }}>Don't worry!</h2>
-                                                <p className="smallest fw-bold ls-1 mb-0 text-uppercase mt-1" style={{ color: '#dc2626', opacity: 0.8 }}>We'll review this later</p>
+                                                <h2 className="fw-black mb-0 ls-tight uppercase" style={{ color: '#dc2626', fontSize: '2.5rem' }}>Focus!</h2>
+                                                <p className="smallest fw-black ls-1 mb-0 text-uppercase mt-1" style={{ color: '#dc2626' }}>You'll get another chance</p>
                                             </div>
                                         </div>
                                         
-                                        <div className="bg-white p-3 rounded-4 mx-2 border-0 shadow-sm">
-                                            <p className="smallest fw-bold mb-1 ls-2 text-uppercase" style={{ color: '#ef4444' }}>Correct Answer</p>
-                                            <p className="fs-5 fw-bold mb-0" style={{ color: '#dc2626' }}>
+                                        <div className="bg-white p-3 brutalist-card--sm border-dark border-2 border-dashed shadow-none">
+                                            <p className="smallest fw-black mb-1 ls-2 text-uppercase" style={{ color: '#666' }}>Correct Answer</p>
+                                            <p className="fs-5 fw-black mb-0 text-dark uppercase ls-1">
                                                 {q.type === 'true-false' ? ((q as any).correctAnswer === true ? 'NGOHO (TRUE)' : 'MAZWIFHI (FALSE)') : (q as any).correctAnswer}
                                             </p>
                                         </div>
 
-                                        <button className="btn w-100 py-3 fw-900 ls-1 text-white hover-scale border-0" 
-                                            style={{ borderRadius: '20px', backgroundColor: '#ef4444', boxShadow: '0 6px 0 #dc2626', fontSize: '1.2rem', transition: 'all 0.2s' }} 
+                                        <button className="btn btn-game w-100 py-3 text-white border-0" 
+                                            style={{ backgroundColor: '#ef4444', boxShadow: '0 8px 0 #dc2626', fontSize: '1.4rem' }} 
                                             onClick={() => {
                                                 const newScore = isFirstTime ? awardConsolation() : score;
                                                 nextQuestion(newScore);
                                             }}>
-                                            GOT IT
+                                            I UNDERSTAND
                                         </button>
                                     </div>
                                 )}
@@ -732,49 +701,37 @@ const GameRoom: React.FC = () => {
         return (
             <div className="min-vh-100 d-flex flex-column" style={{ background: '#FFFFFF' }}>
                 <div className="flex-grow-1 d-flex align-items-center justify-content-center p-3 bg-light">
-                    <div className="text-center w-100 bg-white rounded-5 p-4 p-md-5 shadow-sm border border-light" style={{ maxWidth: '500px' }}>
-                        <div className="d-flex justify-content-center mb-4">
-                            <Mascot mood={mascotMood} width="120px" height="120px" />
+                    <div className="text-center w-100 brutalist-card p-4 p-md-5 shadow-action" style={{ maxWidth: '500px' }}>
+                        <div className="d-flex justify-content-center mb-5">
+                            <Mascot mood={mascotMood} width="140px" height="140px" />
                         </div>
-                        <h1 className="fw-900 display-5 text-dark mb-2 ls-tight">{isFirstTime ? 'Ro Fhedza!' : 'Review Done!'}</h1>
-                        <p className="text-muted mb-4 ls-1 smallest fw-bold">{isFirstTime ? "YOU'VE MASTERED THIS LESSON" : "GREAT JOB REFRESHING YOUR KNOWLEDGE"}</p>
+                        <h1 className="fw-black display-4 text-dark mb-2 ls-tight uppercase">{isFirstTime ? 'Quest Ended!' : 'Review Done!'}</h1>
+                        <p className="text-muted mb-5 ls-1 smallest fw-black uppercase">{isFirstTime ? "YOU'VE MASTERED THIS CHAPTER" : "GREAT JOB REFRESHING YOUR MEMORY"}</p>
                         
                         {isFirstTime && (
-                            <div className="py-4 border-top border-bottom mb-4">
-                                <h1 className="display-2 fw-900 mb-3" style={{ color: '#FACC15', letterSpacing: '-2px' }}>+{score} XP</h1>
-                                <div className="d-flex flex-column gap-2 text-start mx-auto" style={{ maxWidth: 280 }}>
-                                    <div className="d-flex justify-content-between smallest text-muted align-items-center">
-                                        <span className="d-flex align-items-center gap-2 px-2 py-1 bg-light rounded-pill"><Bookmark size={12} /> Base points</span>
-                                        <span className="fw-900 text-dark">{scoreBreakdown.base}</span>
+                           <div className="py-4 border-top border-bottom border-dark border-2 mb-5">
+                                <h1 className="display-2 fw-black mb-3" style={{ color: '#FACC15', letterSpacing: '-2px', WebkitTextStroke: '2px black' }}>+{score} XP</h1>
+                                <div className="d-flex flex-column gap-3 text-start mx-auto" style={{ maxWidth: 300 }}>
+                                    <div className="d-flex justify-content-between smallest text-dark align-items-center">
+                                        <span className="d-flex align-items-center gap-2 p-2 bg-white brutalist-card--sm rounded-pill fw-black uppercase ls-1"><Bookmark size={14} /> BASE POINTS</span>
+                                        <span className="fw-black">{scoreBreakdown.base}</span>
                                     </div>
                                     {scoreBreakdown.speed > 0 &&
-                                        <div className="d-flex justify-content-between smallest text-muted align-items-center">
-                                            <span className="d-flex align-items-center gap-2 px-2 py-1 bg-light rounded-pill"><Zap size={12} className="text-warning" /> Speed bonus</span>
-                                            <span className="fw-900 text-dark">+{scoreBreakdown.speed}</span>
+                                        <div className="d-flex justify-content-between smallest text-dark align-items-center">
+                                            <span className="d-flex align-items-center gap-2 p-2 bg-warning brutalist-card--sm rounded-pill fw-black uppercase ls-1"><Zap size={14} /> SPEED BONUS</span>
+                                            <span className="fw-black">+{scoreBreakdown.speed}</span>
                                         </div>}
                                     {scoreBreakdown.streakBonus > 0 &&
-                                        <div className="d-flex justify-content-between smallest text-muted align-items-center">
-                                            <span className="d-flex align-items-center gap-2 px-2 py-1 bg-light rounded-pill"><Flame size={12} className="text-danger" /> Streak bonus</span>
-                                            <span className="fw-900 text-dark">+{scoreBreakdown.streakBonus}</span>
-                                        </div>}
-                                    {scoreBreakdown.consolation > 0 &&
-                                        <div className="d-flex justify-content-between smallest text-muted align-items-center">
-                                            <span className="d-flex align-items-center gap-2 px-2 py-1 bg-light rounded-pill"><HelpCircle size={12} className="text-primary" /> Learning bonus</span>
-                                            <span className="fw-900 text-dark">{scoreBreakdown.consolation}</span>
+                                        <div className="d-flex justify-content-between smallest text-dark align-items-center">
+                                            <span className="d-flex align-items-center gap-2 p-2 bg-danger text-white brutalist-card--sm rounded-pill fw-black uppercase ls-1"><Flame size={14} /> STREAK BONUS</span>
+                                            <span className="fw-black">+{scoreBreakdown.streakBonus}</span>
                                         </div>}
                                 </div>
                             </div>
                         )}
                         
-                        {!isFirstTime && (
-                            <div className="py-5 border-top border-bottom mb-5">
-                                <p className="smallest fw-bold text-muted mb-1 ls-2 text-uppercase">Progress Status</p>
-                                <h1 className="display-2 fw-900 mb-0" style={{ color: '#FACC15', letterSpacing: '-2px' }}>COMPLETE</h1>
-                            </div>
-                        )}
-                        
-                        <button className="btn game-btn-primary w-100 py-3 fw-900 ls-1 shadow-sm" onClick={() => navigate(lesson?.courseId ? `/courses/${lesson.courseId}` : '/courses')} style={{ borderRadius: '18px', backgroundColor: '#FACC15', boxShadow: '0 6px 0 #EAB308' }}>
-                            BACK TO COURSE
+                        <button className="btn btn-game btn-game-primary w-100 py-3 fw-black ls-1 uppercase" onClick={() => navigate(lesson?.courseId ? `/courses/${lesson.courseId}` : '/courses')}>
+                            RETURN TO MAP
                         </button>
                     </div>
                 </div>
@@ -791,9 +748,9 @@ const GameRoom: React.FC = () => {
                 .ls-1 { letter-spacing: 1px; }
                 .ls-2 { letter-spacing: 2px; }
                 .smallest { font-size: 11px; }
-                .fw-900 { font-weight: 900; }
+                .fw-black { font-weight: 900; }
                 .italic-text { font-style: italic; }
-                .hover-scale { transition: transform 0.2s ease; }
+                .hover-scale { transition: transform 0.1s ease; }
                 .hover-scale:hover { transform: scale(1.05); }
                 .hover-scale:active { transform: scale(0.95); }
                 .hr-fade { height: 1px; background: linear-gradient(to right, transparent, #E5E7EB, transparent); }
@@ -803,14 +760,11 @@ const GameRoom: React.FC = () => {
                 @keyframes pulseDanger { 0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); } 70% { box-shadow: 0 0 0 15px rgba(239, 68, 68, 0); } 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); } }
                 .pulse-wave { animation: pulseWave 1s infinite ease-in-out; }
                 @keyframes pulseWave { 0%, 100% { transform: scaleY(1); } 50% { transform: scaleY(2); } }
-                .game-btn-primary { background-color: #FACC15 !important; color: #111827 !important; border: none !important; border-radius: 12px; transition: all 0.2s; }
-                .game-btn-primary:active { transform: translateY(4px); box-shadow: 0 2px 0 #EAB308 !important; }
-                .game-btn-primary:disabled { opacity: 0.5; }
                 .study-card { max-width: 500px; margin: 0 auto; transition: all 0.3s ease; }
                 @keyframes cheerPopIn { 0% { opacity: 0; transform: translateX(-50%) translateY(40px) scale(0.7); } 50% { opacity: 1; transform: translateX(-50%) translateY(-8px) scale(1.05); } 100% { opacity: 1; transform: translateX(-50%) translateY(0) scale(1); } }
-                .mascot-cheer-overlay { position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%); z-index: 9999; display: flex; flex-direction: column; align-items: center; animation: cheerPopIn 0.4s ease-out forwards; pointer-events: none; filter: drop-shadow(0 6px 20px rgba(0,0,0,0.15)); }
-                .mascot-cheer-bubble { background: #111827; color: #FACC15; font-size: 14px; font-weight: 800; font-family: var(--game-font-family); letter-spacing: 0.5px; padding: 8px 20px; border-radius: 20px; margin-bottom: 6px; white-space: nowrap; box-shadow: 0 4px 16px rgba(250, 204, 21, 0.25); position: relative; }
-                .mascot-cheer-bubble::after { content: ''; position: absolute; bottom: -6px; left: 50%; transform: translateX(-50%); width: 0; height: 0; border-left: 6px solid transparent; border-right: 6px solid transparent; border-top: 6px solid #111827; }
+                .mascot-cheer-overlay { position: fixed; bottom: 120px; left: 50%; transform: translateX(-50%); z-index: 9999; display: flex; flex-direction: column; align-items: center; animation: cheerPopIn 0.4s ease-out forwards; pointer-events: none; filter: drop-shadow(0 6px 20px rgba(0,0,0,0.15)); }
+                .mascot-cheer-bubble { background: #FACC15; color: #000; font-size: 14px; font-weight: 900; letter-spacing: 0.5px; padding: 10px 24px; border: 3px solid #000; border-radius: 20px; margin-bottom: 6px; white-space: nowrap; box-shadow: 6px 6px 0px #000; position: relative; }
+                .mascot-cheer-bubble::after { content: ''; position: absolute; bottom: -12px; left: 50%; transform: translateX(-50%); width: 0; height: 0; border-left: 10px solid transparent; border-right: 10px solid transparent; border-top: 10px solid #000; }
             `}</style>
         </div>
     );

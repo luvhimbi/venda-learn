@@ -1,6 +1,6 @@
 import React from 'react';
-import TrophyIcon from './TrophyIcon';
 import { AvatarDisplay } from './AvatarPicker';
+import TrophyIcon from './TrophyIcon';
 
 interface SharePreviewModalProps {
     isOpen: boolean;
@@ -8,10 +8,7 @@ interface SharePreviewModalProps {
     title: string;
     image?: string;
     category: string;
-    trophy?: {
-        rarity: 'bronze' | 'silver' | 'gold' | 'special';
-        color: string;
-    } | null;
+    trophy?: { rarity: any; color: any } | null;
     userData?: any;
 }
 
@@ -81,21 +78,19 @@ const SharePreviewModal: React.FC<SharePreviewModalProps> = ({ isOpen, onClose, 
             const blob = await new Promise<Blob | null>(resolve => canvas.toBlob(resolve, 'image/png'));
             const file = blob ? new File([blob], `LanguagePlatform_${title.replace(/\s+/g, '_')}.png`, { type: 'image/png' }) : null;
             
-            const shareText = trophy 
-                ? `I just earned the "${title}" trophy on this language platform! 🏅`
-                : `I just learned about ${title} on this language platform!`;
+            const shareText = `I just learned about ${title} on this language platform!`;
 
             // 3. Attempt to share with file if supported
             if (navigator.canShare && file && navigator.canShare({ files: [file] })) {
                 await navigator.share({
                     files: [file],
-                    title: trophy ? 'My Achievement' : 'Language Story',
+                    title: 'Language Story',
                     text: shareText,
                 });
             } else if (navigator.share) {
                 // Fallback to text sharing
                 await navigator.share({
-                    title: trophy ? 'My Achievement' : 'Language Story',
+                    title: 'Language Story',
                     text: shareText,
                     url: shareUrl,
                 });
@@ -120,50 +115,52 @@ const SharePreviewModal: React.FC<SharePreviewModalProps> = ({ isOpen, onClose, 
     };
 
     return (
-        <div className="position-fixed top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center" style={{ zIndex: 2000 }}>
+        <div className="position-fixed top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center p-3" style={{ zIndex: 2000 }}>
             {/* Backdrop */}
             <div 
-                className="position-absolute top-0 start-0 w-100 h-100 bg-black opacity-75"
+                className="position-absolute top-0 start-0 w-100 h-100 bg-black opacity-75 backdrop-blur-sm"
                 onClick={onClose}
             ></div>
 
             {/* Modal Content */}
-            <div className="bg-white rounded-5 overflow-hidden shadow-2xl position-relative animate-pop-in" style={{ width: '92%', maxWidth: '340px' }}>
+            <div className="brutalist-card bg-white overflow-hidden shadow-action position-relative animate-pop-in w-100" style={{ maxWidth: '340px' }}>
                 
                 {/* PREVIEW CARD */}
                 <div 
                     id="share-card" 
-                    className="position-relative overflow-hidden d-flex flex-column align-items-center justify-content-center" 
-                    style={{ background: 'linear-gradient(135deg, #1e293b 0%, #0f172a 100%)', color: 'white', padding: '24px 16px' }}
+                    className="position-relative overflow-hidden d-flex flex-column align-items-center justify-content-center border-bottom border-dark border-4" 
+                    style={{ background: '#000', color: 'white', padding: '20px 14px' }}
                 >
-                    {/* Background Accents (Kept subtle and monochrome to avoid 'minwenda' feel) */}
-                    <div className="position-absolute rounded-circle" style={{ width: 250, height: 250, background: 'radial-gradient(circle, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0) 70%)', top: '-80px', right: '-50px' }}></div>
-                    <div className="position-absolute rounded-circle" style={{ width: 300, height: 300, background: 'radial-gradient(circle, rgba(255, 255, 255, 0.03) 0%, rgba(255, 255, 255, 0) 70%)', bottom: '-100px', left: '-100px' }}></div>
+                    {/* Background Accents (Brutalist style) */}
+                    <div className="position-absolute" style={{ top: -20, right: -20, width: 80, height: 80, border: '12px solid rgba(255,255,255,0.05)', borderRadius: '50%' }}></div>
 
                     {/* SMALL DOWNLOAD ICON (Top-Left) */}
                     <button 
                         onClick={(e) => { e.stopPropagation(); handleDownload(); }}
-                        className="position-absolute top-0 start-0 m-3 btn btn-white bg-white rounded-circle shadow-sm d-flex align-items-center justify-content-center z-2 p-0"
-                        style={{ width: '32px', height: '32px', border: 'none' }}
-                        title="Download Image"
+                        className="position-absolute top-0 start-0 m-2 btn-game-white rounded-circle d-flex align-items-center justify-content-center z-2 p-0 border border-dark border-2"
+                        style={{ width: '28px', height: '28px' }}
+                        title="Download"
                     >
-                        <i className="bi bi-download text-dark" style={{ fontSize: '14px' }}></i>
+                        <i className="bi bi-download text-dark" style={{ fontSize: '12px' }}></i>
                     </button>
 
                     <div className="position-relative z-1 d-flex flex-column align-items-center text-center w-100 h-100">
                         {/* Branded Logo */}
-                        <div className="d-flex align-items-center justify-content-center mb-3 mt-2">
-                            <div className="bg-white p-2 rounded-3 shadow-sm d-inline-block">
-                                <img src="/images/Logo.png" alt="Language Platform" height="28" className="object-fit-contain" />
-                            </div>
+                        <div className="bg-white p-1.5 px-3 border border-dark border-2 rounded-2 mb-3 shadow-none">
+                            <img src="/images/Logo.png" alt="Logo" height="18" className="object-fit-contain" />
                         </div>
 
                         {/* Visual Asset (Trophy or Image) */}
-                        <div className="flex-grow-1 d-flex align-items-center justify-content-center w-100 mb-3 px-3">
+                        <div className="flex-grow-1 d-flex align-items-center justify-content-center w-100 mb-3 px-2">
                             {trophy ? (
-                                <TrophyIcon rarity={trophy.rarity} color={trophy.color} size={100} animate={false} />
+                                <TrophyIcon 
+                                    rarity={trophy.rarity} 
+                                    size={100} 
+                                    color={trophy.color}
+                                    animate={true}
+                                />
                             ) : image ? (
-                                <div className="rounded-4 overflow-hidden shadow-lg w-100 position-relative" style={{ minHeight: '160px', border: '4px solid rgba(255,255,255,0.1)' }}>
+                                <div className="rounded-3 overflow-hidden shadow-sm w-100 position-relative border border-dark border-2" style={{ minHeight: '140px' }}>
                                     <div 
                                         className="position-absolute top-0 start-0 w-100 h-100"
                                         style={{ 
@@ -177,68 +174,60 @@ const SharePreviewModal: React.FC<SharePreviewModalProps> = ({ isOpen, onClose, 
                         </div>
 
                         {/* Category Strip */}
-                        <div className="d-flex align-items-center gap-2 mb-2 bg-dark rounded-pill p-1 shadow-sm border border-secondary border-opacity-25 pe-3">
-                            <div className="flex-shrink-0" style={{ width: '40px', height: '24px', position: 'relative', borderRadius: '12px', overflow: 'hidden' }}>
-                                {/* Horizontal Stripes */}
-                                <div style={{ position: 'absolute', top: 0, left: '10px', right: 0, height: '33%', backgroundColor: '#00703C' }} /> {/* Green */}
-                                <div style={{ position: 'absolute', top: '33%', left: '10px', right: 0, height: '34%', backgroundColor: '#FFB81C' }} /> {/* Yellow */}
-                                <div style={{ position: 'absolute', top: '67%', left: '10px', right: 0, height: '33%', backgroundColor: '#593C1F' }} /> {/* Brown */}
-                                {/* Vertical Blue Hoist */}
-                                <div style={{ position: 'absolute', top: 0, left: 0, width: '12px', height: '100%', backgroundColor: '#00529F', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                    {/* Brown V embedded inside the blue strip */}
-                                    <span style={{ color: '#593C1F', fontSize: '9px', fontWeight: '900', userSelect: 'none' }}>V</span>
-                                </div>
+                        <div className="d-flex align-items-center gap-2 mb-2 bg-dark rounded-pill p-1 shadow-none border border-white border-opacity-20 pe-3">
+                            <div className="flex-shrink-0" style={{ width: '30px', height: '18px', position: 'relative', borderRadius: '9px', overflow: 'hidden' }}>
+                                <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '33%', backgroundColor: '#00703C' }} />
+                                <div style={{ position: 'absolute', top: '33%', left: 0, width: '100%', height: '34%', backgroundColor: '#FFB81C' }} />
+                                <div style={{ position: 'absolute', top: '67%', left: 0, width: '100%', height: '33%', backgroundColor: '#593C1F' }} />
                             </div>
-                            <span className="smallest fw-bold ls-2 text-warning uppercase">{category}</span>
+                            <span className="smallest-print fw-black ls-2 text-warning uppercase">{category}</span>
                         </div>
 
                         {/* Title & Branding block */}
-                        <h1 className="text-white fw-bold mb-0 ls-tight px-3" style={{ fontSize: '1.75rem', lineHeight: '1.1' }}>{title}</h1>
+                        <h1 className="text-white fw-black mb-0 ls-tight px-2" style={{ fontSize: '1.25rem' }}>{title}</h1>
                         
                         {/* Dynamically Include Profile info if available */}
                         {userData && (
-                            <div className="d-flex align-items-center gap-3 bg-white bg-opacity-10 shadow-sm p-3 rounded-4 mt-4 w-100 justify-content-between border border-white border-opacity-10 backdrop-blur-sm">
-                                <div className="d-flex align-items-center gap-3">
-                                    <div className="bg-white rounded-circle p-1 shadow-sm" style={{ width: 44, height: 44 }}>
-                                        <AvatarDisplay avatarId={userData.avatarId || 'adventurer'} seed={userData.username} size={36} />
+                            <div className="d-flex align-items-center gap-2 bg-white bg-opacity-10 border border-white border-opacity-20 p-2 rounded-3 mt-3 w-100 justify-content-between">
+                                <div className="d-flex align-items-center gap-2">
+                                    <div className="bg-white rounded-circle p-0.5 border border-dark border-1" style={{ width: 36, height: 36 }}>
+                                        <AvatarDisplay avatarId={userData.avatarId || 'adventurer'} seed={userData.username} size={30} />
                                     </div>
                                     <div className="text-start">
-                                        <p className="mb-0 fw-bold">{userData.username?.split(' ')[0]}</p>
-                                        <p className="smallest text-white-50 mb-0 ls-1 text-uppercase">Language Learner</p>
+                                        <p className="mb-0 fw-black smallest uppercase ls-1 text-white">{userData.username?.split(' ')[0]}</p>
+                                        <p className="mb-0 text-white-50" style={{ fontSize: '8px' }}>LEARNER</p>
                                     </div>
                                 </div>
-                                <div className="text-end pe-1">
-                                    <p className="mb-0 fw-bold text-warning d-flex align-items-center gap-1 justify-content-end">
-                                        {userData.points || 0} <span className="smallest text-white-50">XP</span>
+                                <div className="text-end">
+                                    <p className="mb-0 fw-black text-warning smallest ls-1">
+                                        {userData.points || 0} XP
                                     </p>
                                 </div>
                             </div>
                         )}
-                        {!userData && <p className="smallest text-white-50 mt-2 mb-0 uppercase ls-2">Language Learning Platform</p>}
                     </div>
                 </div>
 
                 {/* Actions */}
-                <div className="px-4 py-4 bg-white">
+                <div className="p-3 bg-white">
                     <div className="d-flex flex-column gap-2">
                         <button 
                             onClick={handleNativeShare}
-                            className={`btn btn-primary w-100 rounded-pill py-3 fw-bold ls-1 uppercase shadow-lg display-6 ${isSharing ? 'opacity-50 pointer-events-none' : 'animate__animated animate__pulse animate__infinite'}`}
-                            style={{ fontSize: '14px', backgroundColor: '#FACC15', border: 'none', color: '#111827' }}
+                            className={`btn btn-game btn-game-primary w-100 py-2.5 shadow-action-sm ${isSharing ? 'opacity-50' : ''}`}
                             disabled={isSharing}
                         >
                             {isSharing ? (
-                                <><span className="spinner-border spinner-border-sm me-2"></span> Preparing...</>
+                                <><span className="spinner-border spinner-border-sm me-2"></span> PREPARING...</>
                             ) : (
-                                <><i className="bi bi-share-fill me-2"></i> Share Now</>
+                                <><i className="bi bi-share-fill me-2"></i> SHARE NOW</>
                             )}
                         </button>
                         
                         <button 
                             onClick={onClose}
-                            className="btn btn-link text-muted w-100 text-decoration-none smallest fw-bold ls-1 uppercase mt-2"
+                            className="btn btn-link text-muted w-100 text-decoration-none smallest-print fw-black ls-2 uppercase mt-1"
                         >
-                            Maybe later
+                            MAYBE LATER
                         </button>
                     </div>
                 </div>

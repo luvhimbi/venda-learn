@@ -7,7 +7,7 @@ const DMCA: React.FC = () => {
         Last Updated: December 2025.
 
         1. Introduction.
-        LanguageLearn ("we," "us," or "our") respects the intellectual property rights of others and expects our users to do the same. In accordance with the Digital Millennium Copyright Act (DMCA), we will respond expeditiously to claims of copyright infringement committed using the LanguageLearn service (the "Service") that are reported to our Designated Copyright Agent.
+        Chommie Language Companion ("we," "us," or "our") respects the intellectual property rights of others and expects our users to do the same. In accordance with the Digital Millennium Copyright Act (DMCA), we will respond expeditiously to claims of copyright infringement committed using the Chommie Language Companion service (the "Service") that are reported to our Designated Copyright Agent.
 
         2. Notice of Infringement.
         If you are a copyright owner, or are authorized to act on behalf of one, please report alleged copyright infringements taking place on or through the Service by completing a DMCA Notice of Alleged Infringement and delivering it to our Designated Copyright Agent. Upon receipt of a valid notice, we will take whatever action, in our sole discretion, we deem appropriate, including removal of the challenged material from the Service.
@@ -23,7 +23,7 @@ const DMCA: React.FC = () => {
 
         4. Designated Copyright Agent.
         Please send your DMCA Notice to:
-        Designated Agent: LanguageLearn Legal Team
+        Designated Agent: Chommie Language Companion Legal Team
         Email: yonalisa514@gmail.com
         Address: South Africa Gauteng
 

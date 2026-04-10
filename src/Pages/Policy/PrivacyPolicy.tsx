@@ -7,7 +7,7 @@ const PrivacyPolicy: React.FC = () => {
         Last Updated: December 2025.
 
         1. Introduction.
-        LanguageLearn ("we," "us," or "our") respects the privacy of our users ("user" or "you"). This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you visit our website and mobile application (the "Service"). Please read this privacy policy carefully. If you do not agree with the terms of this privacy policy, please do not access the Service.
+        Chommie Language Companion ("we," "us," or "our") respects the privacy of our users ("user" or "you"). This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you visit our website and mobile application (the "Service"). Please read this privacy policy carefully. If you do not agree with the terms of this privacy policy, please do not access the Service.
 
         2. Collection of Your Information.
         We may collect information about you in a variety of ways. The information we may collect via the Service includes:
@@ -50,7 +50,7 @@ const PrivacyPolicy: React.FC = () => {
         We do not knowingly solicit information from or market to children under the age of 13. If you become aware that any data we have collected is from children under the age of 13, please contact us using the contact information provided below.
 
         7. Contact Us.
-        If you have questions or comments about this Privacy Policy, please contact us at: privacy@vendalearn.com.
+        If you questions or comments about this Privacy Policy, please contact us at: privacy@chommielanguage.com.
     `;
 
     return (

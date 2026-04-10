@@ -149,6 +149,24 @@ h3 { font-size: 1.5rem; }
   box-shadow: var(--shadow-brutalist-light);
 }
 
+.brutalist-card {
+  background-color: #fff;
+  border: 4px solid #000;
+  box-shadow: var(--shadow-brutalist);
+  border-radius: 12px;
+  overflow: hidden;
+  transition: all 0.2s;
+}
+
+.brutalist-card--sm {
+  background-color: #fff;
+  border: 3px solid #000;
+  box-shadow: var(--shadow-brutalist-sm);
+  border-radius: 12px;
+  overflow: hidden;
+  transition: all 0.2s;
+}
+
 /* ============================================
    7. INPUT GROUP SYSTEM
    ============================================ */
@@ -197,7 +215,7 @@ h3 { font-size: 1.5rem; }
   font-family: var(--game-font);
   font-weight: 900;
   text-transform: uppercase;
-  border: 3px solid #000;
+  border: 4px solid #000;
   border-radius: 12px;
   padding: 0.6rem 1.4rem;
   transition: all 0.1s ease;
@@ -205,21 +223,39 @@ h3 { font-size: 1.5rem; }
   align-items: center;
   justify-content: center;
   gap: 8px;
+  color: #000 !important;
+  background-color: #fff;
 }
 
-/* Matching the 'START QUEST' black button with gold shadow */
+.btn-game:hover {
+  background-color: #f8fafc;
+  color: #000 !important;
+  transform: translate(-2px, -2px);
+  box-shadow: 4px 4px 0px #000;
+}
+
+.btn-game:active {
+  transform: translate(2px, 2px);
+  box-shadow: 0 0 0 transparent;
+}
+
+/* Matching the 'START QUEST' black button with total black look */
 .btn-game-primary {
-  background-color: #111827;
-  color: #fff;
-  box-shadow: 8px 8px 0px var(--venda-yellow);
+  background-color: #000 !important;
+  color: #fff !important;
+  box-shadow: 8px 8px 0px #000;
 }
 
 .btn-game-primary:hover {
-  transform: translate(-2px, -2px);
-  box-shadow: 10px 10px 0px var(--venda-yellow);
+  background-color: #000 !important;
+  color: #fff !important;
+  transform: translate(-4px, -4px);
+  box-shadow: 12px 12px 0px #000;
 }
 
 .btn-game-primary:active {
+  background-color: #000 !important;
+  color: #fff !important;
   transform: translate(6px, 6px);
   box-shadow: 0 0 0 transparent;
 }
@@ -237,9 +273,39 @@ h3 { font-size: 1.5rem; }
   letter-spacing: 1px;
 }
 
+.game-btn-primary:hover {
+  background-color: var(--game-amber-light) !important;
+  color: #000 !important;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 0 #000 !important;
+}
+
 .game-btn-primary:active {
   transform: translateY(4px);
   box-shadow: 0 2px 0 #000 !important;
+  color: #000 !important;
+}
+
+/* --- Game White Variant --- */
+.btn-game-white {
+  background-color: #fff !important;
+  color: #000 !important;
+}
+
+.btn-game-white:hover {
+  background-color: #f8fafc !important;
+  color: #000 !important;
+}
+
+/* --- Game Dark Variant --- */
+.btn-game-dark {
+  background-color: #111827 !important;
+  color: #fff !important;
+}
+
+.btn-game-dark:hover {
+  background-color: #000 !important;
+  color: #fff !important;
 }
 
 /* ============================================

@@ -13,7 +13,7 @@ const MultipleChoiceQuestion: React.FC<Props> = ({ q, selected, status, onSelect
         {q.options.map((opt) => {
             const isCorrect = opt === q.correctAnswer;
             const isSelected = selected === opt;
-            let cls = 'btn-outline-dark border-2';
+            let cls = 'btn-game-white border-dark border-3';
             if (isSelected) cls = isCorrect ? 'btn-success border-success text-white' : 'btn-danger border-danger text-white';
             else if (selected && isCorrect && status === 'wrong') cls = 'btn-success border-success text-white opacity-75';
             return (

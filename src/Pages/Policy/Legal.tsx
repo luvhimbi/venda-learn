@@ -23,7 +23,7 @@ const Legal: React.FC = () => {
                         <Shield size={40} />
                     </div>
                     <h1 className="fw-bold text-dark mb-2">Legal & Policies</h1>
-                    <p className="text-muted">Important documents regarding your use of Imaginators</p>
+                    <p className="text-muted">Important documents regarding your use of Chommie Language Companion</p>
                 </div>
 
                 <div className="d-flex flex-column gap-3">
@@ -47,7 +47,7 @@ const Legal: React.FC = () => {
                 </div>
 
                 <div className="mt-5 text-center">
-                    <p className="smallest text-muted opacity-50 uppercase ls-2">© {new Date().getFullYear()} IMAGINATORS. ALL RIGHTS RESERVED.</p>
+                    <p className="smallest text-muted opacity-50 uppercase ls-2">© {new Date().getFullYear()} CHOMMIE LANGUAGE COMPANION. ALL RIGHTS RESERVED.</p>
                 </div>
             </div>
 

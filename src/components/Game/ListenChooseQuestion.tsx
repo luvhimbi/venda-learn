@@ -14,7 +14,7 @@ const ListenChooseQuestion: React.FC<Props> = ({ q, selected, status, onSelect, 
     useEffect(() => { speakVenda(q.vendaWord); }, []);
     return (
         <div>
-            <button className="btn btn-outline-dark border-2 rounded-pill px-5 py-3 mb-4 fw-bold"
+            <button className="btn btn-game-white border-dark border-3 rounded-pill px-5 py-3 mb-4 fw-black ls-1 smallest"
                 onClick={() => speakVenda(q.vendaWord)}>
                 <i className="bi bi-volume-up-fill fs-3 me-2"></i> PLAY AGAIN
             </button>
@@ -22,7 +22,7 @@ const ListenChooseQuestion: React.FC<Props> = ({ q, selected, status, onSelect, 
                 {q.options.map(opt => {
                     const isCorrect = opt === q.correctAnswer;
                     const isSelected = selected === opt;
-                    let cls = 'btn-outline-dark border-2';
+                    let cls = 'btn-game-white border-dark border-3';
                     if (isSelected) cls = isCorrect ? 'btn-success border-success text-white' : 'btn-danger border-danger text-white';
                     else if (selected && isCorrect && status === 'wrong') cls = 'btn-success border-success text-white opacity-75';
                     return (

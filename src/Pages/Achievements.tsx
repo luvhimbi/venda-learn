@@ -4,7 +4,7 @@ import { ALL_TROPHIES } from '../services/achievementService';
 import { fetchUserData } from '../services/dataCache';
 import AchievementCard from '../components/AchievementCard';
 import SharePreviewModal from '../components/SharePreviewModal';
-import { ArrowLeft, Info, Trophy as TrophyIconLucide } from 'lucide-react';
+import { ArrowLeft,  Trophy as TrophyIconLucide } from 'lucide-react';
 import SEO from '../components/SEO';
 
 const Achievements: React.FC = () => {
@@ -59,39 +59,42 @@ const Achievements: React.FC = () => {
     const totalCount = ALL_TROPHIES.length;
 
     return (
-        <div className="achievements-page bg-light min-vh-100 pb-5">
+        <div className="achievements-page bg-white min-vh-100 pb-5" style={{ background: 'url("data:image/svg+xml,%3Csvg width=\'20\' height=\'20\' viewBox=\'0 0 20 20\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cg fill=\'%23000000\' fill-opacity=\'0.03\' fill-rule=\'evenodd\'%3E%3Ccircle cx=\'3\' cy=\'3\' r=\'1\'/%3E%3C/g%3E%3C/svg%3E")' }}>
             <SEO
                 title="Trophies & Achievements"
                 description="View your achievements and track your progress to mastery."
             />
 
-            {/* TIGHTER HEADER */}
-            <div className="bg-white border-bottom py-3 sticky-top shadow-sm">
-                <div className="container" style={{ maxWidth: '1000px' }}>
+            {/* BRUTALIST HEADER */}
+            <div className="bg-white border-bottom border-dark border-4 py-3 sticky-top shadow-sm z-3">
+                <div className="container" style={{ maxWidth: '800px' }}>
                     <div className="d-flex align-items-center justify-content-between">
                         <button
                             onClick={() => navigate(-1)}
-                            className="btn btn-back-round d-flex align-items-center justify-content-center"
+                            className="btn btn-game-white rounded-circle d-flex align-items-center justify-content-center p-0 border border-dark border-3 shadow-action-sm"
+                            style={{ width: 44, height: 44 }}
                         >
-                            <ArrowLeft size={18} />
+                            <ArrowLeft size={20} strokeWidth={3} />
                         </button>
                         <div className="text-center">
-                            <h5 className="fw-bold mb-0 text-dark ls-tight">Achievement Collection</h5>
-                            <p className="smallest fw-bold text-muted text-uppercase ls-1 mb-0">Trophies & Achievements</p>
+                            <h5 className="fw-black mb-0 text-dark uppercase ls-tight" style={{ fontSize: '1.25rem' }}>COLLECTION</h5>
                         </div>
-                        <div className="px-3 py-1 bg-warning bg-opacity-10 rounded-pill border border-warning border-opacity-20 d-flex align-items-center gap-2">
-                            <TrophyIconLucide size={14} className="text-warning" />
-                            <span className="small fw-bold text-dark">{earnedCount}/{totalCount}</span>
+                        <div className="px-3 py-1.5 bg-warning border border-dark border-3 shadow-action-sm d-flex align-items-center gap-2">
+                            <TrophyIconLucide size={16} className="text-dark" strokeWidth={3} />
+                            <span className="small fw-black text-dark uppercase ls-1">{earnedCount}/{totalCount}</span>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <div className="container mt-4" style={{ maxWidth: '1000px' }}>
-
+            <div className="container mt-5" style={{ maxWidth: '800px' }}>
+                <div className="mb-5 text-center text-md-start">
+                    <h2 className="fw-black text-dark uppercase ls-tight mb-2">My Journey</h2>
+                    <p className="smallest fw-bold text-muted uppercase ls-2 mb-0">Track your progress and collections</p>
+                </div>
 
                 {/* GRID WITH BETTER DENSITY */}
-                <div className="row g-3 mb-5">
+                <div className="row g-4 mb-5">
                     {[...ALL_TROPHIES]
                         .sort((a, b) => {
                             const aEarned = (userData?.trophies || []).includes(a.id);
@@ -120,9 +123,11 @@ const Achievements: React.FC = () => {
                 </div>
 
                 <div className="text-center pb-5">
-                    <p className="small text-muted d-flex align-items-center justify-content-center gap-2">
-                        <Info size={14} /> New trophies are added regularly as your journey expands.
-                    </p>
+                    <div className="p-4 brutalist-card bg-light border-dashed border-dark border-3 shadow-none">
+                        <p className="smallest fw-black text-muted uppercase ls-1 mb-0 d-flex align-items-center justify-content-center gap-2">
+                             New trophies are added regularly. Keep learning!
+                        </p>
+                    </div>
                 </div>
             </div>
 
@@ -140,24 +145,12 @@ const Achievements: React.FC = () => {
             />
 
             <style>{`
-                .ls-tight { letter-spacing: -1px; }
+                .ls-tight { letter-spacing: -1.5px; }
                 .ls-1 { letter-spacing: 1px; }
+                .ls-2 { letter-spacing: 2px; }
                 .smallest { font-size: 11px; }
                 .uppercase { text-transform: uppercase; }
-                .btn-back-round {
-                    width: 44px;
-                    height: 44px;
-                    border-radius: 12px;
-                    background-color: #f8fafc;
-                    border: 1px solid #e2e8f0;
-                    color: #64748b;
-                    transition: all 0.2s;
-                }
-                .btn-back-round:hover {
-                    background-color: #f1f5f9;
-                    color: #1e293b;
-                    transform: translateX(-3px);
-                }
+                .fw-black { font-weight: 900; }
             `}</style>
         </div>
     );

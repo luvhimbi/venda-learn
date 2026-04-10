@@ -2,15 +2,15 @@ import React, { useEffect, useState } from 'react';
 import { db, auth } from '../../services/firebaseConfig';
 import { doc, getDoc, updateDoc, writeBatch, collection, query, where, getDocs, setDoc, increment } from 'firebase/firestore';
 import { onAuthStateChanged, signOut } from 'firebase/auth';
-import { Gem, Compass, Bell, Flame, CheckCircle, LogOut, Users, Gift, Clock, Camera, Share2, MoreVertical, Shield, ChevronRight, Star, Globe } from 'lucide-react';
+import { Gem, Compass, Bell, Flame, LogOut, Users, Gift, Clock, Camera, Share2, MoreVertical, Shield, ChevronRight, Star, Globe } from 'lucide-react';
 import LogoutModal from '../../components/LogoutModal';
 import ShareProfileModal from '../../components/ShareProfileModal';
 import ShareStreakModal from '../../components/ShareStreakModal';
-import { checkAchievements, awardTrophies, ALL_TROPHIES } from '../../services/achievementService';
-import TrophyIcon from '../../components/TrophyIcon';
 import AvatarPicker, { AvatarDisplay } from '../../components/AvatarPicker';
 import StreakCalendar from '../../components/StreakCalendar';
 import JuicyButton from '../../components/JuicyButton';
+import AchievementCard from '../../components/AchievementCard';
+import { ALL_TROPHIES } from '../../services/achievementService';
 import { invalidateCache, refreshUserData, fetchUserData, fetchLearnedStats, fetchLanguages } from '../../services/dataCache';
 import ReviewModal from '../../components/ReviewModal';
 import AvatarBuilder from '../../components/AvatarBuilder';
@@ -83,8 +83,7 @@ const Profile: React.FC = () => {
                     const profile = data as UserProfile;
                     const normalizedProfile = {
                         ...profile,
-                        points: Number(profile.points) || 0,
-                        trophies: profile.trophies || []
+                        points: Number(profile.points) || 0
                     };
                     setUserData(normalizedProfile);
                     setEditUsername(profile.username || '');
@@ -108,30 +107,6 @@ const Profile: React.FC = () => {
                         }
                     }
 
-                    // Check for new achievements (including 1st Login)
-                    const newTrophies = checkAchievements(normalizedProfile, profile.trophies || []);
-                    if (newTrophies.length > 0) {
-                        const newIds = newTrophies.map(t => t.id);
-                        await awardTrophies(user.uid, newIds);
-
-                        // Update local state
-                        setUserData((prev: UserProfile | null) => prev ? {
-                            ...prev,
-                            trophies: [...(prev.trophies || []), ...newIds]
-                        } : null);
-
-                        // Notify user for the most significant one if multiple
-                        const first = newTrophies[0];
-                        Swal.fire({
-                            title: 'Trophy Unlocked!',
-                            text: `New Achievement: ${first.title}!`,
-                            icon: 'success',
-                            imageUrl: 'https://cdn-icons-png.flaticon.com/512/3112/3112946.png',
-                            imageWidth: 80,
-                            confirmButtonColor: '#FACC15',
-                            customClass: { popup: 'rounded-4' }
-                        });
-                    }
 
                     // Fetch unclaimed invites
                     const q = query(
@@ -317,6 +292,27 @@ const Profile: React.FC = () => {
         }
     };
 
+    const calculateProgress = (trophy: any) => {
+        if (!userData) return 0;
+        const { type, value } = trophy.requirement;
+        let current = 0;
+
+        switch (type) {
+            case 'login': current = 1; break;
+            case 'level': current = userData.level || 1; break;
+            case 'points': current = userData.points || 0; break;
+            case 'streak': current = userData.streak || 0; break;
+            case 'lessons': current = userData.completedLessons?.length || 0; break;
+            default: current = 0;
+        }
+
+        return Math.min(Math.round((current / value) * 100), 100);
+    };
+
+    const handleShareAchievement = () => {
+        navigate('/achievements'); // Redirect to achievements page for full view/share
+    };
+
     if (loading) return (
         <div className="min-vh-100 bg-white d-flex justify-content-center align-items-center">
             <div className="spinner-border" style={{ color: '#FACC15' }}></div>
@@ -324,11 +320,11 @@ const Profile: React.FC = () => {
     );
 
     return (
-        <div className="bg-white min-vh-100 py-5">
-            <div className="container" style={{ maxWidth: '850px' }}>
+        <div className="bg-white min-vh-100 py-5" style={{ background: 'url("data:image/svg+xml,%3Csvg width=\'20\' height=\'20\' viewBox=\'0 0 20 20\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cg fill=\'%23000000\' fill-opacity=\'0.03\' fill-rule=\'evenodd\'%3E%3Ccircle cx=\'3\' cy=\'3\' r=\'1\'/%3E%3C/g%3E%3C/svg%3E")' }}>
+            <div className="container" style={{ maxWidth: '900px' }}>
 
                 {/* PROFILE HEADER & SETTINGS */}
-                <header className={`mb-5 pb-4 border-bottom transition-all ${isEditing ? 'bg-light p-4 rounded-4 border-warning shadow-sm' : ''}`}>
+                <header className={`mb-5 p-3 p-md-4 brutalist-card transition-all ${isEditing ? 'border-warning shadow-action-light' : ''}`} style={{ overflow: 'visible' }}>
                     <div className="d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-4">
 
                         {/* LEFT COMPONENT - Avatar & Identity */}
@@ -337,9 +333,9 @@ const Profile: React.FC = () => {
                                 <AvatarDisplay
                                     avatarId={userData?.avatarId || 'adventurer'}
                                     seed={userData?.username || 'learner'}
-                                    size={100}
-                                    className="shadow-sm border-dark"
-                                    style={{ borderWidth: '3px' }}
+                                    size={110}
+                                    className="border-dark"
+                                    style={{ borderWidth: '4px', borderStyle: 'solid', borderRadius: '24px' }}
                                 />
                                 {isEditing && (
                                     <div className="position-absolute bottom-0 end-0 bg-dark text-white rounded-circle d-flex align-items-center justify-content-center shadow" style={{ width: 32, height: 32, border: '2px solid white' }}>
@@ -348,33 +344,20 @@ const Profile: React.FC = () => {
                                 )}
                             </div>
                             <div>
-                                <div className="d-flex flex-wrap align-items-center justify-content-center justify-content-md-start gap-2 mb-1">
-                                    <h1 className="fw-bold mb-0 text-black ls-tight" style={{ fontSize: '1.75rem' }}>{userData?.username}</h1>
-                                    {/*{userData?.isNativeSpeaker && (*/}
-                                    {/*    <span className="badge bg-success text-white smallest fw-bold ls-1 rounded-pill px-2 py-1">*/}
-                                    {/*        <i className="bi bi-patch-check-fill me-1"></i> VERIFIED*/}
-                                    {/*    </span>*/}
-                                    {/*)}*/}
-                                    {/*{userData?.nativeVerificationStatus === 'pending' && (*/}
-                                    {/*    <span className="badge bg-warning text-dark smallest fw-bold ls-1 rounded-pill px-2 py-1">PENDING</span>*/}
-                                    {/*)}*/}
-                                    {/*{userData?.nativeVerificationStatus === 'rejected' && (*/}
-                                    {/*    <span className="badge bg-danger text-white smallest fw-bold ls-1 rounded-pill px-2 py-1">REJECTED</span>*/}
-                                    {/*)}*/}
-                                </div>
-                                <p className="small text-muted mb-0">{userData?.email}</p>
+                                <p className="fw-black text-dark mb-1 ls-tight uppercase" style={{ fontSize: '1.25rem' }}>MY PROFILE</p>
+                                <p className="small fw-bold text-muted mb-0 ls-1 uppercase">{userData?.email}</p>
 
                                 {/* JOIN DATE & CURRENT LESSON BADGES */}
                                 <div className="d-flex flex-wrap align-items-center justify-content-center gap-2 mt-3">
                                     {userData?.createdAt && (
-                                        <div className="d-flex align-items-center gap-2 px-3 py-1 bg-light border rounded-pill smallest text-muted fw-bold ls-1 uppercase">
-                                            <i className="bi bi-calendar-check"></i>
+                                        <div className="d-flex align-items-center gap-2 px-3 py-1 bg-white border border-dark border-2 rounded-pill smallest text-muted fw-bold ls-1 uppercase shadow-action-sm">
+                                            <i className="bi bi-calendar-check text-dark"></i>
                                             Joined {new Date(userData.createdAt).toLocaleString('default', { month: 'long', year: 'numeric' })}
                                         </div>
                                     )}
                                     {currentLessonTitle && (
-                                        <div className="d-flex align-items-center gap-1 px-2 py-0.5 bg-warning bg-opacity-10 text-dark border border-warning border-opacity-50 rounded-pill fw-bold ls-1 uppercase" style={{ fontSize: '9px' }}>
-                                            <i className="bi bi-book text-warning" style={{ fontSize: '10px' }}></i>
+                                        <div className="d-flex align-items-center gap-1 px-3 py-1 bg-warning text-dark border border-dark border-2 rounded-pill fw-black ls-1 uppercase shadow-action-sm" style={{ fontSize: '10px' }}>
+                                            <i className="bi bi-zap-fill text-dark" style={{ fontSize: '12px' }}></i>
                                             LEARNING: {currentLessonTitle}
                                         </div>
                                     )}
@@ -383,25 +366,25 @@ const Profile: React.FC = () => {
                         </div>
 
                         {/* RIGHT COMPONENT - Actions */}
-                        <div className="d-flex align-items-center justify-content-center justify-content-md-end gap-2 w-100 w-md-auto mt-3 mt-md-0">
+                        <div className="d-flex align-items-center justify-content-center justify-content-md-end gap-2 w-auto mt-3 mt-md-0">
                             {!isEditing && (
                                 <>
                                     {auth.currentUser?.isAnonymous ? (
-                                        <div className="d-flex align-items-center px-4 py-2 bg-light border rounded-pill shadow-sm">
+                                        <div className="d-flex align-items-center px-3 py-1.5 bg-light border rounded-pill shadow-sm">
                                             <div className="bg-secondary rounded-circle me-2 animate-pulse" style={{ width: 8, height: 8 }}></div>
-                                            <span className="small fw-bold text-muted ls-1 uppercase">Guest Account</span>
+                                            <span className="small fw-bold text-muted ls-1 uppercase" style={{ fontSize: '10px' }}>Guest Account</span>
                                         </div>
                                     ) : (
-                                        <button onClick={() => setIsEditing(true)} className="btn btn-primary px-4 py-2 fw-bold ls-1 rounded-pill shadow-sm d-flex align-items-center gap-2 text-white border-0">
-                                            Edit Profile
+                                        <button onClick={() => setIsEditing(true)} className="btn btn-game btn-game-primary px-3 py-1.5 smallest">
+                                            EDIT PROFILE
                                         </button>
                                     )}
 
                                     <div className="dropdown">
-                                        <button className="btn btn-light rounded-circle shadow-sm border border-light-subtle d-flex align-items-center justify-content-center" style={{ width: '42px', height: '42px' }} data-bs-toggle="dropdown" aria-expanded="false">
-                                            <MoreVertical size={18} className="text-secondary" />
+                                        <button className="btn btn-game-white brutalist-card--sm rounded-circle d-flex align-items-center justify-content-center" style={{ width: '40px', height: '40px' }} data-bs-toggle="dropdown" aria-expanded="false">
+                                            <MoreVertical size={18} className="text-dark" />
                                         </button>
-                                        <ul className="dropdown-menu dropdown-menu-end shadow border-0 rounded-4 mt-2 py-2" style={{ minWidth: '200px' }}>
+                                        <ul className="dropdown-menu dropdown-menu-end shadow-action-sm border border-dark border-3 rounded-3 mt-2 py-2 overflow-hidden" style={{ minWidth: '200px' }}>
                                             <li className="d-none d-md-block">
                                                 <button
                                                     onClick={async () => {
@@ -410,20 +393,20 @@ const Profile: React.FC = () => {
                                                         sessionStorage.removeItem('tour_offered');
                                                         window.location.href = '/';
                                                     }}
-                                                    className="dropdown-item d-flex align-items-center gap-3 py-2 fw-medium text-dark"
+                                                    className="dropdown-item d-flex align-items-center gap-3 py-3 fw-black text-dark uppercase ls-1 smallest hover-bg-warning"
                                                 >
-                                                    <Compass size={16} className="text-muted" /> Restart Tour
+                                                    <Compass size={18} className="text-dark" strokeWidth={3} /> Restart Tour
                                                 </button>
                                             </li>
                                             <li>
-                                                <button onClick={() => setIsShareModalOpen(true)} className="dropdown-item d-flex align-items-center gap-3 py-2 fw-medium text-dark">
-                                                    <Share2 size={16} className="text-primary" /> Share Profile
+                                                <button onClick={() => setIsShareModalOpen(true)} className="dropdown-item d-flex align-items-center gap-3 py-3 fw-black text-dark uppercase ls-1 smallest hover-bg-warning">
+                                                    <Share2 size={18} className="text-dark" strokeWidth={3} /> Share Profile
                                                 </button>
                                             </li>
-                                            <li><hr className="dropdown-divider opacity-10" /></li>
+                                            <li><hr className="dropdown-divider border-dark opacity-100 border-1 my-0" /></li>
                                             <li>
-                                                <button onClick={() => setShowLogout(true)} className="dropdown-item d-flex align-items-center gap-3 py-2 fw-medium text-danger">
-                                                    <LogOut size={16} /> Logout
+                                                <button onClick={() => setShowLogout(true)} className="dropdown-item d-flex align-items-center gap-3 py-3 fw-black text-danger uppercase ls-1 smallest hover-bg-danger-subtle">
+                                                    <LogOut size={18} strokeWidth={3} /> Logout
                                                 </button>
                                             </li>
                                         </ul>
@@ -438,27 +421,27 @@ const Profile: React.FC = () => {
                         <div className="mt-4 pt-4 border-top">
                             <form onSubmit={handleUpdate} className="animate__animated animate__fadeIn">
                                 <div className="d-flex flex-column gap-4">
-                                    <div className="d-flex flex-column">
-                                        <label className="small fw-bold text-muted ls-1 mb-2">Display Name</label>
-                                        <input
-                                            type="text"
-                                            className="form-control form-control-lg border border-light-subtle bg-white py-2 px-3 rounded-4 shadow-sm fw-bold"
-                                            style={{ maxWidth: '300px' }}
-                                            value={editUsername}
-                                            onChange={(e) => setEditUsername(e.target.value)}
-                                            required
-                                        />
-                                    </div>
+                                        <label className="small fw-black text-dark ls-1 mb-2 uppercase">Display Name</label>
+                                        <div className="custom-input-group--brutalist w-100" style={{ maxWidth: '400px' }}>
+                                            <input
+                                                type="text"
+                                                className="bg-transparent border-0 w-100 px-4 py-3 fw-black text-dark"
+                                                style={{ outline: 'none', fontSize: '1.1rem' }}
+                                                value={editUsername}
+                                                onChange={(e) => setEditUsername(e.target.value)}
+                                                required
+                                            />
+                                        </div>
 
-                                    <div className="p-4 rounded-4 bg-white border border-light-subtle shadow-sm flex-grow-1" style={{ maxWidth: '500px' }}>
-                                        <div className="d-flex flex-column flex-sm-row justify-content-between align-items-sm-center mb-3 gap-2">
-                                            <p className="small fw-bold text-muted mb-0 ls-1 text-uppercase">Choose Style</p>
+                                    <div className="p-4 brutalist-card shadow-action-light">
+                                        <div className="d-flex flex-column flex-sm-row justify-content-between align-items-sm-center mb-4 gap-3">
+                                            <p className="small fw-black text-dark mb-0 ls-1 text-uppercase">Choose Character</p>
                                             <button 
                                                 type="button" 
                                                 onClick={() => setShowCustomBuilder(true)}
-                                                className="btn btn-sm btn-dark text-warning fw-bold rounded-pill shadow-sm ls-1 px-3 py-2 d-flex align-items-center gap-2"
+                                                className="btn btn-game btn-game-primary smallest"
                                             >
-                                                <i className="bi bi-palette"></i> BUILD CUSTOM AVATAR
+                                                <i className="bi bi-palette-fill me-2"></i> CUSTOM BUILDER
                                             </button>
                                         </div>
                                         <AvatarPicker
@@ -477,15 +460,15 @@ const Profile: React.FC = () => {
                                         )}
                                     </div>
 
-                                    <div className="d-flex gap-2 mt-2">
-                                        <JuicyButton type="submit" className="btn btn-primary px-5 py-3 fw-bold ls-1 rounded-pill shadow" disabled={updateLoading}>
+                                    <div className="d-flex gap-3 mt-3">
+                                        <button type="submit" className="btn btn-game btn-game-primary px-4 py-2 smallest" disabled={updateLoading}>
                                             {updateLoading ? (
                                                 <span className="spinner-border spinner-border-sm me-2"></span>
                                             ) : (
-                                                <><CheckCircle size={18} className="me-2" /> SAVE CHANGES</>
+                                                'SAVE'
                                             )}
-                                        </JuicyButton>
-                                        <button type="button" onClick={() => setIsEditing(false)} className="btn btn-light px-4 py-3 fw-bold ls-1 border border-light-subtle rounded-pill">
+                                        </button>
+                                        <button type="button" onClick={() => setIsEditing(false)} className="btn btn-game btn-game-white px-3 py-1.5 smallest">
                                             CANCEL
                                         </button>
                                     </div>
@@ -496,18 +479,18 @@ const Profile: React.FC = () => {
                 </header>
 
                 {/* TABS NAVIGATION */}
-                <div className="d-flex justify-content-center mb-4 mb-md-5 tour-profile-tabs">
-                    <div className="nav nav-pills bg-light p-1 rounded-pill shadow-sm border border-white flex-nowrap overflow-auto hide-scrollbar" style={{ maxWidth: '100%' }}>
+                <div className="d-flex justify-content-center mb-4 tour-profile-tabs">
+                    <div className="nav nav-pills bg-white p-2 brutalist-card--sm rounded-pill shadow-action-sm flex-nowrap overflow-auto hide-scrollbar" style={{ maxWidth: '100%' }}>
                         <button
                             onClick={() => setActiveTab('overview')}
-                            className={`nav-link rounded-pill px-4 px-sm-5 py-2 fw-bold ls-1 smallest d-flex align-items-center justify-content-center transition-all ${activeTab === 'overview' ? 'bg-dark text-white active shadow-sm' : 'text-muted'}`}
+                            className={`nav-link rounded-pill px-4 py-1.5 fw-black ls-1 smallest d-flex align-items-center justify-content-center transition-all ${activeTab === 'overview' ? 'bg-dark text-white active shadow-action-sm' : 'text-muted'}`}
                             style={{ minWidth: 'fit-content' }}
                         >
                             <Gem size={14} className="me-2" /> PROGRESS
                         </button>
                         <button
                             onClick={() => setActiveTab('gear')}
-                            className={`nav-link rounded-pill px-4 px-sm-5 py-2 fw-bold ls-1 smallest d-flex align-items-center justify-content-center transition-all tour-gear-tab ${activeTab === 'gear' ? 'bg-dark text-white active shadow-sm' : 'text-muted'}`}
+                            className={`nav-link rounded-pill px-4 py-1.5 fw-black ls-1 smallest d-flex align-items-center justify-content-center transition-all tour-gear-tab ${activeTab === 'gear' ? 'bg-dark text-white active shadow-action-sm' : 'text-muted'}`}
                             style={{ minWidth: 'fit-content' }}
                         >
                             <Bell size={14} className="me-2" /> SETTINGS
@@ -518,69 +501,36 @@ const Profile: React.FC = () => {
                 {activeTab === 'overview' && (
                     <div className="animate__animated animate__fadeIn">
                         {/* MY PROGRESS JOURNEY SECTION */}
+                        {/* MY ACHIEVEMENTS SECTION */}
                         <section className="mb-5">
-                            <div className="d-flex justify-content-between align-items-end mb-4">
-                                <div className="w-100">
-                                    {/* TROPHY CASE */}
-                                    <div className="mb-5">
-                                        <div className="d-flex flex-column flex-md-row justify-content-between align-items-center mb-4 text-center text-md-start gap-3">
-                                            <div>
-                                                <h5 className="fw-bold mb-0 text-uppercase ls-2 smallest text-muted">Trophy Case</h5>
-                                                <h4 className="fw-bold text-dark mt-1">ACHIEVEMENTS</h4>
-                                            </div>
-                                            <button
-                                                onClick={() => navigate('/achievements')}
-                                                className="btn btn-link text-warning fw-bold smallest text-uppercase ls-1 p-0 text-decoration-none"
-                                            >
-                                                View All <i className="bi bi-arrow-right ms-1"></i>
-                                            </button>
-                                        </div>
-                                        <div className="d-flex flex-wrap justify-content-center justify-content-md-center gap-3 gap-md-4">
-                                            {[...ALL_TROPHIES]
-                                                .sort((a, b) => {
-                                                    const aEarned = (userData?.trophies || []).includes(a.id);
-                                                    const bEarned = (userData?.trophies || []).includes(b.id);
-                                                    if (aEarned && !bEarned) return -1;
-                                                    if (!aEarned && bEarned) return 1;
-                                                    return 0;
-                                                })
-                                                .slice(0, 3)
-                                                .map(trophy => {
-                                                    const isEarned = (userData?.trophies || []).includes(trophy.id);
-                                                    return (
-                                                        <div key={trophy.id} style={{ width: '100px' }}>
-                                                            <div
-                                                                className="d-flex flex-column align-items-center gap-2 w-100"
-                                                                title={trophy.description}
-                                                                style={{
-                                                                    cursor: 'pointer',
-                                                                    opacity: isEarned ? 1 : 0.5,
-                                                                    filter: isEarned ? 'none' : 'grayscale(1)'
-                                                                }}
-                                                                onClick={() => navigate('/achievements')}
-                                                            >
-                                                                <div className={`p-3 rounded-4 w-100 d-flex justify-content-center transition-all ${isEarned ? 'bg-white shadow-sm border border-warning' : 'bg-white border'}`}>
-                                                                    <TrophyIcon
-                                                                        rarity={trophy.rarity as any}
-                                                                        size={56}
-                                                                        animate={isEarned}
-                                                                        color={trophy.color}
-                                                                    />
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    );
-                                                })}
-                                        </div>
-                                    </div>
-
-                                </div>
+                            <div className="d-flex justify-content-between align-items-center mb-4">
+                                <h3 className="fw-black text-dark mb-0 ls-tight uppercase" style={{ fontSize: '1.25rem' }}>My Achievements</h3>
+                                <Link to="/achievements" className="smallest fw-black text-warning ls-1 uppercase text-decoration-none">VIEW ALL COLLECTION</Link>
                             </div>
+                            <div className="row g-3">
+                                {[...ALL_TROPHIES].slice(0, 6).map((trophy: any, idx: number) => {
+                                    const isEarned = (userData?.trophies || []).includes(trophy.id);
+                                    const progress = calculateProgress(trophy);
+                                    return (
+                                        <div key={trophy.id} className="col-6 col-md-4 col-lg-2 animate__animated animate__zoomIn" style={{ animationDelay: `${idx * 0.1}s` }}>
+                                            <AchievementCard
+                                                id={trophy.id}
+                                                color={trophy.color}
+                                                isEarned={isEarned}
+                                                progress={progress}
+                                                rarity={trophy.rarity as any}
+                                                onShare={handleShareAchievement}
+                                            />
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        </section>
 
 
 
                             {/* DAILY ACTIVITY LOG (Moved from Mastery) */}
-                            <div className="mt-5">
+                            <div className="mt-4">
                                 <StreakCalendar
                                     activityHistory={userData?.activityHistory || []}
                                     frozenDays={userData?.frozenDays || []}
@@ -591,7 +541,6 @@ const Profile: React.FC = () => {
                                     onShareClick={() => setIsShareStreakOpen(true)}
                                 />
                             </div>
-                        </section>
                     </div>
                 )}
 
@@ -599,42 +548,34 @@ const Profile: React.FC = () => {
                 {activeTab === 'gear' && (
                     <div className="animate__animated animate__fadeIn">
                         {/* LANGUAGE PREFERENCES */}
-                        <section className="mb-4">
-                            <div className="card border-0 shadow-sm rounded-4 p-4 bg-white overflow-hidden position-relative mb-4">
-                                <div className="d-flex align-items-center gap-2 mb-4">
-                                    <div className="bg-primary bg-opacity-10 p-2 rounded-3 text-primary">
-                                        <Globe size={20} />
+                        <section className="mb-5">
+                            <div className="brutalist-card p-4 shadow-action">
+                                <div className="d-flex align-items-center gap-3 mb-4">
+                                    <div className="bg-warning p-2 brutalist-card--sm rounded-3">
+                                        <Globe size={24} className="text-dark" />
                                     </div>
-                                    <h5 className="fw-bold mb-0 text-dark">Target Language</h5>
+                                    <h3 className="fw-black mb-0 text-dark">Target Language</h3>
                                 </div>
                                 <div className="row g-3">
                                     {languages.map((lang, idx) => (
                                         <div key={lang.id} className="col-6 col-md-4 animate__animated animate__fadeInUp" style={{ animationDelay: `${idx * 0.1}s` }}>
                                             <div
                                                 onClick={() => handleLanguageChange(lang.id)}
-                                                className={`p-3 rounded-4 border-2 text-center cursor-pointer transition-all h-100 d-flex flex-column justify-content-center hover-up ${userData?.preferredLanguageId === lang.id
-                                                        ? 'border-warning bg-white shadow'
-                                                        : 'border-light bg-light bg-opacity-50'
+                                                className={`p-3 brutalist-card--sm text-center cursor-pointer transition-all h-100 d-flex flex-column align-items-center justify-content-center hover-lift ${userData?.preferredLanguageId === lang.id
+                                                        ? 'bg-warning shadow-action-sm border-dark'
+                                                        : 'bg-white shadow-none'
                                                     }`}
+                                                style={{ minHeight: '100px' }}
                                             >
-                                                <h6 className={`fw-bold mb-1 ${userData?.preferredLanguageId === lang.id ? 'text-dark' : 'text-secondary'}`}>{lang.name}</h6>
-                                                <span className="smallest fw-extrabold ls-1 opacity-50 mb-2">{lang.code.toUpperCase()}</span>
-                                                {userData?.preferredLanguageId === lang.id ? (
-                                                    <div className="mt-1">
-                                                        <span
-                                                            className="badge smallest fw-bold ls-1 rounded-pill px-3 py-1 shadow-sm border border-warning"
-                                                            style={{
-                                                                fontSize: '9px',
-                                                                backgroundColor: '#FACC15',
-                                                                color: '#000000',
-                                                                display: 'inline-block'
-                                                            }}
-                                                        >
+                                                <span className="smallest-print fw-black text-muted mb-1 ls-2 uppercase opacity-75">{lang.code}</span>
+                                                <h6 className="fw-black mb-0 ls-tight uppercase text-dark" style={{ fontSize: '1rem' }}>{lang.name}</h6>
+                                                
+                                                {userData?.preferredLanguageId === lang.id && (
+                                                    <div className="mt-2">
+                                                        <span className="badge bg-dark text-white rounded-pill px-3 py-1 smallest-print fw-black ls-1 uppercase shadow-sm">
                                                             ACTIVE
                                                         </span>
                                                     </div>
-                                                ) : (
-                                                    <div style={{ height: '20px' }}></div> // Spacer to maintain uniform height
                                                 )}
                                             </div>
                                         </div>
@@ -645,65 +586,65 @@ const Profile: React.FC = () => {
 
                         {/* NOTIFICATION PREFERENCES */}
                         <section className="mb-5">
-                            <div className="card border-0 shadow-sm rounded-4 p-4 bg-white overflow-hidden position-relative mb-4">
-                                <div className="d-flex align-items-center gap-2 mb-4">
-                                    <div className="bg-warning bg-opacity-10 p-2 rounded-3 text-warning">
-                                        <Bell size={20} />
+                            <div className="brutalist-card p-4 shadow-action">
+                                <div className="d-flex align-items-center gap-3 mb-4">
+                                    <div className="bg-warning p-2 brutalist-card--sm rounded-3">
+                                        <Bell size={24} className="text-dark" />
                                     </div>
-                                    <h5 className="fw-bold mb-0 text-dark">Learning Reminders</h5>
+                                    <h3 className="fw-black mb-0 text-dark">Learning Reminders</h3>
                                 </div>
 
                                 <div className="row align-items-center g-4">
                                     <div className="col-md-7">
-                                        <p className="small text-muted mb-0">
-                                            Set a daily reminder to keep your streak alive and make steady progress in your language-learning journey.
+                                        <p className="small fw-bold text-muted mb-0 uppercase ls-1">
+                                            Don't break your streak! Set a reminder to keep your daily learning habit strong.
                                         </p>
                                     </div>
                                     <div className="col-md-5">
                                         <div className="d-flex flex-column gap-3">
                                             <div className="form-check form-switch d-flex align-items-center gap-3 ps-0 mb-0">
-                                                <input
-                                                    className="form-check-input ms-0"
-                                                    type="checkbox"
-                                                    role="switch"
-                                                    id="reminderSwitch"
-                                                    checked={reminderEnabled}
-                                                    onChange={async (e) => {
-                                                        const enabled = e.target.checked;
-                                                        if (enabled) {
-                                                            const granted = await requestNotificationPermission();
-                                                            if (!granted) {
-                                                                Swal.fire({
-                                                                    title: 'Permission Required',
-                                                                    text: 'Please enable notifications in your browser to receive reminders.',
-                                                                    icon: 'info',
-                                                                    confirmButtonColor: '#111827'
-                                                                });
-                                                                return;
+                                                    <input
+                                                        className="form-check-input ms-0 border border-dark border-2"
+                                                        type="checkbox"
+                                                        role="switch"
+                                                        id="reminderSwitch"
+                                                        checked={reminderEnabled}
+                                                        onChange={async (e) => {
+                                                            const enabled = e.target.checked;
+                                                            if (enabled) {
+                                                                const granted = await requestNotificationPermission();
+                                                                if (!granted) {
+                                                                    Swal.fire({
+                                                                        title: 'Permission Required',
+                                                                        text: 'Please enable notifications in your browser to receive reminders.',
+                                                                        icon: 'info',
+                                                                        confirmButtonColor: '#111827'
+                                                                    });
+                                                                    return;
+                                                                }
                                                             }
-                                                        }
-                                                        setReminderEnabled(enabled);
-                                                        await updateReminderSettings({
-                                                            reminderEnabled: enabled,
-                                                            reminderTime
-                                                        });
-                                                        if (enabled) {
-                                                            Swal.fire({
-                                                                title: 'Push Alerts Enabled!',
-                                                                text: 'You will now receive external notifications for your reminders.',
-                                                                icon: 'success',
-                                                                toast: true,
-                                                                position: 'top-end',
-                                                                timer: 3000,
-                                                                showConfirmButton: false
+                                                            setReminderEnabled(enabled);
+                                                            await updateReminderSettings({
+                                                                reminderEnabled: enabled,
+                                                                reminderTime
                                                             });
-                                                        }
-                                                    }}
-                                                    style={{ width: '45px', height: '24px', cursor: 'pointer' }}
-                                                />
-                                                <label className="form-check-label small fw-bold text-dark cursor-pointer" htmlFor="reminderSwitch">
-                                                    {reminderEnabled ? 'Daily Reminders On' : 'Daily Reminders Off'}
-                                                </label>
+                                                            if (enabled) {
+                                                                Swal.fire({
+                                                                    title: 'Push Alerts Enabled!',
+                                                                    text: 'You will now receive external notifications for your reminders.',
+                                                                    icon: 'success',
+                                                                    toast: true,
+                                                                    position: 'top-end',
+                                                                    timer: 3000,
+                                                                    showConfirmButton: false
+                                                                });
+                                                            }
+                                                        }}
+                                                        style={{ width: '45px', height: '24px', cursor: 'pointer', backgroundColor: reminderEnabled ? '#FACC15' : '#eee' }}
+                                                    />
+                                                    <label className="form-check-label small fw-black text-dark cursor-pointer uppercase ls-1" htmlFor="reminderSwitch">
+                                                        {reminderEnabled ? 'Reminders Active' : 'Reminders Disabled'}
+                                                    </label>
                                             </div>
 
                                             {reminderEnabled && (
@@ -745,7 +686,7 @@ const Profile: React.FC = () => {
                                                                 });
                                                             }
                                                         }}
-                                                        className="btn btn-outline-warning btn-sm border-2 fw-bold ls-1 smallest rounded-pill py-2"
+                                                        className="btn btn-game btn-game-primary smallest px-4"
                                                         style={{ width: 'fit-content' }}
                                                     >
                                                         SEND TEST POP-UP
@@ -760,8 +701,8 @@ const Profile: React.FC = () => {
                                                     </div>
                                                     <input
                                                         type="time"
-                                                        className="form-control form-control-sm border-0 bg-light p-2 rounded-3 fw-bold"
-                                                        style={{ width: '120px' }}
+                                                        className="brutalist-card--sm border-dark bg-light p-2 h-auto fw-black uppercase"
+                                                        style={{ width: '130px' }}
                                                         value={reminderTime}
                                                         onChange={async (e) => {
                                                             const time = e.target.value;
@@ -772,7 +713,7 @@ const Profile: React.FC = () => {
                                                             });
                                                         }}
                                                     />
-                                                    <span className="smallest fw-bold text-muted text-uppercase ls-1">Daily</span>
+                                                    <span className="smallest fw-black text-dark text-uppercase ls-1">Daily</span>
                                                 </div>
                                             )}
                                         </div>
@@ -781,59 +722,59 @@ const Profile: React.FC = () => {
                             </div>
 
                             {/* AUDIO & TACTILE PREFERENCES */}
-                            <div className="card border-0 shadow-sm rounded-4 p-4 bg-white overflow-hidden position-relative mb-4">
-                                <div className="d-flex align-items-center gap-2 mb-4">
-                                    <div className="bg-primary bg-opacity-10 p-2 rounded-3 text-primary">
-                                        <Flame size={20} />
+                            <div className="brutalist-card p-4 shadow-action mb-5">
+                                <div className="d-flex align-items-center gap-3 mb-4">
+                                    <div className="bg-warning p-2 brutalist-card--sm rounded-3">
+                                        <Flame size={24} className="text-dark" />
                                     </div>
-                                    <h5 className="fw-bold mb-0 text-dark">Audio & Tactile Feedback</h5>
+                                    <h3 className="fw-black mb-0 text-dark">Game Feedback</h3>
                                 </div>
 
                                 <div className="row g-4">
                                     <div className="col-md-6">
                                         <div className="form-check form-switch d-flex align-items-center gap-3 ps-0 mb-3">
-                                            <input
-                                                className="form-check-input ms-0"
-                                                type="checkbox"
-                                                role="switch"
-                                                id="soundSwitch"
-                                                checked={soundEnabled}
-                                                onChange={async (e) => {
-                                                    const enabled = e.target.checked;
-                                                    setSoundEnabled(enabled);
-                                                    const userRef = doc(db, "users", auth.currentUser!.uid);
-                                                    await updateDoc(userRef, { soundEnabled: enabled });
-                                                    invalidateCache(`user_${auth.currentUser!.uid}`);
-                                                }}
-                                                style={{ width: '45px', height: '24px', cursor: 'pointer' }}
-                                            />
-                                            <label className="form-check-label small fw-bold text-dark cursor-pointer" htmlFor="soundSwitch">
-                                                Sound Effects {soundEnabled ? 'On' : 'Off'}
-                                            </label>
+                                                <input
+                                                    className="form-check-input ms-0 border border-dark border-2"
+                                                    type="checkbox"
+                                                    role="switch"
+                                                    id="soundSwitch"
+                                                    checked={soundEnabled}
+                                                    onChange={async (e) => {
+                                                        const enabled = e.target.checked;
+                                                        setSoundEnabled(enabled);
+                                                        const userRef = doc(db, "users", auth.currentUser!.uid);
+                                                        await updateDoc(userRef, { soundEnabled: enabled });
+                                                        invalidateCache(`user_${auth.currentUser!.uid}`);
+                                                    }}
+                                                    style={{ width: '45px', height: '24px', cursor: 'pointer', backgroundColor: soundEnabled ? '#f59e0b' : '#eee' }}
+                                                />
+                                                <label className="form-check-label small fw-black text-dark cursor-pointer uppercase ls-1" htmlFor="soundSwitch">
+                                                    SFX {soundEnabled ? 'Enabled' : 'Muted'}
+                                                </label>
                                         </div>
                                         <p className="smallest text-muted mb-0 ps-5 ms-3">Play subtle sounds during navigation and games.</p>
                                     </div>
 
                                     <div className="col-md-6">
                                         <div className="form-check form-switch d-flex align-items-center gap-3 ps-0 mb-3">
-                                            <input
-                                                className="form-check-input ms-0"
-                                                type="checkbox"
-                                                role="switch"
-                                                id="hapticSwitch"
-                                                checked={hapticEnabled}
-                                                onChange={async (e) => {
-                                                    const enabled = e.target.checked;
-                                                    setHapticEnabled(enabled);
-                                                    const userRef = doc(db, "users", auth.currentUser!.uid);
-                                                    await updateDoc(userRef, { hapticEnabled: enabled });
-                                                    invalidateCache(`user_${auth.currentUser!.uid}`);
-                                                }}
-                                                style={{ width: '45px', height: '24px', cursor: 'pointer' }}
-                                            />
-                                            <label className="form-check-label small fw-bold text-dark cursor-pointer" htmlFor="hapticSwitch">
-                                                Haptic Feedback {hapticEnabled ? 'On' : 'Off'}
-                                            </label>
+                                                <input
+                                                    className="form-check-input ms-0 border border-dark border-2"
+                                                    type="checkbox"
+                                                    role="switch"
+                                                    id="hapticSwitch"
+                                                    checked={hapticEnabled}
+                                                    onChange={async (e) => {
+                                                        const enabled = e.target.checked;
+                                                        setHapticEnabled(enabled);
+                                                        const userRef = doc(db, "users", auth.currentUser!.uid);
+                                                        await updateDoc(userRef, { hapticEnabled: enabled });
+                                                        invalidateCache(`user_${auth.currentUser!.uid}`);
+                                                    }}
+                                                    style={{ width: '45px', height: '24px', cursor: 'pointer', backgroundColor: hapticEnabled ? '#f59e0b' : '#eee' }}
+                                                />
+                                                <label className="form-check-label small fw-black text-dark cursor-pointer uppercase ls-1" htmlFor="hapticSwitch">
+                                                    Haptics {hapticEnabled ? 'Active' : 'Silent'}
+                                                </label>
                                         </div>
                                         <p className="smallest text-muted mb-0 ps-5 ms-3">Feel subtle vibrations on your mobile device.</p>
                                     </div>
@@ -843,39 +784,39 @@ const Profile: React.FC = () => {
                             {/* LEGAL SECTION */}
                             <Link
                                 to="/legal"
-                                className="card border-0 shadow-sm rounded-4 p-4 bg-white overflow-hidden position-relative mb-4 text-decoration-none hover-up transition-all"
+                                className="brutalist-card p-4 shadow-action mb-5 text-decoration-none hover-up transition-all d-block"
                             >
                                 <div className="d-flex align-items-center justify-content-between">
-                                    <div className="d-flex align-items-center gap-3">
-                                        <div className="bg-primary bg-opacity-10 p-2 rounded-3 text-primary">
-                                            <Shield size={20} />
+                                    <div className="d-flex align-items-center gap-4">
+                                        <div className="bg-warning p-2 brutalist-card--sm rounded-3">
+                                            <Shield size={24} className="text-dark" />
                                         </div>
                                         <div>
-                                            <h5 className="fw-bold mb-1 text-dark">Legal & Policies</h5>
-                                            <p className="smallest text-muted mb-0">Privacy, Terms, DMCA & POPI Act</p>
+                                            <h3 className="fw-black mb-1 text-dark uppercase">Legal & Policies</h3>
+                                            <p className="smallest fw-bold text-muted mb-0 ls-1 uppercase">Privacy, Terms, DMCA & POPI Act</p>
                                         </div>
                                     </div>
-                                    <ChevronRight size={20} className="text-muted" />
+                                    <ChevronRight size={24} className="text-dark" />
                                 </div>
                             </Link>
 
                             {/* REVIEW / FEEDBACK SECTION */}
                             <button
                                 onClick={() => setShowReviewModal(true)}
-                                className="w-100 text-start border-0 p-0 bg-transparent mb-4"
+                                className="w-100 text-start border-0 p-0 bg-transparent mb-5"
                             >
-                                <div className="card border-0 shadow-sm rounded-4 p-4 bg-white overflow-hidden position-relative hover-up transition-all">
+                                <div className="brutalist-card p-4 shadow-action hover-up transition-all">
                                     <div className="d-flex align-items-center justify-content-between">
-                                        <div className="d-flex align-items-center gap-3">
-                                            <div className="bg-warning bg-opacity-10 p-2 rounded-3 text-warning">
-                                                <Star size={20} />
+                                        <div className="d-flex align-items-center gap-4">
+                                            <div className="bg-warning p-2 brutalist-card--sm rounded-3">
+                                                <Star size={24} className="text-dark" />
                                             </div>
                                             <div>
-                                                <h5 className="fw-bold mb-1 text-dark">Leave a Review</h5>
-                                                <p className="smallest text-muted mb-0">Help us improve your South African languages learning journey</p>
+                                                <h3 className="fw-black mb-1 text-dark uppercase">Leave a Review</h3>
+                                                <p className="smallest fw-bold text-muted mb-0 ls-1 uppercase">Help us improve the Venda Learn experience</p>
                                             </div>
                                         </div>
-                                        <ChevronRight size={20} className="text-muted" />
+                                        <ChevronRight size={24} className="text-dark" />
                                     </div>
                                 </div>
                             </button>
@@ -940,15 +881,6 @@ const Profile: React.FC = () => {
                 .smallest { font-size: 11px; }
                 .uppercase { text-transform: uppercase; }
                 
-                .game-btn-primary { 
-                    background-color: #FACC15 !important; 
-                    color: #111827 !important; 
-                    border: none !important; 
-                    border-radius: 8px; 
-                    box-shadow: 0 4px 0 #EAB308 !important; 
-                    transition: all 0.2s; 
-                }
-                .game-btn-primary:active { transform: translateY(2px); box-shadow: 0 2px 0 #EAB308 !important; }
 
                 .hover-up:hover { transform: translateY(-5px); }
                 .transition-all { transition: all 0.3s ease; }
