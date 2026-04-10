@@ -104,7 +104,7 @@ The app includes a built-in **Admin Panel** for managing lessons and a robust **
 ---
 
 ## 🎨 Design Philosophy
-Venda Learn uses a **Premium Slate & Amber** palette. Every interaction is designed to feel alive, with subtle micro-animations and smooth transitions that respect user focus. **Note: No purple colors are used in the platform design.**
+Venda Learn uses a **Premium Slate & Amber** palette. Every interaction is designed to feel alive, with subtle micro-animations and smooth transitions that respect user focus.
 
 ---
 *Built with ❤️ for the Venda Community.*
