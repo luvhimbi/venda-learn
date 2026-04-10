@@ -5,11 +5,12 @@ import { useNavigate } from 'react-router-dom';
 import { fetchLessons, fetchUserData, getMicroLessons, fetchLanguages, invalidateCache } from '../../services/dataCache';
 import { doc, updateDoc } from 'firebase/firestore';
 import { db } from '../../services/firebaseConfig';
-import { Key, BookOpen, MessageSquare, Star, Lightbulb, CheckSquare, Zap, Globe, ChevronRight, ArrowLeft, Check } from 'lucide-react';
+import { Key, BookOpen, MessageSquare, Star, Lightbulb, CheckSquare, Zap, Globe, ChevronRight, ArrowLeft, Check, Lock } from 'lucide-react';
 import { motion } from 'framer-motion';
 import Skeleton from 'react-loading-skeleton';
 import 'react-loading-skeleton/dist/skeleton.css';
 import JuicyButton from '../../components/JuicyButton';
+import LanguageCharacter from '../../components/illustrations/LanguageCharacters';
 import '../../styles/learning-grid.css';
 
 const CARD_THEMES = [
@@ -134,9 +135,9 @@ const Courses: React.FC = () => {
             <div className="container pt-2 pb-4" style={{ maxWidth: '1000px' }}>
 
                 {/* NAVIGATION */}
-                <div className="d-flex justify-content-between align-items-center mb-3">
+                <div className="d-flex flex-column flex-md-row justify-content-between align-items-center gap-3 mb-4 mb-md-3">
                     <JuicyButton
-                        className="btn btn-link text-decoration-none p-0 d-flex align-items-center gap-2 text-dark fw-bold smallest ls-1 text-uppercase"
+                        className="btn btn-link text-decoration-none p-0 d-flex align-items-center justify-content-center justify-content-md-start gap-2 text-dark fw-bold smallest ls-1 text-uppercase"
                         onClick={() => navigate('/')}
                     >
                         <ArrowLeft size={16} /> Home
@@ -156,7 +157,7 @@ const Courses: React.FC = () => {
                 {!selectedLanguageId ? (
                     <div className="animate__animated animate__fadeIn">
                         <header className="mb-5 text-center">
-                            <h2 className="fw-bold mb-2 ls-tight" style={{ fontSize: '2.5rem' }}>Select Your Path</h2>
+                            <h2 className="fw-bold mb-2 ls-tight text-dark" style={{ fontSize: '2.5rem' }}>Select Your Path</h2>
                             <p className="text-muted small">Choose a language course to begin your learning journey.</p>
                         </header>
 
@@ -168,21 +169,22 @@ const Courses: React.FC = () => {
                                         className="course-card-professional p-4 shadow-sm"
                                         style={{ transition: 'all 0.3s ease', minHeight: '120px' }}
                                     >
-                                        <div className="d-flex align-items-center justify-content-between">
-                                            <div className="d-flex align-items-center gap-4">
-                                                <div className="bg-light p-3 rounded-4 border">
-                                                    <Globe size={28} className="text-dark" />
+                                        <div className="d-flex flex-column flex-md-row align-items-center justify-content-between gap-3 text-center text-md-start">
+                                            <div className="d-flex flex-column flex-md-row align-items-center gap-3 gap-md-4">
+                                                <div className="bg-white p-0 rounded-4 border overflow-hidden d-flex align-items-center justify-content-center" 
+                                                     style={{ width: '100px', height: '100px', flexShrink: 0 }}>
+                                                    <LanguageCharacter languageName={lang.name} style={{ height: '90%', width: 'auto' }} />
                                                 </div>
                                                 <div>
-                                                    <h4 className="fw-bold text-dark mb-0" style={{ fontSize: '1.6rem' }}>{lang.name}</h4>
-                                                    <p className="smallest text-muted fw-bold ls-1 uppercase opacity-75 mb-0">Explore Library</p>
+                                                    <h4 className="fw-bold text-dark mb-1" style={{ fontSize: '1.6rem' }}>{lang.name}</h4>
+                                                    <p className="smallest text-muted fw-bold ls-1 uppercase opacity-75 mb-0">Explore {lang.name} Library</p>
                                                 </div>
                                             </div>
-                                            <div className="d-flex align-items-center gap-3">
+                                            <div className="d-flex align-items-center gap-3 mt-2 mt-md-0">
                                                 <span className="badge bg-light text-muted border fw-bold ls-1 px-3 py-2" style={{ fontSize: '12px' }}>
                                                     {lang.code?.toUpperCase()}
                                                 </span>
-                                                <ChevronRight size={20} className="text-warning" />
+                                                <ChevronRight size={24} className="text-warning d-none d-md-block" />
                                             </div>
                                         </div>
                                     </div>
@@ -193,22 +195,30 @@ const Courses: React.FC = () => {
                 ) : (
                     <>
                         {/* HEADER */}
-                        <header className="learning-header">
-                            <div className="d-flex align-items-center gap-2 mb-3">
-                                <span className="badge bg-warning text-dark px-3 py-2 fw-bold smallest ls-1 rounded-3">
-                                    {languages.find(l => l.id === selectedLanguageId)?.name.toUpperCase() || 'LANGUAGE'}
-                                </span>
+                        <header className="learning-header d-flex flex-column flex-md-row align-items-center gap-3 gap-md-4 mb-4 text-center text-md-start mt-3 mt-md-0">
+                            <div className="bg-white border rounded-4 shadow-sm p-2 d-flex align-items-center justify-content-center" style={{ width: 100, height: 100, flexShrink: 0 }}>
+                                <LanguageCharacter 
+                                    languageName={languages.find(l => l.id === selectedLanguageId)?.name} 
+                                    style={{ height: '100%', width: 'auto' }} 
+                                />
                             </div>
-                            <div className="d-md-flex align-items-end justify-content-between gap-4">
-                                <div>
-                                    <h2 className="mb-1">Learning Path</h2>
-                                    <p className="mb-0">Structured courses to help you master {languages.find(l => l.id === selectedLanguageId)?.name}.</p>
+                            <div className="flex-grow-1 w-100">
+                                <div className="d-flex align-items-center justify-content-center justify-content-md-start gap-2 mb-2">
+                                    <span className="badge bg-warning text-dark px-3 py-2 fw-bold smallest ls-1 rounded-3">
+                                        {languages.find(l => l.id === selectedLanguageId)?.name.toUpperCase() || 'LANGUAGE'}
+                                    </span>
                                 </div>
-
+                                <div className="d-flex flex-column flex-md-row align-items-center align-items-md-end justify-content-between gap-2 gap-md-4">
+                                    <div className="w-100">
+                                        <h2 className="mb-1 fw-bold">Learning Path</h2>
+                                        <p className="mb-0 text-muted">Structured courses to help you master {languages.find(l => l.id === selectedLanguageId)?.name}.</p>
+                                    </div>
+                                </div>
                             </div>
+                        </header>
 
                             {!isLoggedIn && (
-                                <div className="mt-4 p-4 rounded-4 d-flex align-items-center gap-3 bg-white border shadow-sm">
+                                <div className="mt-4 p-4 rounded-4 d-flex flex-column flex-md-row align-items-center gap-3 bg-white border shadow-sm text-center text-md-start">
                                     <div className="bg-warning bg-opacity-10 p-3 rounded-circle text-warning">
                                         <Key size={30} />
                                     </div>
@@ -216,12 +226,12 @@ const Courses: React.FC = () => {
                                         <h6 className="fw-bold text-dark mb-1">Sign in to save progress</h6>
                                         <p className="small text-muted mb-0">Your learning data will be synced across all your devices.</p>
                                     </div>
-                                    <JuicyButton onClick={() => navigate('/login')} className="btn btn-sm btn-dark rounded-pill px-4 py-2 fw-bold smallest ls-1 text-nowrap">
+                                    <JuicyButton onClick={() => navigate('/login')} className="btn btn-sm btn-dark rounded-pill px-4 py-2 fw-bold smallest ls-1 text-nowrap w-100 w-md-auto mt-2 mt-md-0">
                                         SIGN IN
                                     </JuicyButton>
                                 </div>
                             )}
-                        </header>
+
 
                         {/* COURSE GRID */}
                         {(() => {
@@ -240,15 +250,6 @@ const Courses: React.FC = () => {
                                             const isUnlocked = globalIdx <= (maxCompletedIdx + 1) || hasStarted;
                                             const progress = getCourseProgress(course);
                                             const theme = CARD_THEMES[globalIdx % CARD_THEMES.length];
-
-                                            const borderColor = isDone
-                                                ? '#22c55e'
-                                                : hasStarted
-                                                    ? '#3b82f6'
-                                                    : !isUnlocked
-                                                        ? '#cbd5e1'
-                                                        : '#e2e8f0';
-
                                             return (
                                                 <motion.div
                                                     key={course.id}
@@ -261,10 +262,17 @@ const Courses: React.FC = () => {
                                                     style={{
                                                         '--theme-color': theme.bg,
                                                         '--theme-hover': theme.border,
-                                                        borderColor: borderColor,
-                                                        borderBottomColor: isDone ? '#16a34a' : hasStarted ? '#2563eb' : !isUnlocked ? '#94a3b8' : '#e2e8f0',
                                                     } as any}
                                                 >
+                                                    {!isUnlocked && (
+                                                        <div className="locked-overlay">
+                                                            <div className="locked-badge">
+                                                                <Lock size={16} className="d-none d-md-block" />
+                                                                <Lock size={16} className="d-block d-md-none mb-1" />
+                                                                <span>FINISH PREVIOUS</span>
+                                                            </div>
+                                                        </div>
+                                                    )}
                                                     <div className="d-flex justify-content-between align-items-start mb-2">
                                                         <div>
                                                             <div className="card-title text-truncate-2 mb-0" style={{ minHeight: 'auto' }}>{course.title}</div>
@@ -278,22 +286,35 @@ const Courses: React.FC = () => {
                                                     </div>
 
                                                     <div className="card-footer-progress">
-                                                        <div className="progress-text">
-                                                            <span>PROGRESS</span>
-                                                            <span>{progress.percent}%</span>
-                                                        </div>
-                                                        <div className="professional-progress-container mb-2">
-                                                            <div
-                                                                className="professional-progress-bar"
-                                                                style={{
-                                                                    width: `${progress.percent}%`,
-                                                                    '--theme-color': theme.progress
-                                                                } as any}
-                                                            ></div>
-                                                        </div>
-                                                        <div className="smallest fw-bold text-muted ls-1 uppercase opacity-50">
-                                                            {progress.completed} / {progress.total} Sections
-                                                        </div>
+                                                        {isUnlocked ? (
+                                                            <>
+                                                                <div className="progress-text">
+                                                                    <span>PROGRESS</span>
+                                                                    <span>{progress.percent}%</span>
+                                                                </div>
+                                                                <div className="professional-progress-container mb-2">
+                                                                    <div
+                                                                        className="professional-progress-bar"
+                                                                        style={{
+                                                                            width: `${progress.percent}%`,
+                                                                            backgroundColor: isDone ? 'var(--venda-green)' : 'var(--venda-yellow)'
+                                                                        } as any}
+                                                                    ></div>
+                                                                </div>
+                                                                <div className="smallest fw-bold text-dark ls-1 uppercase opacity-75">
+                                                                    {progress.completed} / {progress.total} Sections Complete
+                                                                </div>
+                                                            </>
+                                                        ) : (
+                                                            <div className="d-flex align-items-center justify-content-between h-100 mt-2">
+                                                                <span className="smallest fw-bold text-dark ls-1 uppercase opacity-75">
+                                                                    {progress.total} Sections
+                                                                </span>
+                                                                <span className="smallest fw-bold text-muted ls-1 uppercase opacity-50">
+                                                                    LOCKED
+                                                                </span>
+                                                            </div>
+                                                        )}
                                                     </div>
                                                 </motion.div>
                                             );
@@ -304,7 +325,7 @@ const Courses: React.FC = () => {
                                     {totalPages > 1 && (
                                         <div className="d-flex justify-content-center align-items-center gap-2 mt-5">
                                             <JuicyButton
-                                                className="btn btn-outline-dark border-2 px-3 py-2 fw-bold smallest ls-1 rounded-3"
+                                                className="btn pagination-btn px-4 py-2"
                                                 disabled={currentPage === 1}
                                                 onClick={() => setCurrentPage(p => p - 1)}
                                             >
@@ -313,15 +334,14 @@ const Courses: React.FC = () => {
                                             {[...Array(totalPages)].map((_, i) => (
                                                 <JuicyButton
                                                     key={i}
-                                                    className={`btn px-3 py-2 fw-bold smallest ls-1 rounded-3 ${currentPage === i + 1 ? 'text-dark' : 'btn-outline-secondary'}`}
-                                                    style={currentPage === i + 1 ? { backgroundColor: '#FACC15', border: 'none', boxShadow: '0 2px 0 #EAB308' } : {}}
+                                                    className={`btn pagination-btn px-3 py-2 ${currentPage === i + 1 ? 'active' : ''}`}
                                                     onClick={() => setCurrentPage(i + 1)}
                                                 >
                                                     {i + 1}
                                                 </JuicyButton>
                                             ))}
                                             <JuicyButton
-                                                className="btn btn-outline-dark border-2 px-3 py-2 fw-bold smallest ls-1 rounded-3"
+                                                className="btn pagination-btn px-4 py-2"
                                                 disabled={currentPage === totalPages}
                                                 onClick={() => setCurrentPage(p => p + 1)}
                                             >

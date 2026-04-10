@@ -198,7 +198,8 @@ const Register: React.FC = () => {
 
                     <button
                         type="submit"
-                        className="btn w-100 fw-black py-3 mb-4 btn-primary border border-4 border-dark rounded-0 shadow-action text-uppercase ls-1 btn-press"
+                        className="btn w-100 fw-black py-3 mb-4 text-dark border border-4 border-dark rounded-0 shadow-action text-uppercase ls-1 hover-press"
+                        style={{ backgroundColor: 'var(--venda-yellow)' }}
                         disabled={loading}
                     >
                         {loading ? <Loader2 className="animate-spin" size={20} /> : step === 3 ? 'Register Sharp-Sharp' : 'Continue'}
@@ -215,7 +216,7 @@ const Register: React.FC = () => {
 
                         <button
                             onClick={handleGoogleSignIn}
-                            className="btn w-100 fw-black py-3 bg-white border border-4 border-dark rounded-0 shadow-action d-flex align-items-center justify-content-center text-uppercase smallest ls-1 btn-press mb-4"
+                            className="btn w-100 fw-black py-3 bg-white border border-4 border-dark rounded-0 shadow-action d-flex align-items-center justify-content-center text-uppercase smallest ls-1 hover-press text-dark mb-4"
                             disabled={loading}
                         >
                             <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google" className="me-2" style={{ width: '20px' }} />
@@ -225,8 +226,8 @@ const Register: React.FC = () => {
                 )}
 
                 <div className="text-center mt-4">
-                    <p className="fw-bold smallest text-uppercase">
-                        Got an account? <Link to="/login" className="fw-black text-decoration-underline" style={{ color: '#000' }}>Log In</Link>
+                    <p className="fw-bold smallest text-uppercase text-dark">
+                        Got an account? <Link to="/login" className="fw-black text-decoration-underline text-dark">Log In</Link>
                     </p>
                 </div>
             </div>

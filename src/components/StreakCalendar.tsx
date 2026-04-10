@@ -19,12 +19,12 @@ interface CalendarDay {
     isToday: boolean;
 }
 
-const StreakCalendar: React.FC<StreakCalendarProps> = ({ 
-    activityHistory, 
+const StreakCalendar: React.FC<StreakCalendarProps> = ({
+    activityHistory,
     frozenDays = [],
-    streakFreezes, 
-    points, 
-    streak = 0, 
+    streakFreezes,
+    points,
+    streak = 0,
     onBuyFreeze,
     onShareClick
 }) => {
@@ -40,14 +40,14 @@ const StreakCalendar: React.FC<StreakCalendarProps> = ({
     const generateDays = () => {
         const days: (CalendarDay | null)[] = [];
         const numDays = daysInMonthCount(viewDate.getFullYear(), viewDate.getMonth());
-        
+
         // Monday start adjustment
         const adjustedStart = (firstDayOfMonth + 6) % 7;
-        
+
         for (let i = 0; i < adjustedStart; i++) {
             days.push(null);
         }
-        
+
         for (let d = 1; d <= numDays; d++) {
             const dateStr = `${viewDate.getFullYear()}-${String(viewDate.getMonth() + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
             days.push({
@@ -68,7 +68,7 @@ const StreakCalendar: React.FC<StreakCalendarProps> = ({
     return (
         <div className="unified-streak-calendar rounded-3xl overflow-hidden border border-slate-200 bg-white shadow-sm animate__animated animate__fadeIn">
 
-            
+
             <div className="p-4">
                 {/* Header with Streak and Stats */}
                 <div className="d-flex flex-column flex-md-row justify-content-between align-items-center gap-4 mb-4 pb-4 border-bottom border-slate-100">
@@ -84,10 +84,10 @@ const StreakCalendar: React.FC<StreakCalendarProps> = ({
                             </div>
                         </div>
                     </div>
-                    
+
                     <div className="d-flex gap-2">
                         {onShareClick && (
-                            <button 
+                            <button
                                 onClick={onShareClick}
                                 className="btn btn-danger d-flex align-items-center gap-2 px-3 py-2 rounded-xl border-0 shadow-sm transition-all"
                             >
@@ -109,13 +109,13 @@ const StreakCalendar: React.FC<StreakCalendarProps> = ({
                             <span className="small fw-bold text-slate-600 uppercase tracking-widest">{monthName} {year}</span>
                         </div>
                         <div className="d-flex align-items-center gap-1">
-                            <button 
+                            <button
                                 onClick={() => setViewDate(new Date(viewDate.getFullYear(), viewDate.getMonth() - 1, 1))}
                                 className="btn btn-light btn-sm rounded-lg p-1 border-slate-200"
                             >
                                 <ChevronLeft size={18} />
                             </button>
-                            <button 
+                            <button
                                 onClick={() => setViewDate(new Date(viewDate.getFullYear(), viewDate.getMonth() + 1, 1))}
                                 className="btn btn-light btn-sm rounded-lg p-1 border-slate-200"
                             >
@@ -128,12 +128,12 @@ const StreakCalendar: React.FC<StreakCalendarProps> = ({
                         {weekDays.map((wd, i) => (
                             <div key={i} className="text-center smallest fw-bold text-slate-400 uppercase mb-2">{wd}</div>
                         ))}
-                        
+
                         {days.map((day, idx) => {
                             if (!day) return <div key={`empty-${idx}`} className="calendar-node empty"></div>;
                             return (
-                                <div 
-                                    key={idx} 
+                                <div
+                                    key={idx}
                                     className={`calendar-node-cell d-flex flex-column align-items-center justify-content-center`}
                                 >
                                     <div className={`calendar-node ${day.active ? 'active' : ''} ${day.frozen ? 'frozen' : ''} ${day.isToday ? 'today' : ''}`}>
@@ -154,11 +154,11 @@ const StreakCalendar: React.FC<StreakCalendarProps> = ({
                                 <Shield size={24} fill="currentColor" opacity={0.15} strokeWidth={2} />
                             </div>
                             <div>
-                                <h5 className="fw-bold mb-0 text-slate-900">{streakFreezes} Streak Freezes</h5>
-                                <p className="smallest fw-bold text-slate-400 uppercase tracking-widest mb-0 mt-1">Status: {streakFreezes > 0 ? 'Protected' : 'At Risk'}</p>
+                                <h5 className="fw-bold mb-0 text-dark">{streakFreezes} Streak Freezes</h5>
+                                <p className="smallest fw-bold text-secondary uppercase tracking-widest mb-0 mt-1">Status: {streakFreezes > 0 ? 'Protected' : 'At Risk'}</p>
                             </div>
                         </div>
-                        
+
                         <div className="d-flex flex-column gap-2 align-items-stretch min-w-[140px]">
                             <button
                                 onClick={onBuyFreeze}

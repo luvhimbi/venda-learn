@@ -5,6 +5,7 @@ import AdminNavbar from '../../components/AdminNavbar';
 import { invalidateCache } from '../../services/dataCache';
 import Swal from 'sweetalert2';
 import { Globe, Edit, Loader2, Plus, X, Languages } from 'lucide-react';
+import LanguageCharacter from '../../components/illustrations/LanguageCharacters';
 
 interface LanguageEntry {
     id: string;
@@ -182,9 +183,14 @@ const AdminLanguages: React.FC = () => {
                             <div key={lang.id} className="col-md-6 col-lg-4">
                                 <div className="bg-white border rounded-4 shadow-sm p-4 h-100 lang-card">
                                     <div className="d-flex justify-content-between align-items-start mb-3">
-                                        <div>
-                                            <h4 className="fw-bold mb-0" style={{ color: '#111827' }}>{lang.name}</h4>
-                                            <p className="smallest fw-bold text-warning ls-1 text-uppercase mb-0">Code: {lang.code}</p>
+                                        <div className="d-flex align-items-center gap-3">
+                                            <div className="bg-light rounded-3 p-1 d-flex align-items-center justify-content-center" style={{ width: 60, height: 60, flexShrink: 0 }}>
+                                                <LanguageCharacter languageName={lang.name} style={{ height: '100%', width: 'auto' }} />
+                                            </div>
+                                            <div>
+                                                <h4 className="fw-bold mb-0" style={{ color: '#111827' }}>{lang.name}</h4>
+                                                <p className="smallest fw-bold text-warning ls-1 text-uppercase mb-0">Code: {lang.code}</p>
+                                            </div>
                                         </div>
                                         <div className="d-flex gap-2">
                                             <button onClick={() => handleEdit(lang)} className="btn btn-sm btn-outline-dark rounded-pill px-3 d-flex align-items-center gap-1"

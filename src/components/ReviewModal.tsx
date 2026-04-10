@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Star, X, MessageSquare, Send } from 'lucide-react';
+import { Star, X,  Send, Heart } from 'lucide-react';
 import { db, auth } from '../services/firebaseConfig';
 import { doc, setDoc, serverTimestamp } from 'firebase/firestore';
 import Mascot from './Mascot';
@@ -20,7 +20,7 @@ const ReviewModal: React.FC<ReviewModalProps> = ({ onClose, username }) => {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         if (rating === 0) {
-            popupService.error('Missing Rating', 'Please select at least one star!');
+            popupService.error('Missing Rating', 'Give us some stars, chommie!');
             return;
         }
         if (!auth.currentUser) return;
@@ -34,47 +34,66 @@ const ReviewModal: React.FC<ReviewModalProps> = ({ onClose, username }) => {
                 comment,
                 timestamp: serverTimestamp()
             });
-            
+
             popupService.innerSuccess(
-                'Ndi khwine!', 
-                'Thank you for your feedback! Your review helps us make the platform better for everyone.',
-                'Awesome'
+                'Lekker!',
+                'Thanks for the feedback! You’re helping us build the best companion in Mzansi.',
+                'Sharp!'
             );
             onClose();
         } catch (error) {
-            console.error("Error submitting review:", error);
-            popupService.error('Submission Failed', 'Could not save your review. Please try again.');
+            console.error("Error:", error);
+            popupService.error('Eish!', 'Something went wrong. Give it another shot?');
         } finally {
             setSubmitting(false);
         }
     };
 
     return (
-        <div className="position-fixed top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center bg-black bg-opacity-50" style={{ zIndex: 2000, backdropFilter: 'blur(4px)' }}>
-            <div className="bg-white rounded-5 shadow-2xl overflow-hidden animate__animated animate__zoomIn" style={{ maxWidth: '500px', width: '95%' }}>
-                
-                {/* Header with Gradient */}
-                <div className="bg-warning bg-opacity-10 p-4 border-bottom border-warning border-opacity-20 d-flex justify-content-between align-items-center">
+        <div
+            className="position-fixed top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center"
+            style={{
+                zIndex: 9999,
+                backdropFilter: 'blur(10px)',
+                backgroundColor: 'rgba(255, 255, 255, 0.3)'
+            }}
+        >
+            <div
+                className="bg-white rounded-5 shadow-2xl overflow-hidden animate__animated animate__bounceIn border border-4 border-dark"
+                style={{
+                    maxWidth: '480px',
+                    width: '95%',
+                    boxShadow: '15px 15px 0px rgba(0,0,0,0.1)'
+                }}
+            >
+
+                {/* Header: "The Shout-Out" */}
+                <div className="bg-warning p-3 border-bottom border-4 border-dark d-flex justify-content-between align-items-center">
                     <div className="d-flex align-items-center gap-2">
-                        <MessageSquare size={20} className="text-warning" />
-                        <h5 className="fw-bold mb-0 text-dark ls-tight">Share Your Experience</h5>
+                        <Heart size={20} fill="black" />
+                        <h5 className="fw-black mb-0 text-dark text-uppercase ls-tight">Rate the Trip</h5>
                     </div>
-                    <button onClick={onClose} className="btn btn-link text-muted p-0 shadow-none">
-                        <X size={24} />
+                    <button onClick={onClose} className="btn p-0 border-0 shadow-none">
+                        <X size={28} color="black" strokeWidth={3} />
                     </button>
                 </div>
 
                 <div className="p-4 p-md-5 text-center">
-                    <div className="mb-4">
-                        <Mascot mood={rating >= 4 ? 'excited' : rating >= 2 ? 'happy' : 'happy'} width="120px" height="120px" />
+                    <div className="mb-3 mascot-container">
+                        <Mascot
+                            mood={rating >= 4 ? 'excited' : rating >= 2 ? 'happy' : 'happy'}
+                            width="130px"
+                            height="130px"
+                        />
                     </div>
 
-                    <p className="text-muted small mb-4">
-                        How are you enjoying your Tshivenḓa journey so far, <span className="fw-bold text-dark">{username}</span>?
+                    <h3 className="fw-black text-dark mb-1">How’s the vibe, {username}?</h3>
+                    <p className="text-muted fw-bold mb-4">
+                        Is your language journey feeling lekker?
                     </p>
 
                     <form onSubmit={handleSubmit}>
-                        {/* Star Rating */}
+                        {/* Mzansi Star Rating */}
                         <div className="d-flex justify-content-center gap-2 mb-4">
                             {[1, 2, 3, 4, 5].map((star) => (
                                 <button
@@ -86,12 +105,14 @@ const ReviewModal: React.FC<ReviewModalProps> = ({ onClose, username }) => {
                                     onMouseLeave={() => setHover(0)}
                                 >
                                     <Star
-                                        size={42}
-                                        fill={(hover || rating) >= star ? "#FACC15" : "none"}
-                                        color={(hover || rating) >= star ? "#FACC15" : "#E2E8F0"}
-                                        strokeWidth={2}
-                                        className="transition-all"
-                                        style={{ transform: (hover || rating) >= star ? 'scale(1.1)' : 'scale(1)' }}
+                                        size={46}
+                                        fill={(hover || rating) >= star ? "#FACC15" : "white"}
+                                        color="black"
+                                        strokeWidth={3}
+                                        style={{
+                                            transform: (hover || rating) >= star ? 'scale(1.15) rotate(5deg)' : 'scale(1)',
+                                            transition: 'all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275)'
+                                        }}
                                     />
                                 </button>
                             ))}
@@ -99,37 +120,73 @@ const ReviewModal: React.FC<ReviewModalProps> = ({ onClose, username }) => {
 
                         <div className="mb-4">
                             <textarea
-                                className="form-control rounded-4 border-2 bg-light p-3 small"
-                                style={{ minHeight: '120px', resize: 'none', borderColor: '#F3F4F6' }}
-                                placeholder="What's working well? What can we improve? (Optional)"
+                                className="form-control rounded-4 border-3 border-dark bg-light p-3 fw-bold"
+                                style={{ minHeight: '100px', resize: 'none' }}
+                                placeholder="Any suggestions for the crew? (Optional)"
                                 value={comment}
                                 onChange={(e) => setComment(e.target.value)}
                             />
                         </div>
 
-                        <div className="d-flex gap-3">
-                            <button 
-                                type="button" 
-                                className="btn btn-light rounded-pill px-4 py-3 fw-bold flex-grow-1 text-muted border"
+                        <div className="d-flex flex-column flex-sm-row gap-3">
+                            <button
+                                type="button"
+                                className="btn btn-link text-dark fw-black text-decoration-none order-2 order-sm-1"
                                 onClick={onClose}
                             >
-                                CANCEL
+                                SKIP FOR NOW
                             </button>
                             <JuicyButton
                                 type="submit"
-                                className="btn btn-warning rounded-pill px-4 py-3 fw-bold flex-grow-1 text-dark shadow-sm d-flex align-items-center justify-content-center gap-2"
+                                className="chommie-btn-submit order-1 order-sm-2 flex-grow-1"
                                 disabled={submitting || rating === 0}
                             >
                                 {submitting ? (
                                     <span className="spinner-border spinner-border-sm"></span>
                                 ) : (
-                                    <><Send size={18} /> SUBMIT</>
+                                    <>SEND IT! <Send size={18} /></>
                                 )}
                             </JuicyButton>
                         </div>
                     </form>
                 </div>
             </div>
+
+            <style>{`
+                .fw-black { font-weight: 900; }
+                .ls-tight { letter-spacing: -1px; }
+                
+                .mascot-container {
+                    filter: drop-shadow(0 10px 10px rgba(0,0,0,0.1));
+                }
+
+                .chommie-btn-submit {
+                    background-color: #FACC15 !important;
+                    color: #000 !important;
+                    border: 3px solid #000 !important;
+                    border-radius: 50px !important;
+                    padding: 12px 24px !important;
+                    font-weight: 900 !important;
+                    display: flex !important;
+                    align-items: center !important;
+                    justify-content: center !important;
+                    gap: 10px !important;
+                    box-shadow: 5px 5px 0px #000 !important;
+                    transition: all 0.1s !important;
+                }
+
+                .chommie-btn-submit:active {
+                    transform: translate(3px, 3px) !important;
+                    box-shadow: 0px 0px 0px #000 !important;
+                }
+
+                .chommie-btn-submit:disabled {
+                    background-color: #e2e8f0 !important;
+                    border-color: #cbd5e1 !important;
+                    box-shadow: none !important;
+                    cursor: not-allowed;
+                }
+            `}</style>
         </div>
     );
 };

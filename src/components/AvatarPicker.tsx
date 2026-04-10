@@ -1,4 +1,6 @@
 import React from 'react';
+import CustomAvatarSVG from './CustomAvatar';
+import type { AvatarConfig } from './CustomAvatar';
 
 // Venda Minwenda Pattern colors
 export const DICEBEAR_STYLES = [
@@ -248,6 +250,34 @@ export const AvatarDisplay: React.FC<{
     className?: string;
     style?: React.CSSProperties
 }> = ({ avatarId, seed = "default", size = 36, className = "", style }) => {
+
+    const isJson = typeof avatarId === 'string' && avatarId.startsWith('{');
+
+    if (isJson) {
+        let config: AvatarConfig;
+        try {
+            config = JSON.parse(avatarId);
+        } catch {
+            return null; // Fallback handled gracefully
+        }
+        
+        return (
+            <div
+                className={`d-flex align-items-center justify-content-center rounded-circle flex-shrink-0 overflow-hidden shadow-sm ${className}`}
+                style={{
+                    width: `${size}px`,
+                    height: `${size}px`,
+                    border: `2px solid ${config.bgColor}`,
+                    backgroundColor: config.bgColor,
+                    ...style
+                }}
+            >
+                <CustomAvatarSVG config={config} size="100%" />
+            </div>
+        );
+    }
+
+    // Default DiceBear Fallback
     const styleData = DICEBEAR_STYLES.find(s => s.id === avatarId) || DICEBEAR_STYLES[0];
     const clothingColor = styleData.themeColor.replace('#', '');
     const avatarUrl = `https://api.dicebear.com/9.x/${styleData.id}/svg?seed=${seed}&backgroundColor=f1f5f9&clothingColor=${clothingColor}&topColor=${clothingColor}`;

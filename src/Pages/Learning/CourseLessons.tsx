@@ -3,7 +3,7 @@ import { auth } from '../../services/firebaseConfig';
 import { onAuthStateChanged } from 'firebase/auth';
 import { useNavigate, useParams } from 'react-router-dom';
 import { fetchLessons, fetchUserData, getMicroLessons } from '../../services/dataCache';
-import { BookOpen, MessageSquare, Star, Lightbulb, CheckSquare, Zap, ChevronRight, ArrowLeft, Check, ClipboardEdit } from 'lucide-react';
+import { BookOpen, MessageSquare, Star, Lightbulb, CheckSquare, Zap, ChevronRight, ArrowLeft, Check, ClipboardEdit, Lock } from 'lucide-react';
 import { motion } from 'framer-motion';
 import Skeleton from 'react-loading-skeleton';
 import 'react-loading-skeleton/dist/skeleton.css';
@@ -119,19 +119,19 @@ const CourseLessons: React.FC = () => {
     return (
         <div className="learning-container animate__animated animate__fadeIn">
             <div className="container pt-2 pb-4" style={{ maxWidth: '1000px' }}>
-                
+
                 {/* HEADER */}
                 <header className="learning-header">
                     <JuicyButton
-                        className="btn btn-link text-decoration-none p-0 d-flex align-items-center gap-2 text-dark fw-bold smallest ls-1 text-uppercase mb-2"
+                        className="btn btn-link text-decoration-none p-0 d-flex align-items-center justify-content-center justify-content-md-start gap-2 text-dark fw-bold smallest ls-1 text-uppercase mb-3 mb-md-2"
                         onClick={() => navigate('/courses')}
                     >
                         <ArrowLeft size={16} /> Course Path
                     </JuicyButton>
 
-                    <div className="d-md-flex align-items-end justify-content-between gap-4">
-                        <div className="flex-grow-1">
-                            <div className="d-flex align-items-center gap-2 mb-2">
+                    <div className="d-flex flex-column flex-md-row align-items-center align-items-md-end justify-content-between gap-4 text-center text-md-start">
+                        <div className="flex-grow-1 w-100">
+                            <div className="d-flex align-items-center justify-content-center justify-content-md-start gap-2 mb-2">
                                 <span className="badge bg-warning text-dark px-3 mt-1 py-1 fw-bold smallest ls-1 rounded-3">
                                     CURRENT MISSION
                                 </span>
@@ -139,22 +139,24 @@ const CourseLessons: React.FC = () => {
                             <h2 className="mb-1">{course.title}</h2>
                             <p className="mb-0 text-muted">{course.vendaTitle}</p>
                         </div>
-                        <div className="text-md-end mt-4 mt-md-0" style={{ minWidth: '220px' }}>
-                            <div className="d-flex justify-content-between smallest fw-bold text-muted ls-1 uppercase mb-2">
-                                <span>MISSION PROGRESS</span>
-                                <span>{courseProgress}%</span>
+                        {courseProgress > 0 && (
+                            <div className="text-center text-md-end mt-2 mt-md-0 w-100" style={{ minWidth: '220px', maxWidth: '400px' }}>
+                                <div className="d-flex justify-content-between smallest fw-bold text-muted ls-1 uppercase mb-2 text-start">
+                                    <span>MISSION PROGRESS</span>
+                                    <span>{courseProgress}%</span>
+                                </div>
+                                <div className="professional-progress-container mb-1 shadow-sm">
+                                    <div
+                                        className="professional-progress-bar"
+                                        style={{
+                                            width: `${courseProgress}%`,
+                                            backgroundColor: '#FACC15'
+                                        }}
+                                    ></div>
+                                </div>
+                                <div className="smallest fw-bold text-muted opacity-50 uppercase text-start">{completedCount} / {totalCount} MASTERED</div>
                             </div>
-                            <div className="professional-progress-container mb-1 shadow-sm">
-                                <div 
-                                    className="professional-progress-bar" 
-                                    style={{ 
-                                        width: `${courseProgress}%`,
-                                        backgroundColor: '#FACC15'
-                                    }}
-                                ></div>
-                            </div>
-                            <div className="smallest fw-bold text-muted opacity-50 uppercase">{completedCount} / {totalCount} MASTERED</div>
-                        </div>
+                        )}
                     </div>
                 </header>
 
@@ -174,7 +176,7 @@ const CourseLessons: React.FC = () => {
                                 : '#cbd5e1';
 
                         return (
-                            <motion.div 
+                            <motion.div
                                 key={ml.id}
                                 className={`course-card-professional ${!isUnlocked ? 'locked' : ''}`}
                                 onClick={() => { if (isUnlocked) navigate(`/game/${courseId}/${ml.id}`); }}
@@ -182,13 +184,22 @@ const CourseLessons: React.FC = () => {
                                 animate={{ opacity: 1, y: 0 }}
                                 transition={{ delay: index * 0.06, duration: 0.4, ease: 'easeOut' }}
                                 whileHover={isUnlocked ? { y: -4, boxShadow: '0 12px 24px -8px rgba(0,0,0,0.12)' } : {}}
-                                style={{ 
+                                style={{
                                     '--theme-color': theme.bg,
                                     '--theme-hover': theme.border,
                                     borderColor: borderColor,
                                     borderBottomColor: isDone ? '#16a34a' : isUnlocked ? '#2563eb' : '#94a3b8',
                                 } as any}
                             >
+                                {!isUnlocked && (
+                                    <div className="locked-overlay">
+                                        <div className="locked-badge">
+                                            <Lock size={16} className="d-none d-md-block" />
+                                            <Lock size={16} className="d-block d-md-none mb-1" />
+                                            <span>FINISH PREVIOUS</span>
+                                        </div>
+                                    </div>
+                                )}
                                 <div className="d-flex justify-content-between align-items-start mb-2">
                                     <div>
                                         <div className="smallest fw-bold ls-1 text-muted uppercase opacity-50 mb-1">
@@ -212,15 +223,17 @@ const CourseLessons: React.FC = () => {
                                             <ClipboardEdit size={14} /> {questionCount} Tasks
                                         </span>
                                     </div>
-                                    <div className="professional-progress-container mb-2">
-                                            <div 
-                                                className="professional-progress-bar" 
-                                                style={{ 
+                                    {isUnlocked && (
+                                        <div className="professional-progress-container mb-2">
+                                            <div
+                                                className="professional-progress-bar"
+                                                style={{
                                                     width: isDone ? '100%' : '0%',
-                                                    '--theme-color': theme.progress 
+                                                    '--theme-color': theme.progress
                                                 } as any}
                                             ></div>
-                                    </div>
+                                        </div>
+                                    )}
                                     <div className="d-flex align-items-center justify-content-between">
                                         <span className="smallest fw-bold text-muted ls-1 uppercase opacity-50">
                                             {isDone ? 'COMPLETED' : (isUnlocked ? 'READY TO START' : 'LOCKED')}
