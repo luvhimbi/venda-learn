@@ -39,9 +39,9 @@ const newQuestion = (type: QuestionType, id: string | number): any => {
         case 'fill-in-the-blank':
             return { ...base, question: '', correctAnswer: '', hint: '' };
         case 'match-pairs':
-            return { ...base, question: '', pairs: [{ venda: '', english: '' }] };
+            return { ...base, question: '', pairs: [{ nativeWord: '', english: '' }] };
         case 'listen-and-choose':
-            return { ...base, vendaWord: '', question: '', options: ['', '', ''], correctAnswer: '' };
+            return { ...base, nativeWord: '', question: '', options: ['', '', ''], correctAnswer: '' };
     }
 };
 
@@ -179,7 +179,7 @@ const QuestionBuilder: React.FC<Props> = ({ questions, onChange }) => {
 
     const addPair = (qIdx: number) => {
         const copy = [...questions];
-        copy[qIdx] = { ...copy[qIdx], pairs: [...(copy[qIdx].pairs || []), { venda: '', english: '' }] };
+        copy[qIdx] = { ...copy[qIdx], pairs: [...(copy[qIdx].pairs || []), { nativeWord: '', english: '' }] };
         onChange(copy);
     };
 
@@ -371,7 +371,7 @@ const QuestionBuilder: React.FC<Props> = ({ questions, onChange }) => {
                         {(q.pairs || []).map((pair: any, pIdx: number) => (
                             <div key={pIdx} className="d-flex align-items-center gap-2 mb-2">
                                 <input className="form-control qb-input" placeholder="Target word"
-                                    value={pair.venda || ''} onChange={e => updatePair(idx, pIdx, 'venda', e.target.value)} />
+                                    value={pair.nativeWord || ''} onChange={e => updatePair(idx, pIdx, 'nativeWord', e.target.value)} />
                                 <i className="bi bi-arrow-right text-muted"></i>
                                 <input className="form-control qb-input" placeholder="English meaning"
                                     value={pair.english || ''} onChange={e => updatePair(idx, pIdx, 'english', e.target.value)} />
@@ -394,7 +394,7 @@ const QuestionBuilder: React.FC<Props> = ({ questions, onChange }) => {
                         <div className="mb-3">
                             <label className="qb-label">Target Word (played via TTS)</label>
                             <input className="form-control qb-input" placeholder="e.g. Ndi madekwana"
-                                value={q.vendaWord || ''} onChange={e => update(idx, 'vendaWord', e.target.value)} />
+                                value={q.nativeWord || ''} onChange={e => update(idx, 'nativeWord', e.target.value)} />
                         </div>
                         <div className="mb-3">
                             <label className="qb-label">Question</label>

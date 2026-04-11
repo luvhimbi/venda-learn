@@ -113,7 +113,7 @@ const KnowledgeBattle: React.FC = () => {
     }, []);
 
     // TTS
-    const speakVenda = useCallback((text: string) => {
+    const speakNative = useCallback((text: string) => {
         window.speechSynthesis.cancel();
         const u = new SpeechSynthesisUtterance(text);
         u.rate = 0.8;
@@ -735,7 +735,7 @@ const KnowledgeBattle: React.FC = () => {
                     case 'true-false': return <TrueFalseQuestion q={q as TFQuestion} selected={null} status={answerStatus} onSelect={(v) => handleTFSelect(v, (q as TFQuestion).correctAnswer)} />;
                     case 'fill-in-the-blank': return <FillBlankQuestion q={q as FBQuestion} status={answerStatus} onSubmit={(a) => handleFBSubmit(a, (q as FBQuestion).correctAnswer)} />;
                     case 'match-pairs': return <MatchPairsQuestion q={q as MPQuestion} onComplete={handleMatchComplete} />;
-                    case 'listen-and-choose': return <ListenChooseQuestion q={q as LCQuestion} selected={null} status={answerStatus} onSelect={(o) => handleLCSelect(o, (q as LCQuestion).correctAnswer)} speakVenda={speakVenda} />;
+                    case 'listen-and-choose': return <ListenChooseQuestion q={q as LCQuestion} selected={null} status={answerStatus} onSelect={(o) => handleLCSelect(o, (q as LCQuestion).correctAnswer)} speakNative={speakNative} />;
                     default: return <MultipleChoiceQuestion q={q as MCQuestion} selected={null} status={answerStatus} onSelect={(o) => handleMCSelect(o, (q as MCQuestion).correctAnswer)} />;
                 }
             };

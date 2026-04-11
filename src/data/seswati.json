@@ -1,0 +1,38 @@
+{
+  "name": "Seswati",
+  "code": "ss",
+  "picturePuzzles": [
+    { "english": "Sun", "word": "Lilanga" },
+    { "english": "Moon", "word": "Inyanga" },
+    { "english": "Tree", "word": "Sihlahla" },
+    { "english": "Fire", "word": "Umlilo" },
+    { "english": "Water", "word": "Emanti" },
+    { "english": "Dog", "word": "Inja" },
+    { "english": "Cat", "word": "Likati" },
+    { "english": "Person", "word": "Umuntfu" }
+  ],
+  "wordBombWords": [
+    { "english": "Book", "word": "Incwadzi", "difficulty": "Easy" },
+    { "english": "School", "word": "Sikolwa", "difficulty": "Easy" },
+    { "english": "Teacher", "word": "Thisha", "difficulty": "Easy" },
+    { "english": "Mother", "word": "Make", "difficulty": "Easy" },
+    { "english": "Computer", "word": "Ikhompyutha", "difficulty": "Easy" }
+  ],
+  "puzzleWords": [
+    { "english": "WATER", "word": "EMANTI", "difficulty": "Easy", "hint": "Type the SESWATI word for WATER" },
+    { "english": "APPLE", "word": "LIPUL", "difficulty": "Easy", "hint": "Type the SESWATI word for APPLE" },
+    { "english": "HOUSE", "word": "INDLU", "difficulty": "Easy", "hint": "Type the SESWATI word for HOUSE" },
+    { "english": "TRAIN", "word": "SITIM", "difficulty": "Easy", "hint": "Type the SESWATI word for TRAIN" },
+    { "english": "SNAKE", "word": "INYOK", "difficulty": "Easy", "hint": "Type the SESWATI word for SNAKE" }
+  ],
+  "syllablePuzzles": [
+    { "translation": "water", "word": "Emanti", "syllables": ["E", "ma", "nti"], "difficulty": "Beginner" },
+    { "translation": "fire", "word": "Umlilo", "syllables": ["U", "mli", "lo"], "difficulty": "Intermediate" },
+    { "translation": "person", "word": "Umuntfu", "syllables": ["U", "mu", "ntfu"], "difficulty": "Advanced" }
+  ],
+  "sentencePuzzles": [
+    { "translation": "I see the dog", "words": ["Ngi", "yayibona", "inja"], "difficulty": "Beginner" },
+    { "translation": "The sun is hot", "words": ["Lilanga", "liyashisa"], "difficulty": "Intermediate" },
+    { "translation": "Knowledge is power", "words": ["Lwati", "ngemandla"], "difficulty": "Advanced" }
+  ]
+}

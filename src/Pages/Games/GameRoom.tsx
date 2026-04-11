@@ -70,7 +70,7 @@ const GameRoom: React.FC = () => {
         initialPersistentState?.gameState === 'STUDY' ? initialPersistentState.currentSlide : (startType === 'STUDY' ? startIdx : 0)
     );
 
-    const { isPlayingAudio, speakVenda, setAudioUrl } = useAudio();
+    const { isPlayingAudio, speakVenda: speakNative, setAudioUrl } = useAudio();
     const [studyStartTime, setStudyStartTime] = useState(initialPersistentState?.studyStartTime || Date.now());
 
     const [showExitModal, setShowExitModal] = useState(false);
@@ -460,7 +460,7 @@ const GameRoom: React.FC = () => {
 
                                     {/* Section 1: Phrase Display */}
                                     <div className="text-center mb-5">
-                                        <h1 className="fw-black mb-1 text-dark ls-tight uppercase" style={{ fontSize: 'clamp(2rem, 8vw, 4rem)' }}>{slide.venda}</h1>
+                                        <h1 className="fw-black mb-1 text-dark ls-tight uppercase" style={{ fontSize: 'clamp(2rem, 8vw, 4rem)' }}>{slide.nativeWord}</h1>
                                         <h4 className="text-muted fw-black uppercase ls-1" style={{ fontSize: '1.25rem' }}>{slide.english}</h4>
                                     </div>
 
@@ -469,12 +469,12 @@ const GameRoom: React.FC = () => {
                                         <div className="d-flex flex-column align-items-center gap-4">
                                             <div className="d-flex align-items-center gap-4">
                                                 <button className="btn rounded-circle d-flex align-items-center justify-content-center shadow-action-light hover-scale" 
-                                                    onClick={() => speakVenda(slide.venda)}
+                                                    onClick={() => speakNative(slide.nativeWord)}
                                                     style={{ width: 80, height: 80, backgroundColor: isPlayingAudio ? '#FACC15' : '#111827', border: '5px solid #000', transition: 'all 0.1s' }}>
                                                     <Play size={32} fill={isPlayingAudio ? '#000' : '#FFFFFF'} className={isPlayingAudio ? 'text-dark' : 'text-white'} />
                                                 </button>
                                                 <button className="btn bg-white brutalist-card--sm rounded-circle d-flex align-items-center justify-content-center hover-scale" 
-                                                    onClick={() => speakVenda(slide.venda)}
+                                                    onClick={() => speakNative(slide.nativeWord)}
                                                     style={{ width: 50, height: 50 }}>
                                                     <span className="fw-black text-dark uppercase ls-1" style={{ fontSize: '11px' }}>0.5x</span>
                                                 </button>
@@ -595,7 +595,7 @@ const GameRoom: React.FC = () => {
                     case 'true-false': return <TrueFalseQuestion q={q as TFQuestion} selected={selectedTF} status={answerStatus} onSelect={(v) => handleTFSelect(v, (q as TFQuestion).correctAnswer)} />;
                     case 'fill-in-the-blank': return <FillBlankQuestion q={q as FBQuestion} status={answerStatus} onSubmit={(a) => handleFBSubmit(a, (q as FBQuestion).correctAnswer)} />;
                     case 'match-pairs': return <MatchPairsQuestion q={q as MPQuestion} onComplete={handleMatchComplete} />;
-                    case 'listen-and-choose': return <ListenChooseQuestion q={q as LCQuestion} selected={selectedOption} status={answerStatus} onSelect={(o) => handleLCSelect(o, (q as LCQuestion).correctAnswer)} speakVenda={speakVenda} />;
+                    case 'listen-and-choose': return <ListenChooseQuestion q={q as LCQuestion} selected={selectedOption} status={answerStatus} onSelect={(o) => handleLCSelect(o, (q as LCQuestion).correctAnswer)} speakNative={speakNative} />;
                     default: return <MultipleChoiceQuestion q={q as MCQuestion} selected={selectedOption} status={answerStatus} onSelect={(o) => handleMCSelect(o, (q as MCQuestion).correctAnswer)} />;
                 }
             };

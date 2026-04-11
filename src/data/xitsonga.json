@@ -1,0 +1,1374 @@
+{
+  "name": "Xitsonga",
+  "code": "ts",
+  "picturePuzzles": [
+    {
+      "english": "Sun",
+      "word": "Dyambu"
+    },
+    {
+      "english": "Moon",
+      "word": "Ndzhenga"
+    },
+    {
+      "english": "Tree",
+      "word": "Ndzati"
+    },
+    {
+      "english": "Fire",
+      "word": "Ndzilo"
+    },
+    {
+      "english": "Water",
+      "word": "Mati"
+    },
+    {
+      "english": "Dog",
+      "word": "Mbyana"
+    },
+    {
+      "english": "Cat",
+      "word": "Kati"
+    },
+    {
+      "english": "Person",
+      "word": "Munhu"
+    },
+    {
+      "english": "Bird",
+      "word": "Nyenyani"
+    },
+    {
+      "english": "Fish",
+      "word": "Nhlampfi"
+    },
+    {
+      "english": "Cow",
+      "word": "Homu"
+    },
+    {
+      "english": "Goat",
+      "word": "Mbuji"
+    },
+    {
+      "english": "Car",
+      "word": "Motokari"
+    },
+    {
+      "english": "House",
+      "word": "Yindlu"
+    },
+    {
+      "english": "Food",
+      "word": "Swakudya"
+    },
+    {
+      "english": "Rain",
+      "word": "Mpfula"
+    },
+    {
+      "english": "Star",
+      "word": "Nhonga"
+    },
+    {
+      "english": "Flower",
+      "word": "Sesani"
+    },
+    {
+      "english": "Mountain",
+      "word": "Ndhava"
+    },
+    {
+      "english": "River",
+      "word": "Nambu"
+    },
+    {
+      "english": "Road",
+      "word": "Ndlela"
+    },
+    {
+      "english": "Chair",
+      "word": "Xitulu"
+    },
+    {
+      "english": "Table",
+      "word": "Tafile"
+    },
+    {
+      "english": "Door",
+      "word": "Munyango"
+    },
+    {
+      "english": "Window",
+      "word": "Festere"
+    },
+    {
+      "english": "Apple",
+      "word": "Apula"
+    },
+    {
+      "english": "Bread",
+      "word": "Voko"
+    },
+    {
+      "english": "Milk",
+      "word": "Rhandzi"
+    },
+    {
+      "english": "Egg",
+      "word": "Tandza"
+    },
+    {
+      "english": "Heart",
+      "word": "Mbilu"
+    },
+    {
+      "english": "Hand",
+      "word": "Voko"
+    },
+    {
+      "english": "Foot",
+      "word": "Nenge"
+    },
+    {
+      "english": "Eye",
+      "word": "Hlo"
+    },
+    {
+      "english": "Mouth",
+      "word": "Nkomo"
+    },
+    {
+      "english": "Head",
+      "word": "Nhloko"
+    },
+    {
+      "english": "Sky",
+      "word": "Tiloko"
+    },
+    {
+      "english": "Sea",
+      "word": "Lwandle"
+    },
+    {
+      "english": "Stone",
+      "word": "Rirhandzu"
+    },
+    {
+      "english": "Wind",
+      "word": "Mpfhuka"
+    },
+    {
+      "english": "Grass",
+      "word": "Byanyi"
+    },
+    {
+      "english": "Horse",
+      "word": "Hangasi"
+    },
+    {
+      "english": "Lion",
+      "word": "Nghala"
+    },
+    {
+      "english": "Elephant",
+      "word": "Ndlopfu"
+    },
+    {
+      "english": "Snake",
+      "word": "Nyoka"
+    }
+  ],
+  "wordBombWords": [
+    {
+      "english": "Book",
+      "word": "Buku",
+      "difficulty": "Easy"
+    },
+    {
+      "english": "School",
+      "word": "Sikolo",
+      "difficulty": "Easy"
+    },
+    {
+      "english": "Teacher",
+      "word": "Dyondzisi",
+      "difficulty": "Easy"
+    },
+    {
+      "english": "Mother",
+      "word": "Manana",
+      "difficulty": "Easy"
+    },
+    {
+      "english": "Computer",
+      "word": "Khompyuta",
+      "difficulty": "Easy"
+    },
+    {
+      "english": "Father",
+      "word": "Tatana",
+      "difficulty": "Easy"
+    },
+    {
+      "english": "Child",
+      "word": "N'wana",
+      "difficulty": "Easy"
+    },
+    {
+      "english": "Friend",
+      "word": "Munghana",
+      "difficulty": "Easy"
+    },
+    {
+      "english": "Love",
+      "word": "Rirhandzu",
+      "difficulty": "Medium"
+    },
+    {
+      "english": "Peace",
+      "word": "Rixile",
+      "difficulty": "Medium"
+    },
+    {
+      "english": "Freedom",
+      "word": "Ntshunxeko",
+      "difficulty": "Medium"
+    },
+    {
+      "english": "Happiness",
+      "word": "Nkense",
+      "difficulty": "Medium"
+    },
+    {
+      "english": "Family",
+      "word": "Ndyangu",
+      "difficulty": "Medium"
+    },
+    {
+      "english": "Garden",
+      "word": "Badi",
+      "difficulty": "Easy"
+    },
+    {
+      "english": "Kitchen",
+      "word": "Khitsini",
+      "difficulty": "Medium"
+    },
+    {
+      "english": "Bedroom",
+      "word": "Khorobye",
+      "difficulty": "Medium"
+    },
+    {
+      "english": "Bathroom",
+      "word": "Khoto yo hlamba",
+      "difficulty": "Hard"
+    },
+    {
+      "english": "Work",
+      "word": "Ntirho",
+      "difficulty": "Medium"
+    },
+    {
+      "english": "Health",
+      "word": "Ripfumelo",
+      "difficulty": "Medium"
+    },
+    {
+      "english": "Community",
+      "word": "Vaaki",
+      "difficulty": "Hard"
+    },
+    {
+      "english": "Leadership",
+      "word": "Vurhangeri",
+      "difficulty": "Hard"
+    },
+    {
+      "english": "Wisdom",
+      "word": "Vutlhari",
+      "difficulty": "Hard"
+    },
+    {
+      "english": "Strength",
+      "word": "Matimba",
+      "difficulty": "Medium"
+    },
+    {
+      "english": "Courage",
+      "word": "Chuma",
+      "difficulty": "Medium"
+    },
+    {
+      "english": "Chief",
+      "word": "Hosi",
+      "difficulty": "Hard"
+    },
+    {
+      "english": "Village",
+      "word": "Mutini",
+      "difficulty": "Easy"
+    },
+    {
+      "english": "Animal",
+      "word": "Xiharhi",
+      "difficulty": "Medium"
+    },
+    {
+      "english": "Time",
+      "word": "Nkarhi",
+      "difficulty": "Easy"
+    },
+    {
+      "english": "Day",
+      "word": "Siku",
+      "difficulty": "Easy"
+    },
+    {
+      "english": "Night",
+      "word": "Vusiku",
+      "difficulty": "Easy"
+    },
+    {
+      "english": "Truth",
+      "word": "Ntiyiso",
+      "difficulty": "Medium"
+    },
+    {
+      "english": "Hope",
+      "word": "Ntshembo",
+      "difficulty": "Medium"
+    },
+    {
+      "english": "Dream",
+      "word": "Rorho",
+      "difficulty": "Medium"
+    },
+    {
+      "english": "Music",
+      "word": "Mbuyelo",
+      "difficulty": "Easy"
+    },
+    {
+      "english": "Dance",
+      "word": "Giya",
+      "difficulty": "Easy"
+    },
+    {
+      "english": "God",
+      "word": "Xikwembu",
+      "difficulty": "Medium"
+    },
+    {
+      "english": "King",
+      "word": "Hosi",
+      "difficulty": "Hard"
+    }
+  ],
+  "puzzleWords": [
+    {
+      "english": "WATER",
+      "word": "MATI",
+      "difficulty": "Easy",
+      "hint": "Type the XITSONGA word for WATER"
+    },
+    {
+      "english": "APPLE",
+      "word": "APULA",
+      "difficulty": "Easy",
+      "hint": "Type the XITSONGA word for APPLE"
+    },
+    {
+      "english": "HOUSE",
+      "word": "YINDLU",
+      "difficulty": "Easy",
+      "hint": "Type the XITSONGA word for HOUSE"
+    },
+    {
+      "english": "TRAIN",
+      "word": "XITIMELA",
+      "difficulty": "Easy",
+      "hint": "Type the XITSONGA word for TRAIN"
+    },
+    {
+      "english": "SNAKE",
+      "word": "NYOKA",
+      "difficulty": "Easy",
+      "hint": "Type the XITSONGA word for SNAKE"
+    },
+    {
+      "english": "BIRD",
+      "word": "NYENYANI",
+      "difficulty": "Easy",
+      "hint": "Type the XITSONGA word for BIRD"
+    },
+    {
+      "english": "FISH",
+      "word": "NHLAMPFI",
+      "difficulty": "Medium",
+      "hint": "Type the XITSONGA word for FISH"
+    },
+    {
+      "english": "COW",
+      "word": "HOMU",
+      "difficulty": "Easy",
+      "hint": "Type the XITSONGA word for COW"
+    },
+    {
+      "english": "GOAT",
+      "word": "MBUJI",
+      "difficulty": "Easy",
+      "hint": "Type the XITSONGA word for GOAT"
+    },
+    {
+      "english": "CAR",
+      "word": "MOTOKARI",
+      "difficulty": "Easy",
+      "hint": "Type the XITSONGA word for CAR"
+    },
+    {
+      "english": "RAIN",
+      "word": "MPFULA",
+      "difficulty": "Medium",
+      "hint": "Type the XITSONGA word for RAIN"
+    },
+    {
+      "english": "STAR",
+      "word": "NHONGA",
+      "difficulty": "Medium",
+      "hint": "Type the XITSONGA word for STAR"
+    },
+    {
+      "english": "FLOWER",
+      "word": "SESANI",
+      "difficulty": "Medium",
+      "hint": "Type the XITSONGA word for FLOWER"
+    },
+    {
+      "english": "MOUNTAIN",
+      "word": "NDHAVA",
+      "difficulty": "Medium",
+      "hint": "Type the XITSONGA word for MOUNTAIN"
+    },
+    {
+      "english": "RIVER",
+      "word": "NAMBU",
+      "difficulty": "Easy",
+      "hint": "Type the XITSONGA word for RIVER"
+    },
+    {
+      "english": "FOOD",
+      "word": "SWAKUDYA",
+      "difficulty": "Medium",
+      "hint": "Type the XITSONGA word for FOOD"
+    },
+    {
+      "english": "LOVE",
+      "word": "RIRHANDZU",
+      "difficulty": "Hard",
+      "hint": "Type the XITSONGA word for LOVE"
+    },
+    {
+      "english": "PEACE",
+      "word": "RIXILE",
+      "difficulty": "Medium",
+      "hint": "Type the XITSONGA word for PEACE"
+    },
+    {
+      "english": "FREEDOM",
+      "word": "NTSHUNXEKO",
+      "difficulty": "Hard",
+      "hint": "Type the XITSONGA word for FREEDOM"
+    },
+    {
+      "english": "FAMILY",
+      "word": "NDYANGU",
+      "difficulty": "Medium",
+      "hint": "Type the XITSONGA word for FAMILY"
+    },
+    {
+      "english": "MILK",
+      "word": "RHANDZI",
+      "difficulty": "Easy",
+      "hint": "Type the XITSONGA word for MILK"
+    },
+    {
+      "english": "BREAD",
+      "word": "VOKO",
+      "difficulty": "Easy",
+      "hint": "Type the XITSONGA word for BREAD"
+    },
+    {
+      "english": "EGG",
+      "word": "TANDZA",
+      "difficulty": "Medium",
+      "hint": "Type the XITSONGA word for EGG"
+    },
+    {
+      "english": "HEART",
+      "word": "MBILU",
+      "difficulty": "Medium",
+      "hint": "Type the XITSONGA word for HEART"
+    },
+    {
+      "english": "STRENGTH",
+      "word": "MATIMBA",
+      "difficulty": "Medium",
+      "hint": "Type the XITSONGA word for STRENGTH"
+    },
+    {
+      "english": "WORK",
+      "word": "NTIRHO",
+      "difficulty": "Medium",
+      "hint": "Type the XITSONGA word for WORK"
+    },
+    {
+      "english": "GARDEN",
+      "word": "BADI",
+      "difficulty": "Easy",
+      "hint": "Type the XITSONGA word for GARDEN"
+    },
+    {
+      "english": "CHAIR",
+      "word": "XITULU",
+      "difficulty": "Medium",
+      "hint": "Type the XITSONGA word for CHAIR"
+    },
+    {
+      "english": "TABLE",
+      "word": "TAFILE",
+      "difficulty": "Easy",
+      "hint": "Type the XITSONGA word for TABLE"
+    },
+    {
+      "english": "DOOR",
+      "word": "MUNYANGO",
+      "difficulty": "Medium",
+      "hint": "Type the XITSONGA word for DOOR"
+    },
+    {
+      "english": "CHIEF",
+      "word": "HOSI",
+      "difficulty": "Hard",
+      "hint": "Type the XITSONGA word for CHIEF"
+    },
+    {
+      "english": "HAND",
+      "word": "VOKO",
+      "difficulty": "Easy",
+      "hint": "Type the XITSONGA word for HAND"
+    },
+    {
+      "english": "EYE",
+      "word": "HLO",
+      "difficulty": "Easy",
+      "hint": "Type the XITSONGA word for EYE"
+    },
+    {
+      "english": "HEAD",
+      "word": "NHLOKO",
+      "difficulty": "Medium",
+      "hint": "Type the XITSONGA word for HEAD"
+    },
+    {
+      "english": "MOUTH",
+      "word": "NKOMO",
+      "difficulty": "Medium",
+      "hint": "Type the XITSONGA word for MOUTH"
+    },
+    {
+      "english": "TREE",
+      "word": "NDZATI",
+      "difficulty": "Medium",
+      "hint": "Type the XITSONGA word for TREE"
+    },
+    {
+      "english": "FIRE",
+      "word": "NDZILO",
+      "difficulty": "Easy",
+      "hint": "Type the XITSONGA word for FIRE"
+    },
+    {
+      "english": "MOON",
+      "word": "NDZHENGA",
+      "difficulty": "Medium",
+      "hint": "Type the XITSONGA word for MOON"
+    },
+    {
+      "english": "SUN",
+      "word": "DYAMBU",
+      "difficulty": "Easy",
+      "hint": "Type the XITSONGA word for SUN"
+    },
+    {
+      "english": "CAT",
+      "word": "KATI",
+      "difficulty": "Easy",
+      "hint": "Type the XITSONGA word for CAT"
+    },
+    {
+      "english": "SEA",
+      "word": "LWANDLE",
+      "difficulty": "Hard",
+      "hint": "Type the XITSONGA word for SEA"
+    },
+    {
+      "english": "WIND",
+      "word": "MPFUHKA",
+      "difficulty": "Medium",
+      "hint": "Type the XITSONGA word for WIND"
+    },
+    {
+      "english": "HORSE",
+      "word": "HANGASI",
+      "difficulty": "Medium",
+      "hint": "Type the XITSONGA word for HORSE"
+    },
+    {
+      "english": "LION",
+      "word": "NGHALA",
+      "difficulty": "Easy",
+      "hint": "Type the XITSONGA word for LION"
+    },
+    {
+      "english": "ELEPHANT",
+      "word": "NDLOPFU",
+      "difficulty": "Hard",
+      "hint": "Type the XITSONGA word for ELEPHANT"
+    }
+  ],
+  "syllablePuzzles": [
+    {
+      "translation": "water",
+      "word": "Mati",
+      "syllables": [
+        "Ma",
+        "ti"
+      ],
+      "difficulty": "Beginner"
+    },
+    {
+      "translation": "fire",
+      "word": "Ndzilo",
+      "syllables": [
+        "Ndzi",
+        "lo"
+      ],
+      "difficulty": "Intermediate"
+    },
+    {
+      "translation": "person",
+      "word": "Munhu",
+      "syllables": [
+        "Mu",
+        "nhu"
+      ],
+      "difficulty": "Advanced"
+    },
+    {
+      "translation": "dog",
+      "word": "Mbyana",
+      "syllables": [
+        "Mbya",
+        "na"
+      ],
+      "difficulty": "Beginner"
+    },
+    {
+      "translation": "cat",
+      "word": "Kati",
+      "syllables": [
+        "Ka",
+        "ti"
+      ],
+      "difficulty": "Beginner"
+    },
+    {
+      "translation": "tree",
+      "word": "Ndzati",
+      "syllables": [
+        "Ndza",
+        "ti"
+      ],
+      "difficulty": "Advanced"
+    },
+    {
+      "translation": "moon",
+      "word": "Ndzhenga",
+      "syllables": [
+        "Ndzhe",
+        "nga"
+      ],
+      "difficulty": "Intermediate"
+    },
+    {
+      "translation": "sun",
+      "word": "Dyambu",
+      "syllables": [
+        "Dya",
+        "mbu"
+      ],
+      "difficulty": "Beginner"
+    },
+    {
+      "translation": "mother",
+      "word": "Manana",
+      "syllables": [
+        "Ma",
+        "na",
+        "na"
+      ],
+      "difficulty": "Beginner"
+    },
+    {
+      "translation": "father",
+      "word": "Tatana",
+      "syllables": [
+        "Ta",
+        "ta",
+        "na"
+      ],
+      "difficulty": "Beginner"
+    },
+    {
+      "translation": "teacher",
+      "word": "Dyondzisi",
+      "syllables": [
+        "Dyo",
+        "ndzi",
+        "si"
+      ],
+      "difficulty": "Intermediate"
+    },
+    {
+      "translation": "book",
+      "word": "Buku",
+      "syllables": [
+        "Bu",
+        "ku"
+      ],
+      "difficulty": "Beginner"
+    },
+    {
+      "translation": "school",
+      "word": "Sikolo",
+      "syllables": [
+        "Si",
+        "ko",
+        "lo"
+      ],
+      "difficulty": "Intermediate"
+    },
+    {
+      "translation": "freedom",
+      "word": "Ntshunxeko",
+      "syllables": [
+        "Ntshu",
+        "nxe",
+        "ko"
+      ],
+      "difficulty": "Advanced"
+    },
+    {
+      "translation": "happiness",
+      "word": "Nkense",
+      "syllables": [
+        "Nke",
+        "nse"
+      ],
+      "difficulty": "Intermediate"
+    },
+    {
+      "translation": "love",
+      "word": "Rirhandzu",
+      "syllables": [
+        "Ri",
+        "rha",
+        "ndzu"
+      ],
+      "difficulty": "Advanced"
+    },
+    {
+      "translation": "peace",
+      "word": "Rixile",
+      "syllables": [
+        "Ri",
+        "xi",
+        "le"
+      ],
+      "difficulty": "Intermediate"
+    },
+    {
+      "translation": "family",
+      "word": "Ndyangu",
+      "syllables": [
+        "Ndya",
+        "ngu"
+      ],
+      "difficulty": "Intermediate"
+    },
+    {
+      "translation": "bird",
+      "word": "Nyenyani",
+      "syllables": [
+        "Nye",
+        "nya",
+        "ni"
+      ],
+      "difficulty": "Beginner"
+    },
+    {
+      "translation": "fish",
+      "word": "Nhlampfi",
+      "syllables": [
+        "Nhla",
+        "mpfi"
+      ],
+      "difficulty": "Intermediate"
+    },
+    {
+      "translation": "cow",
+      "word": "Homu",
+      "syllables": [
+        "Ho",
+        "mu"
+      ],
+      "difficulty": "Beginner"
+    },
+    {
+      "translation": "goat",
+      "word": "Mbuji",
+      "syllables": [
+        "Mbu",
+        "ji"
+      ],
+      "difficulty": "Beginner"
+    },
+    {
+      "translation": "car",
+      "word": "Motokari",
+      "syllables": [
+        "Mo",
+        "to",
+        "ka",
+        "ri"
+      ],
+      "difficulty": "Beginner"
+    },
+    {
+      "translation": "house",
+      "word": "Yindlu",
+      "syllables": [
+        "Yi",
+        "ndlu"
+      ],
+      "difficulty": "Beginner"
+    },
+    {
+      "translation": "rain",
+      "word": "Mpfula",
+      "syllables": [
+        "Mpfu",
+        "la"
+      ],
+      "difficulty": "Intermediate"
+    },
+    {
+      "translation": "star",
+      "word": "Nhonga",
+      "syllables": [
+        "Nho",
+        "nga"
+      ],
+      "difficulty": "Intermediate"
+    },
+    {
+      "translation": "mountain",
+      "word": "Ndhava",
+      "syllables": [
+        "Ndha",
+        "va"
+      ],
+      "difficulty": "Intermediate"
+    },
+    {
+      "translation": "river",
+      "word": "Nambu",
+      "syllables": [
+        "Na",
+        "mbu"
+      ],
+      "difficulty": "Beginner"
+    },
+    {
+      "translation": "bread",
+      "word": "Voko",
+      "syllables": [
+        "Vo",
+        "ko"
+      ],
+      "difficulty": "Beginner"
+    },
+    {
+      "translation": "milk",
+      "word": "Rhandzi",
+      "syllables": [
+        "Rha",
+        "ndzi"
+      ],
+      "difficulty": "Intermediate"
+    },
+    {
+      "translation": "egg",
+      "word": "Tandza",
+      "syllables": [
+        "Ta",
+        "ndza"
+      ],
+      "difficulty": "Intermediate"
+    },
+    {
+      "translation": "heart",
+      "word": "Mbilu",
+      "syllables": [
+        "Mbi",
+        "lu"
+      ],
+      "difficulty": "Beginner"
+    },
+    {
+      "translation": "chief",
+      "word": "Hosi",
+      "syllables": [
+        "Ho",
+        "si"
+      ],
+      "difficulty": "Advanced"
+    },
+    {
+      "translation": "hand",
+      "word": "Voko",
+      "syllables": [
+        "Vo",
+        "ko"
+      ],
+      "difficulty": "Beginner"
+    },
+    {
+      "translation": "head",
+      "word": "Nhloko",
+      "syllables": [
+        "Nhlo",
+        "ko"
+      ],
+      "difficulty": "Intermediate"
+    },
+    {
+      "translation": "strength",
+      "word": "Matimba",
+      "syllables": [
+        "Ma",
+        "ti",
+        "mba"
+      ],
+      "difficulty": "Intermediate"
+    },
+    {
+      "translation": "eye",
+      "word": "Hlo",
+      "syllables": [
+        "Hlo"
+      ],
+      "difficulty": "Beginner"
+    },
+    {
+      "translation": "mouth",
+      "word": "Nkomo",
+      "syllables": [
+        "Nko",
+        "mo"
+      ],
+      "difficulty": "Intermediate"
+    },
+    {
+      "translation": "sea",
+      "word": "Lwandle",
+      "syllables": [
+        "Lwa",
+        "ndle"
+      ],
+      "difficulty": "Advanced"
+    },
+    {
+      "translation": "wind",
+      "word": "Mpfhuka",
+      "syllables": [
+        "Mpfhu",
+        "ka"
+      ],
+      "difficulty": "Intermediate"
+    },
+    {
+      "translation": "horse",
+      "word": "Hangasi",
+      "syllables": [
+        "Ha",
+        "nga",
+        "si"
+      ],
+      "difficulty": "Intermediate"
+    },
+    {
+      "translation": "lion",
+      "word": "Nghala",
+      "syllables": [
+        "Ngha",
+        "la"
+      ],
+      "difficulty": "Beginner"
+    },
+    {
+      "translation": "elephant",
+      "word": "Ndlopfu",
+      "syllables": [
+        "Ndlo",
+        "pfu"
+      ],
+      "difficulty": "Advanced"
+    }
+  ],
+  "sentencePuzzles": [
+    {
+      "translation": "I see the dog",
+      "words": [
+        "Ndzi",
+        "vona",
+        "mbyana"
+      ],
+      "difficulty": "Beginner"
+    },
+    {
+      "translation": "The sun is hot",
+      "words": [
+        "Dyambu",
+        "ri",
+        "tshisa"
+      ],
+      "difficulty": "Intermediate"
+    },
+    {
+      "translation": "Knowledge is power",
+      "words": [
+        "Vutivi",
+        "i",
+        "matimba"
+      ],
+      "difficulty": "Advanced"
+    },
+    {
+      "translation": "I eat food",
+      "words": [
+        "Ndzi",
+        "dya",
+        "swakudya"
+      ],
+      "difficulty": "Beginner"
+    },
+    {
+      "translation": "The child is crying",
+      "words": [
+        "N'wana",
+        "u",
+        "lila"
+      ],
+      "difficulty": "Intermediate"
+    },
+    {
+      "translation": "We love peace",
+      "words": [
+        "Hi",
+        "rhandza",
+        "rixile"
+      ],
+      "difficulty": "Intermediate"
+    },
+    {
+      "translation": "The car is fast",
+      "words": [
+        "Motokari",
+        "yi",
+        "hahluka"
+      ],
+      "difficulty": "Intermediate"
+    },
+    {
+      "translation": "The bird flies",
+      "words": [
+        "Nyenyani",
+        "yi",
+        "hahula"
+      ],
+      "difficulty": "Intermediate"
+    },
+    {
+      "translation": "She is my mother",
+      "words": [
+        "I",
+        "manana",
+        "wa",
+        "mina"
+      ],
+      "difficulty": "Advanced"
+    },
+    {
+      "translation": "The rain is falling",
+      "words": [
+        "Mpfula",
+        "yi",
+        "na"
+      ],
+      "difficulty": "Intermediate"
+    },
+    {
+      "translation": "Come here",
+      "words": [
+        "Tana",
+        "laha"
+      ],
+      "difficulty": "Beginner"
+    },
+    {
+      "translation": "I want water",
+      "words": [
+        "Ndzi",
+        "lava",
+        "mati"
+      ],
+      "difficulty": "Beginner"
+    },
+    {
+      "translation": "The teacher is reading",
+      "words": [
+        "Dyondzisi",
+        "u",
+        "haya"
+      ],
+      "difficulty": "Intermediate"
+    },
+    {
+      "translation": "They are building a house",
+      "words": [
+        "Va",
+        "aka",
+        "yindlu"
+      ],
+      "difficulty": "Advanced"
+    },
+    {
+      "translation": "Unity is strength",
+      "words": [
+        "Vun'we",
+        "i",
+        "matimba"
+      ],
+      "difficulty": "Advanced"
+    },
+    {
+      "translation": "I love you",
+      "words": [
+        "Ndzi",
+        "ku",
+        "rhandza"
+      ],
+      "difficulty": "Intermediate"
+    },
+    {
+      "translation": "Good morning",
+      "words": [
+        "Avuxeni"
+      ],
+      "difficulty": "Beginner"
+    },
+    {
+      "translation": "Thank you",
+      "words": [
+        "Inkomu"
+      ],
+      "difficulty": "Beginner"
+    },
+    {
+      "translation": "How are you?",
+      "words": [
+        "Ku",
+        "njhani?"
+      ],
+      "difficulty": "Beginner"
+    },
+    {
+      "translation": "The cat sleeps on the chair",
+      "words": [
+        "Kati",
+        "yi",
+        "etlele",
+        "xitulwini"
+      ],
+      "difficulty": "Advanced"
+    },
+    {
+      "translation": "My father works hard",
+      "words": [
+        "Tatana",
+        "wa",
+        "mina",
+        "u",
+        "tirha",
+        "hi",
+        "matimba"
+      ],
+      "difficulty": "Advanced"
+    },
+    {
+      "translation": "The flowers are beautiful",
+      "words": [
+        "Sesani",
+        "swi",
+        "sasekile"
+      ],
+      "difficulty": "Intermediate"
+    },
+    {
+      "translation": "We drink milk every day",
+      "words": [
+        "Hi",
+        "nwa",
+        "rhandzi",
+        "siku",
+        "ni",
+        "siku"
+      ],
+      "difficulty": "Advanced"
+    },
+    {
+      "translation": "The mountain is high",
+      "words": [
+        "Ndhava",
+        "yi",
+        "lehe"
+      ],
+      "difficulty": "Intermediate"
+    },
+    {
+      "translation": "The chief is wise",
+      "words": [
+        "Hosi",
+        "yi",
+        "na",
+        "vutlhari"
+      ],
+      "difficulty": "Advanced"
+    },
+    {
+      "translation": "Let us go home",
+      "words": [
+        "A",
+        "hi",
+        "yeni",
+        "kaya"
+      ],
+      "difficulty": "Intermediate"
+    },
+    {
+      "translation": "I am happy",
+      "words": [
+        "Ndzi",
+        "tsakile"
+      ],
+      "difficulty": "Beginner"
+    },
+    {
+      "translation": "What is your name?",
+      "words": [
+        "Vito",
+        "ra",
+        "wena",
+        "i",
+        "mani?"
+      ],
+      "difficulty": "Intermediate"
+    },
+    {
+      "translation": "The dog is barking",
+      "words": [
+        "Mbyana",
+        "yi",
+        "hunguta"
+      ],
+      "difficulty": "Intermediate"
+    },
+    {
+      "translation": "We are going to school",
+      "words": [
+        "Hi",
+        "ya",
+        "sikolo"
+      ],
+      "difficulty": "Intermediate"
+    },
+    {
+      "translation": "The sea is big",
+      "words": [
+        "Lwandle",
+        "ri",
+        "kulu"
+      ],
+      "difficulty": "Intermediate"
+    },
+    {
+      "translation": "The wind is blowing",
+      "words": [
+        "Mpfhuka",
+        "wu",
+        "vurha"
+      ],
+      "difficulty": "Intermediate"
+    },
+    {
+      "translation": "I am learning Tsonga",
+      "words": [
+        "Ndzi",
+        "dyondza",
+        "Xitsonga"
+      ],
+      "difficulty": "Advanced"
+    },
+    {
+      "translation": "The lion is strong",
+      "words": [
+        "Nghala",
+        "yi",
+        "na",
+        "matimba"
+      ],
+      "difficulty": "Advanced"
+    },
+    {
+      "translation": "God is good",
+      "words": [
+        "Xikwembu",
+        "xi",
+        "lunghile"
+      ],
+      "difficulty": "Intermediate"
+    },
+    {
+      "translation": "The elephant is big",
+      "words": [
+        "Ndlopfu",
+        "yi",
+        "kulu"
+      ],
+      "difficulty": "Intermediate"
+    }
+  ]
+}

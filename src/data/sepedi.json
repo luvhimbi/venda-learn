@@ -1,0 +1,1116 @@
+{
+  "name": "Sepedi",
+  "code": "nso",
+  "picturePuzzles": [
+    {
+      "english": "Sun",
+      "word": "Letšatši"
+    },
+    {
+      "english": "Moon",
+      "word": "Ngwedi"
+    },
+    {
+      "english": "Tree",
+      "word": "Mohlare"
+    },
+    {
+      "english": "Fire",
+      "word": "Mollo"
+    },
+    {
+      "english": "Water",
+      "word": "Meetse"
+    },
+    {
+      "english": "Dog",
+      "word": "Mpša"
+    },
+    {
+      "english": "Cat",
+      "word": "Katse"
+    },
+    {
+      "english": "Person",
+      "word": "Motho"
+    },
+    {
+      "english": "Bird",
+      "word": "Nonyana"
+    },
+    {
+      "english": "Fish",
+      "word": "Tlhapi"
+    },
+    {
+      "english": "Cow",
+      "word": "Kgomo"
+    },
+    {
+      "english": "Goat",
+      "word": "Pudi"
+    },
+    {
+      "english": "Car",
+      "word": "Koloi"
+    },
+    {
+      "english": "House",
+      "word": "Ntlo"
+    },
+    {
+      "english": "Food",
+      "word": "Dijo"
+    },
+    {
+      "english": "Rain",
+      "word": "Pula"
+    },
+    {
+      "english": "Star",
+      "word": "Naledi"
+    },
+    {
+      "english": "Flower",
+      "word": "Letšatši"
+    },
+    {
+      "english": "Mountain",
+      "word": "Thaba"
+    },
+    {
+      "english": "River",
+      "word": "Noka"
+    },
+    {
+      "english": "Road",
+      "word": "Tsela"
+    },
+    {
+      "english": "Chair",
+      "word": "Setulo"
+    },
+    {
+      "english": "Table",
+      "word": "Tafole"
+    },
+    {
+      "english": "Door",
+      "word": "Lebati"
+    },
+    {
+      "english": "Window",
+      "word": "Fenetšere"
+    },
+    {
+      "english": "Apple",
+      "word": "Apole"
+    },
+    {
+      "english": "Bread",
+      "word": "Borotho"
+    },
+    {
+      "english": "Milk",
+      "word": "Mashi"
+    },
+    {
+      "english": "Egg",
+      "word": "Lee"
+    },
+    {
+      "english": "Heart",
+      "word": "Pelo"
+    },
+    {
+      "english": "Hand",
+      "word": "Letsoho"
+    },
+    {
+      "english": "Foot",
+      "word": "Lenao"
+    },
+    {
+      "english": "Eye",
+      "word": "Leihlo"
+    },
+    {
+      "english": "Mouth",
+      "word": "Molomo"
+    },
+    {
+      "english": "Head",
+      "word": "Hlogo"
+    }
+  ],
+  "wordBombWords": [
+    {
+      "english": "Book",
+      "word": "Puku",
+      "difficulty": "Easy"
+    },
+    {
+      "english": "School",
+      "word": "Sekolo",
+      "difficulty": "Easy"
+    },
+    {
+      "english": "Teacher",
+      "word": "Morutiši",
+      "difficulty": "Easy"
+    },
+    {
+      "english": "Mother",
+      "word": "Mma",
+      "difficulty": "Easy"
+    },
+    {
+      "english": "Computer",
+      "word": "Khputara",
+      "difficulty": "Easy"
+    },
+    {
+      "english": "Father",
+      "word": "Tate",
+      "difficulty": "Easy"
+    },
+    {
+      "english": "Child",
+      "word": "Ngwana",
+      "difficulty": "Easy"
+    },
+    {
+      "english": "Friend",
+      "word": "Mogwera",
+      "difficulty": "Easy"
+    },
+    {
+      "english": "Love",
+      "word": "Lerato",
+      "difficulty": "Medium"
+    },
+    {
+      "english": "Peace",
+      "word": "Khutšo",
+      "difficulty": "Medium"
+    },
+    {
+      "english": "Freedom",
+      "word": "Tokologo",
+      "difficulty": "Medium"
+    },
+    {
+      "english": "Happiness",
+      "word": "Thabo",
+      "difficulty": "Medium"
+    },
+    {
+      "english": "Family",
+      "word": "Lapa",
+      "difficulty": "Medium"
+    },
+    {
+      "english": "Garden",
+      "word": "Tšhemo",
+      "difficulty": "Easy"
+    },
+    {
+      "english": "Kitchen",
+      "word": "Kitšing",
+      "difficulty": "Medium"
+    },
+    {
+      "english": "Bedroom",
+      "word": "Phapoši",
+      "difficulty": "Medium"
+    },
+    {
+      "english": "Bathroom",
+      "word": "Phapamelo",
+      "difficulty": "Hard"
+    },
+    {
+      "english": "Work",
+      "word": "Mošomo",
+      "difficulty": "Medium"
+    },
+    {
+      "english": "Health",
+      "word": "Maphelo",
+      "difficulty": "Medium"
+    },
+    {
+      "english": "Community",
+      "word": "Motsese",
+      "difficulty": "Hard"
+    },
+    {
+      "english": "Leadership",
+      "word": "Boetapele",
+      "difficulty": "Hard"
+    },
+    {
+      "english": "Wisdom",
+      "word": "Bohlale",
+      "difficulty": "Hard"
+    },
+    {
+      "english": "Strength",
+      "word": "Matla",
+      "difficulty": "Medium"
+    },
+    {
+      "english": "Courage",
+      "word": "Sebete",
+      "difficulty": "Medium"
+    },
+    {
+      "english": "Chief",
+      "word": "Kgoši",
+      "difficulty": "Hard"
+    },
+    {
+      "english": "Village",
+      "word": "Motseng",
+      "difficulty": "Easy"
+    },
+    {
+      "english": "Animal",
+      "word": "Phologolo",
+      "difficulty": "Medium"
+    },
+    {
+      "english": "Time",
+      "word": "Nako",
+      "difficulty": "Easy"
+    },
+    {
+      "english": "Day",
+      "word": "Letšatši",
+      "difficulty": "Easy"
+    },
+    {
+      "english": "Night",
+      "word": "Bošego",
+      "difficulty": "Easy"
+    }
+  ],
+  "puzzleWords": [
+    {
+      "english": "WATER",
+      "word": "MEETSE",
+      "difficulty": "Easy",
+      "hint": "Type the SEPEDI word for WATER"
+    },
+    {
+      "english": "APPLE",
+      "word": "APOLE",
+      "difficulty": "Easy",
+      "hint": "Type the SEPEDI word for APPLE"
+    },
+    {
+      "english": "HOUSE",
+      "word": "NTLO",
+      "difficulty": "Easy",
+      "hint": "Type the SEPEDI word for HOUSE"
+    },
+    {
+      "english": "TRAIN",
+      "word": "SETIMELA",
+      "difficulty": "Easy",
+      "hint": "Type the SEPEDI word for TRAIN"
+    },
+    {
+      "english": "SNAKE",
+      "word": "NOGA",
+      "difficulty": "Easy",
+      "hint": "Type the SEPEDI word for SNAKE"
+    },
+    {
+      "english": "BIRD",
+      "word": "NONYANA",
+      "difficulty": "Easy",
+      "hint": "Type the SEPEDI word for BIRD"
+    },
+    {
+      "english": "FISH",
+      "word": "TLHAPI",
+      "difficulty": "Medium",
+      "hint": "Type the SEPEDI word for FISH"
+    },
+    {
+      "english": "COW",
+      "word": "KGOMO",
+      "difficulty": "Easy",
+      "hint": "Type the SEPEDI word for COW"
+    },
+    {
+      "english": "GOAT",
+      "word": "PUDI",
+      "difficulty": "Easy",
+      "hint": "Type the SEPEDI word for GOAT"
+    },
+    {
+      "english": "CAR",
+      "word": "KOLOI",
+      "difficulty": "Easy",
+      "hint": "Type the SEPEDI word for CAR"
+    },
+    {
+      "english": "RAIN",
+      "word": "PULA",
+      "difficulty": "Easy",
+      "hint": "Type the SEPEDI word for RAIN"
+    },
+    {
+      "english": "STAR",
+      "word": "NALEDI",
+      "difficulty": "Medium",
+      "hint": "Type the SEPEDI word for STAR"
+    },
+    {
+      "english": "FLOWER",
+      "word": "LETŠATŠI",
+      "difficulty": "Medium",
+      "hint": "Type the SEPEDI word for FLOWER"
+    },
+    {
+      "english": "MOUNTAIN",
+      "word": "THABA",
+      "difficulty": "Easy",
+      "hint": "Type the SEPEDI word for MOUNTAIN"
+    },
+    {
+      "english": "RIVER",
+      "word": "NOKA",
+      "difficulty": "Easy",
+      "hint": "Type the SEPEDI word for RIVER"
+    },
+    {
+      "english": "FOOD",
+      "word": "DIJO",
+      "difficulty": "Easy",
+      "hint": "Type the SEPEDI word for FOOD"
+    },
+    {
+      "english": "LOVE",
+      "word": "LERATO",
+      "difficulty": "Medium",
+      "hint": "Type the SEPEDI word for LOVE"
+    },
+    {
+      "english": "PEACE",
+      "word": "KHUTŠO",
+      "difficulty": "Medium",
+      "hint": "Type the SEPEDI word for PEACE"
+    },
+    {
+      "english": "FREEDOM",
+      "word": "TOKOLOGO",
+      "difficulty": "Hard",
+      "hint": "Type the SEPEDI word for FREEDOM"
+    },
+    {
+      "english": "FAMILY",
+      "word": "LAPA",
+      "difficulty": "Easy",
+      "hint": "Type the SEPEDI word for FAMILY"
+    },
+    {
+      "english": "MILK",
+      "word": "MASHI",
+      "difficulty": "Easy",
+      "hint": "Type the SEPEDI word for MILK"
+    },
+    {
+      "english": "BREAD",
+      "word": "BOROTHO",
+      "difficulty": "Medium",
+      "hint": "Type the SEPEDI word for BREAD"
+    },
+    {
+      "english": "EGG",
+      "word": "LEE",
+      "difficulty": "Easy",
+      "hint": "Type the SEPEDI word for EGG"
+    },
+    {
+      "english": "HEART",
+      "word": "PELO",
+      "difficulty": "Easy",
+      "hint": "Type the SEPEDI word for HEART"
+    },
+    {
+      "english": "STRENGTH",
+      "word": "MATLA",
+      "difficulty": "Medium",
+      "hint": "Type the SEPEDI word for STRENGTH"
+    },
+    {
+      "english": "WORK",
+      "word": "MOŠOMO",
+      "difficulty": "Medium",
+      "hint": "Type the SEPEDI word for WORK"
+    },
+    {
+      "english": "GARDEN",
+      "word": "TŠHEMO",
+      "difficulty": "Medium",
+      "hint": "Type the SEPEDI word for GARDEN"
+    },
+    {
+      "english": "CHAIR",
+      "word": "SETULO",
+      "difficulty": "Medium",
+      "hint": "Type the SEPEDI word for CHAIR"
+    },
+    {
+      "english": "TABLE",
+      "word": "TAFOLE",
+      "difficulty": "Easy",
+      "hint": "Type the SEPEDI word for TABLE"
+    },
+    {
+      "english": "DOOR",
+      "word": "LEBATI",
+      "difficulty": "Medium",
+      "hint": "Type the SEPEDI word for DOOR"
+    },
+    {
+      "english": "CHIEF",
+      "word": "KGOŠI",
+      "difficulty": "Hard",
+      "hint": "Type the SEPEDI word for CHIEF"
+    },
+    {
+      "english": "HAND",
+      "word": "LETSOGO",
+      "difficulty": "Medium",
+      "hint": "Type the SEPEDI word for HAND"
+    },
+    {
+      "english": "EYE",
+      "word": "LEIHLO",
+      "difficulty": "Medium",
+      "hint": "Type the SEPEDI word for EYE"
+    },
+    {
+      "english": "HEAD",
+      "word": "HLOGO",
+      "difficulty": "Easy",
+      "hint": "Type the SEPEDI word for HEAD"
+    },
+    {
+      "english": "MOUTH",
+      "word": "MOLOMO",
+      "difficulty": "Medium",
+      "hint": "Type the SEPEDI word for MOUTH"
+    },
+    {
+      "english": "TREE",
+      "word": "MOHLARE",
+      "difficulty": "Medium",
+      "hint": "Type the SEPEDI word for TREE"
+    },
+    {
+      "english": "FIRE",
+      "word": "MOLLO",
+      "difficulty": "Easy",
+      "hint": "Type the SEPEDI word for FIRE"
+    }
+  ],
+  "syllablePuzzles": [
+    {
+      "translation": "water",
+      "word": "Meetse",
+      "syllables": [
+        "Mee",
+        "tse"
+      ],
+      "difficulty": "Beginner"
+    },
+    {
+      "translation": "fire",
+      "word": "Mollo",
+      "syllables": [
+        "Mo",
+        "llo"
+      ],
+      "difficulty": "Intermediate"
+    },
+    {
+      "translation": "person",
+      "word": "Motho",
+      "syllables": [
+        "Mo",
+        "tho"
+      ],
+      "difficulty": "Advanced"
+    },
+    {
+      "translation": "dog",
+      "word": "Mpša",
+      "syllables": [
+        "Mpša"
+      ],
+      "difficulty": "Beginner"
+    },
+    {
+      "translation": "cat",
+      "word": "Katse",
+      "syllables": [
+        "Ka",
+        "tse"
+      ],
+      "difficulty": "Beginner"
+    },
+    {
+      "translation": "tree",
+      "word": "Mohlare",
+      "syllables": [
+        "Mo",
+        "hla",
+        "re"
+      ],
+      "difficulty": "Advanced"
+    },
+    {
+      "translation": "moon",
+      "word": "Ngwedi",
+      "syllables": [
+        "Ngwe",
+        "di"
+      ],
+      "difficulty": "Intermediate"
+    },
+    {
+      "translation": "sun",
+      "word": "Letšatši",
+      "syllables": [
+        "Le",
+        "tša",
+        "tši"
+      ],
+      "difficulty": "Beginner"
+    },
+    {
+      "translation": "mother",
+      "word": "Mma",
+      "syllables": [
+        "Mma"
+      ],
+      "difficulty": "Beginner"
+    },
+    {
+      "translation": "father",
+      "word": "Tate",
+      "syllables": [
+        "Ta",
+        "te"
+      ],
+      "difficulty": "Beginner"
+    },
+    {
+      "translation": "teacher",
+      "word": "Morutiši",
+      "syllables": [
+        "Mo",
+        "ru",
+        "ti",
+        "ši"
+      ],
+      "difficulty": "Intermediate"
+    },
+    {
+      "translation": "book",
+      "word": "Puku",
+      "syllables": [
+        "Pu",
+        "ku"
+      ],
+      "difficulty": "Beginner"
+    },
+    {
+      "translation": "school",
+      "word": "Sekolo",
+      "syllables": [
+        "Se",
+        "ko",
+        "lo"
+      ],
+      "difficulty": "Intermediate"
+    },
+    {
+      "translation": "freedom",
+      "word": "Tokologo",
+      "syllables": [
+        "To",
+        "ko",
+        "lo",
+        "go"
+      ],
+      "difficulty": "Advanced"
+    },
+    {
+      "translation": "happiness",
+      "word": "Thabo",
+      "syllables": [
+        "Tha",
+        "bo"
+      ],
+      "difficulty": "Intermediate"
+    },
+    {
+      "translation": "love",
+      "word": "Lerato",
+      "syllables": [
+        "Le",
+        "ra",
+        "to"
+      ],
+      "difficulty": "Intermediate"
+    },
+    {
+      "translation": "peace",
+      "word": "Khutšo",
+      "syllables": [
+        "Khu",
+        "tšo"
+      ],
+      "difficulty": "Intermediate"
+    },
+    {
+      "translation": "family",
+      "word": "Lapa",
+      "syllables": [
+        "La",
+        "pa"
+      ],
+      "difficulty": "Beginner"
+    },
+    {
+      "translation": "bird",
+      "word": "Nonyana",
+      "syllables": [
+        "No",
+        "nya",
+        "na"
+      ],
+      "difficulty": "Beginner"
+    },
+    {
+      "translation": "fish",
+      "word": "Tlhapi",
+      "syllables": [
+        "Tlha",
+        "pi"
+      ],
+      "difficulty": "Intermediate"
+    },
+    {
+      "translation": "cow",
+      "word": "Kgomo",
+      "syllables": [
+        "Kgo",
+        "mo"
+      ],
+      "difficulty": "Beginner"
+    },
+    {
+      "translation": "goat",
+      "word": "Pudi",
+      "syllables": [
+        "Pu",
+        "di"
+      ],
+      "difficulty": "Beginner"
+    },
+    {
+      "translation": "car",
+      "word": "Koloi",
+      "syllables": [
+        "Ko",
+        "loi"
+      ],
+      "difficulty": "Beginner"
+    },
+    {
+      "translation": "house",
+      "word": "Ntlo",
+      "syllables": [
+        "Ntlo"
+      ],
+      "difficulty": "Beginner"
+    },
+    {
+      "translation": "rain",
+      "word": "Pula",
+      "syllables": [
+        "Pu",
+        "la"
+      ],
+      "difficulty": "Beginner"
+    },
+    {
+      "translation": "star",
+      "word": "Naledi",
+      "syllables": [
+        "Na",
+        "le",
+        "di"
+      ],
+      "difficulty": "Intermediate"
+    },
+    {
+      "translation": "mountain",
+      "word": "Thaba",
+      "syllables": [
+        "Tha",
+        "ba"
+      ],
+      "difficulty": "Beginner"
+    },
+    {
+      "translation": "river",
+      "word": "Noka",
+      "syllables": [
+        "No",
+        "ka"
+      ],
+      "difficulty": "Beginner"
+    },
+    {
+      "translation": "bread",
+      "word": "Borotho",
+      "syllables": [
+        "Bo",
+        "ro",
+        "tho"
+      ],
+      "difficulty": "Intermediate"
+    },
+    {
+      "translation": "milk",
+      "word": "Mashi",
+      "syllables": [
+        "Ma",
+        "shi"
+      ],
+      "difficulty": "Beginner"
+    },
+    {
+      "translation": "egg",
+      "word": "Lee",
+      "syllables": [
+        "Le",
+        "e"
+      ],
+      "difficulty": "Beginner"
+    },
+    {
+      "translation": "heart",
+      "word": "Pelo",
+      "syllables": [
+        "Pe",
+        "lo"
+      ],
+      "difficulty": "Beginner"
+    },
+    {
+      "translation": "chief",
+      "word": "Kgoši",
+      "syllables": [
+        "Kgo",
+        "ši"
+      ],
+      "difficulty": "Advanced"
+    },
+    {
+      "translation": "hand",
+      "word": "Letsoho",
+      "syllables": [
+        "Le",
+        "tso",
+        "ho"
+      ],
+      "difficulty": "Intermediate"
+    },
+    {
+      "translation": "head",
+      "word": "Hlogo",
+      "syllables": [
+        "Hlo",
+        "go"
+      ],
+      "difficulty": "Beginner"
+    },
+    {
+      "translation": "strength",
+      "word": "Matla",
+      "syllables": [
+        "Ma",
+        "tla"
+      ],
+      "difficulty": "Intermediate"
+    }
+  ],
+  "sentencePuzzles": [
+    {
+      "translation": "I see the dog",
+      "words": [
+        "Ke",
+        "bona",
+        "mpša"
+      ],
+      "difficulty": "Beginner"
+    },
+    {
+      "translation": "The sun is hot",
+      "words": [
+        "Letšatši",
+        "le",
+        "fiša"
+      ],
+      "difficulty": "Intermediate"
+    },
+    {
+      "translation": "Knowledge is power",
+      "words": [
+        "Tsebo",
+        "ke",
+        "matla"
+      ],
+      "difficulty": "Advanced"
+    },
+    {
+      "translation": "I eat food",
+      "words": [
+        "Ke",
+        "ja",
+        "dijo"
+      ],
+      "difficulty": "Beginner"
+    },
+    {
+      "translation": "The child is crying",
+      "words": [
+        "Ngwana",
+        "o",
+        "lela"
+      ],
+      "difficulty": "Intermediate"
+    },
+    {
+      "translation": "We love peace",
+      "words": [
+        "Re",
+        "rata",
+        "khutšo"
+      ],
+      "difficulty": "Intermediate"
+    },
+    {
+      "translation": "The car is fast",
+      "words": [
+        "Koloi",
+        "e",
+        "phakela"
+      ],
+      "difficulty": "Intermediate"
+    },
+    {
+      "translation": "The bird flies",
+      "words": [
+        "Nonyana",
+        "e",
+        "fofa"
+      ],
+      "difficulty": "Intermediate"
+    },
+    {
+      "translation": "She is my mother",
+      "words": [
+        "Ke",
+        "mma",
+        "ka"
+      ],
+      "difficulty": "Advanced"
+    },
+    {
+      "translation": "The rain is falling",
+      "words": [
+        "Pula",
+        "e",
+        "na"
+      ],
+      "difficulty": "Intermediate"
+    },
+    {
+      "translation": "Come here",
+      "words": [
+        "Tlo",
+        "mono"
+      ],
+      "difficulty": "Beginner"
+    },
+    {
+      "translation": "I want water",
+      "words": [
+        "Ke",
+        "nyaka",
+        "meetse"
+      ],
+      "difficulty": "Beginner"
+    },
+    {
+      "translation": "The teacher is reading",
+      "words": [
+        "Morutiši",
+        "o",
+        "balega"
+      ],
+      "difficulty": "Intermediate"
+    },
+    {
+      "translation": "They are building a house",
+      "words": [
+        "Ba",
+        "aga",
+        "ntlo"
+      ],
+      "difficulty": "Advanced"
+    },
+    {
+      "translation": "Unity is strength",
+      "words": [
+        "Bongwe",
+        "ke",
+        "matla"
+      ],
+      "difficulty": "Advanced"
+    },
+    {
+      "translation": "I love you",
+      "words": [
+        "Ke",
+        "go",
+        "rata"
+      ],
+      "difficulty": "Intermediate"
+    },
+    {
+      "translation": "Good morning",
+      "words": [
+        "Thobela"
+      ],
+      "difficulty": "Beginner"
+    },
+    {
+      "translation": "Thank you",
+      "words": [
+        "Ke",
+        "a",
+        "leboga"
+      ],
+      "difficulty": "Beginner"
+    },
+    {
+      "translation": "How are you?",
+      "words": [
+        "Le",
+        "kae?"
+      ],
+      "difficulty": "Beginner"
+    },
+    {
+      "translation": "The cat sleeps on the chair",
+      "words": [
+        "Katse",
+        "e",
+        "robala",
+        "setulong"
+      ],
+      "difficulty": "Advanced"
+    },
+    {
+      "translation": "My father works hard",
+      "words": [
+        "Tate",
+        "o",
+        "šoma",
+        "ka",
+        "maatla"
+      ],
+      "difficulty": "Advanced"
+    },
+    {
+      "translation": "The flowers are beautiful",
+      "words": [
+        "Letšatši",
+        "le",
+        "botse"
+      ],
+      "difficulty": "Intermediate"
+    },
+    {
+      "translation": "We drink milk every day",
+      "words": [
+        "Re",
+        "nwa",
+        "mashi",
+        "letšatši",
+        "le",
+        "letšatši"
+      ],
+      "difficulty": "Advanced"
+    },
+    {
+      "translation": "The mountain is high",
+      "words": [
+        "Thaba",
+        "e",
+        "tlelela"
+      ],
+      "difficulty": "Intermediate"
+    },
+    {
+      "translation": "The chief is wise",
+      "words": [
+        "Kgoši",
+        "e",
+        "na",
+        "le",
+        "bohlale"
+      ],
+      "difficulty": "Advanced"
+    },
+    {
+      "translation": "Let us go home",
+      "words": [
+        "A",
+        "reyeng",
+        "gae"
+      ],
+      "difficulty": "Intermediate"
+    },
+    {
+      "translation": "I am happy",
+      "words": [
+        "Ke",
+        "thabile"
+      ],
+      "difficulty": "Beginner"
+    },
+    {
+      "translation": "What is your name?",
+      "words": [
+        "Leina",
+        "la",
+        "gago",
+        "ke",
+        "mang?"
+      ],
+      "difficulty": "Intermediate"
+    }
+  ]
+}

@@ -1,18 +1,20 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { doc, updateDoc, increment, getDoc, type Firestore } from 'firebase/firestore';
-import { ArrowLeft, Loader2, Heart, Bomb, Zap } from 'lucide-react';
+import { doc, updateDoc, increment,  type Firestore } from 'firebase/firestore';
+import { ArrowLeft, Loader2,  Bomb, Zap, HelpCircle, Eye, Keyboard, AlertTriangle  } from 'lucide-react';
 import { auth, db } from '../../services/firebaseConfig';
-import { fetchWordBombWords, refreshUserData } from '../../services/dataCache';
+import { fetchWordBombWords, refreshUserData, fetchUserData, fetchLanguages } from '../../services/dataCache';
 import { useVisualJuice } from '../../hooks/useVisualJuice';
 import { updateStreak } from '../../services/streakUtils';
 import { popupService } from '../../services/popupService';
 import Mascot, { type MascotMood } from '../../components/Mascot';
+import GameIntroModal, { resetIntroSeen } from '../../components/GameIntroModal';
+import ExitConfirmModal from '../../components/ExitConfirmModal';
 
 interface WordBombWord {
     id: string;
     english: string;
-    venda: string;
+    nativeWord: string;
     difficulty: string;
 }
 
@@ -38,6 +40,24 @@ interface ScoreHighlight {
     text: string;
 }
 
+const WORD_BOMB_INTRO_STEPS = [
+    {
+        icon: <Eye size={28} strokeWidth={3} />,
+        title: 'Words Fall Down',
+        description: 'English words fall from the sky. Read them quickly before they reach the bottom!'
+    },
+    {
+        icon: <Keyboard size={28} strokeWidth={3} />,
+        title: 'Type the Translation',
+        description: 'Type or tap the correct translation. On mobile, use the word palette below!'
+    },
+    {
+        icon: <AlertTriangle size={28} strokeWidth={3} />,
+        title: "Don't Let Them Drop!",
+        description: 'You have 10 lives. Each missed word costs a life. Build combos for bonus points!'
+    }
+];
+
 const WordBomb: React.FC = () => {
     const navigate = useNavigate();
     const [allWords, setAllWords] = useState<WordBombWord[]>([]);
@@ -54,8 +74,13 @@ const WordBomb: React.FC = () => {
     const [missFlash, setMissFlash] = useState(false);
     const [sessionStartTime, setSessionStartTime] = useState(Date.now());
     const [isMobile, setIsMobile] = useState(window.innerWidth < 576);
+    const [preferredLanguage, setPreferredLanguage] = useState<any>(null);
     const [paletteOptions, setPaletteOptions] = useState<WordBombWord[]>([]);
+    const [showIntro, setShowIntro] = useState(true);
+    const [showExitConfirm, setShowExitConfirm] = useState(false);
     const { playCorrect, playWrong, playClick, triggerShake } = useVisualJuice();
+
+    const handleIntroDismiss = useCallback(() => setShowIntro(false), []);
 
     const inputRef = useRef<HTMLInputElement>(null);
     const gameLoopRef = useRef<number | null>(null);
@@ -96,18 +121,42 @@ const WordBomb: React.FC = () => {
         if (spawnTimerRef.current) clearInterval(spawnTimerRef.current);
     }, []);
 
+    const handleExit = () => {
+        if (gameStatus === 'playing') {
+            setShowExitConfirm(true);
+        } else {
+            navigate('/mitambo');
+        }
+    };
+
+    const confirmExit = () => {
+        cleanup();
+        isPlayingRef.current = false;
+        setShowExitConfirm(false);
+        navigate('/mitambo');
+    };
+
     // Load words
     useEffect(() => {
         const loadData = async () => {
             try {
-                const words = await fetchWordBombWords();
-                if (words && Array.isArray(words)) {
-                    setAllWords(words as WordBombWord[]);
-                    setGameStatus('ready');
+                const [words, uData, langs] = await Promise.all([
+                    fetchWordBombWords(),
+                    fetchUserData(),
+                    fetchLanguages()
+                ]);
+
+                let activeLang: any = null;
+                if (uData && langs) {
+                    activeLang = langs.find((l: any) => l.id === uData.preferredLanguageId);
+                    setPreferredLanguage(activeLang);
                 }
-                if (auth.currentUser) {
-                    await getDoc(doc(db as Firestore, "users", auth.currentUser.uid));
-                    // streak state removed as it was unused in render
+
+                if (words && Array.isArray(words)) {
+                    // Filter by language if possible
+                    const filtered = words.filter((w: any) => !activeLang || w.languageId === activeLang.id || (!w.languageId && activeLang.name.toLowerCase().includes('venda')));
+                    setAllWords(filtered as WordBombWord[]);
+                    setGameStatus('ready');
                 }
             } catch (err) {
                 console.error("Failed to load Word Bomb words:", err);
@@ -306,7 +355,7 @@ const WordBomb: React.FC = () => {
 
         const guess = userInput.trim().toLowerCase();
         const match = fallingWordsRef.current.find(fw =>
-            fw.active && fw.word.venda.toLowerCase() === guess
+            fw.active && fw.word.nativeWord.toLowerCase() === guess
         );
 
         if (match) {
@@ -373,9 +422,9 @@ const WordBomb: React.FC = () => {
         inputRef.current?.focus();
     };
 
-    const handlePaletteSelection = (vendaWord: string) => {
+    const handlePaletteSelection = (nativeWord: string) => {
         const match = fallingWordsRef.current.find(fw =>
-            fw.active && fw.word.venda.toLowerCase() === vendaWord.toLowerCase()
+            fw.active && fw.word.nativeWord.toLowerCase() === nativeWord.toLowerCase()
         );
 
         if (match) {
@@ -406,10 +455,6 @@ const WordBomb: React.FC = () => {
             if (newCombo >= 5) setMascotMood('excited');
             playCorrect();
 
-            if (newCombo % 5 === 0) {
-                setSpeedLevel(prev => prev + 1);
-            }
-
             if (isMobile) {
                 updatePalette(fallingWordsRef.current.filter(fw => fw.id !== match.id));
             }
@@ -431,26 +476,42 @@ const WordBomb: React.FC = () => {
                     <ArrowLeft size={24} />
                 </button>
 
+                {/* INTRO MODAL */}
+                {showIntro && (
+                    <GameIntroModal
+                        gameId="wordBomb"
+                        gameTitle="WORD BOMB"
+                        gameIcon={<Bomb size={28} strokeWidth={3} />}
+                        steps={WORD_BOMB_INTRO_STEPS}
+                        accentColor="#FACC15"
+                        onClose={handleIntroDismiss}
+                    />
+                )}
+
                 <div className="text-center mb-5 d-flex flex-column align-items-center">
                     <div className="mb-4">
-                        <Mascot width="140px" height="140px" mood="excited" />
+                        <Mascot width="120px" height="120px" mood="excited" />
                     </div>
-                    <div className="rounded-circle d-flex align-items-center justify-content-center mb-3 shadow-sm bg-game-warning" style={{ width: '80px', height: '80px', border: '2px solid #FEF3C7', flexShrink: 0 }}>
-                        <Bomb size={40} className="text-warning wb-pulse" />
+                    <div className="brutalist-card bg-warning p-4 mb-4 shadow-action-sm">
+                        <Bomb size={48} strokeWidth={3} className="text-dark wb-pulse" />
                     </div>
-                    <h1 className="fw-bold mb-2 text-dark" style={{ fontSize: '2.5rem' }}>Word Bomb</h1>
-                    <p className="text-muted mb-0" style={{ maxWidth: '300px', fontSize: '1.1rem' }}>English words fall from the sky. Type the matching translation.</p>
+                    <h1 className="fw-black mb-2 text-dark uppercase ls-tight display-5">WORD BOMB</h1>
+                    <p className="fw-bold text-muted uppercase smallest ls-1">Master {preferredLanguage?.name || 'Local'} vocabulary at speed</p>
                 </div>
 
                 <div className="d-flex flex-column gap-3 w-100 mt-4 px-3" style={{ maxWidth: '400px' }}>
                     <button
                         onClick={startGame}
-                        className="btn-game btn-game-primary w-100 p-3 p-md-4 rounded-4 fw-bold shadow-lg transition-all"
-                        style={{ fontSize: isMobile ? '1.1rem' : '1.4rem', letterSpacing: '2px' }}
+                        className="btn-game btn-game-warning w-100 p-4 rounded-4 shadow-action-lg"
                     >
                         START GAME
                     </button>
-                    <p className="text-center text-muted small mt-3">Ready to test your speed?</p>
+                    <button
+                        onClick={() => { resetIntroSeen('wordBomb'); setShowIntro(true); }}
+                        className="btn-game btn-game-white w-100 p-3 rounded-4 d-flex align-items-center justify-content-center gap-2"
+                    >
+                        <HelpCircle size={18} strokeWidth={3} /> HOW TO PLAY
+                    </button>
                 </div>
 
                 <style>{`
@@ -513,29 +574,48 @@ const WordBomb: React.FC = () => {
 
     return (
         <div className="min-vh-100 d-flex flex-column wb-bg" onClick={() => inputRef.current?.focus()}>
+            {/* EXIT CONFIRM MODAL */}
+            <ExitConfirmModal
+                visible={showExitConfirm}
+                onConfirmExit={confirmExit}
+                onCancel={() => setShowExitConfirm(false)}
+            />
+
             {/* GAME HUD / HEADER */}
             {gameStatus === 'playing' && (
-                <div className={`position-absolute top-0 start-0 ${isMobile ? 'p-2' : 'p-4'} w-100 d-flex justify-content-between align-items-center`} style={{ zIndex: 50 }}>
-                    <div className="d-flex align-items-center gap-1 gap-md-3">
-                        <Mascot width={isMobile ? "50px" : "80px"} height={isMobile ? "50px" : "80px"} mood={mascotMood} className="shadow-sm rounded-circle bg-white p-1 border" />
-                        <div className={`${isMobile ? 'p-1 px-2' : 'p-3'} bg-white text-dark rounded-3 rounded-md-4 shadow-sm border border-warning border-opacity-50`}>
-                            <h5 className={`mb-0 fw-bold ls-1 ${isMobile ? 'smallest text-nowrap' : ''}`}>SCORE: {score}</h5>
-                            <div className="d-flex align-items-center gap-2">
-                                <small className="text-warning fw-bold" style={{ fontSize: isMobile ? '9px' : '' }}>C:{combo}</small>
-                                <small className="text-muted" style={{ fontSize: isMobile ? '9px' : '' }}>S:{speedLevel}</small>
+                <div className="px-3 pt-3 pb-4 bg-dark text-white border-bottom border-dark border-4 shadow-action-sm w-100 d-flex justify-content-between align-items-center mb-3 position-relative" style={{ zIndex: 100 }}>
+                    <div className="container-fluid d-flex justify-content-between align-items-center">
+                        <div className="d-flex align-items-center gap-2 gap-md-3">
+                            <button onClick={handleExit} className="btn-game btn-game-white rounded-circle d-flex align-items-center justify-content-center" style={{ width: 40, height: 40, padding: 0 }}>
+                                <ArrowLeft size={20} strokeWidth={3} className="text-dark" />
+                            </button>
+                            <Mascot width={isMobile ? "40px" : "60px"} height={isMobile ? "40px" : "60px"} mood={mascotMood} className="brutalist-card bg-white p-1" />
+                            <div className="text-start">
+                                <span className="smallest fw-black text-warning uppercase ls-1 mb-0 d-block">Score: {score}</span>
+                                <div className="d-flex gap-2 smallest uppercase fw-black opacity-75">
+                                    <span>Combo: {combo}</span>
+                                    <span>Lvl: {speedLevel}</span>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                    <div className={`${isMobile ? 'p-1 px-2' : 'p-3'} bg-white text-dark rounded-3 rounded-md-4 shadow-sm border border-danger border-opacity-50`}>
-                        <div className="d-flex gap-1 gap-md-2">
-                            {[...Array(INITIAL_LIVES)].map((_, i) => (
-                                <Heart
-                                    key={i}
-                                    size={isMobile ? 12 : 24}
-                                    fill={i < lives ? "#ef4444" : "none"}
-                                    className={i < lives ? "text-danger animate__animated animate__pulse animate__infinite" : "text-muted opacity-25"}
-                                />
-                            ))}
+                        
+                        <div className="d-flex flex-column align-items-end gap-1">
+                            <div className="bg-warning text-dark brutalist-card--sm px-3 py-1 fw-black d-flex align-items-center gap-2 smallest shadow-action-sm mb-1">
+                                {lives} LIVES LEFT
+                            </div>
+                            <div className="d-flex gap-1">
+                                {[...Array(Math.min(INITIAL_LIVES, 10))].map((_, i) => (
+                                    <div 
+                                        key={i} 
+                                        style={{ 
+                                            width: isMobile ? 8 : 12, 
+                                            height: isMobile ? 8 : 12, 
+                                            background: i < lives ? '#EF4444' : 'rgba(255,255,255,0.1)',
+                                            border: i < lives ? '1px solid #000' : 'none'
+                                        }} 
+                                    />
+                                ))}
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -593,28 +673,29 @@ const WordBomb: React.FC = () => {
                                 <button
                                     key={opt.id}
                                     className="wb-palette-btn"
-                                    onClick={() => { playClick(); handlePaletteSelection(opt.venda); }}
+                                    onClick={() => { playClick(); handlePaletteSelection(opt.nativeWord); }}
                                 >
-                                    <span className="text-truncate" style={{ maxWidth: '100%' }}>{opt.venda}</span>
+                                    <span className="text-truncate" style={{ maxWidth: '100%' }}>{opt.nativeWord}</span>
                                 </button>
                             ))}
                         </div>
                     </div>
                 ) : (
-                    <form id="wb-input-zone" onSubmit={handleSubmit} className="wb-input-bar d-flex gap-2 p-3">
+                    <form id="wb-input-zone" onSubmit={handleSubmit} className="wb-input-bar d-flex gap-3 p-4 bg-white border-top border-dark border-4 shadow-action-sm">
                         <input
                             ref={inputRef}
                             type="text"
-                            className="form-control wb-input fw-bold"
-                            placeholder="Type the translated word..."
+                            className="brutalist-card flex-grow-1 p-3 fw-black uppercase ls-1"
+                            placeholder={`TYPE THE ${preferredLanguage?.name || 'TARGET'} WORD...`}
                             value={userInput}
                             onChange={handleInputChange}
                             autoFocus
                             autoComplete="off"
                             autoCapitalize="off"
+                            style={{ fontSize: '1.1rem' }}
                         />
-                        <button type="submit" className="btn wb-submit-btn fw-bold px-4">
-                            <Zap size={18} />
+                        <button type="submit" className="btn-game btn-game-warning px-4 py-2">
+                            <Zap size={24} strokeWidth={3} />
                         </button>
                     </form>
                 )
@@ -652,16 +733,15 @@ const WordBomb: React.FC = () => {
                 .wb-word-text {
                     display: inline-block;
                     background: #ffffff;
-                    border: 2px solid #111827;
+                    border: 4px solid #111827;
                     color: #111827;
-                    font-weight: 700;
-                    padding: clamp(6px, 2vw, 10px) clamp(12px, 4vw, 24px);
-                    border-radius: 12px;
-                    font-size: clamp(0.75rem, 3.5vw, 1.1rem);
-                    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-                    animation: wordGlow 2s ease-in-out infinite;
-                    white-space: nowrap;
-                    text-shadow: none;
+                    font-weight: 900;
+                    padding: clamp(8px, 2vw, 12px) clamp(16px, 4vw, 32px);
+                    border-radius: 0;
+                    font-size: clamp(0.9rem, 3.5vw, 1.25rem);
+                    box-shadow: 4px 4px 0 #111827;
+                    text-transform: uppercase;
+                    letter-spacing: 1px;
                 }
                 .wb-heart-pulse {
                     animation: heartPulse 1.5s infinite ease-in-out;
@@ -804,9 +884,6 @@ const WordBomb: React.FC = () => {
                     overflow: hidden;
                 }
                 .wb-palette-btn:active {
-                    transform: translateY(2px);
-                    box-shadow: none;
-                }
                     transform: translateY(2px);
                     box-shadow: none;
                 }

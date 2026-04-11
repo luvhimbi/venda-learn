@@ -43,13 +43,13 @@ import PicturePuzzle from "./Pages/Games/PicturePuzzle";
 import SyllableBuilder from "./Pages/Games/SyllableBuilder";
 import SentenceScramble from "./Pages/Games/SentenceScramble";
 // import KnowledgeBattle from "./Pages/Games/KnowledgeBattle";
-import DailyChallenge from "./Pages/Games/DailyChallenge";
 import WordBomb from "./Pages/Games/WordBomb";
 import AdminWordBomb from "./Pages/Admin/AdminWordBomb";
 import AdminLanguages from "./Pages/Admin/AdminLanguages";
 import AdminPicturePuzzle from "./Pages/Admin/AdminPicturePuzzle";
 import Achievements from "./Pages/Achievements";
-
+import GameDataPatcher from "./Pages/Admin/GameDataPatcher";
+import Morabaraba from "./Pages/Games/Morabaraba";
 import AdminReviews from "./Pages/Admin/AdminReviews";
 import NotFound from "./Pages/NotFound";
 import { auth, messaging } from './services/firebaseConfig';
@@ -135,6 +135,7 @@ const AppContent: React.FC = () => {
                         <Route path="/game/:lessonId/:microLessonId?" element={<GameRoom />} />
                         <Route path="/word-of-the-day" element={<DailyWordPage />} />
                         <Route path="/mitambo" element={<GamesDashboard />} />
+                        <Route path="/morabaraba" element={<Morabaraba />} />
                         <Route path="/word-puzzle" element={<WordPuzzle />} />
                         <Route path="/picture-puzzle" element={<PicturePuzzle />} />
                         <Route path="/syllable-builder" element={<SyllableBuilder />} />
@@ -152,7 +153,7 @@ const AppContent: React.FC = () => {
                         <Route path="/dmca" element={<DMCA />} />
                         <Route path="/legal" element={<Legal />} />
                         <Route path="/ngano" element={<Stories />} />
-                        <Route path="/daily-challenge" element={<DailyChallenge />} />
+                        {/* <Route path="/daily-challenge" element={<DailyChallenge />} /> */}
                         <Route path="/word-bomb" element={<WordBomb />} />
                         <Route path="/achievements" element={<Achievements />} />
 
@@ -162,6 +163,14 @@ const AppContent: React.FC = () => {
                             element={
                                 <AdminRoute>
                                     <AdminDashboard />
+                                </AdminRoute>
+                            }
+                        />
+                        <Route
+                            path="/admin/patch-games"
+                            element={
+                                <AdminRoute>
+                                    <GameDataPatcher />
                                 </AdminRoute>
                             }
                         />

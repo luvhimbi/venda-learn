@@ -1,13 +1,15 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { doc, updateDoc, increment, getDoc, type Firestore } from 'firebase/firestore';
 import { auth, db } from '../../services/firebaseConfig';
-import { fetchPuzzles, refreshUserData } from '../../services/dataCache';
-import { ArrowLeft, Delete, Lightbulb, AlertCircle, CheckCircle2, Flame } from 'lucide-react';
+import { fetchPuzzles, refreshUserData, fetchUserData, fetchLanguages } from '../../services/dataCache';
+import { ArrowLeft, Delete, Lightbulb, AlertCircle, CheckCircle2, Flame, HelpCircle, Keyboard, Search, Palette } from 'lucide-react';
 import Swal from 'sweetalert2';
 import Mascot from '../../components/Mascot';
 import { useVisualJuice } from '../../hooks/useVisualJuice';
 import { updateStreak } from '../../services/streakUtils';
+import GameIntroModal, { resetIntroSeen } from '../../components/GameIntroModal';
+import ExitConfirmModal from '../../components/ExitConfirmModal';
 
 interface PuzzleWord {
     id: string;
@@ -15,14 +17,34 @@ interface PuzzleWord {
     hint: string;
     translation: string;
     difficulty: string;
+    languageId?: string;
 }
 
 const WORD_LENGTH = 5;
 const MAX_GUESSES = 6;
 
+const WORD_PUZZLE_INTRO_STEPS = [
+    {
+        icon: <Lightbulb size={28} strokeWidth={3} />,
+        title: 'Read the Hint',
+        description: 'A hint is shown to help you guess the hidden word. Use it wisely!'
+    },
+    {
+        icon: <Keyboard size={28} strokeWidth={3} />,
+        title: 'Type Your Guess',
+        description: 'Use the keyboard to type a 5-letter word and press Enter to check it.'
+    },
+    {
+        icon: <Palette size={28} strokeWidth={3} />,
+        title: 'Follow the Colors',
+        description: 'Green = correct spot, Yellow = wrong spot, Grey = not in word. Fix your guess until you get it right!'
+    }
+];
+
 const WordPuzzle: React.FC = () => {
     const navigate = useNavigate();
     const [targetPuzzle, setTargetPuzzle] = useState<PuzzleWord | null>(null);
+    const [preferredLanguage, setPreferredLanguage] = useState<any>(null);
     const [guesses, setGuesses] = useState<string[]>([]);
     const [currentGuess, setCurrentGuess] = useState('');
     const [gameStatus, setGameStatus] = useState<'playing' | 'won' | 'lost'>('playing');
@@ -32,8 +54,25 @@ const WordPuzzle: React.FC = () => {
     const [checkedGuess, setCheckedGuess] = useState<string | null>(null);
     const [sessionStartTime, setSessionStartTime] = useState(Date.now());
     const [streak, setStreak] = useState(0);
+    const [showIntro, setShowIntro] = useState(true);
+    const [showExitConfirm, setShowExitConfirm] = useState(false);
     const { playCorrect, playWrong, playClick, triggerShake } = useVisualJuice();
     const inputRef = useRef<HTMLInputElement>(null);
+
+    const handleIntroDismiss = useCallback(() => setShowIntro(false), []);
+
+    const handleExit = () => {
+        if (gameStatus === 'playing') {
+            setShowExitConfirm(true);
+        } else {
+            navigate('/mitambo');
+        }
+    };
+
+    const confirmExit = () => {
+        setShowExitConfirm(false);
+        navigate('/mitambo');
+    };
 
     useEffect(() => {
         loadGame();
@@ -61,9 +100,25 @@ const WordPuzzle: React.FC = () => {
     const loadGame = async () => {
         setLoading(true);
         try {
-            const allPuzzles = await fetchPuzzles();
+            const [allPuzzles, uData, langs] = await Promise.all([
+                fetchPuzzles(),
+                fetchUserData(),
+                fetchLanguages()
+            ]);
+
+            let activeLang: any = null;
+            if (uData && langs) {
+                activeLang = langs.find((l: any) => l.id === uData.preferredLanguageId);
+                setPreferredLanguage(activeLang);
+            }
+
             // Filter only 5-letter words for now to match grid
-            const validPuzzles = allPuzzles.filter((p: any) => p.word.length === WORD_LENGTH);
+            // Also filter by language if possible
+            const validPuzzles = allPuzzles.filter((p: any) => {
+                const isCorrectLength = p.word.length === WORD_LENGTH;
+                const isCorrectLang = !activeLang || p.languageId === activeLang.id || (!p.languageId && activeLang.name.toLowerCase().includes('venda'));
+                return isCorrectLength && isCorrectLang;
+            });
 
             if (validPuzzles.length > 0) {
                 const random = validPuzzles[Math.floor(Math.random() * validPuzzles.length)];
@@ -105,7 +160,7 @@ const WordPuzzle: React.FC = () => {
             setShake(true);
             playWrong();
             triggerShake('uvumba-grid');
-            setMessage({ text: "Nwalani mailede othe! (Complete the word)", type: 'error' });
+            setMessage({ text: "Complete the word!", type: 'error' });
             setTimeout(() => { setShake(false); setMessage(null); }, 2000);
             return;
         }
@@ -116,7 +171,7 @@ const WordPuzzle: React.FC = () => {
             setCurrentGuess('');
             setGameStatus('won');
             playCorrect();
-            setMessage({ text: "Ndi zwone! (Correct!)", type: 'success' });
+            setMessage({ text: "Correct!", type: 'success' });
             await handleWin();
         } else {
             // WRONG GUESS - Forgiving Mode
@@ -126,7 +181,7 @@ const WordPuzzle: React.FC = () => {
             setShake(true);
             playWrong();
             triggerShake('uvumba-grid');
-            setMessage({ text: "A si zwone! (That's not correct - Fix your mistake)", type: 'error' });
+            setMessage({ text: "That's not correct - Fix your mistake!", type: 'error' });
             setTimeout(() => { setShake(false); setMessage(null); }, 3000);
         }
     };
@@ -206,18 +261,44 @@ const WordPuzzle: React.FC = () => {
     );
 
     return (
-        <div className="min-vh-100 bg-white py-4 d-flex flex-column align-items-center">
+        <div className="min-vh-100 bg-white py-4 d-flex flex-column align-items-center" style={{ background: 'url("data:image/svg+xml,%3Csvg width=\'20\' height=\'20\' viewBox=\'0 0 20 20\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cg fill=\'%23000000\' fill-opacity=\'0.02\' fill-rule=\'evenodd\'%3E%3Ccircle cx=\'3\' cy=\'3\' r=\'1\'/%3E%3C/g%3E%3C/svg%3E")' }}>
+
+            {/* INTRO MODAL */}
+            {showIntro && (
+                <GameIntroModal
+                    gameId="wordPuzzle"
+                    gameTitle="WORD PUZZLE"
+                    gameIcon={<Search size={28} strokeWidth={3} />}
+                    steps={WORD_PUZZLE_INTRO_STEPS}
+                    accentColor="#FACC15"
+                    onClose={handleIntroDismiss}
+                />
+            )}
+
+            {/* EXIT CONFIRM MODAL */}
+            <ExitConfirmModal
+                visible={showExitConfirm}
+                onConfirmExit={confirmExit}
+                onCancel={() => setShowExitConfirm(false)}
+            />
+
             <div className="container" style={{ maxWidth: '500px' }}>
-                <div className="d-flex justify-content-between align-items-center mb-4">
-                    <button onClick={() => navigate('/mitambo')} className="btn btn-outline-dark btn-sm rounded-circle d-flex align-items-center justify-content-center" style={{ width: 32, height: 32 }}>
-                        <ArrowLeft size={18} />
+                <div className="d-flex justify-content-between align-items-center mb-4 px-2">
+                    <button onClick={handleExit} className="btn-game btn-game-white rounded-circle d-flex align-items-center justify-content-center" style={{ width: 44, height: 44, padding: 0 }}>
+                        <ArrowLeft size={24} strokeWidth={3} />
                     </button>
-                    <h4 className="fw-bold mb-0 text-uppercase ls-1">U Vumba</h4>
+                    <div className="text-center">
+                        <span className="smallest fw-black text-muted uppercase ls-1 mb-0 d-block">{preferredLanguage?.name || 'Local'} Word</span>
+                        <h2 className="fw-black mb-0 text-dark ls-tight" style={{ fontSize: '1.5rem' }}>U VUMBA</h2>
+                    </div>
                     <div className="d-flex align-items-center gap-2">
+                        <button onClick={() => { resetIntroSeen('wordPuzzle'); setShowIntro(true); }} className="btn-game btn-game-white rounded-circle d-flex align-items-center justify-content-center" style={{ width: 36, height: 36, padding: 0 }} title="How to play">
+                            <HelpCircle size={18} strokeWidth={3} className="text-dark" />
+                        </button>
                          {streak > 0 && (
-                            <div className="d-flex align-items-center gap-1 glow-pulse" title="Daily Streak">
+                            <div className="d-flex align-items-center flex-column bg-white brutalist-card--sm px-2 py-1" title="Daily Streak">
                                 <Flame size={18} color="#EF4444" fill="#EF4444" />
-                                <span className="fw-bold small text-dark">{streak}</span>
+                                <span className="fw-black smallest text-dark">{streak}</span>
                             </div>
                         )}
                     </div>
@@ -225,20 +306,20 @@ const WordPuzzle: React.FC = () => {
 
                 {/* FEEDBACK MESSAGE */}
                 {message && (
-                    <div className={`alert ${message.type === 'error' ? 'alert-danger text-danger' : 'alert-success text-success'} py-2 px-3 text-center fw-bold shadow-sm mb-3 animate__animated animate__fadeIn d-flex align-items-center justify-content-center gap-2`}>
+                    <div className={`brutalist-card--sm ${message.type === 'error' ? 'bg-danger text-white' : 'bg-success text-white'} py-2 px-3 text-center fw-black shadow-action-sm mb-3 animate__animated animate__shakeX d-flex align-items-center justify-content-center gap-2 uppercase smallest`}>
                         {message.type === 'error' ? <AlertCircle size={18} /> : <CheckCircle2 size={18} />}
                         {message.text}
                     </div>
                 )}
 
                 {/* HINT BANNER */}
-                <div className="bg-white border rounded-3 p-3 mb-4 shadow-sm d-flex align-items-center gap-3 animate__animated animate__fadeInDown">
-                    <div className="bg-warning-subtle p-2 rounded-circle">
-                        <Lightbulb className="text-warning" size={20} />
+                <div className="brutalist-card p-3 mb-4 shadow-action-sm d-flex align-items-center gap-3 animate__animated animate__fadeInDown bg-warning">
+                    <div className="bg-white p-2 border border-2 border-dark rounded-circle">
+                        <Lightbulb className="text-dark" size={24} strokeWidth={3} />
                     </div>
                     <div>
-                        <p className="text-uppercase smallest fw-bold text-muted ls-1 mb-0">Murero (Hint)</p>
-                        <p className="mb-0 fw-bold text-dark">{targetPuzzle?.hint}</p>
+                        <p className="text-uppercase smallest fw-black text-dark ls-1 mb-0 opacity-75">MURERO (HINT)</p>
+                        <p className="mb-0 fw-black text-dark uppercase">{targetPuzzle?.hint}</p>
                     </div>
                 </div>
 
@@ -315,27 +396,29 @@ const WordPuzzle: React.FC = () => {
                 </div>
 
                 {/* KEYBOARD */}
-                <div className="w-100">
+                <div className="w-100 px-1">
                     {keys.map((row, i) => (
-                        <div key={i} className="d-flex justify-content-center gap-1 mb-2">
+                        <div key={i} className="d-flex justify-content-center gap-1 mb-1">
                             {row.map(key => {
                                 const status = getKeyStatus(key);
-                                let btnClass = 'btn-light text-dark';
-                                if (status === 'correct') btnClass = 'btn-success text-white';
-                                else if (status === 'present') btnClass = 'btn-warning text-dark';
-                                else if (status === 'absent') btnClass = 'btn-secondary text-white opacity-50';
+                                let btnClass = 'bg-white';
+                                if (status === 'correct') btnClass = 'bg-success text-white';
+                                else if (status === 'present') btnClass = 'bg-warning text-dark';
+                                else if (status === 'absent') btnClass = 'bg-secondary text-white opacity-50';
 
                                 return (
                                     <button
                                         key={key}
                                         onClick={() => { playClick(); handleKeyPress(key); }}
-                                        className={`btn ${btnClass} fw-bold shadow-sm key-btn`}
+                                        className={`btn-game ${btnClass} fw-black shadow-action-sm key-btn p-0`}
                                         style={{
-                                            flex: key === 'ENTER' || key === 'BACKSPACE' ? '1.5' : '1',
-                                            padding: '8px 0'
+                                            flex: key === 'ENTER' || key === 'BACKSPACE' ? '2' : '1',
+                                            height: '54px',
+                                            fontSize: key === 'ENTER' || key === 'BACKSPACE' ? '10px' : '18px',
+                                            borderWidth: '3px'
                                         }}
                                     >
-                                        {key === 'BACKSPACE' ? <Delete size={20} /> : key}
+                                        {key === 'BACKSPACE' ? <Delete size={20} strokeWidth={3} /> : key}
                                     </button>
                                 );
                             })}

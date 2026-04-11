@@ -6,16 +6,16 @@ interface Props {
     selected: string | null;
     status: 'correct' | 'wrong' | null;
     onSelect: (opt: string) => void;
-    speakVenda: (text: string) => void;
+    speakNative: (text: string) => void;
 }
 
-const ListenChooseQuestion: React.FC<Props> = ({ q, selected, status, onSelect, speakVenda }) => {
+const ListenChooseQuestion: React.FC<Props> = ({ q, selected, status, onSelect, speakNative }) => {
     // Auto-play on mount
-    useEffect(() => { speakVenda(q.vendaWord); }, []);
+    useEffect(() => { speakNative(q.nativeWord); }, []);
     return (
         <div>
             <button className="btn btn-game-white border-dark border-3 rounded-pill px-5 py-3 mb-4 fw-black ls-1 smallest"
-                onClick={() => speakVenda(q.vendaWord)}>
+                onClick={() => speakNative(q.nativeWord)}>
                 <i className="bi bi-volume-up-fill fs-3 me-2"></i> PLAY AGAIN
             </button>
             <div className="d-grid gap-3 mt-2">
