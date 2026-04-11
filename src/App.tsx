@@ -15,7 +15,6 @@ import Muvhigo from "./Pages/Admin/Muvhigo";
 import GameRoom from "./Pages/Games/GameRoom";
 import DailyWordPage from "./Pages/Learning/DailyWordPage";
 import Courses from "./Pages/Learning/Courses";
-import CourseLessons from "./Pages/Learning/CourseLessons";
 import PrivacyPolicy from "./Pages/Policy/PrivacyPolicy";
 import TermsOfUse from "./Pages/Policy/TermsOfUse";
 import POPIAct from "./Pages/Policy/POPIAct";
@@ -50,8 +49,11 @@ import AdminPicturePuzzle from "./Pages/Admin/AdminPicturePuzzle";
 import Achievements from "./Pages/Achievements";
 import GameDataPatcher from "./Pages/Admin/GameDataPatcher";
 import Morabaraba from "./Pages/Games/Morabaraba";
+import Moruba from "./Pages/Games/Moruba";
 import AdminReviews from "./Pages/Admin/AdminReviews";
 import NotFound from "./Pages/NotFound";
+import AboutUs from "./Pages/AboutUs";
+import WordCards from "./Pages/Learning/WordCards";
 import { auth, messaging } from './services/firebaseConfig';
 import { onAuthStateChanged } from 'firebase/auth';
 import { onMessage } from 'firebase/messaging';
@@ -136,6 +138,7 @@ const AppContent: React.FC = () => {
                         <Route path="/word-of-the-day" element={<DailyWordPage />} />
                         <Route path="/mitambo" element={<GamesDashboard />} />
                         <Route path="/morabaraba" element={<Morabaraba />} />
+                        <Route path="/moruba" element={<Moruba />} />
                         <Route path="/word-puzzle" element={<WordPuzzle />} />
                         <Route path="/picture-puzzle" element={<PicturePuzzle />} />
                         <Route path="/syllable-builder" element={<SyllableBuilder />} />
@@ -143,7 +146,6 @@ const AppContent: React.FC = () => {
                         {/* <Route path="/battle" element={<KnowledgeBattle />} /> */}
                         <Route path="/history" element={<HistoryList />} />
                         <Route path="/courses" element={<Courses />} />
-                        <Route path="/courses/:courseId" element={<CourseLessons />} />
                         <Route path="/history/add" element={<AddHistory />} />
                         <Route path="/history/:storyId" element={<HistoryDetail />} />
                         <Route path="/profile" element={<Profile />} />
@@ -156,6 +158,8 @@ const AppContent: React.FC = () => {
                         {/* <Route path="/daily-challenge" element={<DailyChallenge />} /> */}
                         <Route path="/word-bomb" element={<WordBomb />} />
                         <Route path="/achievements" element={<Achievements />} />
+                        <Route path="/about" element={<AboutUs />} />
+                        <Route path="/word-cards" element={<WordCards />} />
 
                         {/* Protected Admin Routes */}
                         <Route

@@ -1,9 +1,9 @@
 import React, { useState, useCallback } from 'react';
-import { fetchSentences, fetchUserData, fetchLanguages } from '../../services/dataCache';
+import { fetchSentences, fetchUserData, fetchLanguages, awardPoints } from '../../services/dataCache';
 import { useNavigate } from 'react-router-dom';
-import Swal from 'sweetalert2';
 import { auth, db } from '../../services/firebaseConfig';
-import { doc, updateDoc, increment, getDoc, type Firestore } from 'firebase/firestore';
+import GameResultModal from '../../components/GameResultModal';
+import { doc, updateDoc, getDoc, type Firestore } from 'firebase/firestore';
 import Mascot from '../../components/Mascot';
 import confetti from 'canvas-confetti';
 import { updateStreak } from "../../services/streakUtils.ts";
@@ -66,6 +66,8 @@ const SentenceScramble: React.FC = () => {
     const [preferredLanguage, setPreferredLanguage] = useState<any>(null);
     const [showIntro, setShowIntro] = useState(true);
     const [showExitConfirm, setShowExitConfirm] = useState(false);
+    const [showResult, setShowResult] = useState(false);
+    const [resultData, setResultData] = useState({ isSuccess: false, title: '', message: '', points: 0 });
 
     const [scrambledWords, setScrambledWords] = useState<{ id: string, text: string, colorIdx: number }[]>([]);
     const [answerZone, setAnswerZone] = useState<{ id: string, text: string, colorIdx: number }[]>([]);
@@ -122,12 +124,23 @@ const SentenceScramble: React.FC = () => {
             if (shuffled.length > 0) {
                 setupRound(shuffled[0], 0);
             } else {
-                Swal.fire('Info', `No sentence puzzles found for ${level} in ${activeLang?.name || 'this language'}.`, 'info');
+                setResultData({
+                    isSuccess: false,
+                    title: 'No Puzzles',
+                    message: `No sentence puzzles found for ${level} in ${activeLang?.name || 'this language'}.`,
+                    points: 0
+                });
+                setShowResult(true);
                 setSelectedLevel(null);
             }
         } catch (error) {
-            console.error("Error loading sentences:", error);
-            Swal.fire('Error', 'Failed to load game.', 'error');
+            setResultData({
+                isSuccess: false,
+                title: 'Error',
+                message: 'Failed to load game data. Please try again.',
+                points: 0
+            });
+            setShowResult(true);
             setSelectedLevel(null);
         } finally {
             setLoading(false);
@@ -198,9 +211,11 @@ const SentenceScramble: React.FC = () => {
 
             const user = auth.currentUser;
             if (user) {
+                // Using centralized awardPoints to ensure weekly leaderboard sync
+                await awardPoints(10);
+
                 const userRef = doc(db as Firestore, 'users', user.uid);
                 await updateDoc(userRef, {
-                    points: increment(10),
                     [`gamePerformance.sentenceScramble.${currentPuzzle.id}`]: {
                         sentence: currentSentence,
                         duration: totalDuration,
@@ -221,7 +236,19 @@ const SentenceScramble: React.FC = () => {
 
     const nextRound = () => {
         if (!currentPuzzle) return;
-        const nextIdx = (currentIndex + 1) % puzzles.length;
+        const nextIdx = currentIndex + 1;
+
+        if (nextIdx >= puzzles.length) {
+            setResultData({
+                isSuccess: true,
+                title: 'Category Complete!',
+                message: `Excellent! You've mastered all ${puzzles.length} sentences in this level.`,
+                points: score
+            });
+            setShowResult(true);
+            return;
+        }
+
         setSessionStartTime(Date.now());
         setupRound(puzzles[nextIdx], nextIdx);
     };
@@ -310,7 +337,22 @@ const SentenceScramble: React.FC = () => {
     const diffColors = DIFFICULTY_COLORS[currentPuzzle?.difficulty || 'Easy'] || DIFFICULTY_COLORS['Easy'];
 
     return (
-        <div className="min-vh-100 d-flex flex-column bg-white">
+        <div className="min-vh-100 d-flex flex-column bg-white" style={{ 
+            backgroundColor: '#ffffff',
+            backgroundImage: 'url("data:image/svg+xml,%3Csvg width=\'20\' height=\'20\' viewBox=\'0 0 20 20\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cg fill=\'%23000000\' fill-opacity=\'0.01\' fill-rule=\'evenodd\'%3E%3Ccircle cx=\'3\' cy=\'3\' r=\'1\'/%3E%3C/g%3E%3C/svg%3E")' 
+        }}>
+            {/* RESULT MODAL */}
+            <GameResultModal
+                isOpen={showResult}
+                isSuccess={resultData.isSuccess}
+                title={resultData.title}
+                message={resultData.message}
+                points={resultData.points}
+                primaryActionText={resultData.isSuccess ? "PLAY AGAIN" : "TRY AGAIN"}
+                secondaryActionText="EXIT TO MENU"
+                onPrimaryAction={() => { setShowResult(false); setSelectedLevel(null); setScore(0); }}
+                onSecondaryAction={() => { setShowResult(false); navigate('/mitambo'); }}
+            />
             {/* EXIT CONFIRM MODAL */}
             <ExitConfirmModal
                 visible={showExitConfirm}

@@ -5,7 +5,7 @@ import { createUserWithEmailAndPassword, signInWithPopup } from 'firebase/auth';
 import { Loader2, Eye, EyeOff, ArrowLeft } from 'lucide-react';
 import { useGoogleReCaptcha } from 'react-google-recaptcha-v3';
 import { auth, db, googleProvider } from '../../services/firebaseConfig';
-import BaobabAuthHeader from '../../components/BaobabAuthHeader';
+
 import Onboarding from './Onboarding';
 
 const Register: React.FC = () => {
@@ -136,8 +136,6 @@ const Register: React.FC = () => {
         <div className="min-vh-100 d-flex align-items-center justify-content-center bg-white px-3 py-5 font-auth">
             <div className="w-100" style={{ maxWidth: '440px' }}>
 
-                <BaobabAuthHeader />
-
                 <div className="text-center mb-5 mt-4">
                     <div className="d-flex align-items-center justify-content-center position-relative">
                         {step > 1 && (
@@ -148,9 +146,13 @@ const Register: React.FC = () => {
                                 <ArrowLeft size={24} />
                             </button>
                         )}
-                        <h2 className="display-6 fw-black text-uppercase ls-tight text-dark mb-0">Join the Crew</h2>
+                        <h2 className="display-6 fw-black text-uppercase ls-tight text-dark mb-0">
+                            {step === 2 && formData.username ? `Hi ${formData.username}!` : 'Join the Crew'}
+                        </h2>
                     </div>
-                    <p className="fw-bold text-muted mt-2 mb-0 small text-uppercase">Step {step} of 3: {step === 1 ? 'Profile' : step === 2 ? 'Account' : 'Security'}</p>
+                    <p className="fw-bold text-muted mt-2 mb-0 small text-uppercase">
+                        {step === 2 ? "Now, let's get your email address" : `Step ${step} of 3: ${step === 1 ? 'Profile' : step === 2 ? 'Account' : 'Security'}`}
+                    </p>
                 </div>
 
                 {error && (

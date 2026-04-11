@@ -55,21 +55,32 @@ const POPIAct: React.FC = () => {
     `;
 
     return (
-        <div className="min-vh-100 bg-light py-5">
-            <div className="container">
-                <div className="card border-0 shadow-sm rounded-4 p-4 p-md-5 bg-white">
-                    <div className="d-flex justify-content-between align-items-center mb-4">
-                        <h1 className="fw-bold text-primary mb-0">POPI Act Compliance</h1>
+        <div className="min-vh-100 bg-white py-5" style={{ fontFamily: '"Lexend", sans-serif' }}>
+            <div className="container" style={{ maxWidth: '900px' }}>
+                <div className="brutalist-card bg-white position-relative">
+                    {/* Decorative Top Bar */}
+                    <div className="bg-warning border-bottom border-4 border-dark" style={{ height: '20px' }}></div>
+                    
+                    <div className="p-4 p-md-5">
+                        <h1 className="display-4 fw-black text-uppercase ls-tight mb-4">POPI Act Compliance</h1>
+                        <div className="bg-dark mb-5" style={{ height: '8px', width: '100px' }}></div>
+
+                        <SmartReader
+                            title="POPI Act (Full Audio)"
+                            text={popiText}
+                        />
+
+                        <p className="fw-bold text-muted mb-0 mt-5 text-center small uppercase ls-1">Committed to protecting your rights under South African Law.</p>
                     </div>
-
-                    <SmartReader
-                        title="POPI Act (Full Audio)"
-                        text={popiText}
-                    />
-
-                    <p className="lead text-muted mb-5 mt-4 text-center small">Committed to protecting your rights under South African Law.</p>
                 </div>
             </div>
+
+            <style>{`
+                .ls-tight { letter-spacing: -1.5px; }
+                .ls-1 { letter-spacing: 1px; }
+                .fw-black { font-weight: 900; }
+                .uppercase { text-transform: uppercase; }
+            `}</style>
         </div>
     );
 };

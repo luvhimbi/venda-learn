@@ -32,6 +32,7 @@ const Footer: React.FC = () => {
                     <div className="col-6 col-md-2">
                         <h6 className="fw-black mb-4 text-uppercase border-bottom border-3 border-dark d-inline-block pb-1" style={{ fontSize: '13px' }}>Explore</h6>
                         <ul className="list-unstyled d-flex flex-column gap-3 mb-0">
+                            <li><Link to="/about" className="text-decoration-none text-dark small fw-black text-uppercase hover-yellow transition-all">About Us</Link></li>
                             <li><Link to="/courses" className="text-decoration-none text-dark small fw-black text-uppercase hover-yellow transition-all">Quests</Link></li>
                             <li><Link to="/#culture" className="text-decoration-none text-dark small fw-black text-uppercase hover-yellow transition-all">Heritage</Link></li>
                             <li><Link to="/#minigames" className="text-decoration-none text-dark small fw-black text-uppercase hover-yellow transition-all">Minigames</Link></li>
@@ -39,14 +40,6 @@ const Footer: React.FC = () => {
                         </ul>
                     </div>
 
-                    {/* SUPPORT LINKS */}
-                    <div className="col-6 col-md-2">
-                        <h6 className="fw-black mb-4 text-uppercase border-bottom border-3 border-dark d-inline-block pb-1" style={{ fontSize: '13px' }}>Support</h6>
-                        <ul className="list-unstyled d-flex flex-column gap-3 mb-0">
-                            <li><Link to="/#faq" className="text-decoration-none text-dark small fw-black text-uppercase hover-yellow transition-all">FAQ</Link></li>
-                            <li><Link to="/#contact" className="text-decoration-none text-dark small fw-black text-uppercase hover-yellow transition-all">Contact Us</Link></li>
-                        </ul>
-                    </div>
 
                     {/* LEGAL & SOCIALS */}
                     <div className="col-12 col-md-4">

@@ -1,12 +1,12 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { doc, updateDoc, increment,  type Firestore } from 'firebase/firestore';
-import { ArrowLeft, Loader2,  Bomb, Zap, HelpCircle, Eye, Keyboard, AlertTriangle  } from 'lucide-react';
+import { doc, updateDoc, type Firestore } from 'firebase/firestore';
+import { ArrowLeft, Loader2, Bomb, Zap, HelpCircle, Eye, Keyboard, AlertTriangle } from 'lucide-react';
 import { auth, db } from '../../services/firebaseConfig';
-import { fetchWordBombWords, refreshUserData, fetchUserData, fetchLanguages } from '../../services/dataCache';
+import GameResultModal from '../../components/GameResultModal';
+import { fetchWordBombWords, fetchUserData, fetchLanguages, awardPoints } from '../../services/dataCache';
 import { useVisualJuice } from '../../hooks/useVisualJuice';
 import { updateStreak } from '../../services/streakUtils';
-import { popupService } from '../../services/popupService';
 import Mascot, { type MascotMood } from '../../components/Mascot';
 import GameIntroModal, { resetIntroSeen } from '../../components/GameIntroModal';
 import ExitConfirmModal from '../../components/ExitConfirmModal';
@@ -78,6 +78,8 @@ const WordBomb: React.FC = () => {
     const [paletteOptions, setPaletteOptions] = useState<WordBombWord[]>([]);
     const [showIntro, setShowIntro] = useState(true);
     const [showExitConfirm, setShowExitConfirm] = useState(false);
+    const [showResult, setShowResult] = useState(false);
+    const [resultData, setResultData] = useState({ isSuccess: false, title: '', message: '', points: 0 });
     const { playCorrect, playWrong, playClick, triggerShake } = useVisualJuice();
 
     const handleIntroDismiss = useCallback(() => setShowIntro(false), []);
@@ -86,6 +88,7 @@ const WordBomb: React.FC = () => {
     const gameLoopRef = useRef<number | null>(null);
     const spawnTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
     const fallingWordsRef = useRef<FallingWord[]>([]);
+    const lastSpawnTimeRef = useRef(0);
     const livesRef = useRef(INITIAL_LIVES);
     const scoreRef = useRef(0);
     const comboRef = useRef(0);
@@ -106,16 +109,14 @@ const WordBomb: React.FC = () => {
     useEffect(() => {
         const handleResize = () => {
             setIsMobile(window.innerWidth < 576);
-            // Fix for mobile browser address bar/keyboard
             let vh = window.innerHeight * 0.01;
             document.documentElement.style.setProperty('--vh', `${vh}px`);
         };
-        handleResize(); // Initial call
+        handleResize();
         window.addEventListener('resize', handleResize);
         return () => window.removeEventListener('resize', handleResize);
     }, []);
 
-    // Load words
     const cleanup = useCallback(() => {
         if (gameLoopRef.current) cancelAnimationFrame(gameLoopRef.current);
         if (spawnTimerRef.current) clearInterval(spawnTimerRef.current);
@@ -136,7 +137,6 @@ const WordBomb: React.FC = () => {
         navigate('/mitambo');
     };
 
-    // Load words
     useEffect(() => {
         const loadData = async () => {
             try {
@@ -153,7 +153,6 @@ const WordBomb: React.FC = () => {
                 }
 
                 if (words && Array.isArray(words)) {
-                    // Filter by language if possible
                     const filtered = words.filter((w: any) => !activeLang || w.languageId === activeLang.id || (!w.languageId && activeLang.name.toLowerCase().includes('venda')));
                     setAllWords(filtered as WordBombWord[]);
                     setGameStatus('ready');
@@ -169,39 +168,12 @@ const WordBomb: React.FC = () => {
     const getRandomWord = useCallback((): WordBombWord | null => {
         const available = allWordsRef.current.filter(w => !usedWordIds.current.has(w.id));
         if (available.length === 0) {
-            usedWordIds.current.clear(); // reset cycle
+            usedWordIds.current.clear();
             return allWordsRef.current[Math.floor(Math.random() * allWordsRef.current.length)] || null;
         }
         return available[Math.floor(Math.random() * available.length)];
     }, []);
 
-    const spawnWord = useCallback(() => {
-        const activeFalling = fallingWordsRef.current.filter(w => w.active);
-        if (activeFalling.length >= MAX_ACTIVE_WORDS) return;
-
-        const word = getRandomWord();
-        if (!word) return;
-
-        usedWordIds.current.add(word.id);
-
-        const newFalling: FallingWord = {
-            id: `${word.id}_${Date.now()}`,
-            word,
-            x: 10 + Math.random() * 75,
-            y: -5,
-            speed: BASE_SPEED + (speedLevelRef.current - 1) * SPEED_INCREMENT,
-            active: true,
-        };
-
-        setFallingWords(prev => [...prev, newFalling]);
-
-        // Update palette for mobile
-        if (isMobile) {
-            updatePalette([...fallingWordsRef.current, newFalling]);
-        }
-    }, [getRandomWord, isMobile]);
-
-    // Build palette: active words + random distractors, shuffled
     const updatePalette = useCallback((currentFalling: FallingWord[]) => {
         const activeWords = currentFalling.filter(fw => fw.active).map(fw => fw.word);
         const activeIds = new Set(activeWords.map(w => w.id));
@@ -217,6 +189,44 @@ const WordBomb: React.FC = () => {
         setPaletteOptions(options.sort(() => 0.5 - Math.random()));
     }, []);
 
+    const spawnWord = useCallback(() => {
+        const activeFalling = fallingWordsRef.current.filter(w => w.active);
+        if (activeFalling.length >= MAX_ACTIVE_WORDS) return;
+
+        const now = Date.now();
+        if (now - lastSpawnTimeRef.current < 800) return;
+        lastSpawnTimeRef.current = now;
+
+        const word = getRandomWord();
+        if (!word) return;
+
+        usedWordIds.current.add(word.id);
+
+        const currentActive = fallingWordsRef.current.filter(fw => fw.active);
+        let newX = 10 + Math.random() * 75;
+        
+        for (let i = 0; i < 5; i++) {
+            const hasConflict = currentActive.some(fw => Math.abs(fw.x - newX) < 20);
+            if (!hasConflict) break;
+            newX = 10 + Math.random() * 75;
+        }
+
+        const newFalling: FallingWord = {
+            id: `${word.id}_${Date.now()}`,
+            word,
+            x: newX,
+            y: -5,
+            speed: BASE_SPEED + (speedLevelRef.current - 1) * SPEED_INCREMENT,
+            active: true,
+        };
+
+        setFallingWords(prev => [...prev, newFalling]);
+
+        if (isMobile) {
+            updatePalette([...fallingWordsRef.current, newFalling]);
+        }
+    }, [getRandomWord, isMobile, updatePalette]);
+
     const handleGameOver = useCallback(async () => {
         cleanup();
         const start = sessionStartTime;
@@ -226,9 +236,12 @@ const WordBomb: React.FC = () => {
         const user = auth.currentUser;
         if (user) {
             try {
+                // Using centralized awardPoints to ensure weekly leaderboard sync
+                await awardPoints(finalScore);
+                
+                // Still update specific game performance stats
                 const userRef = doc(db as Firestore, 'users', user.uid);
                 await updateDoc(userRef, {
-                    points: increment(finalScore),
                     [`gamePerformance.wordBomb.lastPlayed`]: {
                         score: finalScore,
                         duration: totalDuration,
@@ -236,24 +249,19 @@ const WordBomb: React.FC = () => {
                     }
                 });
                 await updateStreak(user.uid);
-                await refreshUserData();
             } catch (err) {
-                console.error("Error saving score:", err);
+                console.error("Failed to save Word Bomb score:", err);
             }
         }
-
-        popupService.innerSuccess(
-            'Game Over!',
-            `<p style="font-size:14px;color:#666">Great job!</p><h2 style="color:#FACC15;font-weight:800">+${finalScore} XP</h2>`,
-            'Play Again'
-        ).then((result) => {
-            if (result.isConfirmed) {
-                startGame(); // Changed from resetGame to startGame
-            } else {
-                navigate('/mitambo');
-            }
+        setGameStatus('over');
+        setResultData({
+            isSuccess: finalScore > 0,
+            title: finalScore > 40 ? 'Muḓifho! (Sweet!)' : 'Zwavhuḓi! (Good!)',
+            message: `You scored ${finalScore} points and saved the day!`,
+            points: finalScore
         });
-    }, [navigate, cleanup, sessionStartTime]);
+        setShowResult(true);
+    }, [cleanup, sessionStartTime, awardPoints]);
 
     const gameLoop = useCallback(() => {
         if (!isPlayingRef.current || livesRef.current <= 0) return;
@@ -261,7 +269,6 @@ const WordBomb: React.FC = () => {
         setFallingWords(prev => {
             const updated = prev.map(fw => {
                 if (!fw.active) return fw;
-                // Use current speed from ref to ensure it's always up to date
                 const currentSpeed = BASE_SPEED + (speedLevelRef.current - 1) * SPEED_INCREMENT;
                 const newY = fw.y + currentSpeed;
 
@@ -273,7 +280,6 @@ const WordBomb: React.FC = () => {
             return updated.filter(fw => fw.active || fw.y < 100);
         });
 
-        // Sync physics check
         const currentPhysicsCheck = fallingWordsRef.current;
         let missedCount = 0;
         currentPhysicsCheck.forEach(fw => {
@@ -291,7 +297,7 @@ const WordBomb: React.FC = () => {
                 return updatedLives;
             });
             setCombo(0);
-            setMascotMood('happy'); // Reset mascot if was excited
+            setMascotMood('happy');
             playWrong();
             triggerShake('wb-arena-shake');
             setMissFlash(true);
@@ -310,9 +316,8 @@ const WordBomb: React.FC = () => {
         }
 
         gameLoopRef.current = requestAnimationFrame(gameLoop);
-    }, [handleGameOver, isMobile, updatePalette]);
+    }, [handleGameOver, isMobile, updatePalette, playWrong, triggerShake]);
 
-    // Defined startGame after gameLoop to avoid reference issues
     const startGame = useCallback(() => {
         cleanup();
         setScore(0);
@@ -327,12 +332,10 @@ const WordBomb: React.FC = () => {
         isPlayingRef.current = true;
         setSessionStartTime(Date.now());
         usedWordIds.current.clear();
-        setMascotMood('happy'); // Reset mascot mood
+        setMascotMood('happy');
 
-        // Start game loop
         gameLoopRef.current = requestAnimationFrame(gameLoop);
 
-        // Start spawning words
         spawnWord();
         spawnTimerRef.current = setInterval(() => {
             spawnWord();
@@ -359,7 +362,6 @@ const WordBomb: React.FC = () => {
         );
 
         if (match) {
-            // Correct!
             setCorrectFlash(match.id);
             setTimeout(() => setCorrectFlash(null), 600);
 
@@ -370,7 +372,6 @@ const WordBomb: React.FC = () => {
             const newCombo = comboRef.current + 1;
             const points = 10 + Math.floor(newCombo / 3) * 5;
 
-            // Add floating point highlight
             const newHighlight = {
                 id: Date.now(),
                 x: match.x,
@@ -384,35 +385,12 @@ const WordBomb: React.FC = () => {
 
             setScore(prev => prev + points);
             setCombo(newCombo);
-            // Update mascot mood based on combo
             if (newCombo >= 5) setMascotMood('excited');
             playCorrect();
 
-            // Increase speed every 5 correct answers
             if (newCombo % 5 === 0) {
                 setSpeedLevel(prev => prev + 1);
             }
-            // Add Visual Juice: Confetti for correct answer
-            const canvas = document.createElement('canvas');
-            canvas.style.position = 'fixed';
-            canvas.style.top = '0';
-            canvas.style.left = '0';
-            canvas.style.width = '100%';
-            canvas.style.height = '100%';
-            canvas.style.pointerEvents = 'none';
-            canvas.style.zIndex = '9999';
-            document.body.appendChild(canvas);
-
-            import('canvas-confetti').then((confetti) => {
-                const myConfetti = confetti.create(canvas, { resize: true });
-                myConfetti({
-                    particleCount: 40,
-                    spread: 70,
-                    origin: { y: 0.6 },
-                    colors: ['#FACC15', '#F59E0B', '#34D399']
-                });
-                setTimeout(() => document.body.removeChild(canvas), 3000);
-            });
         } else {
             playWrong();
             triggerShake('wb-input-zone');
@@ -438,7 +416,6 @@ const WordBomb: React.FC = () => {
             const newCombo = comboRef.current + 1;
             const points = 10 + Math.floor(newCombo / 3) * 5;
 
-            // Add floating point highlight
             const newHighlight = {
                 id: Date.now(),
                 x: match.x,
@@ -476,7 +453,6 @@ const WordBomb: React.FC = () => {
                     <ArrowLeft size={24} />
                 </button>
 
-                {/* INTRO MODAL */}
                 {showIntro && (
                     <GameIntroModal
                         gameId="wordBomb"
@@ -513,27 +489,6 @@ const WordBomb: React.FC = () => {
                         <HelpCircle size={18} strokeWidth={3} /> HOW TO PLAY
                     </button>
                 </div>
-
-                <style>{`
-                    .wb-pulse { animation: bombPulse 2s infinite; }
-                    @keyframes bombPulse {
-                        0%, 100% { transform: scale(1); }
-                        50% { transform: scale(1.1); }
-                    }
-                    .btn-game-primary {
-                        background-color: #f59e0b !important;
-                        color: #111827 !important;
-                        box-shadow: 0 6px 0 #d97706 !important;
-                    }
-                    .btn-game-primary:hover {
-                        transform: translateY(-2px);
-                        box-shadow: 0 8px 0 #d97706 !important;
-                    }
-                    .btn-game-primary:active {
-                        transform: translateY(4px);
-                        box-shadow: 0 2px 0 #d97706 !important;
-                    }
-                `}</style>
             </div>
         );
     }
@@ -574,14 +529,24 @@ const WordBomb: React.FC = () => {
 
     return (
         <div className="min-vh-100 d-flex flex-column wb-bg" onClick={() => inputRef.current?.focus()}>
-            {/* EXIT CONFIRM MODAL */}
+            <GameResultModal
+                isOpen={showResult}
+                isSuccess={resultData.isSuccess}
+                title={resultData.title}
+                message={resultData.message}
+                points={resultData.points}
+                primaryActionText="PLAY AGAIN"
+                secondaryActionText="EXIT GAME"
+                onPrimaryAction={() => { setShowResult(false); startGame(); }}
+                onSecondaryAction={() => { setShowResult(false); navigate('/mitambo'); }}
+            />
+
             <ExitConfirmModal
                 visible={showExitConfirm}
                 onConfirmExit={confirmExit}
                 onCancel={() => setShowExitConfirm(false)}
             />
 
-            {/* GAME HUD / HEADER */}
             {gameStatus === 'playing' && (
                 <div className="px-3 pt-3 pb-4 bg-dark text-white border-bottom border-dark border-4 shadow-action-sm w-100 d-flex justify-content-between align-items-center mb-3 position-relative" style={{ zIndex: 100 }}>
                     <div className="container-fluid d-flex justify-content-between align-items-center">
@@ -621,9 +586,7 @@ const WordBomb: React.FC = () => {
                 </div>
             )}
 
-            {/* GAME ARENA */}
             <div id="wb-arena-shake" className="flex-grow-1 position-relative wb-arena overflow-hidden">
-                {/* Floating Score Highlights */}
                 {highlights.map(h => (
                     <div
                         key={h.id}
@@ -641,7 +604,6 @@ const WordBomb: React.FC = () => {
                     </div>
                 ))}
 
-                {/* Falling Words */}
                 {gameStatus === 'playing' && fallingWords.filter(fw => fw.active).map((fw) => (
                     <div
                         key={fw.id}
@@ -655,16 +617,13 @@ const WordBomb: React.FC = () => {
                     </div>
                 ))}
 
-                {/* Miss flash */}
                 {missFlash && <div className="wb-miss-flash" />}
 
-                {/* Ground line */}
                 {gameStatus === 'playing' && (
                     <div className="wb-ground" />
                 )}
             </div>
 
-            {/* INPUT / PALETTE BAR */}
             {gameStatus === 'playing' && (
                 isMobile ? (
                     <div className="wb-palette-bar pb-safe">
@@ -672,10 +631,10 @@ const WordBomb: React.FC = () => {
                             {paletteOptions.map((opt) => (
                                 <button
                                     key={opt.id}
-                                    className="wb-palette-btn"
+                                    className="wb-palette-btn brutalist-card--sm"
                                     onClick={() => { playClick(); handlePaletteSelection(opt.nativeWord); }}
                                 >
-                                    <span className="text-truncate" style={{ maxWidth: '100%' }}>{opt.nativeWord}</span>
+                                    <span className="text-truncate" style={{ maxWidth: '100%' }}>{opt.nativeWord || opt.english}</span>
                                 </button>
                             ))}
                         </div>
@@ -701,8 +660,6 @@ const WordBomb: React.FC = () => {
                 )
             )}
 
-            {/* Game Over logic handled via early return above */}
-
             <style>{`
                 .wb-bg {
                     background: #ffffff;
@@ -711,13 +668,6 @@ const WordBomb: React.FC = () => {
                     height: 100vh;
                     height: calc(var(--vh, 1vh) * 100);
                     overflow: hidden;
-                }
-                .wb-header {
-                    background: rgba(255,255,255,0.9);
-                    backdrop-filter: blur(15px);
-                    border-bottom: 1px solid rgba(0,0,0,0.1);
-                    z-index: 100;
-                    height: 60px;
                 }
                 .wb-arena {
                     position: relative;
@@ -742,17 +692,6 @@ const WordBomb: React.FC = () => {
                     box-shadow: 4px 4px 0 #111827;
                     text-transform: uppercase;
                     letter-spacing: 1px;
-                }
-                .wb-heart-pulse {
-                    animation: heartPulse 1.5s infinite ease-in-out;
-                }
-                @keyframes heartPulse {
-                    0%, 100% { transform: scale(1); }
-                    50% { transform: scale(1.15); filter: drop-shadow(0 0 5px #EF4444); }
-                }
-                @keyframes wordGlow {
-                    0%, 100% { border-color: rgba(17, 24, 39, 0.4); box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
-                    50% { border-color: rgba(17, 24, 39, 0.8); box-shadow: 0 4px 20px rgba(0,0,0,0.1); }
                 }
                 .wb-explode {
                     animation: explode 0.5s forwards !important;
@@ -789,69 +728,8 @@ const WordBomb: React.FC = () => {
                     z-index: 100;
                     padding: clamp(10px, 3vw, 20px) !important;
                 }
-                .wb-input {
-                    background: #f9fafb !important;
-                    border: 2px solid #e5e7eb !important;
-                    color: #111827 !important;
-                    border-radius: 12px !important;
-                    font-size: 16px !important;
-                    padding: clamp(10px, 2.5vw, 14px) 16px !important;
-                    flex: 1;
-                }
-                .wb-input::placeholder { color: #9ca3af !important; }
-                .wb-input:focus {
-                    border-color: #FACC15 !important;
-                    box-shadow: 0 0 20px rgba(250, 204, 21, 0.1) !important;
-                    background: #ffffff !important;
-                }
-                .wb-submit-btn {
-                    background: #111827 !important;
-                    border: none !important;
-                    border-radius: 12px !important;
-                    color: #ffffff !important;
-                    box-shadow: 0 4px 0 #000 !important;
-                    transition: transform 0.1s;
-                }
-                .wb-submit-btn:active {
-                    transform: translateY(2px);
-                    box-shadow: 0 2px 0 #A1810B !important;
-                }
-                .wb-start-btn {
-                    background: linear-gradient(135deg, #FACC15, #F59E0B) !important;
-                    color: #000 !important;
-                    border: none;
-                    font-size: 1rem;
-                    letter-spacing: 2px;
-                    box-shadow: 0 6px 0 #A1810B, 0 10px 30px rgba(250,204,21,0.3) !important;
-                }
-                .wb-start-btn:active { transform: translateY(3px); box-shadow: 0 3px 0 #A1810B !important; }
-                .wb-combo-badge {
-                    background: linear-gradient(135deg, #8B5CF6, #6366f1);
-                    color: #fff;
-                    padding: 2px 10px;
-                    border-radius: 20px;
-                    font-size: 12px;
-                    animation: comboPop 0.3s ease-out;
-                }
-                @keyframes comboPop {
-                    0% { transform: scale(0.5); }
-                    70% { transform: scale(1.2); }
-                    100% { transform: scale(1); }
-                }
-                .wb-pulse {
-                    animation: bombPulse 2s infinite;
-                }
-                @keyframes bombPulse {
-                    0%, 100% { transform: scale(1); }
-                    50% { transform: scale(1.1); }
-                }
-                .wb-ready-overlay {
-                    z-index: 15;
-                }
                 .smallest { font-size: 11px; }
                 .ls-1 { letter-spacing: 1px; }
-
-                /* Mobile palette */
                 .wb-palette-bar {
                     background: #ffffff;
                     border-top: 1px solid rgba(0,0,0,0.1);
@@ -861,31 +739,41 @@ const WordBomb: React.FC = () => {
                 }
                 .pb-safe { padding-bottom: max(8px, env(safe-area-inset-bottom)); }
                 .wb-palette-grid {
-                    display: grid;
-                    grid-template-columns: repeat(4, 1fr);
-                    gap: 6px;
+                    display: flex;
+                    flex-wrap: wrap;
+                    justify-content: center;
+                    gap: 8px;
                     width: 100%;
+                    padding: 4px;
                 }
                 .wb-palette-btn {
-                    background: #f3f4f6;
-                    border: 2px solid #e5e7eb;
-                    color: #111827;
-                    border-radius: 10px;
-                    padding: 6px 2px;
-                    font-size: 0.8rem;
-                    font-weight: 700;
+                    background: #111827;
+                    border: 3px solid #000;
+                    color: #FACC15 !important;
+                    border-radius: 0;
+                    padding: 10px 14px;
+                    font-size: 0.95rem;
+                    font-weight: 900;
                     text-align: center;
-                    min-height: 40px;
-                    transition: all 0.1s;
-                    box-shadow: 0 2px 0 #d1d5db;
+                    min-height: 54px;
+                    min-width: 90px;
+                    transition: all 0.2s;
+                    box-shadow: 4px 4px 0 #FACC15;
                     display: flex;
                     align-items: center;
                     justify-content: center;
-                    overflow: hidden;
+                    text-transform: uppercase;
+                    cursor: pointer;
+                    line-height: 1.1;
+                }
+                .wb-palette-btn:hover {
+                    background: #1F2937;
+                    transform: translateY(-2px);
+                    box-shadow: 6px 6px 0 #FACC15;
                 }
                 .wb-palette-btn:active {
                     transform: translateY(2px);
-                    box-shadow: none;
+                    box-shadow: none !important;
                 }
             `}</style>
         </div>

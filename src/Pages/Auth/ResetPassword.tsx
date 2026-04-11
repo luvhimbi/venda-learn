@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { MailCheck, Loader2, ArrowLeft } from 'lucide-react';
 import { auth } from '../../services/firebaseConfig';
 import { sendPasswordResetEmail } from 'firebase/auth';
-import BaobabAuthHeader from '../../components/BaobabAuthHeader';
+
 
 const ResetPassword: React.FC = () => {
     const navigate = useNavigate();
@@ -36,7 +36,6 @@ const ResetPassword: React.FC = () => {
         <div className="min-vh-100 d-flex align-items-center justify-content-center bg-white px-3 py-5" style={{ fontFamily: '"Lexend", sans-serif' }}>
             <div className="w-100" style={{ maxWidth: '440px' }}>
 
-                <BaobabAuthHeader />
 
                 {!submitted ? (
                     <div className="mt-4">

@@ -30,6 +30,14 @@ const AuthNavbar: React.FC<AuthNavbarProps> = ({ user }) => {
                         )}
 
                         <div className="d-flex align-items-center gap-2">
+                            <Link to="/" className="btn btn-link text-decoration-none text-dark fw-black smallest ls-1 text-uppercase px-2 px-md-3 hover-yellow d-none d-md-inline-block">
+                                Home
+                            </Link>
+
+                            <Link to="/about" className="btn btn-link text-decoration-none text-dark fw-black smallest ls-1 text-uppercase px-2 px-md-3 hover-yellow d-none d-md-inline-block">
+                                About Us
+                            </Link>
+
                             <Link to="/login" className="btn btn-link text-decoration-none text-dark fw-black smallest ls-1 text-uppercase px-2 px-md-3 hover-yellow">
                                 Login
                             </Link>

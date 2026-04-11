@@ -40,19 +40,32 @@ const TermsOfUse: React.FC = () => {
     `;
 
     return (
-        <div className="min-vh-100 bg-light py-5">
-            <div className="container">
-                <div className="card border-0 shadow-sm rounded-4 p-4 p-md-5 bg-white">
-                    <h1 className="fw-bold mb-4">Terms of Use</h1>
+        <div className="min-vh-100 bg-white py-5" style={{ fontFamily: '"Lexend", sans-serif' }}>
+            <div className="container" style={{ maxWidth: '900px' }}>
+                <div className="brutalist-card bg-white position-relative">
+                    {/* Decorative Top Bar */}
+                    <div className="bg-warning border-bottom border-4 border-dark" style={{ height: '20px' }}></div>
+                    
+                    <div className="p-4 p-md-5">
+                        <h1 className="display-4 fw-black text-uppercase ls-tight mb-4">Terms of Use</h1>
+                        <div className="bg-dark mb-5" style={{ height: '8px', width: '100px' }}></div>
 
-                    <SmartReader
-                        title="Terms of Use (Full Audio)"
-                        text={termsText}
-                    />
+                        <SmartReader
+                            title="Terms of Use (Full Audio)"
+                            text={termsText}
+                        />
 
-                    <p className="text-muted mb-4 mt-4 text-center small">Last Updated: December 2025</p>
+                        <p className="fw-bold text-muted mb-0 mt-5 text-center small uppercase ls-1">Last Updated: December 2025</p>
+                    </div>
                 </div>
             </div>
+
+            <style>{`
+                .ls-tight { letter-spacing: -1.5px; }
+                .ls-1 { letter-spacing: 1px; }
+                .fw-black { font-weight: 900; }
+                .uppercase { text-transform: uppercase; }
+            `}</style>
         </div>
     );
 };

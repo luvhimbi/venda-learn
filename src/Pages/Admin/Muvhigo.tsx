@@ -15,7 +15,38 @@ interface Player {
     avatarId?: string;
 }
 
-const Leaderboard: React.FC = () => {
+const LEAGUES = {
+    PODIUM: { min: 1, max: 3, color: '#facc15' },
+    GOLD: { min: 4, max: 10, color: '#CA8A04' },
+    SILVER: { min: 11, max: 20, color: '#6B7280' }
+};
+
+interface RankItemProps {
+    player: Player;
+    rank: number;
+    leagueColor: string;
+    isMe: boolean;
+}
+
+const RankItem: React.FC<RankItemProps> = ({ player, rank, leagueColor, isMe }) => (
+    <div className={`list-group-item bg-transparent border-0 px-3 py-3 d-flex align-items-center ${isMe ? 'border-start border-4' : ''}`} style={isMe ? { borderLeftColor: leagueColor, backgroundColor: 'rgba(0,0,0,0.04)' } : {}}>
+        <span className="me-3 fw-black text-muted smallest" style={{ width: '25px' }}>#{rank > 20 ? '20+' : rank}</span>
+        <div className="me-3">
+            <AvatarDisplay avatarId={player.avatarId || 'adventurer'} seed={player.username} size={40} />
+        </div>
+        <div className="flex-grow-1 text-start">
+            <div className="d-flex align-items-center gap-2">
+                <span className="fw-black text-dark">{player.username || 'Anonymous Learner'}</span>
+                {isMe && <span className="smallest fw-black ls-1 text-uppercase" style={{ color: leagueColor }}> (YOU)</span>}
+            </div>
+        </div>
+        <div className="text-end">
+            <div className="fw-black text-dark">{player.points.toLocaleString()} XP</div>
+        </div>
+    </div>
+);
+
+const Muvhigo: React.FC = () => {
     const navigate = useNavigate();
     const [players, setPlayers] = useState<Player[]>([]);
     const [currentUserRank, setCurrentUserRank] = useState<{ rank: number, player: Player } | null>(null);
@@ -23,8 +54,90 @@ const Leaderboard: React.FC = () => {
     const [isLoggedIn, setIsLoggedIn] = useState(false);
     const [communityStats, setCommunityStats] = useState({ totalXP: 0 });
 
+    const handleShowGuide = () => {
+        Swal.fire({
+            title: '<span class="fw-black ls-tight text-dark">HOW TO RANK UP</span>',
+            html: `
+        <div class="text-start p-2">
+            <div class="mb-4 d-flex align-items-start gap-3">
+                <div class="bg-light p-3 rounded-4 border border-2 border-dark shadow-action-sm text-primary">
+                    <i class="bi bi-book-half fs-4"></i>
+                </div>
+                <div>
+                    <p class="smallest fw-black text-dark mb-1 ls-1 text-uppercase">Lessons</p>
+                    <p class="small text-muted mb-0">Earn base points for every successfully completed module.</p>
+                </div>
+            </div>
+
+            <div class="mb-4 d-flex align-items-start gap-3">
+                <div class="bg-light p-3 rounded-4 border border-2 border-dark shadow-action-sm text-warning">
+                    <i class="bi bi-zap-fill fs-4"></i>
+                </div>
+                <div>
+                    <p class="smallest fw-black text-dark mb-1 ls-1 text-uppercase">Streaks</p>
+                    <p class="small text-muted mb-0">Maintain a daily learning streak to multiply your rewards.</p>
+                </div>
+            </div>
+
+            <div class="mb-0 d-flex align-items-start gap-3">
+                <div class="bg-light p-3 rounded-4 border border-2 border-dark shadow-action-sm text-danger">
+                    <i class="bi bi-target fs-4"></i>
+                </div>
+                <div>
+                    <p class="smallest fw-black text-dark mb-1 ls-1 text-uppercase">Accuracy</p>
+                    <p class="small text-muted mb-0">Perfect scores in quizzes grant the "Muhali" bonus points.</p>
+                </div>
+            </div>
+        </div>
+    `,
+            confirmButtonText: 'GOT IT',
+            confirmButtonColor: '#000',
+            customClass: {
+                popup: 'rounded-4 border border-4 border-dark shadow-action',
+                confirmButton: 'rounded-pill px-5 fw-black text-white ls-1'
+            }
+        });
+    };
+
+    const handleShowLeaguesGuide = () => {
+        Swal.fire({
+            title: '<span class="fw-bold ls-tight">LEAGUES EXPLAINED</span>',
+            html: `
+<div class="text-start p-2">
+    <div class="mb-4 d-flex align-items-start gap-3">
+        <div class="bg-light p-3 rounded-4" style="color: #facc15;"><i class="bi bi-gem fs-4"></i></div>
+        <div>
+            <p class="smallest fw-bold text-dark mb-1 ls-1 text-uppercase">The Podium (Top 3)</p>
+            <p class="small text-muted mb-0">The elite learners. Your avatar is displayed dynamically at the top of the leaderboard.</p>
+        </div>
+    </div>
+    <div class="mb-4 d-flex align-items-start gap-3">
+        <div class="bg-light p-3 rounded-4" style="color: #CA8A04;"><i class="bi bi-star-fill fs-4"></i></div>
+        <div>
+            <p class="smallest fw-bold text-dark mb-1 ls-1 text-uppercase">Gold League</p>
+            <p class="small text-muted mb-0">The rising stars. Place between Rank 4 and Rank 10 to earn your gold shield.</p>
+        </div>
+    </div>
+    <div class="mb-0 d-flex align-items-start gap-3">
+        <div class="bg-light p-3 rounded-4" style="color: #6B7280;"><i class="bi bi-shield-fill fs-4"></i></div>
+        <div>
+            <p class="smallest fw-bold text-dark mb-1 ls-1 text-uppercase">Silver League</p>
+            <p class="small text-muted mb-0">The active challengers. Secure a spot between Rank 11 and Rank 20 to maintain Silver League status.</p>
+        </div>
+    </div>
+</div>
+`,
+            confirmButtonText: 'GOT IT',
+            confirmButtonColor: '#FACC15',
+            customClass: {
+                popup: 'rounded-5 border-0 shadow-lg',
+                confirmButton: 'rounded-pill px-5 fw-bold text-dark ls-1'
+            }
+        });
+    };
+
     useEffect(() => {
-        const unsubAuth = onAuthStateChanged(auth, (user: any) => {
+        const unsubAuth = onAuthStateChanged(auth, (user) => {
             setIsLoggedIn(!!user);
         });
 
@@ -37,19 +150,19 @@ const Leaderboard: React.FC = () => {
                 let totalXP = 0;
 
                 if (playersData && Array.isArray(playersData)) {
+                    let foundMe = false;
                     playersData.forEach((player, index) => {
                         if (index < 10) totalXP += (player.points || 0);
-                        if (player.id === auth.currentUser?.uid) {
+                        if (auth.currentUser && player.id === auth.currentUser.uid) {
                             setCurrentUserRank({ rank: index + 1, player });
+                            foundMe = true;
                         }
                     });
 
-                    if (currentUserData &&
-                        currentUserData.lastActiveWeek === currentWeek &&
-                        (currentUserData.weeklyXP || 0) > 0 &&
-                        !playersData.find(p => p.id === auth.currentUser?.uid)) {
+                    // If user is active but not in top 20, show them as "Unranked" but with points
+                    if (!foundMe && currentUserData && currentUserData.lastActiveWeek === currentWeek && (currentUserData.weeklyXP || 0) > 0) {
                         setCurrentUserRank({
-                            rank: 0,
+                            rank: 21, // Use 21 as local indicator for "20+" or just outside Top 20
                             player: {
                                 id: auth.currentUser?.uid || '',
                                 username: currentUserData.username || 'Anonymous',
@@ -70,126 +183,6 @@ const Leaderboard: React.FC = () => {
         };
 
         fetchLeaderboard();
-
-        const handleShowGuide = () => {
-            Swal.fire({
-                title: '<span class="fw-black ls-tight text-dark">HOW TO RANK UP</span>',
-                html: `
-            <div class="text-start p-2">
-                <div class="mb-4 d-flex align-items-start gap-3">
-                    <div class="bg-light p-3 rounded-4 border border-2 border-dark shadow-action-sm text-primary">
-                        <i class="bi bi-book-half fs-4"></i>
-                    </div>
-                    <div>
-                        <p class="smallest fw-black text-dark mb-1 ls-1 text-uppercase">Lessons</p>
-                        <p class="small text-muted mb-0">Earn base points for every successfully completed module.</p>
-                    </div>
-                </div>
-
-                <div class="mb-4 d-flex align-items-start gap-3">
-                    <div class="bg-light p-3 rounded-4 border border-2 border-dark shadow-action-sm text-warning">
-                        <i class="bi bi-zap-fill fs-4"></i>
-                    </div>
-                    <div>
-                        <p class="smallest fw-black text-dark mb-1 ls-1 text-uppercase">Streaks</p>
-                        <p class="small text-muted mb-0">Maintain a daily learning streak to multiply your rewards.</p>
-                    </div>
-                </div>
-
-                <div class="mb-0 d-flex align-items-start gap-3">
-                    <div class="bg-light p-3 rounded-4 border border-2 border-dark shadow-action-sm text-danger">
-                        <i class="bi bi-target fs-4"></i>
-                    </div>
-                    <div>
-                        <p class="smallest fw-black text-dark mb-1 ls-1 text-uppercase">Accuracy</p>
-                        <p class="small text-muted mb-0">Perfect scores in quizzes grant the "Muhali" bonus points.</p>
-                    </div>
-                </div>
-            </div>
-        `,
-                confirmButtonText: 'GOT IT',
-                confirmButtonColor: '#000',
-                customClass: {
-                    popup: 'rounded-4 border border-4 border-dark shadow-action',
-                    confirmButton: 'rounded-pill px-5 fw-black text-white ls-1'
-                }
-            });
-        };
-        (window as any).showScoringGuide = handleShowGuide;
-
-        const handleShowLeaguesGuide = () => {
-
-            Swal.fire({
-
-                title: '<span class="fw-bold ls-tight">LEAGUES EXPLAINED</span>',
-
-                html: `
-
-<div class="text-start p-2">
-
-<div class="mb-4 d-flex align-items-start gap-3">
-
-<div class="bg-light p-3 rounded-4" style="color: #0284c7;"><i class="bi bi-gem fs-4"></i></div>
-
-<div>
-
-<p class="smallest fw-bold text-dark mb-1 ls-1 text-uppercase">The Podium (Top 3)</p>
-
-<p class="small text-muted mb-0">The elite learners. Your avatar is displayed dynamically at the top of the leaderboard.</p>
-
-</div>
-
-</div>
-
-<div class="mb-4 d-flex align-items-start gap-3">
-
-<div class="bg-light p-3 rounded-4" style="color: #CA8A04;"><i class="bi bi-star-fill fs-4"></i></div>
-
-<div>
-
-<p class="smallest fw-bold text-dark mb-1 ls-1 text-uppercase">Gold League</p>
-
-<p class="small text-muted mb-0">The rising stars. Place between Rank 4 and Rank 10 to earn your gold shield.</p>
-
-</div>
-
-</div>
-
-<div class="mb-0 d-flex align-items-start gap-3">
-
-<div class="bg-light p-3 rounded-4 text-secondary"><i class="bi bi-shield-fill fs-4"></i></div>
-
-<div>
-
-<p class="smallest fw-bold text-dark mb-1 ls-1 text-uppercase">Silver League</p>
-
-<p class="small text-muted mb-0">The active challengers. Secure a spot between Rank 11 and Rank 20 to maintain Silver League status.</p>
-
-</div>
-
-</div>
-
-</div>
-
-`,
-
-                confirmButtonText: 'GOT IT',
-
-                confirmButtonColor: '#FACC15',
-
-                customClass: {
-
-                    popup: 'rounded-5 border-0 shadow-lg',
-
-                    confirmButton: 'rounded-pill px-5 fw-bold text-dark ls-1'
-
-                }
-
-            });
-
-        };
-        (window as any).showLeaguesGuide = handleShowLeaguesGuide;
-
         return () => unsubAuth();
     }, []);
 
@@ -203,27 +196,6 @@ const Leaderboard: React.FC = () => {
     const goldLeague = players.slice(3, 10);
     const silverLeague = players.slice(10, 20);
 
-    const renderPlayer = (player: Player, globalIndex: number, leagueColor: string) => {
-        const isMe = isLoggedIn && player.id === auth.currentUser?.uid;
-        return (
-            <div key={player.id} className={`list-group-item bg-transparent border-0 px-3 py-3 d-flex align-items-center ${isMe ? 'border-start border-4' : ''}`} style={isMe ? { borderLeftColor: leagueColor, backgroundColor: 'rgba(0,0,0,0.04)' } : {}}>
-                <span className="me-3 fw-black text-muted smallest" style={{ width: '25px' }}>#{globalIndex + 1}</span>
-                <div className="me-3">
-                    <AvatarDisplay avatarId={player.avatarId || 'adventurer'} seed={player.username} size={40} />
-                </div>
-                <div className="flex-grow-1 text-start">
-                    <div className="d-flex align-items-center gap-2">
-                        <span className="fw-black text-dark">{player.username || 'Anonymous Learner'}</span>
-                        {isMe && <span className="smallest fw-black ls-1 text-uppercase" style={{ color: leagueColor }}> (YOU)</span>}
-                    </div>
-                </div>
-                <div className="text-end">
-                    <div className="fw-black text-dark">{player.points.toLocaleString()} XP</div>
-                </div>
-            </div>
-        );
-    };
-
     return (
         <div className="bg-white min-vh-100 pt-3 pb-5" style={{ overflowX: 'hidden' }}>
             <div className="container" style={{ maxWidth: '1100px' }}>
@@ -231,7 +203,7 @@ const Leaderboard: React.FC = () => {
                 {/* BACK NAVIGATION */}
                 <button
                     className="btn btn-link text-decoration-none p-0 mb-4 d-flex align-items-center gap-2 text-dark fw-black smallest ls-2 text-uppercase"
-                    onClick={() => navigate('/')}
+                    onClick={() => navigate(-1)}
                 >
                     <ArrowLeft size={16} /> Murahu
                 </button>
@@ -250,13 +222,13 @@ const Leaderboard: React.FC = () => {
                         <div className="d-flex align-items-center gap-2">
                             <button
                                 className="btn btn-outline-dark rounded-pill py-2 px-3 fw-black smallest ls-1 d-flex align-items-center gap-2 border-2"
-                                onClick={() => (window as any).showScoringGuide()}
+                                onClick={handleShowGuide}
                             >
                                 <Info size={16} /> <span className="d-none d-sm-block text-uppercase">Scoring</span>
                             </button>
                             <button
                                 className="btn btn-dark rounded-pill py-2 px-3 fw-black smallest ls-1 d-flex align-items-center gap-2 shadow-action-sm"
-                                onClick={() => (window as any).showLeaguesGuide()}
+                                onClick={handleShowLeaguesGuide}
                             >
                                 <Trophy size={16} className="text-warning" /> <span className="d-none d-sm-block text-uppercase">Leagues</span>
                             </button>
@@ -323,7 +295,15 @@ const Leaderboard: React.FC = () => {
                                                 <h6 className="mb-0 fw-black ls-1 text-uppercase text-dark" style={{ fontSize: "12px" }}>Gold League</h6>
                                             </div>
                                             <div className="list-group shadow-action rounded-4 border border-4 border-dark bg-white overflow-hidden">
-                                                {goldLeague.map((player, index) => renderPlayer(player, index + 3, '#CA8A04'))}
+                                                {goldLeague.map((player, index) => (
+                                                    <RankItem 
+                                                        key={player.id} 
+                                                        player={player} 
+                                                        rank={index + 4} 
+                                                        leagueColor={LEAGUES.GOLD.color} 
+                                                        isMe={isLoggedIn && player.id === auth.currentUser?.uid} 
+                                                    />
+                                                ))}
                                             </div>
                                         </div>
                                     )}
@@ -335,7 +315,33 @@ const Leaderboard: React.FC = () => {
                                                 <h6 className="mb-0 fw-black ls-1 text-uppercase text-muted" style={{ fontSize: "12px" }}>Silver League</h6>
                                             </div>
                                             <div className="list-group shadow-action rounded-4 border border-4 border-dark bg-white overflow-hidden">
-                                                {silverLeague.map((player, index) => renderPlayer(player, index + 10, '#6B7280'))}
+                                                {silverLeague.map((player, index) => (
+                                                    <RankItem 
+                                                        key={player.id} 
+                                                        player={player} 
+                                                        rank={index + 11} 
+                                                        leagueColor={LEAGUES.SILVER.color} 
+                                                        isMe={isLoggedIn && player.id === auth.currentUser?.uid} 
+                                                    />
+                                                ))}
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {/* PERSONAL STANDINGS (If outside top 20) */}
+                                    {currentUserRank && currentUserRank.rank > 20 && (
+                                        <div className="mt-5 pt-4 border-top border-4 border-dark border-dashed mx-auto" style={{ maxWidth: '600px' }}>
+                                            <p className="smallest fw-black text-muted ls-2 text-uppercase mb-3">Your Progress</p>
+                                            <div className="list-group shadow-action rounded-4 border border-4 border-dark bg-white overflow-hidden">
+                                                <RankItem 
+                                                    player={currentUserRank.player} 
+                                                    rank={currentUserRank.rank} 
+                                                    leagueColor="#2563eb" 
+                                                    isMe={true} 
+                                                />
+                                                <div className="bg-light p-3 border-top border-2 border-dark text-center">
+                                                    <p className="small fw-bold text-muted mb-0">You are just outside the Top 20. Keep learning to break into the Silver League!</p>
+                                                </div>
                                             </div>
                                         </div>
                                     )}
@@ -349,4 +355,4 @@ const Leaderboard: React.FC = () => {
     );
 };
 
-export default Leaderboard;
+export default Muvhigo;

@@ -5,7 +5,7 @@ import { signInAnonymously, signInWithEmailAndPassword, signInWithPopup } from '
 import { auth, db, googleProvider } from '../../services/firebaseConfig';
 import { Loader2, Eye, EyeOff } from 'lucide-react';
 import { useGoogleReCaptcha } from 'react-google-recaptcha-v3';
-import BaobabAuthHeader from '../../components/BaobabAuthHeader';
+
 
 const Login: React.FC = () => {
     const [email, setEmail] = useState<string>('');
@@ -136,7 +136,6 @@ const Login: React.FC = () => {
         <div className="min-vh-100 d-flex align-items-center justify-content-center bg-white px-3 py-5" style={{ fontFamily: '"Lexend", sans-serif' }}>
             <div className="w-100" style={{ maxWidth: '440px' }}>
 
-                <BaobabAuthHeader />
 
                 <div className="text-center mb-5 mt-4">
                     <h2 className="display-5 fw-black text-uppercase ls-tight text-dark mb-2">Aweh! Back Again?</h2>
