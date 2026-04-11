@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowLeft, HelpCircle, Info, Trophy, User, Monitor, RotateCcw } from 'lucide-react';
+import { ArrowLeft, HelpCircle, Info, Trophy, User, Monitor, RotateCcw, Palette, Check } from 'lucide-react';
 import { doc, updateDoc, increment, type Firestore } from 'firebase/firestore';
 import { auth, db } from '../../services/firebaseConfig';
 import { refreshUserData } from '../../services/dataCache';
@@ -29,6 +29,50 @@ interface Junction {
     x: number;
     y: number;
 }
+ 
+interface ThemeConfig {
+    id: string;
+    name: string;
+    boardBg: string;
+    lineColor: string;
+    p1: { type: 'emoji' | 'shape'; value: string; color: string; };
+    p2: { type: 'emoji' | 'shape'; value: string; color: string; };
+}
+ 
+const THEMES: ThemeConfig[] = [
+    {
+        id: 'traditional',
+        name: 'Cattle Ranch',
+        boardBg: '#ffffff',
+        lineColor: '#000000',
+        p1: { type: 'emoji', value: '🐂', color: '#FACC15' },
+        p2: { type: 'emoji', value: '🐃', color: '#1e293b' }
+    },
+    {
+        id: 'wooden',
+        name: 'Royal Wood',
+        boardBg: '#78350f',
+        lineColor: '#451a03',
+        p1: { type: 'shape', value: 'circle', color: '#fbbf24' },
+        p2: { type: 'shape', value: 'circle', color: '#059669' }
+    },
+    {
+        id: 'patriotic',
+        name: 'South Africa',
+        boardBg: '#1e293b',
+        lineColor: '#ffffff',
+        p1: { type: 'shape', value: 'gem', color: '#e11d48' },
+        p2: { type: 'shape', value: 'gem', color: '#16a34a' }
+    },
+    {
+        id: 'midnight',
+        name: 'Midnight Stone',
+        boardBg: '#0f172a',
+        lineColor: '#38bdf8',
+        p1: { type: 'shape', value: 'stone', color: '#94a3b8' },
+        p2: { type: 'shape', value: 'stone', color: '#475569' }
+    }
+];
 
 // Generate junctions
 const JUNCTIONS: Junction[] = [];
@@ -117,6 +161,15 @@ const Morabaraba: React.FC = () => {
     const [showExitConfirm, setShowExitConfirm] = useState(false);
     const [isVsAI, setIsVsAI] = useState(true);
     const [aiProcessing, setAiProcessing] = useState(false);
+    const [showThemePicker, setShowThemePicker] = useState(false);
+    const [currentTheme, setCurrentTheme] = useState<ThemeConfig>(() => {
+        const saved = localStorage.getItem('morabaraba_theme');
+        return THEMES.find(t => t.id === saved) || THEMES[0];
+    });
+ 
+    useEffect(() => {
+        localStorage.setItem('morabaraba_theme', currentTheme.id);
+    }, [currentTheme]);
     
     // Haptic Logic
     const triggerHaptic = useCallback((pattern: number | number[]) => {
@@ -411,6 +464,56 @@ const Morabaraba: React.FC = () => {
                 onConfirmExit={() => navigate('/mitambo')}
                 onCancel={() => setShowExitConfirm(false)}
             />
+ 
+            {/* THEME PICKER MODAL */}
+            <AnimatePresence>
+                {showThemePicker && (
+                    <motion.div 
+                        initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+                        className="position-fixed top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center p-3"
+                        style={{ backgroundColor: 'rgba(0,0,0,0.8)', zignore: 2000, zIndex: 2000 }}
+                    >
+                        <motion.div 
+                            initial={{ scale: 0.9, y: 20 }} animate={{ scale: 1, y: 0 }}
+                            className="brutalist-card bg-white p-4 w-100 shadow-action"
+                            style={{ maxWidth: '500px' }}
+                        >
+                            <div className="d-flex justify-content-between align-items-center mb-4">
+                                <h3 className="fw-black mb-0 ls-tight">CUSTOMIZE GAME</h3>
+                                <button onClick={() => setShowThemePicker(false)} className="btn-close"></button>
+                            </div>
+                            
+                            <div className="row g-3">
+                                {THEMES.map(theme => (
+                                    <div key={theme.id} className="col-12">
+                                        <button 
+                                            onClick={() => { setCurrentTheme(theme); setShowThemePicker(false); }}
+                                            className={`w-100 text-start brutalist-card p-3 transition-all d-flex align-items-center justify-content-between ${currentTheme.id === theme.id ? 'border-primary bg-light shadow-action-sm' : 'border-dark'}`}
+                                            style={{ borderWidth: '3px' }}
+                                        >
+                                            <div className="d-flex align-items-center gap-3">
+                                                <div className="rounded-2 border border-2 border-dark" style={{ width: 40, height: 40, backgroundColor: theme.boardBg }}></div>
+                                                <div>
+                                                    <h6 className="fw-black mb-0 smallest uppercase">{theme.name}</h6>
+                                                    <div className="d-flex gap-1 mt-1">
+                                                        <div className="rounded-circle border border-1 border-dark" style={{ width: 12, height: 12, backgroundColor: theme.p1.color }}></div>
+                                                        <div className="rounded-circle border border-1 border-dark" style={{ width: 12, height: 12, backgroundColor: theme.p2.color }}></div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            {currentTheme.id === theme.id && <Check className="text-primary" size={24} strokeWidth={4} />}
+                                        </button>
+                                    </div>
+                                ))}
+                            </div>
+
+                            <button onClick={() => setShowThemePicker(false)} className="btn-game btn-game-primary w-100 mt-4 py-3 fw-black uppercase">
+                                DONE
+                            </button>
+                        </motion.div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
 
             <div className="container" style={{ maxWidth: '800px' }}>
                 {/* HEADER */}
@@ -423,6 +526,9 @@ const Morabaraba: React.FC = () => {
                         <h2 className="fw-black mb-0 text-dark ls-tight" style={{ fontSize: '1.5rem' }}>MORABARABA</h2>
                     </div>
                     <div className="d-flex align-items-center gap-2">
+                        <button onClick={() => setShowThemePicker(true)} className="btn-game btn-game-white rounded-circle d-flex align-items-center justify-content-center" style={{ width: 44, height: 44, padding: 0 }}>
+                            <Palette size={22} className="text-dark" strokeWidth={3} />
+                        </button>
                         <button onClick={() => setIsVsAI(!isVsAI)} className={`btn-game ${isVsAI ? 'btn-game-primary' : 'btn-game-white'} rounded-pill px-3 py-1 smallest fw-black uppercase`}>
                             {isVsAI ? 'CPU' : 'PVP'}
                         </button>
@@ -461,10 +567,31 @@ const Morabaraba: React.FC = () => {
 
                     {/* BOARD */}
                     <div className="col-12 col-lg-6 order-3 order-lg-2 d-flex justify-content-center">
-                        <div id="m-board" className="brutalist-card p-1 p-md-2 bg-white shadow-action position-relative" style={{ width: 'min(98vw, 500px)', height: 'min(98vw, 500px)', border: '6px solid #111' }}>
+                        <div id="m-board" className="brutalist-card p-1 p-md-2 shadow-action position-relative overflow-hidden" style={{ width: 'min(98vw, 500px)', height: 'min(98vw, 500px)', border: '6px solid #111', backgroundColor: currentTheme.boardBg }}>
                             <svg viewBox="0 0 500 500" className="w-100 h-100">
+                                <defs>
+                                    {/* Wood Pattern */}
+                                    <pattern id="woodPattern" patternUnits="userSpaceOnUse" width="100" height="100">
+                                        <rect width="100" height="100" fill="#78350f" />
+                                        <path d="M0 20 Q 50 10 100 20 M0 50 Q 50 60 100 50 M0 80 Q 50 70 100 80" stroke="#451a03" strokeWidth="2" fill="none" opacity="0.5" />
+                                    </pattern>
+                                    {/* Flag Decoration (Simplified SA Colors) */}
+                                    <linearGradient id="flagGrad" x1="0" y1="0" x2="1" y2="1">
+                                        <stop offset="0%" stopColor="#e11d48" />
+                                        <stop offset="45%" stopColor="#ffffff" />
+                                        <stop offset="50%" stopColor="#16a34a" />
+                                        <stop offset="55%" stopColor="#ffffff" />
+                                        <stop offset="100%" stopColor="#1e293b" />
+                                    </linearGradient>
+                                </defs>
+
+                                {/* Background Layer */}
+                                {currentTheme.id === 'wooden' && <rect width="500" height="500" fill="url(#woodPattern)" />}
+                                {currentTheme.id === 'patriotic' && <rect width="500" height="500" fill="url(#flagGrad)" opacity="0.3" />}
+                                {currentTheme.id === 'midnight' && <rect width="500" height="500" fill={currentTheme.boardBg} />}
+
                                 {/* Grid Lines */}
-                                <g stroke="#000" strokeWidth="4" fill="none">
+                                <g stroke={currentTheme.lineColor} strokeWidth="4" fill="none">
                                     {/* Rings */}
                                     <rect x="50" y="50" width="400" height="400" />
                                     <rect x="130" y="130" width="240" height="240" />
@@ -517,20 +644,42 @@ const Morabaraba: React.FC = () => {
                                                     exit={{ scale: 0, opacity: 0 }}
                                                     transition={{ type: 'spring', bounce: 0.5 }}
                                                 >
-                                                    <circle 
-                                                        cx={j.x} cy={j.y} r="18" 
-                                                        fill={board[j.id] === 1 ? '#FACC15' : '#1e293b'} 
-                                                        stroke="#000" strokeWidth="3"
-                                                        className="shadow-action-sm"
-                                                    />
-                                                    {/* Cow face simplified */}
-                                                    <text x={j.x} y={j.y + 5} fontSize="14" textAnchor="middle" fill={board[j.id] === 1 ? '#000' : '#fff'} style={{ pointerEvents: 'none', fontWeight: 'bold' }}>
-                                                        {board[j.id] === 1 ? '🐂' : '🐃'}
-                                                    </text>
+                                                    {(() => {
+                                                        const p = board[j.id] === 1 ? currentTheme.p1 : currentTheme.p2;
+                                                        if (p.type === 'emoji') {
+                                                            return (
+                                                                <>
+                                                                    <circle cx={j.x} cy={j.y} r="18" fill={p.color} stroke={currentTheme.lineColor} strokeWidth="3" className="shadow-action-sm" />
+                                                                    <text x={j.x} y={j.y + 5} fontSize="14" textAnchor="middle" fill="#000" style={{ pointerEvents: 'none', fontWeight: 'bold' }}>
+                                                                        {p.value}
+                                                                    </text>
+                                                                </>
+                                                            );
+                                                        }
+                                                        if (p.value === 'stone') {
+                                                            return (
+                                                                <path 
+                                                                    d={`M ${j.x-15} ${j.y-5} q 15 -15 30 0 q 5 15 -15 20 q -20 -5 -15 -20`}
+                                                                    fill={p.color} stroke={currentTheme.lineColor} strokeWidth="3"
+                                                                />
+                                                            );
+                                                        }
+                                                        if (p.value === 'gem') {
+                                                            return (
+                                                                <polygon 
+                                                                    points={`${j.x},${j.y-18} ${j.x+18},${j.y} ${j.x},${j.y+18} ${j.x-18},${j.y}`}
+                                                                    fill={p.color} stroke={currentTheme.lineColor} strokeWidth="3" fillOpacity="0.8"
+                                                                />
+                                                            );
+                                                        }
+                                                        return (
+                                                            <circle cx={j.x} cy={j.y} r="18" fill={p.color} stroke={currentTheme.lineColor} strokeWidth="3" className="shadow-action-sm" />
+                                                        );
+                                                    })()}
                                                     
                                                     {/* Selection indicator */}
                                                     {selectedJunction === j.id && (
-                                                        <circle cx={j.x} cy={j.y} r="22" fill="none" stroke="#FACC15" strokeWidth="4" className="animate__animated animate__pulse animate__infinite" />
+                                                        <circle cx={j.x} cy={j.y} r="22" fill="none" stroke={board[j.id] === 1 ? '#FACC15' : '#38bdf8'} strokeWidth="4" className="animate__animated animate__pulse animate__infinite" />
                                                     )}
                                                 </motion.g>
                                             )}
