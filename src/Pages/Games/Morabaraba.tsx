@@ -4,11 +4,11 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowLeft, HelpCircle, Info, Trophy, User, Monitor, RotateCcw, Palette, Check } from 'lucide-react';
 import { doc, updateDoc, increment, type Firestore } from 'firebase/firestore';
 import { auth, db } from '../../services/firebaseConfig';
-import { refreshUserData } from '../../services/dataCache';
+import GameResultModal from '../../components/GameResultModal';
+import { awardPoints } from '../../services/dataCache';
 import { useVisualJuice } from '../../hooks/useVisualJuice';
 import GameIntroModal, { resetIntroSeen } from '../../components/GameIntroModal';
 import ExitConfirmModal from '../../components/ExitConfirmModal';
-import Swal from 'sweetalert2';
 
 // --- CONSTANTS ---
 const COWS_PER_PLAYER = 12;
@@ -144,7 +144,7 @@ const MORABARABA_INTRO_STEPS = [
 
 const Morabaraba: React.FC = () => {
     const navigate = useNavigate();
-    const { playCorrect, playWrong, playClick, triggerShake } = useVisualJuice();
+    const { playCorrect, playWrong, playClick, triggerShake, triggerHaptic } = useVisualJuice();
     
     // Game State
     const [board, setBoard] = useState<(Player | null)[]>(Array(24).fill(null));
@@ -159,6 +159,8 @@ const Morabaraba: React.FC = () => {
     // UI State
     const [showIntro, setShowIntro] = useState(true);
     const [showExitConfirm, setShowExitConfirm] = useState(false);
+    const [showResult, setShowResult] = useState(false);
+    const [resultData, setResultData] = useState({ isSuccess: false, title: '', message: '', points: 0 });
     const [isVsAI, setIsVsAI] = useState(true);
     const [aiProcessing, setAiProcessing] = useState(false);
     const [showThemePicker, setShowThemePicker] = useState(false);
@@ -170,13 +172,6 @@ const Morabaraba: React.FC = () => {
     useEffect(() => {
         localStorage.setItem('morabaraba_theme', currentTheme.id);
     }, [currentTheme]);
-    
-    // Haptic Logic
-    const triggerHaptic = useCallback((pattern: number | number[]) => {
-        if ('vibrate' in navigator) {
-            try { navigator.vibrate(pattern); } catch (e) { /* silent */ }
-        }
-    }, []);
 
     // Helpers
     const getCowsOnBoard = useCallback((player: Player) => {
@@ -218,27 +213,23 @@ const Morabaraba: React.FC = () => {
     const handleWinner = async (winner: Player) => {
         setGameOver(winner);
         if (winner === 1 && auth.currentUser) {
+            // Using centralized awardPoints to ensure weekly leaderboard sync
+            await awardPoints(XP_REWARD);
+
             const userRef = doc(db as Firestore, 'users', auth.currentUser.uid);
             await updateDoc(userRef, {
-                points: increment(XP_REWARD),
                 morabarabaWins: increment(1)
             });
-            await refreshUserData();
             playCorrect();
         }
         
-        Swal.fire({
-            title: winner === 1 ? 'MUWINA! (Winner!)' : 'LOSE (Try Again)',
-            text: winner === 1 ? `Congratulations! You defeated the ${isVsAI ? 'CPU' : 'Player 2'}. +${XP_REWARD} XP` : 'Better luck next time!',
-            icon: winner === 1 ? 'success' : 'error',
-            confirmButtonText: 'PLAY AGAIN',
-            confirmButtonColor: '#FACC15',
-            showCancelButton: true,
-            cancelButtonText: 'DASHBOARD',
-        }).then(res => {
-            if (res.isConfirmed) resetGame();
-            else navigate('/mitambo');
+        setResultData({
+            isSuccess: winner === 1,
+            title: winner === 1 ? 'Ndi hone! (Victory)' : 'Ndi yone! (Defeat)',
+            message: winner === 1 ? 'You outsmarted the CPU Grandmaster!' : 'The CPU was stronger this time. Keep practicing!',
+            points: winner === 1 ? XP_REWARD : 0
         });
+        setShowResult(true);
     };
 
     // Game Actions
@@ -252,7 +243,7 @@ const Morabaraba: React.FC = () => {
 
         // --- SHOOT MODE ---
         if (shootMode) {
-            if (board[id] !== opponent) return;
+            if (id === undefined || id === null || board[id] !== opponent) return;
             
             // Check Rule: cannot shoot from a mill unless ALL opponent's pieces are in mills
             const opponentCows = board.map((o, idx) => o === opponent ? idx : -1).filter(idx => idx !== -1);
@@ -269,7 +260,7 @@ const Morabaraba: React.FC = () => {
             setBoard(newBoard);
             setShootMode(false);
             playCorrect();
-            triggerHaptic([100, 50, 100]); // Mill confirmation vibration
+            triggerHaptic('heavy'); // Mill confirmation vibration
 
             // Check if game ended after removal
             const winner = checkWinCondition(currentPlayer, newBoard, placingCount);
@@ -297,7 +288,7 @@ const Morabaraba: React.FC = () => {
             // Check mill
             if (isJunctionInMill(id, currentPlayer, newBoard)) {
                 setShootMode(true);
-                triggerHaptic(50);
+                triggerHaptic('medium');
             } else {
                 setTurn(opponent);
             }
@@ -345,7 +336,7 @@ const Morabaraba: React.FC = () => {
             // Mill check
             if (isJunctionInMill(id, currentPlayer, newBoard)) {
                 setShootMode(true);
-                triggerHaptic(50);
+                triggerHaptic('medium');
             } else {
                 setTurn(opponent);
             }
@@ -417,16 +408,24 @@ const Morabaraba: React.FC = () => {
         // SHOOT MODE (Special branch)
         if (shootMode) {
             const targets = board.map((o, idx) => o === opponent ? idx : -1).filter(idx => idx !== -1);
+            if (targets.length === 0) return null;
+
             const allInMills = targets.every(id => isJunctionInMill(id, opponent, board));
             const validTargets = targets.filter(id => allInMills || !isJunctionInMill(id, opponent, board));
             
-            // Heuristic for shooting: remove pieces that are part of 2-in-a-row or high adjacency
+            if (validTargets.length === 0) return { type: 'shoot', id: targets[0] };
+
             let bestTarget = validTargets[0];
             let maxImpact = -1;
             
             validTargets.forEach(tid => {
                 let impact = 0;
-                ALL_MILLS.forEach(m => { if(m.includes(tid) && m.filter(mid => board[mid] === opponent).length === 2) impact += 5; });
+                ALL_MILLS.forEach(m => { 
+                    if(m.includes(tid)) {
+                        const oppCount = m.filter(mid => board[mid] === opponent).length;
+                        if (oppCount === 2) impact += 10; // Block a potential mill
+                    }
+                });
                 if (impact > maxImpact) { maxImpact = impact; bestTarget = tid; }
             });
             return { type: 'shoot', id: bestTarget };
@@ -441,7 +440,6 @@ const Morabaraba: React.FC = () => {
             candidates.forEach(cid => {
                 const tempBoard = [...board]; tempBoard[cid] = player;
                 let score = evaluateBoard(tempBoard, phaseP1, phaseP2, placingCount[1], placingCount[2] - 1);
-                // Heavy weight for forming a mill immediately
                 if (isJunctionInMill(cid, player, tempBoard)) score += 500;
                 
                 if (score > bestScore) { bestScore = score; bestMove = cid; }
@@ -488,16 +486,15 @@ const Morabaraba: React.FC = () => {
                 } else if (action.type === 'place') {
                     performAction(action.id as number, true);
                 } else if (action.type === 'move') {
-                    // Two step action for move
                     setSelectedJunction(action.from as number);
                     setTimeout(() => {
                         performAction(action.to as number, true);
                         setAiProcessing(false);
                     }, 600);
-                    return; // Avoid dual setAiProcessing(false)
+                    return;
                 }
                 setAiProcessing(false);
-            }, 1200);
+            }, shootMode ? 800 : 1200);
             return () => clearTimeout(timer);
         }
     }, [turn, shootMode, isVsAI, gameOver, findBestAction, setSelectedJunction, performAction]);
@@ -516,7 +513,21 @@ const Morabaraba: React.FC = () => {
     };
 
     return (
-        <div className="min-vh-100 bg-white py-4 overflow-hidden" style={{ background: 'url("data:image/svg+xml,%3Csvg width=\'20\' height=\'20\' viewBox=\'0 0 20 20\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cg fill=\'%23000000\' fill-opacity=\'0.02\' fill-rule=\'evenodd\'%3E%3Ccircle cx=\'3\' cy=\'3\' r=\'1\'/%3E%3C/g%3E%3C/svg%3E")' }}>
+        <div className="min-vh-100 py-3 position-relative overflow-hidden" style={{ backgroundColor: '#ffffff', backgroundImage: 'url("data:image/svg+xml,%3Csvg width=\'20\' height=\'20\' viewBox=\'0 0 20 20\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cg fill=\'%23000000\' fill-opacity=\'0.02\' fill-rule=\'evenodd\'%3E%3Ccircle cx=\'3\' cy=\'3\' r=\'1\'/%3E%3C/g%3E%3C/svg%3E")' }}>
+            
+            {/* RESULT MODAL */}
+            <GameResultModal
+                isOpen={showResult}
+                isSuccess={resultData.isSuccess}
+                title={resultData.title}
+                message={resultData.message}
+                points={resultData.points}
+                primaryActionText="PLAY AGAIN"
+                secondaryActionText="EXIT TO MENU"
+                onPrimaryAction={() => { setShowResult(false); resetGame(); }}
+                onSecondaryAction={() => { setShowResult(false); navigate('/mitambo'); }}
+            />
+
             {/* MODALS */}
             {showIntro && (
                 <GameIntroModal

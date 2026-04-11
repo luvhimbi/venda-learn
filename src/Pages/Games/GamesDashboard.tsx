@@ -101,6 +101,15 @@ const GamesDashboard: React.FC = () => {
                 route: '/morabaraba',
                 color: 'var(--venda-dark)',
                 gradient: 'linear-gradient(135deg, #1e293b 0%, #0f172a 100%)'
+            },
+            {
+                id: 'moruba',
+                title: 'Moruba Traditional',
+                description: 'A traditional 4-row mancala game. Use your wit to capture the opponent\'s stones.',
+                icon: <Trophy size={48} />,
+                route: '/moruba',
+                color: '#5d4037',
+                gradient: 'linear-gradient(135deg, #78350f 0%, #451a03 100%)'
             }
         ];
     }, [preferredLanguage]);
@@ -148,9 +157,12 @@ const GamesDashboard: React.FC = () => {
     }
 
     return (
-        <div className="min-vh-100 bg-white py-5" style={{ background: 'url("data:image/svg+xml,%3Csvg width=\'20\' height=\'20\' viewBox=\'0 0 20 20\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cg fill=\'%23000000\' fill-opacity=\'0.02\' fill-rule=\'evenodd\'%3E%3Ccircle cx=\'3\' cy=\'3\' r=\'1\'/%3E%3C/g%3E%3C/svg%3E")' }}>
+        <div className="min-vh-100 pt-4 pb-5" style={{ 
+            backgroundColor: '#ffffff',
+            backgroundImage: 'url("data:image/svg+xml,%3Csvg width=\'20\' height=\'20\' viewBox=\'0 0 20 20\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cg fill=\'%23000000\' fill-opacity=\'0.02\' fill-rule=\'evenodd\'%3E%3Ccircle cx=\'3\' cy=\'3\' r=\'1\'/%3E%3C/g%3E%3C/svg%3E")' 
+        }}>
             <div className="container">
-                <div className="text-center mb-5 mt-4 animate__animated animate__fadeInDown">
+                <div className="text-center mb-4 mt-0 animate__animated animate__fadeInDown">
                     <span className="badge bg-warning text-dark border border-dark border-2 rounded-pill px-3 py-1 smallest fw-black ls-1 uppercase mb-2 shadow-action-sm">
                         {preferredLanguage?.name || 'Local'} Quests
                     </span>
@@ -158,7 +170,7 @@ const GamesDashboard: React.FC = () => {
                     <p className="fw-bold text-muted uppercase tracking-widest smallest">Level up your {preferredLanguage?.name || ''} skills</p>
                 </div>
 
-                <div className="row g-4 justify-content-center">
+                <div className="row g-3 justify-content-center">
                     {shuffledGames.map((game, idx) => (
                         <div key={game.id} className="col-md-6 animate__animated animate__fadeInUp" style={{ animationDelay: `${idx * 0.1}s` }}>
                             <div
@@ -171,17 +183,17 @@ const GamesDashboard: React.FC = () => {
                             >
                                 <div className="d-flex flex-column h-100">
                                     <div
-                                        className="p-4 d-flex align-items-center justify-content-center text-white border-bottom border-dark border-4"
-                                        style={{ background: game.gradient, height: '160px' }}
+                                        className="p-3 d-flex align-items-center justify-content-center text-white border-bottom border-dark border-4"
+                                        style={{ background: game.gradient, height: '140px' }}
                                     >
                                         <div className="p-4 rounded-circle border border-white border-2 d-flex align-items-center justify-content-center" 
                                              style={{ backgroundColor: 'rgba(255, 255, 255, 0.2)', width: '100px', height: '100px' }}>
                                             {React.cloneElement(game.icon as React.ReactElement, { color: '#ffffff', strokeWidth: 2.5 } as any)}
                                         </div>
                                     </div>
-                                    <div className="p-4 flex-grow-1 bg-white d-flex flex-column">
-                                        <h3 className="fw-black mb-2 text-dark uppercase ls-1" style={{ fontSize: '1.4rem' }}>{game.title}</h3>
-                                        <p className="small fw-bold text-muted mb-4 flex-grow-1">{game.description}</p>
+                                    <div className="p-3 flex-grow-1 bg-white d-flex flex-column">
+                                        <h3 className="fw-black mb-1 text-dark uppercase ls-1" style={{ fontSize: '1.25rem' }}>{game.title}</h3>
+                                        <p className="small fw-bold text-muted mb-3 flex-grow-1">{game.description}</p>
                                         <button className="btn btn-game btn-game-primary w-100 py-3 smallest fw-black">
                                             PLAY NOW <ArrowRight size={18} className="ms-2" strokeWidth={3} />
                                         </button>

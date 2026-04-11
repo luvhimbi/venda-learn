@@ -35,11 +35,11 @@ import {
     Ham, DollarSign, Church, Shirt, Utensils, Hand, Car,
     HelpCircle, MousePointerClick, Timer
 } from 'lucide-react';
-import { fetchPicturePuzzles, fetchUserData, fetchLanguages } from '../../services/dataCache';
+import { fetchPicturePuzzles, fetchUserData, fetchLanguages, awardPoints } from '../../services/dataCache';
 import { useNavigate } from 'react-router-dom';
-import Swal from 'sweetalert2';
 import { auth, db } from '../../services/firebaseConfig';
-import {doc, updateDoc, increment, getDoc, type Firestore} from 'firebase/firestore';
+import GameResultModal from '../../components/GameResultModal';
+import {doc, updateDoc, getDoc, type Firestore} from 'firebase/firestore';
 import Mascot from '../../components/Mascot';
 import { useVisualJuice } from '../../hooks/useVisualJuice';
 import { updateStreak } from '../../services/streakUtils';
@@ -142,6 +142,8 @@ const PicturePuzzle: React.FC = () => {
     const [streak, setStreak] = useState(0);
     const [showIntro, setShowIntro] = useState(true);
     const [showExitConfirm, setShowExitConfirm] = useState(false);
+    const [showResult, setShowResult] = useState(false);
+    const [resultData, setResultData] = useState({ isSuccess: false, title: '', message: '', points: 0 });
     const { playCorrect, playWrong, playClick, triggerShake } = useVisualJuice();
     const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
@@ -222,8 +224,13 @@ const PicturePuzzle: React.FC = () => {
                 if (snap.exists()) setStreak(snap.data().streak || 0);
             }
         } catch (error) {
-            console.error("Error loading picture puzzle:", error);
-            Swal.fire('Error', 'Failed to load game data.', 'error');
+            setResultData({
+                isSuccess: false,
+                title: 'Error',
+                message: 'Failed to load game data. Please check your connection.',
+                points: 0
+            });
+            setShowResult(true);
         } finally {
             setLoading(false);
         }
@@ -283,9 +290,12 @@ const PicturePuzzle: React.FC = () => {
         const user = auth.currentUser;
         if (user && score > 0) {
             try {
+                // Using centralized awardPoints to ensure weekly leaderboard sync
+                await awardPoints(score);
+                
+                // Still update specific game performance stats
                 const userRef = doc(db as Firestore, 'users', user.uid);
                 await updateDoc(userRef, {
-                    points: increment(score),
                     [`gamePerformance.pictureRace.lastSession`]: {
                         score,
                         duration: totalDuration,
@@ -298,28 +308,16 @@ const PicturePuzzle: React.FC = () => {
             }
         }
 
-        Swal.fire({
-            title: 'Tshifhinga tsho fhela!',
-            html: `<p style="font-size:14px;color:#666">Time's up!</p><h2 style="color:#FACC15;font-weight:800">+${score} XP</h2>`,
-            icon: 'success',
-            confirmButtonText: 'Play Again',
-            confirmButtonColor: '#FACC15',
-            showCancelButton: true,
-            cancelButtonText: 'Exit',
-            customClass: { popup: 'rounded-4' }
-        }).then((result) => {
-            if (result.isConfirmed) {
-                setScore(0);
-                setTimeLeft(GAME_DURATION);
-                setGameActive(true);
-                setSessionStartTime(Date.now());
-                const reshuffled = [...slides].sort(() => 0.5 - Math.random());
-                setSlides(reshuffled);
-                setupRound(reshuffled[0], reshuffled, 0);
-            } else {
-                navigate('/mitambo');
-            }
+        const isSuccess = score > 0;
+        setResultData({
+            isSuccess,
+            title: isSuccess ? 'Tshifhinga tsho fhela!' : 'Game Over',
+            message: isSuccess 
+                ? `Time's up! You did a great job matching the ${roundCount} pictures.` 
+                : `Time's up! No pictures matched this time. Don't give up, keep practicing!`,
+            points: score
         });
+        setShowResult(true);
     };
 
     if (loading) return (
@@ -334,7 +332,31 @@ const PicturePuzzle: React.FC = () => {
     const timerColor = timeLeft > 20 ? '#FACC15' : timeLeft > 10 ? '#F97316' : '#EF4444';
 
     return (
-        <div className="min-vh-100 d-flex flex-column" style={{ background: "url(\"data:image/svg+xml,%3Csvg width='20' height='20' viewBox='0 0 20 20' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23000000' fill-opacity='0.02' fill-rule='evenodd'%3E%3Ccircle cx='3' cy='3' r='1'/%3E%3C/g%3E%3C/svg%3E\")" }}>
+        <div className="min-vh-100 d-flex flex-column" style={{ 
+            backgroundColor: '#ffffff',
+            backgroundImage: "url(\"data:image/svg+xml,%3Csvg width='20' height='20' viewBox='0 0 20 20' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23000000' fill-opacity='0.02' fill-rule='evenodd'%3E%3Ccircle cx='3' cy='3' r='1'/%3E%3C/g%3E%3C/svg%3E\")" 
+        }}>
+            {/* RESULT MODAL */}
+            <GameResultModal
+                isOpen={showResult}
+                isSuccess={resultData.isSuccess}
+                title={resultData.title}
+                message={resultData.message}
+                points={resultData.points}
+                primaryActionText="PLAY AGAIN"
+                secondaryActionText="EXIT TO MENU"
+                onPrimaryAction={() => { 
+                    setShowResult(false); 
+                    setScore(0);
+                    setTimeLeft(GAME_DURATION);
+                    setGameActive(true);
+                    setSessionStartTime(Date.now());
+                    const reshuffled = [...slides].sort(() => 0.5 - Math.random());
+                    setSlides(reshuffled);
+                    setupRound(reshuffled[0], reshuffled, 0);
+                }}
+                onSecondaryAction={() => { setShowResult(false); navigate('/mitambo'); }}
+            />
 
             {/* INTRO MODAL */}
             {showIntro && (
@@ -427,11 +449,21 @@ const PicturePuzzle: React.FC = () => {
                                         className={`btn-game w-100 p-4 fw-black text-uppercase shadow-action-sm
                                             ${isCorrect ? 'bg-success text-white' : ''}
                                             ${isWrong ? 'bg-danger text-white animate__animated animate__shakeX' : ''}
-                                            ${!isSelected ? 'bg-white text-dark' : ''}
+                                            ${!isSelected ? 'bg-white text-dark fw-black' : ''}
                                         `}
-                                        style={{ fontSize: 'clamp(1rem, 3vw, 1.25rem)', letterSpacing: '1px' }}
+                                        style={{ 
+                                            fontSize: 'clamp(0.9rem, 2.5vw, 1.25rem)', 
+                                            letterSpacing: '1px',
+                                            color: '#111827',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
+                                            minHeight: '80px'
+                                        }}
                                     >
-                                        {opt}
+                                        <span className="text-truncate" style={{ maxWidth: '100%' }}>
+                                            {opt || currentSlide?.english || '???'}
+                                        </span>
                                     </button>
                                 </div>
                             );

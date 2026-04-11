@@ -6,7 +6,8 @@ import TrueFalseQuestion from '../../components/Game/TrueFalseQuestion';
 import FillBlankQuestion from '../../components/Game/FillBlankQuestion';
 import MatchPairsQuestion from '../../components/Game/MatchPairsQuestion';
 import ListenChooseQuestion from '../../components/Game/ListenChooseQuestion';
-import { fetchDailyChallenge } from '../../services/dataCache';
+import { fetchDailyChallenge, awardPoints } from '../../services/dataCache';
+import { auth } from '../../services/firebaseConfig';
 import type { Question } from '../../types/game';
 import { useVisualJuice } from '../../hooks/useVisualJuice';
 import Mascot from '../../components/Mascot';
@@ -86,8 +87,16 @@ const DailyChallenge: React.FC = () => {
         }
     };
 
-    const finishGame = () => {
+    const finishGame = async () => {
         setIsFinished(true);
+        
+        // Save points even if score is zero (to mark as active this week)
+        // But score 0 shouldn't necessarily award points unless we want to show they played.
+        // awardPoints(score) will handle increments.
+        if (auth.currentUser) {
+            await awardPoints(score);
+        }
+
         if (score > questions.length * 0.5) {
             const canvas = document.createElement('canvas');
             canvas.style.position = 'fixed';

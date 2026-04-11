@@ -1,0 +1,266 @@
+.word-cards-container {
+  padding: 1rem;
+  max-width: 1200px;
+  margin: 0 auto;
+  min-height: 100vh;
+}
+
+.word-cards-header {
+  margin-bottom: 2rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.word-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 1.5rem;
+}
+
+.category-card {
+  background-color: var(--game-surface);
+  border-radius: 24px;
+  overflow: hidden;
+  cursor: pointer;
+  transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.2s;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  position: relative;
+  aspect-ratio: 1 / 1.1;
+  display: flex;
+  flex-direction: column;
+}
+
+.category-card:hover {
+  transform: translateY(-8px) scale(1.02);
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.4);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.category-card-title {
+  padding: 1rem;
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: white;
+  z-index: 2;
+}
+
+.category-card-image {
+  flex-grow: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  opacity: 0.9;
+  transition: opacity 0.2s;
+}
+
+.category-card:hover .category-card-image {
+  opacity: 1;
+}
+
+.category-card-image img {
+  max-width: 80%;
+  max-height: 80%;
+  object-fit: contain;
+}
+
+/* Detail Overlay */
+.word-detail-overlay {
+  position: fixed;
+  inset: 0;
+  background-color: var(--game-bg);
+  z-index: 2000;
+  display: flex;
+  flex-direction: column;
+}
+
+.word-detail-header {
+  padding: 1rem 1.5rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  z-index: 10;
+}
+
+.close-btn {
+  background: rgba(255, 255, 255, 0.1);
+  border: none;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.close-btn:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.carousel-container {
+  flex-grow: 1;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.word-slide {
+  width: 100%;
+  max-width: 500px;
+  height: 80vh;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  background-color: var(--game-surface);
+  border-radius: 32px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+  margin: 0 auto;
+  position: relative;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.word-info {
+  margin-top: 1rem;
+  padding: 1rem;
+}
+
+.native-word {
+  font-size: 2.5rem;
+  font-weight: 900;
+  color: white;
+  margin-bottom: 0.2rem;
+}
+
+.english-word {
+  font-size: 1.4rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.word-image-large {
+  flex-grow: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+}
+
+.word-image-large img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+
+.action-buttons {
+  position: absolute;
+  bottom: 2rem;
+  right: 2rem;
+  display: flex;
+  gap: 1rem;
+}
+
+.sound-btn {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background-color: var(--venda-green);
+  border: none;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+  cursor: pointer;
+  transition: transform 0.1s, background 0.2s;
+}
+
+.sound-btn:active {
+  transform: scale(0.9);
+}
+
+.sound-btn:hover {
+  background-color: #166534;
+}
+
+.carousel-controls {
+  padding: 2rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 2rem;
+}
+
+@media (max-width: 576px) {
+  .word-slide {
+    width: 90%;
+    height: 70vh;
+  }
+  
+  .native-word {
+    font-size: 2rem;
+  }
+}
+
+/* Custom switch for autoplay */
+.autoplay-control {
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.8);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 44px;
+  height: 24px;
+}
+
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #334155;
+  transition: .4s;
+  border-radius: 34px;
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 18px;
+  width: 18px;
+  left: 3px;
+  bottom: 3px;
+  background-color: white;
+  transition: .4s;
+  border-radius: 50%;
+}
+
+input:checked + .slider {
+  background-color: var(--venda-green);
+}
+
+input:checked + .slider:before {
+  transform: translateX(20px);
+}

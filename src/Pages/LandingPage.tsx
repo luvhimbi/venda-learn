@@ -20,7 +20,7 @@ const LandingPage: React.FC = () => {
                                 <span className="bg-white px-3 border border-4 border-dark d-inline-block mt-2">Culture.</span>
                             </h1>
                             <p className="lead fw-bold text-dark mb-5 pe-lg-5">
-                                Chommie is for the whole crew. Meet **Elphie**, your guide to mastering South Africa's 11 official languages through **Quick Quests**, **Word Bombs**, and real-world lingo.
+                                Chommie is for the whole crew. Meet Elphie, your guide to mastering South Africa's 11 official languages through Quick Quests, Word Bombs, and real-world lingo.
                             </p>
                             <div className="d-flex flex-column flex-md-row gap-4 justify-content-center justify-content-lg-start">
                                 <button onClick={() => navigate('/onboarding')} className="btn btn-dark btn-lg px-5 py-3 fw-black rounded-0 border-4 border-dark shadow-action hover-press text-uppercase">
@@ -89,7 +89,7 @@ const LandingPage: React.FC = () => {
                                     <i className="bi bi-controller fs-1 text-white"></i>
                                 </div>
                                 <h4 className="fw-black text-uppercase">Lekker Games</h4>
-                                <p className="fw-bold text-muted mb-0">From **Word Bombs** to **Syllable Builders**, master vocabulary while having a blast.</p>
+                                <p className="fw-bold text-muted mb-0">From Word Bombs to Syllable Builders, master vocabulary while having a blast.</p>
                             </div>
                         </div>
                         <div className="col-md-4">
@@ -135,40 +135,98 @@ const LandingPage: React.FC = () => {
                 </div>
             </section>
 
-            {/* --- FAQ SECTION --- */}
-            <section className="py-5 bg-white">
-                <div className="container py-5" style={{ maxWidth: '900px' }}>
-                    <div className="text-center mb-5">
-                        <h2 className="display-4 fw-black text-uppercase mb-2">The Knowledge Base</h2>
-                        <div className="bg-dark mx-auto" style={{ height: '8px', width: '80px' }}></div>
-                        <p className="fw-bold mt-3 text-muted">Curious? Don't be a shy-guy, here's the lowdown.</p>
-                    </div>
-
-                    <div className="accordion border border-4 border-dark rounded-0 shadow-action" id="chommieFaq">
-                        {[
-                            {
-                                q: "Is Chommie actually free?",
-                                a: "For real, boet! Our mission is to get South Africans talking to each other. All our primary lessons and games are 100% free."
-                            },
-                            {
-                                q: "Which languages can I learn?",
-                                a: "We're going for the full 11! From isiZulu to Afrikaans and Tshivenda, we've got quests loading for everyone."
-                            }
-                        ].map((faq, i) => (
-                            <div className="accordion-item border-0 border-bottom border-4 border-dark rounded-0" key={i}>
-                                <h2 className="accordion-header">
-                                    <button className="accordion-button collapsed fw-black py-4 bg-white text-dark shadow-none text-uppercase" type="button" data-bs-toggle="collapse" data-bs-target={`#collapse${i}`}>
-                                        {faq.q}
-                                    </button>
-                                </h2>
-                                <div id={`collapse${i}`} className="accordion-collapse collapse" data-bs-parent="#chommieFaq">
-                                    <div className="accordion-body fw-bold text-muted pb-4 pt-0">
-                                        <hr className="border-2 border-dark opacity-10 mb-3" />
-                                        {faq.a}
+            {/* --- MZANSI'S VOICES SECTION --- */}
+            <section className="py-5 border-bottom border-4 border-dark" style={{ backgroundColor: '#fff9e6' }}>
+                <div className="container py-5">
+                    <div className="row align-items-center g-5">
+                        <div className="col-lg-6 order-2 order-lg-1">
+                            <div className="row g-3">
+                                {[
+                                    { lang: "IsiZulu", greeting: "Sawubona!", color: "#FF6B6B" },
+                                    { lang: "IsiXhosa", greeting: "Molo!", color: "#FF9F43" },
+                                    { lang: "Afrikaans", greeting: "Haai!", color: "#4ECDC4" },
+                                    { lang: "Sepedi", greeting: "Thobela!", color: "#FFD93D" },
+                                    { lang: "Setswana", greeting: "Dumela!", color: "#F39C12" },
+                                    { lang: "Sesotho", greeting: "Dumela!", color: "#1DD1A1" },
+                                    { lang: "Xitsonga", greeting: "Avuxeni!", color: "#95A5A6" },
+                                    { lang: "siSwati", greeting: "Sawubona!", color: "#54A0FF" },
+                                    { lang: "Tshivenda", greeting: "Nda! / Aa!", color: "#2980B9" },
+                                    { lang: "isiNdebele", greeting: "Lotjhani!", color: "#EE5253" }
+                                ].map((item, index) => (
+                                    <div key={index} className="col-6 col-md-4">
+                                        <div className="p-3 border border-3 border-dark bg-white shadow-action-sm hover-press text-center h-100 d-flex flex-column justify-content-center">
+                                            <div className="fw-black text-uppercase small mb-1">{item.lang}</div>
+                                            <div className="fw-bold text-muted smallest-print">{item.greeting}</div>
+                                        </div>
                                     </div>
+                                ))}
+                            </div>
+                        </div>
+                        <div className="col-lg-6 order-1 order-lg-2 text-center text-lg-start">
+                            <h2 className="display-4 fw-black text-uppercase mb-3">Mzansi's <span className="px-2 bg-warning border border-3 border-dark">Voices</span></h2>
+                            <p className="fw-bold text-muted mb-4 fs-5">
+                                South Africa is a symphony of 11 official languages. From the rhythmic clicks of isiXhosa to the lyrical flow of Tshivenda, every language is a gateway to a unique culture.
+                            </p>
+                            <div className="d-inline-block bg-dark text-white px-4 py-2 border border-2 border-dark shadow-action-sm fw-black text-uppercase small mb-2">
+                                11 Languages. 1 People. 🌍
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            {/* --- WHY CHOMMIE SECTION --- */}
+            <section className="py-5 bg-white border-bottom border-4 border-dark overflow-hidden">
+                <div className="container py-5">
+                    <div className="row align-items-center">
+                        <div className="col-lg-12 text-center mb-5">
+                            <h2 className="display-4 fw-black text-uppercase mb-2">Why Chommie?</h2>
+                            <div className="bg-dark mx-auto" style={{ height: '8px', width: '120px' }}></div>
+                        </div>
+                        <div className="col-md-6 mb-4">
+                            <div className="d-flex align-items-start gap-4 p-4 border border-4 border-dark shadow-action bg-white h-100 hover-press">
+                                <div className="bg-info p-3 border border-3 border-dark shadow-action-sm flex-shrink-0">
+                                    <i className="bi bi-heart-fill fs-2 text-white"></i>
+                                </div>
+                                <div>
+                                    <h4 className="fw-black text-uppercase">Cultural Connection</h4>
+                                    <p className="fw-bold text-muted mb-0 small">We don't just teach words; we teach the soul of the language. Understand the context, the slang, and the heart of every conversation.</p>
                                 </div>
                             </div>
-                        ))}
+                        </div>
+                        <div className="col-md-6 mb-4">
+                            <div className="d-flex align-items-start gap-4 p-4 border border-4 border-dark shadow-action bg-white h-100 hover-press">
+                                <div className="bg-success p-3 border border-3 border-dark shadow-action-sm flex-shrink-0">
+                                    <i className="bi bi-graph-up-arrow fs-2 text-white"></i>
+                                </div>
+                                <div>
+                                    <h4 className="fw-black text-uppercase">Zero Friction</h4>
+                                    <p className="fw-bold text-muted mb-0 small">No complicated registrations or paywalls for core content. Start learning in seconds and keep the momentum going.</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div className="col-md-6 mb-4">
+                            <div className="d-flex align-items-start gap-4 p-4 border border-4 border-dark shadow-action bg-white h-100 hover-press">
+                                <div className="bg-warning p-3 border border-3 border-dark shadow-action-sm flex-shrink-0">
+                                    <i className="bi bi-lightning-charge-fill fs-2 text-dark"></i>
+                                </div>
+                                <div>
+                                    <h4 className="fw-black text-uppercase">Hyper-Fast Quests</h4>
+                                    <p className="fw-bold text-muted mb-0 small">Our lessons are designed for the busy life. 5 minutes is all it takes to complete a quest and level up your skills.</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div className="col-md-6 mb-4">
+                            <div className="d-flex align-items-start gap-4 p-4 border border-4 border-dark shadow-action bg-white h-100 hover-press">
+                                <div className="bg-danger p-3 border border-3 border-dark shadow-action-sm flex-shrink-0">
+                                    <i className="bi bi-people-fill fs-2 text-white"></i>
+                                </div>
+                                <div>
+                                    <h4 className="fw-black text-uppercase">Built for Us</h4>
+                                    <p className="fw-bold text-muted mb-0 small">Created by South Africans for the world. We know the nuances that make our languages special.</p>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </section>

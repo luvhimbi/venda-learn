@@ -1,9 +1,179 @@
-/* VENDA LEARN - BRUTALIST LEARNING GRID */
+.path-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 1rem 0;
+    position: relative;
+    max-width: 600px;
+    margin: 0 auto;
+}
 
-.learning-container {
-    background-color: var(--light-bg);
-    min-height: 100vh;
-    padding-bottom: 4rem;
+.chapter-separator {
+    width: 100%;
+    margin: 1.5rem 0;
+    text-align: center;
+}
+
+.chapter-header-brutalist {
+    background: #000;
+    color: #fff;
+    padding: 1rem 1.5rem;
+    border-radius: 16px;
+    border: 4px solid #000;
+    box-shadow: 0 6px 0 rgba(0,0,0,0.2);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    position: relative;
+    margin-bottom: 1.5rem;
+}
+
+.chapter-header-info {
+    flex-grow: 1;
+    text-align: left;
+}
+
+.chapter-title {
+    font-size: 0.75rem;
+    font-weight: 900;
+    color: var(--venda-yellow);
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    margin-bottom: 0.25rem;
+}
+
+.chapter-subtitle {
+    font-size: 1.25rem;
+    font-weight: 800;
+    margin: 0;
+    line-height: 1.2;
+}
+
+.chapter-progress-circle {
+    width: 50px;
+    height: 50px;
+    flex-shrink: 0;
+    position: relative;
+}
+
+.path-node-row {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    gap: 1.5rem;
+    margin-bottom: 0.75rem;
+    position: relative;
+    padding-left: 5%;
+}
+
+/* Vertical Connector Line */
+.path-node-line {
+    position: absolute;
+    left: calc(5% + 28px); 
+    top: 56px;
+    bottom: -0.75rem;
+    width: 6px;
+    background: #e2e8f0;
+    z-index: 1;
+}
+
+.path-node-line.is-active {
+    background: var(--venda-green);
+}
+
+.path-node-circle {
+    width: 60px;
+    height: 60px;
+    border: 4px solid #000;
+    border-radius: 50%;
+    background: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2;
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    box-shadow: 0 4px 0 #000;
+    position: relative;
+    flex-shrink: 0;
+}
+
+.path-node-circle:hover:not(.locked) {
+    transform: scale(1.1);
+    box-shadow: 0 8px 0 #000;
+}
+
+.path-node-circle:active:not(.locked) {
+    transform: translateY(3px);
+    box-shadow: 0 2px 0 #000;
+}
+
+.path-node-circle.locked {
+    background: #e2e8f0;
+    border-color: #94a3b8;
+    box-shadow: 0 4px 0 #94a3b8;
+    cursor: not-allowed;
+}
+
+.path-node-circle.is-done {
+    border-color: var(--venda-green);
+    background: #ecfdf5;
+}
+
+.path-node-card {
+    background: white;
+    border: 3px solid #000;
+    border-radius: 12px;
+    padding: 0.5rem 1rem;
+    box-shadow: 5px 5px 0px #000;
+    flex-grow: 1;
+    max-width: 280px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.path-node-card:hover:not(.locked) {
+    transform: translate(-2px, -2px);
+    box-shadow: 7px 7px 0px #000;
+}
+
+.path-node-card.locked {
+    background-color: #f1f5f9;
+    border-color: #94a3b8;
+    box-shadow: 3px 3px 0px #94a3b8;
+    opacity: 0.7;
+}
+
+.path-node-title {
+    font-size: 1rem;
+    font-weight: 900;
+    margin: 0;
+    text-transform: uppercase;
+    color: #000;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Circular Progress Visualization */
+.circular-progress {
+    transform: rotate(-90deg);
+}
+
+.circular-progress circle {
+    fill: none;
+    stroke-width: 6;
+}
+
+.circular-progress .bg {
+    stroke: rgba(255, 255, 255, 0.1);
+}
+
+.circular-progress .bar {
+    stroke: var(--venda-yellow);
+    stroke-linecap: round;
+    transition: stroke-dashoffset 1s ease-in-out;
 }
 
 /* Header Refinement */

@@ -10,7 +10,7 @@ import ListenChooseQuestion from '../../components/Game/ListenChooseQuestion';
 import { useGameLogic } from '../../hooks/useGameLogic';
 import { auth } from '../../services/firebaseConfig';
 import { onAuthStateChanged } from 'firebase/auth';
-import { fetchLessons, fetchUserData } from '../../services/dataCache';
+import { fetchLessons, fetchUserData, awardPoints } from '../../services/dataCache';
 import {
     createBattle, fetchOpenBattles, fetchMyBattles, joinBattle,
     subscribeToBattle, updateBattleProgress, finalizeBattle,
@@ -300,6 +300,9 @@ const KnowledgeBattle: React.FC = () => {
     const handleQuizFinish = async (finalScore: number, finalCorrect: number, totalDuration: number) => {
         setQuizFinished(true);
         if (battleId) {
+            // Award XP to user document for the leaderboard
+            await awardPoints(finalScore);
+
             const totalQ = currentBattle?.questionOrder?.length || 0;
             // Update battle progress with duration if battleService supports it (or just metadata)
             await updateDoc(doc(db, 'battles', battleId), {

@@ -2,9 +2,9 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { doc, updateDoc, increment, getDoc, type Firestore } from 'firebase/firestore';
 import { auth, db } from '../../services/firebaseConfig';
-import { fetchPuzzles, refreshUserData, fetchUserData, fetchLanguages } from '../../services/dataCache';
+import { fetchPuzzles, fetchUserData, fetchLanguages, awardPoints } from '../../services/dataCache';
 import { ArrowLeft, Delete, Lightbulb, AlertCircle, CheckCircle2, Flame, HelpCircle, Keyboard, Search, Palette } from 'lucide-react';
-import Swal from 'sweetalert2';
+import GameResultModal from '../../components/GameResultModal';
 import Mascot from '../../components/Mascot';
 import { useVisualJuice } from '../../hooks/useVisualJuice';
 import { updateStreak } from '../../services/streakUtils';
@@ -56,6 +56,8 @@ const WordPuzzle: React.FC = () => {
     const [streak, setStreak] = useState(0);
     const [showIntro, setShowIntro] = useState(true);
     const [showExitConfirm, setShowExitConfirm] = useState(false);
+    const [showResult, setShowResult] = useState(false);
+    const [resultData, setResultData] = useState({ isSuccess: false, title: '', message: '', points: 0 });
     const { playCorrect, playWrong, playClick, triggerShake } = useVisualJuice();
     const inputRef = useRef<HTMLInputElement>(null);
 
@@ -190,9 +192,11 @@ const WordPuzzle: React.FC = () => {
         const totalDuration = Math.floor((Date.now() - sessionStartTime) / 1000);
         const user = auth.currentUser;
         if (user) {
+            // Using centralized awardPoints to ensure weekly leaderboard sync
+            await awardPoints(10);
+
             const userRef = doc(db as Firestore, 'users', user.uid);
             await updateDoc(userRef, {
-                points: increment(10),
                 puzzlesSolved: increment(1),
                 [`gamePerformance.wordPuzzle.${targetPuzzle?.id || 'unknown'}`]: {
                     words: targetPuzzle?.word,
@@ -201,17 +205,14 @@ const WordPuzzle: React.FC = () => {
                 }
             });
             await updateStreak(user.uid);
-            await refreshUserData();
         }
-        Swal.fire({
+        setResultData({
+            isSuccess: true,
             title: 'Ndi hone! (Correct!)',
-            text: `You found the word: ${targetPuzzle?.word} (${targetPuzzle?.translation}). +10 XP`,
-            icon: 'success',
-            confirmButtonText: 'Play Again',
-            confirmButtonColor: '#FACC15'
-        }).then(() => {
-            resetGame();
+            message: `You found the word: <strong>${targetPuzzle?.word}</strong> (${targetPuzzle?.translation}).`,
+            points: 10
         });
+        setShowResult(true);
     };
 
     const resetGame = () => {
@@ -261,7 +262,22 @@ const WordPuzzle: React.FC = () => {
     );
 
     return (
-        <div className="min-vh-100 bg-white py-4 d-flex flex-column align-items-center" style={{ background: 'url("data:image/svg+xml,%3Csvg width=\'20\' height=\'20\' viewBox=\'0 0 20 20\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cg fill=\'%23000000\' fill-opacity=\'0.02\' fill-rule=\'evenodd\'%3E%3Ccircle cx=\'3\' cy=\'3\' r=\'1\'/%3E%3C/g%3E%3C/svg%3E")' }}>
+        <div className="min-vh-100 py-4 d-flex flex-column align-items-center" style={{ 
+            backgroundColor: '#ffffff',
+            backgroundImage: 'url("data:image/svg+xml,%3Csvg width=\'20\' height=\'20\' viewBox=\'0 0 20 20\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cg fill=\'%23000000\' fill-opacity=\'0.02\' fill-rule=\'evenodd\'%3E%3Ccircle cx=\'3\' cy=\'3\' r=\'1\'/%3E%3C/g%3E%3C/svg%3E")' 
+        }}>
+            {/* RESULT MODAL */}
+            <GameResultModal
+                isOpen={showResult}
+                isSuccess={resultData.isSuccess}
+                title={resultData.title}
+                message={resultData.message}
+                points={resultData.points}
+                primaryActionText="PLAY AGAIN"
+                secondaryActionText="EXIT TO MENU"
+                onPrimaryAction={() => { setShowResult(false); resetGame(); }}
+                onSecondaryAction={() => { setShowResult(false); navigate('/mitambo'); }}
+            />
 
             {/* INTRO MODAL */}
             {showIntro && (

@@ -4,7 +4,7 @@
 
 import { db, auth } from './firebaseConfig';
 import type { Firestore } from 'firebase/firestore';
-import { collection, getDocs, doc, getDoc, setDoc, query, orderBy, limit, where, deleteDoc } from 'firebase/firestore';
+import { collection, getDocs, doc, getDoc, setDoc, query, orderBy, limit, where, deleteDoc, updateDoc, increment } from 'firebase/firestore';
 import { getCurrentWeekIdentifier } from './levelUtils';
 import { syncStreak } from './streakUtils';
 
@@ -183,6 +183,41 @@ export const refreshUserData = async (): Promise<any | null> => {
     if (!user) return null;
     invalidateCache(`user_${user.uid}`);
     return fetchUserData();
+};
+
+/**
+ * Centralized point awarding logic.
+ * Updates total points, weeklyXP, and lastActiveWeek.
+ */
+export const awardPoints = async (points: number): Promise<void> => {
+    const user = auth.currentUser;
+    if (!user || points <= 0) return;
+
+    try {
+        const userRef = doc(db as Firestore, "users", user.uid);
+        const userSnap = await getDoc(userRef);
+        if (!userSnap.exists()) return;
+
+        const userData = userSnap.data() as any;
+        const currentWeek = getCurrentWeekIdentifier();
+
+        const updateData: any = {
+            points: increment(points)
+        };
+
+        if (userData.lastActiveWeek !== currentWeek) {
+            updateData.weeklyXP = points;
+            updateData.lastActiveWeek = currentWeek;
+        } else {
+            updateData.weeklyXP = increment(points);
+        }
+
+        await updateDoc(userRef, updateData);
+        await refreshUserData();
+        invalidateCache('topLearners*');
+    } catch (e) {
+        console.error("awardPoints error:", e);
+    }
 };
 
 export const fetchTopLearners = async (count = 5): Promise<any[]> => {

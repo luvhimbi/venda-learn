@@ -18,11 +18,10 @@ import { updateStreak } from '../../services/streakUtils';
 import { popupService } from '../../services/popupService';
 import { HelpCircle, X, Bookmark, CheckCircle2, Volume2, Play, Flame, Zap, Users, Circle } from 'lucide-react';
 import { db, auth } from '../../services/firebaseConfig';
-import { doc, updateDoc, arrayUnion, increment } from 'firebase/firestore';
+import { doc, updateDoc, arrayUnion } from 'firebase/firestore';
 import { onAuthStateChanged } from 'firebase/auth';
-import { getCurrentWeekIdentifier } from "../../services/levelUtils.ts";
 import { type Difficulty } from "../../services/scoringUtils.ts";
-import { fetchLessons, fetchUserData, refreshUserData, invalidateCache, getMicroLessons } from '../../services/dataCache';
+import { fetchLessons, fetchUserData, refreshUserData, invalidateCache, getMicroLessons, awardPoints } from '../../services/dataCache';
 import Swal from 'sweetalert2';
 
 const MASCOT_CHEERS = [
@@ -121,10 +120,10 @@ const GameRoom: React.FC = () => {
                 const studyDuration = Math.floor((Date.now() - studyStartTime) / 1000) - totalDuration;
 
                 if (isFirstTime) {
-                    const currentWeek = getCurrentWeekIdentifier();
+                    // Using centralized awardPoints to handle weekly XP and total points
+                    await awardPoints(finalScore);
                     
                     const updateData: any = {
-                        points: increment(finalScore),
                         completedLessons: arrayUnion(mlId),
                         lastLessonId: null,
                         [`microLessonProgress.${mlId}`]: {
@@ -136,12 +135,6 @@ const GameRoom: React.FC = () => {
                         },
                     };
 
-                    if (currentData.lastActiveWeek !== currentWeek) {
-                        updateData.weeklyXP = finalScore;
-                        updateData.lastActiveWeek = currentWeek;
-                    } else {
-                        updateData.weeklyXP = increment(finalScore);
-                    }
                     const lessons = await fetchLessons();
                     const foundCourse = lessons.find((l: any) => l.id === lessonId);
                     if (foundCourse) {
@@ -449,18 +442,9 @@ const GameRoom: React.FC = () => {
                                 {/* Main Lesson Card */}
                                 <div className="brutalist-card p-4 p-md-5 w-100 position-relative shadow-action" style={{ overflow: 'hidden' }}>
                                     
-                                    {/* Mascot Tutoring */}
-                                    <div className="d-flex align-items-start gap-4 mb-5 mt-2">
-                                        <Mascot width="70px" height="70px" mood={mascotMood} />
-                                        <div className="bg-warning brutalist-card--sm p-3 rounded-4 position-relative shadow-action-sm" style={{ fontSize: '0.95rem', color: '#000' }}>
-                                            <div className="position-absolute border-start border-top border-dark border-3" style={{ width: 14, height: 14, backgroundColor: '#FACC15', top: 15, left: -9, transform: 'rotate(-45deg)' }}></div>
-                                            <strong className="fw-black uppercase ls-1 d-block mb-1">Tip:</strong> {currentSlide === 0 ? "Let's start with basic greetings!" : "You're doing great, keep going!"}
-                                        </div>
-                                    </div>
-
                                     {/* Section 1: Phrase Display */}
                                     <div className="text-center mb-5">
-                                        <h1 className="fw-black mb-1 text-dark ls-tight uppercase" style={{ fontSize: 'clamp(2rem, 8vw, 4rem)' }}>{slide.nativeWord}</h1>
+                                        <h1 className="fw-black mb-1 text-dark ls-tight uppercase" style={{ fontSize: 'clamp(2rem, 8vw, 4rem)' }}>{slide.nativeWord || slide.native || slide.word || slide.venda || slide.tshivenda}</h1>
                                         <h4 className="text-muted fw-black uppercase ls-1" style={{ fontSize: '1.25rem' }}>{slide.english}</h4>
                                     </div>
 
@@ -469,12 +453,12 @@ const GameRoom: React.FC = () => {
                                         <div className="d-flex flex-column align-items-center gap-4">
                                             <div className="d-flex align-items-center gap-4">
                                                 <button className="btn rounded-circle d-flex align-items-center justify-content-center shadow-action-light hover-scale" 
-                                                    onClick={() => speakNative(slide.nativeWord)}
+                                                    onClick={() => speakNative(slide.nativeWord || slide.native || slide.word || slide.venda || slide.tshivenda)}
                                                     style={{ width: 80, height: 80, backgroundColor: isPlayingAudio ? '#FACC15' : '#111827', border: '5px solid #000', transition: 'all 0.1s' }}>
                                                     <Play size={32} fill={isPlayingAudio ? '#000' : '#FFFFFF'} className={isPlayingAudio ? 'text-dark' : 'text-white'} />
                                                 </button>
                                                 <button className="btn bg-white brutalist-card--sm rounded-circle d-flex align-items-center justify-content-center hover-scale" 
-                                                    onClick={() => speakNative(slide.nativeWord)}
+                                                    onClick={() => speakNative(slide.nativeWord || slide.native || slide.word || slide.venda || slide.tshivenda)}
                                                     style={{ width: 50, height: 50 }}>
                                                     <span className="fw-black text-dark uppercase ls-1" style={{ fontSize: '11px' }}>0.5x</span>
                                                 </button>
@@ -630,7 +614,7 @@ const GameRoom: React.FC = () => {
                                     </div>
 
                                     <div className="mb-4">
-                                        <Mascot width="100px" height="100px" mood={mascotMood} />
+                                        <Mascot width="80px" height="80px" mood={mascotMood} />
                                     </div>
 
                                     <h2 className="fw-black text-dark mb-5 ls-tight uppercase" style={{ fontSize: 'clamp(1.5rem, 5vw, 2.5rem)' }}>{q.question}</h2>
