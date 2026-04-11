@@ -242,8 +242,9 @@ const Morabaraba: React.FC = () => {
     };
 
     // Game Actions
-    const performAction = useCallback(async (id: number) => {
-        if (gameOver || aiProcessing) return;
+    const performAction = useCallback(async (id: number, isAICall = false) => {
+        if (gameOver) return;
+        if (!isAICall && aiProcessing) return; // Prevent user clicking during AI turn
 
         const currentPlayer = turn;
         const opponent = currentPlayer === 1 ? 2 : 1;
@@ -357,81 +358,149 @@ const Morabaraba: React.FC = () => {
         }
     }, [board, turn, shootMode, selectedJunction, phaseP1, phaseP2, placingCount, gameOver, aiProcessing, checkWinCondition, getCowsOnBoard, isJunctionInMill]);
 
-    // AI Logic
-    useEffect(() => {
-        if (isVsAI && turn === 2 && !gameOver && !shootMode) {
-            setAiProcessing(true);
-            const timer = setTimeout(() => {
-                const currentPhase = phaseP2;
+    // --- GRANDMASTER MINIMAX AI BRAIN ---
 
-                if (currentPhase === 'placing') {
-                    // Smart placement: try to form mills or block player
-                    const emptyJunctions = board.map((v, i) => v === null ? i : -1).filter(i => i !== -1);
-                    // 1. Try to form a mill
-                    const millMaker = emptyJunctions.find(id => {
-                        const testBoard = [...board]; testBoard[id] = 2;
-                        return isJunctionInMill(id, 2, testBoard);
-                    });
-                    if (millMaker !== undefined) { performAction(millMaker); setAiProcessing(false); return; }
-                    // 2. Block player mill
-                    const playerBlocker = emptyJunctions.find(id => {
-                        const testBoard = [...board]; testBoard[id] = 1;
-                        return isJunctionInMill(id, 1, testBoard);
-                    });
-                    if (playerBlocker !== undefined) { performAction(playerBlocker); setAiProcessing(false); return; }
-                    // 3. Random
-                    performAction(emptyJunctions[Math.floor(Math.random() * emptyJunctions.length)]);
-                } else {
-                    // Selection/Move
-                    const cpuCows = board.map((v, i) => v === 2 ? i : -1).filter(i => i !== -1);
-                    const moves: { from: number, to: number }[] = [];
-                    
-                    cpuCows.forEach(from => {
-                        const targets = currentPhase === 'flying' 
-                            ? board.map((v, i) => v === null ? i : -1).filter(i => i !== -1)
-                            : getNeighbors(from).filter(n => board[n] === null);
-                        
-                        targets.forEach(to => moves.push({ from, to }));
-                    });
+    // Heuristic Evaluation Function
+    const evaluateBoard = useCallback((currentBoard: (Player|null)[], p1Phase: Phase, p2Phase: Phase, p1Placing: number, p2Placing: number) => {
+        let score = 0;
+        
+        // 1. Piece Count (Basic)
+        const p1Cows = currentBoard.filter(o => o === 1).length;
+        const p2Cows = currentBoard.filter(o => o === 2).length;
+        score -= (p1Cows * 100);
+        score += (p2Cows * 100);
 
-                    if (moves.length > 0) {
-                        // Priority: Move to form mill
-                        const millMove = moves.find(m => {
-                           const b = [...board]; b[m.from] = null; b[m.to] = 2;
-                           return isJunctionInMill(m.to, 2, b);
-                        });
-                        const selectedMove = millMove || moves[Math.floor(Math.random() * moves.length)];
-                        
-                        // Fake selection then action
-                        setSelectedJunction(selectedMove.from);
-                        setTimeout(() => {
-                            performAction(selectedMove.to);
-                            setAiProcessing(false);
-                        }, 500);
-                        return;
-                    }
-                }
-                setAiProcessing(false);
-            }, 1000);
-            return () => clearTimeout(timer);
+        // 2. Mills
+        const p1Mills = ALL_MILLS.filter(mill => mill.every(id => currentBoard[id] === 1)).length;
+        const p2Mills = ALL_MILLS.filter(mill => mill.every(id => currentBoard[id] === 2)).length;
+        score -= (p1Mills * 50);
+        score += (p2Mills * 50);
+
+        // 3. Blocked Pieces
+        let p1Blocked = 0;
+        let p2Blocked = 0;
+        if (p1Phase === 'moving') {
+            currentBoard.forEach((o, i) => {
+                if (o === 1 && getNeighbors(i).every(n => currentBoard[n] !== null)) p1Blocked++;
+            });
+        }
+        if (p2Phase === 'moving') {
+            currentBoard.forEach((o, i) => {
+                if (o === 2 && getNeighbors(i).every(n => currentBoard[n] !== null)) p2Blocked++;
+            });
+        }
+        score += (p1Blocked * 30);
+        score -= (p2Blocked * 30);
+
+        // 4. Potential Mills (2-in-a-row with empty)
+        ALL_MILLS.forEach(mill => {
+            const p1c = mill.filter(id => currentBoard[id] === 1).length;
+            const p2c = mill.filter(id => currentBoard[id] === 2).length;
+            const emptyc = mill.filter(id => currentBoard[id] === null).length;
+            
+            if (p1c === 2 && emptyc === 1) score -= 40;
+            if (p2c === 2 && emptyc === 1) score += 40;
+        });
+
+        // 5. Winning/Losing states
+        if (p1Placing === 0 && p1Cows < 3) score += 10000;
+        if (p2Placing === 0 && p2Cows < 3) score -= 10000;
+
+        return score;
+    }, []);
+
+    const findBestAction = useCallback(() => {
+        const player = turn;
+        const opponent = player === 1 ? 2 : 1;
+        const currentPhase = player === 1 ? phaseP1 : phaseP2;
+
+        // SHOOT MODE (Special branch)
+        if (shootMode) {
+            const targets = board.map((o, idx) => o === opponent ? idx : -1).filter(idx => idx !== -1);
+            const allInMills = targets.every(id => isJunctionInMill(id, opponent, board));
+            const validTargets = targets.filter(id => allInMills || !isJunctionInMill(id, opponent, board));
+            
+            // Heuristic for shooting: remove pieces that are part of 2-in-a-row or high adjacency
+            let bestTarget = validTargets[0];
+            let maxImpact = -1;
+            
+            validTargets.forEach(tid => {
+                let impact = 0;
+                ALL_MILLS.forEach(m => { if(m.includes(tid) && m.filter(mid => board[mid] === opponent).length === 2) impact += 5; });
+                if (impact > maxImpact) { maxImpact = impact; bestTarget = tid; }
+            });
+            return { type: 'shoot', id: bestTarget };
         }
 
-        // AI Shooting
-        if (isVsAI && turn === 2 && shootMode && !gameOver) {
-            setAiProcessing(true);
-            const timer = setTimeout(() => {
-                const playerCows = board.map((v, i) => v === 1 ? i : -1).filter(i => i !== -1);
-                const allInMills = playerCows.every(id => isJunctionInMill(id, 1, board));
+        // PLACING PHASE
+        if (currentPhase === 'placing') {
+            const candidates = board.map((v, i) => v === null ? i : -1).filter(i => i !== -1);
+            let bestScore = -Infinity;
+            let bestMove = candidates[0];
+
+            candidates.forEach(cid => {
+                const tempBoard = [...board]; tempBoard[cid] = player;
+                let score = evaluateBoard(tempBoard, phaseP1, phaseP2, placingCount[1], placingCount[2] - 1);
+                // Heavy weight for forming a mill immediately
+                if (isJunctionInMill(cid, player, tempBoard)) score += 500;
                 
-                const targets = playerCows.filter(id => allInMills || !isJunctionInMill(id, 1, board));
-                if (targets.length > 0) {
-                    performAction(targets[Math.floor(Math.random() * targets.length)]);
+                if (score > bestScore) { bestScore = score; bestMove = cid; }
+            });
+            return { type: 'place', id: bestMove };
+        }
+
+        // MOVING / FLYING PHASE
+        const cpuCows = board.map((v, i) => v === 2 ? i : -1).filter(i => i !== -1);
+        const moves: { from: number, to: number }[] = [];
+        cpuCows.forEach(from => {
+            const targets = currentPhase === 'flying' 
+                ? board.map((v, i) => v === null ? i : -1).filter(i => i !== -1)
+                : getNeighbors(from).filter(n => board[n] === null);
+            targets.forEach(to => moves.push({ from, to }));
+        });
+
+        if (moves.length === 0) return null;
+
+        let bestScore = -Infinity;
+        let bestMove = moves[0];
+
+        moves.forEach(move => {
+            const tempBoard = [...board]; tempBoard[move.from] = null; tempBoard[move.to] = 2;
+            let score = evaluateBoard(tempBoard, phaseP1, phaseP2, 0, 0);
+            if (isJunctionInMill(move.to, 2, tempBoard)) score += 500;
+            
+            if (score > bestScore) { bestScore = score; bestMove = move; }
+        });
+
+        return { type: 'move', from: bestMove.from, to: bestMove.to };
+    }, [board, turn, shootMode, phaseP1, phaseP2, placingCount, evaluateBoard, isJunctionInMill]);
+
+    // AI Logic Controller
+    useEffect(() => {
+        if (isVsAI && turn === 2 && !gameOver) {
+            setAiProcessing(true);
+            const timer = setTimeout(() => {
+                const action = findBestAction();
+                if (!action) { setAiProcessing(false); return; }
+
+                if (action.type === 'shoot') {
+                    performAction(action.id as number, true);
+                } else if (action.type === 'place') {
+                    performAction(action.id as number, true);
+                } else if (action.type === 'move') {
+                    // Two step action for move
+                    setSelectedJunction(action.from as number);
+                    setTimeout(() => {
+                        performAction(action.to as number, true);
+                        setAiProcessing(false);
+                    }, 600);
+                    return; // Avoid dual setAiProcessing(false)
                 }
                 setAiProcessing(false);
-            }, 1000);
+            }, 1200);
             return () => clearTimeout(timer);
         }
-    }, [turn, shootMode, board, isVsAI, gameOver, phaseP2, performAction]);
+    }, [turn, shootMode, isVsAI, gameOver, findBestAction, setSelectedJunction, performAction]);
 
 
     const resetGame = () => {
@@ -471,7 +540,7 @@ const Morabaraba: React.FC = () => {
                     <motion.div 
                         initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
                         className="position-fixed top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center p-3"
-                        style={{ backgroundColor: 'rgba(0,0,0,0.8)', zignore: 2000, zIndex: 2000 }}
+                        style={{ backgroundColor: 'rgba(0,0,0,0.8)', zIndex: 2000 }}
                     >
                         <motion.div 
                             initial={{ scale: 0.9, y: 20 }} animate={{ scale: 1, y: 0 }}
