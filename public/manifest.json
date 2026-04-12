@@ -1,6 +1,6 @@
 {
-  "short_name": "LanguageLearn SA",
-  "name": "LanguageLearn | Learn South African Languages",
+  "short_name": "Chommie",
+  "name": "Chommie",
   "description": "A platform for people who want to learn South African languages through interactive lessons, stories, and games.",
   "icons": [
     {
@@ -43,39 +43,32 @@
   "gcm_sender_id": "931595838430",
   "shortcuts": [
     {
-      "name": "Home",
-      "short_name": "Home",
-      "description": "Go to the Home Screen",
-      "url": "/",
-      "icons": [{ "src": "/images/ven.png", "sizes": "192x192" }]
-    },
-    {
       "name": "Lessons",
       "short_name": "Lessons",
       "description": "Continue your learning journey",
       "url": "/courses",
-      "icons": [{ "src": "/images/ven.png", "sizes": "192x192" }]
+      "icons": [{ "src": "/images/ven.png", "sizes": "192x192", "type": "image/png" }]
     },
     {
       "name": "Games",
       "short_name": "Games",
       "description": "Play educational games",
       "url": "/mitambo",
-      "icons": [{ "src": "/images/ven.png", "sizes": "192x192" }]
+      "icons": [{ "src": "/images/ven.png", "sizes": "192x192", "type": "image/png" }]
     },
     {
       "name": "Leaderboard",
       "short_name": "Leaderboard",
       "description": "Check the rankings",
       "url": "/muvhigo",
-      "icons": [{ "src": "/images/ven.png", "sizes": "192x192" }]
+      "icons": [{ "src": "/images/ven.png", "sizes": "192x192", "type": "image/png" }]
     },
     {
       "name": "Profile",
       "short_name": "Profile",
       "description": "View your achievements",
       "url": "/profile",
-      "icons": [{ "src": "/images/ven.png", "sizes": "192x192" }]
+      "icons": [{ "src": "/images/ven.png", "sizes": "192x192", "type": "image/png" }]
     }
   ]
 }
