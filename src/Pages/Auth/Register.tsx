@@ -133,30 +133,30 @@ const Register: React.FC = () => {
     }
 
     return (
-        <div className="min-vh-100 d-flex align-items-center justify-content-center bg-white px-3 py-5 font-auth">
-            <div className="w-100" style={{ maxWidth: '440px' }}>
+        <div className="min-vh-100 d-flex align-items-center justify-content-center bg-theme-base px-3 py-5 font-auth">
+            <div className="w-100 text-theme-main" style={{ maxWidth: '440px' }}>
 
                 <div className="text-center mb-5 mt-4">
                     <div className="d-flex align-items-center justify-content-center position-relative">
                         {step > 1 && (
                             <button
-                                className="btn p-0 position-absolute start-0 text-dark border-0 shadow-none"
+                                className="btn p-0 position-absolute start-0 text-theme-main border-0 shadow-none"
                                 onClick={() => setStep(step - 1)}
                             >
                                 <ArrowLeft size={24} />
                             </button>
                         )}
-                        <h2 className="display-6 fw-black text-uppercase ls-tight text-dark mb-0">
+                        <h2 className="display-6 fw-black text-uppercase ls-tight text-theme-main mb-0">
                             {step === 2 && formData.username ? `Hi ${formData.username}!` : 'Join the Crew'}
                         </h2>
                     </div>
-                    <p className="fw-bold text-muted mt-2 mb-0 small text-uppercase">
+                    <p className="fw-bold text-theme-muted mt-2 mb-0 small text-uppercase">
                         {step === 2 ? "Now, let's get your email address" : `Step ${step} of 3: ${step === 1 ? 'Profile' : step === 2 ? 'Account' : 'Security'}`}
                     </p>
                 </div>
 
                 {error && (
-                    <div className="border border-4 border-dark p-3 mb-4 text-center fw-black text-uppercase shadow-action-sm"
+                    <div className="border border-4 border-theme-main p-3 mb-4 text-center fw-black text-uppercase shadow-action-sm"
                          style={{ backgroundColor: '#FFD1D1', color: '#000', fontSize: '12px' }}>
                         {error}
                     </div>
@@ -188,7 +188,7 @@ const Register: React.FC = () => {
                                 <label className="form-label smallest fw-black text-uppercase ls-1">Create Password</label>
                                 <div className="custom-input-group custom-input-group--brutalist position-relative d-flex align-items-center">
                                     <input name="password" type={showPassword ? "text" : "password"} className="fw-bold" placeholder="••••••••" value={formData.password} onChange={handleChange} required autoFocus disabled={loading} />
-                                    <button type="button" className="btn border-0 p-0 text-dark me-3 position-absolute end-0" onClick={() => setShowPassword(!showPassword)} tabIndex={-1}>
+                                    <button type="button" className="btn border-0 p-0 text-theme-main me-3 position-absolute end-0" onClick={() => setShowPassword(!showPassword)} tabIndex={-1}>
                                         {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
                                     </button>
                                 </div>
@@ -197,7 +197,7 @@ const Register: React.FC = () => {
                                 <label className="form-label smallest fw-black text-uppercase ls-1">Confirm Password</label>
                                 <div className="custom-input-group custom-input-group--brutalist position-relative d-flex align-items-center">
                                     <input name="confirmPassword" type={showConfirmPassword ? "text" : "password"} className="fw-bold" placeholder="••••••••" value={formData.confirmPassword} onChange={handleChange} required disabled={loading} />
-                                    <button type="button" className="btn border-0 p-0 text-dark me-3 position-absolute end-0" onClick={() => setShowConfirmPassword(!showConfirmPassword)} tabIndex={-1}>
+                                    <button type="button" className="btn border-0 p-0 text-theme-main me-3 position-absolute end-0" onClick={() => setShowConfirmPassword(!showConfirmPassword)} tabIndex={-1}>
                                         {showConfirmPassword ? <EyeOff size={20} /> : <Eye size={20} />}
                                     </button>
                                 </div>
@@ -207,7 +207,7 @@ const Register: React.FC = () => {
 
                     <button
                         type="submit"
-                        className="btn w-100 fw-black py-3 mb-4 text-dark border border-4 border-dark rounded-0 shadow-action text-uppercase ls-1 hover-press"
+                        className="btn w-100 fw-black py-3 mb-4 text-dark border border-4 border-theme-main rounded-0 shadow-action text-uppercase ls-1 hover-press"
                         style={{ backgroundColor: 'var(--venda-yellow)' }}
                         disabled={loading}
                     >
@@ -218,14 +218,14 @@ const Register: React.FC = () => {
                 {step === 1 && (
                     <>
                         <div className="d-flex align-items-center my-4">
-                            <div className="flex-grow-1 border-top border-4 border-dark"></div>
-                            <span className="mx-3 text-dark smallest fw-black text-uppercase ls-1">OR</span>
-                            <div className="flex-grow-1 border-top border-4 border-dark"></div>
+                            <div className="flex-grow-1 border-top border-4 border-theme-main"></div>
+                            <span className="mx-3 text-theme-main smallest fw-black text-uppercase ls-1">OR</span>
+                            <div className="flex-grow-1 border-top border-4 border-theme-main"></div>
                         </div>
 
                         <button
                             onClick={handleGoogleSignIn}
-                            className="btn w-100 fw-black py-3 bg-white border border-4 border-dark rounded-0 shadow-action d-flex align-items-center justify-content-center text-uppercase smallest ls-1 hover-press text-dark mb-4"
+                            className="btn w-100 fw-black py-3 bg-theme-surface border border-4 border-theme-main rounded-0 shadow-action d-flex align-items-center justify-content-center text-uppercase smallest ls-1 hover-press text-theme-main mb-4"
                             disabled={loading}
                         >
                             <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google" className="me-2" style={{ width: '20px' }} />
@@ -235,8 +235,8 @@ const Register: React.FC = () => {
                 )}
 
                 <div className="text-center mt-4">
-                    <p className="fw-bold smallest text-uppercase text-dark">
-                        Got an account? <Link to="/login" className="fw-black text-decoration-underline text-dark">Log In</Link>
+                    <p className="fw-bold smallest text-uppercase text-theme-main">
+                        Got an account? <Link to="/login" className="fw-black text-decoration-underline text-theme-main">Log In</Link>
                     </p>
                 </div>
             </div>

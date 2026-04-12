@@ -16,48 +16,56 @@
    2. CSS VARIABLES (Design Tokens)
    ============================================ */
 :root {
-  /* Core Palette */
+  /* Core Palette (Consistent across themes) */
   --game-amber: #f59e0b;
   --game-amber-dark: #d97706;
   --game-amber-light: #fbbf24;
-
-  /* Venda Yellow (auth pages / public pages) */
   --venda-yellow: #FACC15;
   --venda-yellow-dark: #EAB308;
-  --venda-yellow-darker: #000000; /* Re-mapped for Brutalist shadows */
-
-  /* Traditional Palette (Munwenda) */
   --venda-green: #15803D;
   --venda-red: #DC2626;
   --venda-blue: #1E3A8A;
 
-  /* Neutrals - Dark Mode (Dashboard) */
-  --game-bg: #0f172a;
-  --game-surface: #1e293b;
-  --game-text: #ffffff;
-  --game-text-dark: #111827;
-
-  /* Neutrals - Light Mode (Public/Auth) */
-  --light-bg: white;
-  --light-surface: #FFFFFF;
-  --light-border: #E5E7EB;
-  --light-border-strong: #000000;
-  --light-text: #1a1a1a;
-  --light-text-muted: #64748B;
-  --light-text-secondary: #4B5563;
+  /* Theme-Specific Semantic Variables - LIGHT (DEFAULT) */
+  --color-bg: #FFFFFF;
+  --color-surface: #FFFFFF;
+  --color-surface-soft: #F9FAFB;
+  --color-text: #1a1a1a;
+  --color-text-muted: #64748B;
+  --color-text-inv: #FFFFFF;
+  --color-border: #000000;
+  --color-border-soft: #E5E7EB;
+  --color-shadow: #000000;
+  --color-card-bg: #FFFFFF;
 
   /* Typography & Shape */
   --game-font: 'TT Octosquares', 'Poppins', sans-serif;
   --auth-font: 'Lexend', sans-serif;
   --game-radius: 12px;
-  --game-radius-soft: 50px; /* Pill shape for "Join Free" style */
+  --game-radius-soft: 50px;
   --game-shadow-depth: 6px;
 
   /* Shadow Tokens */
-  --shadow-brutalist: 10px 10px 0px 0px #000;
-  --shadow-brutalist-sm: 4px 4px 0px 0px #000;
-  --shadow-brutalist-light: 10px 10px 0px 0px #FACC15;
-  --shadow-soft: 0 6px 0 #000;
+  --shadow-brutalist: 10px 10px 0px 0px var(--color-shadow);
+  --shadow-brutalist-lg: 15px 15px 0px 0px var(--color-shadow);
+  --shadow-brutalist-sm: 4px 4px 0px 0px var(--color-shadow);
+  --shadow-brutalist-light: 10px 10px 0px 0px var(--venda-yellow);
+  --shadow-soft: 0 6px 0 var(--color-shadow);
+}
+
+/* Theme-Specific Semantic Variables - DARK */
+[data-theme='dark'],
+.dark-theme {
+  --color-bg: #0f172a;
+  --color-surface: #1e293b;
+  --color-surface-soft: #334155;
+  --color-text: #f8fafc;
+  --color-text-muted: #94a3b8;
+  --color-text-inv: #0f172a;
+  --color-border: #ffffff;
+  --color-border-soft: #334155;
+  --color-shadow: #000000;
+  --color-card-bg: #1e293b;
 }
 
 /* ============================================
@@ -117,28 +125,49 @@
 body {
   font-family: var(--game-font);
   font-size: 14px;
-  background-color: var(--game-bg);
-  color: var(--game-text);
+  background-color: var(--color-bg);
+  color: var(--color-text);
   line-height: 1.5;
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 h1,
 h2,
 h3 {
-  font-weight: 900; /* Increased for the screenshot look */
+  font-weight: 900;
   text-transform: uppercase;
   letter-spacing: -1px;
+  color: var(--color-text);
 }
 
 h1 { font-size: 2.25rem; }
 h2 { font-size: 1.75rem; }
 h3 { font-size: 1.5rem; }
 
+/* Theme Utility Classes */
+.bg-theme-base { background-color: var(--color-bg) !important; }
+.bg-theme-surface { background-color: var(--color-surface) !important; }
+.bg-theme-card { background-color: var(--color-card-bg) !important; }
+.text-theme-main { color: var(--color-text) !important; }
+.text-theme-muted { color: var(--color-text-muted) !important; }
+.text-theme-inv { color: var(--color-text-inv) !important; }
+.border-theme-main { border-color: var(--color-border) !important; }
+.border-theme-soft { border-color: var(--color-border-soft) !important; }
+
+/* Theme Accent Utilities */
+.bg-theme-accent { background-color: var(--venda-yellow) !important; }
+.text-theme-accent { color: var(--venda-yellow) !important; }
+.fill-theme-accent { fill: var(--venda-yellow) !important; }
+
 /* ============================================
    6. SHADOW SYSTEM
    ============================================ */
 .shadow-action {
   box-shadow: var(--shadow-brutalist);
+}
+
+.shadow-action-lg {
+  box-shadow: var(--shadow-brutalist-lg);
 }
 
 .shadow-action-sm {
@@ -150,8 +179,8 @@ h3 { font-size: 1.5rem; }
 }
 
 .brutalist-card {
-  background-color: #fff;
-  border: 4px solid #000;
+  background-color: var(--color-card-bg);
+  border: 4px solid var(--color-border);
   box-shadow: var(--shadow-brutalist);
   border-radius: 12px;
   overflow: hidden;
@@ -159,8 +188,8 @@ h3 { font-size: 1.5rem; }
 }
 
 .brutalist-card--sm {
-  background-color: #fff;
-  border: 3px solid #000;
+  background-color: var(--color-card-bg);
+  border: 3px solid var(--color-border);
   box-shadow: var(--shadow-brutalist-sm);
   border-radius: 12px;
   overflow: hidden;
@@ -179,27 +208,29 @@ h3 { font-size: 1.5rem; }
 }
 
 .custom-input-group--brutalist {
-  border: 4px solid #000;
-  background-color: #fff;
+  border: 4px solid var(--color-border);
+  background-color: var(--color-card-bg);
   transition: 0.1s;
   border-radius: 12px;
 }
 
 .custom-input-group--brutalist:focus-within {
   transform: translate(-4px, -4px);
-  box-shadow: 8px 8px 0px 0px #000;
+  box-shadow: 8px 8px 0px 0px var(--color-border);
 }
 
 .custom-input-group--brutalist input {
   padding: 1rem !important;
   font-size: 14px;
   font-weight: 700;
+  background-color: transparent;
+  color: var(--color-text);
 }
 
 .custom-input-group--soft {
-  border: 3px solid #000; /* Hardened for consistency */
+  border: 3px solid var(--color-border);
   border-radius: var(--game-radius-soft);
-  background-color: #F9FAFB;
+  background-color: var(--color-surface-soft);
   transition: 0.2s;
   overflow: hidden;
   display: flex;
@@ -215,7 +246,7 @@ h3 { font-size: 1.5rem; }
   font-family: var(--game-font);
   font-weight: 900;
   text-transform: uppercase;
-  border: 4px solid #000;
+  border: 4px solid var(--color-border);
   border-radius: 12px;
   padding: 0.6rem 1.4rem;
   transition: all 0.1s ease;
@@ -223,15 +254,15 @@ h3 { font-size: 1.5rem; }
   align-items: center;
   justify-content: center;
   gap: 8px;
-  color: #000 !important;
-  background-color: #fff;
+  color: var(--color-text) !important;
+  background-color: var(--color-card-bg);
 }
 
 .btn-game:hover {
-  background-color: #f8fafc;
-  color: #000 !important;
+  background-color: var(--color-surface-soft);
+  color: var(--color-text) !important;
   transform: translate(-2px, -2px);
-  box-shadow: 4px 4px 0px #000;
+  box-shadow: 4px 4px 0px var(--color-border);
 }
 
 .btn-game:active {
@@ -239,23 +270,37 @@ h3 { font-size: 1.5rem; }
   box-shadow: 0 0 0 transparent;
 }
 
-/* Matching the 'START QUEST' black button with total black look */
 .btn-game-primary {
-  background-color: #000 !important;
-  color: #fff !important;
-  box-shadow: 8px 8px 0px #000;
+  background-color: var(--color-border) !important;
+  color: var(--color-text-inv) !important;
+  box-shadow: 8px 8px 0px var(--color-border);
+}
+
+[data-theme='dark'] .btn-game-primary,
+.dark-theme .btn-game-primary {
+  background-color: var(--venda-yellow) !important;
+  color: #000 !important;
+  border-color: #000 !important;
+  box-shadow: 4px 4px 0px var(--color-border);
 }
 
 .btn-game-primary:hover {
-  background-color: #000 !important;
-  color: #fff !important;
+  background-color: var(--color-border) !important;
+  color: var(--color-text-inv) !important;
   transform: translate(-4px, -4px);
-  box-shadow: 12px 12px 0px #000;
+  box-shadow: 12px 12px 0px var(--color-border);
+}
+
+[data-theme='dark'] .btn-game-primary:hover,
+.dark-theme .btn-game-primary:hover {
+  background-color: var(--game-amber-light) !important;
+  color: #000 !important;
+  box-shadow: 8px 8px 0px var(--color-border);
 }
 
 .btn-game-primary:active {
-  background-color: #000 !important;
-  color: #fff !important;
+  background-color: var(--color-border) !important;
+  color: var(--color-text-inv) !important;
   transform: translate(6px, 6px);
   box-shadow: 0 0 0 transparent;
 }
@@ -264,9 +309,9 @@ h3 { font-size: 1.5rem; }
 .game-btn-primary {
   background-color: var(--venda-yellow) !important;
   color: #000 !important;
-  border: 4px solid #000 !important;
+  border: 4px solid var(--color-border) !important;
   border-radius: var(--game-radius-soft) !important;
-  box-shadow: 0 6px 0 #000 !important;
+  box-shadow: 0 6px 0 var(--color-border) !important;
   transition: all 0.1s;
   font-weight: 900 !important;
   text-transform: uppercase;
@@ -286,26 +331,82 @@ h3 { font-size: 1.5rem; }
   color: #000 !important;
 }
 
+/* --- Game Warning Variant (Amber Background) --- */
+.btn-game-warning {
+  background-color: var(--venda-yellow) !important;
+  color: #000 !important;
+  border-color: var(--color-border) !important;
+}
+
+.btn-game-warning:hover {
+  background-color: var(--game-amber-light) !important;
+  color: #000 !important;
+  transform: translate(-4px, -4px);
+  box-shadow: 8px 8px 0px var(--color-border);
+}
+
+.btn-game-warning:active {
+  transform: translate(2px, 2px);
+  box-shadow: 0 0 0 transparent;
+}
+
 /* --- Game White Variant --- */
 .btn-game-white {
-  background-color: #fff !important;
-  color: #000 !important;
+  background-color: var(--color-bg) !important;
+  color: var(--color-text) !important;
+  border: 4px solid var(--color-border) !important;
+}
+
+[data-theme='dark'] .btn-game-white,
+.dark-theme .btn-game-white {
+  background-color: var(--color-surface) !important;
+  border-color: var(--color-border) !important;
 }
 
 .btn-game-white:hover {
-  background-color: #f8fafc !important;
-  color: #000 !important;
+  background-color: var(--color-surface-soft) !important;
+  color: var(--color-text) !important;
+  transform: translate(-2px, -2px);
+  box-shadow: 4px 4px 0px var(--color-border);
 }
 
-/* --- Game Dark Variant --- */
+/* --- Theme Support Utilities --- */
+.btn-theme-main {
+  background-color: var(--color-border) !important;
+  color: var(--color-text-inv) !important;
+  border: 4px solid var(--color-border) !important;
+}
+
+.btn-theme-main:hover {
+  background-color: var(--color-border) !important;
+  opacity: 0.9;
+  transform: translate(-2px, -2px);
+  box-shadow: 4px 4px 0px var(--color-border);
+}
+
+.btn-outline-theme {
+  background-color: transparent !important;
+  color: var(--color-text) !important;
+  border: 3px solid var(--color-border) !important;
+}
+
+.btn-outline-theme:hover {
+  background-color: var(--color-border) !important;
+  color: var(--color-text-inv) !important;
+}
+
+/* --- Game Dark Variant (Forces Dark Look) --- */
 .btn-game-dark {
   background-color: #111827 !important;
   color: #fff !important;
+  border: 4px solid #fff !important;
 }
 
 .btn-game-dark:hover {
   background-color: #000 !important;
   color: #fff !important;
+  transform: translate(-2px, -2px);
+  box-shadow: 4px 4px 0px #fff;
 }
 
 /* ============================================
@@ -314,17 +415,17 @@ h3 { font-size: 1.5rem; }
 
 .hover-press {
   transition: transform 0.1s ease, box-shadow 0.1s ease;
-  border: 4px solid #000 !important;
+  border: 4px solid var(--color-border) !important;
 }
 
 .hover-press:hover {
   transform: translate(-4px, -4px);
-  box-shadow: 10px 10px 0px 0px #000;
+  box-shadow: 10px 10px 0px 0px var(--color-border);
 }
 
 .hover-press:active {
   transform: translate(2px, 2px);
-  box-shadow: 0px 0px 0px 0px #000;
+  box-shadow: 0px 0px 0px 0px transparent;
 }
 
 /* ============================================
@@ -333,8 +434,10 @@ h3 { font-size: 1.5rem; }
 .swal2-popup {
   font-family: var(--game-font) !important;
   border-radius: 30px !important;
-  border: 4px solid #000 !important;
-  box-shadow: 15px 15px 0px rgba(0,0,0,0.1) !important;
+  border: 4px solid var(--color-border) !important;
+  background-color: var(--color-bg) !important;
+  color: var(--color-text) !important;
+  box-shadow: 15px 15px 0px var(--color-shadow) !important;
 }
 
 .swal2-confirm {
@@ -342,9 +445,9 @@ h3 { font-size: 1.5rem; }
   color: #000 !important;
   font-weight: 900 !important;
   text-transform: uppercase !important;
-  border: 3px solid #000 !important;
+  border: 3px solid var(--color-border) !important;
   border-radius: 12px !important;
-  box-shadow: 0 5px 0 #000 !important;
+  box-shadow: 0 5px 0 var(--color-border) !important;
 }
 
 /* Remaining keyframes and overrides kept intact... */
@@ -479,8 +582,8 @@ h3 { font-size: 1.5rem; }
    13. ACCORDION (Landing Page FAQ)
    ============================================ */
 .accordion-button:not(.collapsed) {
-  background-color: #f8fafc;
-  color: #000;
+  background-color: var(--color-surface-soft);
+  color: var(--color-text);
 }
 
 .accordion-button::after {
@@ -503,7 +606,7 @@ h3 { font-size: 1.5rem; }
   }
 
   .shadow-action {
-    box-shadow: 6px 6px 0px 0px #000;
+    box-shadow: 6px 6px 0px 0px var(--color-border);
   }
 
   .smallest-print {
@@ -523,4 +626,83 @@ h3 { font-size: 1.5rem; }
   h2 {
     font-size: 1.25rem !important;
   }
+}
+
+/* ============================================
+   15. GLOBAL THEME FIXES & OVERRIDES
+   ============================================ */
+
+/* Force theme colors on common utility classes when in dark mode */
+[data-theme='dark'], .dark-theme {
+  --color-shadow: #000000;
+}
+
+[data-theme='dark'] .text-dark,
+.dark-theme .text-dark,
+[data-theme='dark'] .text-black,
+.dark-theme .text-black {
+  color: var(--color-text) !important;
+}
+
+[data-theme='dark'] .text-muted,
+.dark-theme .text-muted,
+[data-theme='dark'] .text-secondary,
+.dark-theme .text-secondary {
+  color: var(--color-text-muted) !important;
+}
+
+[data-theme='dark'] .bg-white,
+.dark-theme .bg-white,
+[data-theme='dark'] .bg-light,
+.dark-theme .bg-light {
+  background-color: var(--color-surface) !important;
+  color: var(--color-text) !important;
+}
+
+[data-theme='dark'] .border-dark,
+.dark-theme .border-dark {
+  border-color: var(--color-border) !important;
+}
+
+/* Fix for disappearing text on hover issues across all buttons */
+.btn-game:hover, .btn-game-white:hover, .btn-game-primary:hover, .game-btn-primary:hover, .btn-game-warning:hover {
+  transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+/* Safety for any generic button or clickable element */
+[data-theme='dark'] a:hover,
+[data-theme='dark'] button:hover:not(.btn-game-primary):not(.game-btn-primary):not(.btn-game-warning) {
+    color: var(--venda-yellow) !important;
+}
+
+/* Specifically fix the streaks and profile cards high contrast issues */
+[data-theme='dark'] .brutalist-card,
+[data-theme='dark'] .brutalist-card--sm {
+  background-color: var(--color-card-bg) !important;
+  border-color: var(--color-border) !important;
+}
+
+/* Ensure icons inherit theme colors */
+[data-theme='dark'] .lucide,
+.dark-theme .lucide {
+  stroke: currentColor;
+}
+
+/* Fix for buttons that might flip background to white but keep light text */
+[data-theme='dark'] .btn-game-white:hover {
+  background-color: var(--color-surface-soft) !important;
+  color: var(--color-text) !important;
+}
+
+[data-theme='dark'] .btn:hover {
+    box-shadow: 4px 4px 0px var(--color-shadow);
+}
+
+/* Fix transparent logo in dark mode */
+[data-theme='dark'] img[src*="Logo.png"],
+.dark-theme img[src*="Logo.png"] {
+    background-color: var(--color-surface-soft);
+    padding: 6px 12px;
+    border-radius: 8px;
+    border: 2px solid var(--color-border);
 }

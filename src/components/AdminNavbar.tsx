@@ -4,18 +4,16 @@ import { onAuthStateChanged, signOut, type User } from 'firebase/auth';
 import { auth } from '../services/firebaseConfig';
 import { invalidateCache } from '../services/dataCache';
 import { popupService } from '../services/popupService';
-import { Menu, LogOut, Database, ClipboardList } from 'lucide-react';
+import { Menu, LogOut, ClipboardList } from 'lucide-react';
 
 
-import { seedSyllables } from '../services/seedSyllables';
-import { seedSentences } from '../services/seedSentences';
-import { seedPicturePuzzles } from '../services/seedPicturePuzzles';
 
 const AdminNavbar: React.FC = () => {
     const [user, setUser] = useState<User | null>(null);
     const navigate = useNavigate();
     const location = useLocation();
 
+    /*
     const handleSeedGames = async () => {
         const confirm = await popupService.confirm('Seed Games?', 'Vha khou ṱoḓa u vusulusa data ya mitambo?');
         if (confirm.isConfirmed) {
@@ -26,6 +24,7 @@ const AdminNavbar: React.FC = () => {
             popupService.innerSuccess('Success', 'Game data seeded!');
         }
     };
+    */
 
     useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
@@ -93,26 +92,23 @@ const AdminNavbar: React.FC = () => {
                                 User Records
                             </Link>
                         </li>
-                        <li className="nav-item w-100 w-lg-auto text-center">
-                            <Link className={`nav-link nav-custom-link ${isActive('/admin/daily-words') ? 'active-link' : ''}`} to="/admin/daily-words">
-                                Daily Words
-                            </Link>
-                        </li>
+
                         <li className="nav-item w-100 w-lg-auto text-center">
                             <Link className={`nav-link nav-custom-link ${isActive('/admin/languages') ? 'active-link' : ''}`} to="/admin/languages">
                                 Languages
                             </Link>
                         </li>
+
                         <li className="nav-item w-100 w-lg-auto text-center">
-                            <Link className={`nav-link nav-custom-link ${isActive('/admin/history') ? 'active-link' : ''}`} to="/admin/history">
-                                History
+                            <Link className={`nav-link nav-custom-link ${isActive('/admin/game-content') ? 'active-link' : ''}`} to="/admin/game-content">
+                                Game Content
                             </Link>
                         </li>
-                        <li className="nav-item w-100 w-lg-auto text-center">
+                        {/* <li className="nav-item w-100 w-lg-auto text-center">
                             <button onClick={handleSeedGames} className="btn nav-link nav-custom-link text-warning border-0 bg-transparent">
                                 <Database size={14} className="me-1" /> SEED GAMES
                             </button>
-                        </li>
+                        </li> */}
                         <li className="nav-item w-100 w-lg-auto text-center">
                             <Link className="nav-link nav-custom-link" to="/">
                                 Exit to Site

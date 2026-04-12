@@ -414,19 +414,19 @@ const Moruba: React.FC = () => {
 
             <div className="container py-4" style={{ maxWidth: '900px' }}>
                 {/* HEADER */}
-                <div className="d-flex justify-content-between align-items-center mb-4 px-3 text-dark">
-                    <button onClick={() => setShowExitConfirm(true)} className="btn-game btn-game-white rounded-circle shadow-action-sm p-0 d-flex align-items-center justify-content-center" style={{ width: 44, height: 44 }}>
+                <div className="d-flex justify-content-between align-items-center mb-4 px-3 text-theme-main">
+                    <button onClick={() => setShowExitConfirm(true)} className="btn-game bg-theme-surface text-theme-main border border-2 border-theme-main rounded-circle shadow-action-sm p-0 d-flex align-items-center justify-content-center" style={{ width: 44, height: 44 }}>
                         <ArrowLeft size={24} strokeWidth={3} />
                     </button>
                     <div className="text-center">
-                        <span className="smallest fw-black text-muted uppercase ls-1 mb-0 d-block">Traditional Strategy</span>
+                        <span className="smallest fw-black text-theme-muted uppercase ls-1 mb-0 d-block">Traditional Strategy</span>
                         <h1 className="fw-black mb-0 ls-tight" style={{ fontSize: '2rem' }}>MORUBA</h1>
                     </div>
                     <div className="d-flex align-items-center gap-2">
-                        <div className="brutalist-card--sm bg-warning px-3 py-1 fw-black d-flex align-items-center gap-2 smallest shadow-action-sm">
+                        <div className="brutalist-card--sm bg-warning px-3 py-1 fw-black d-flex align-items-center gap-2 smallest shadow-action-sm text-dark">
                             <Star size={14} fill="currentColor" /> {userPoints} XP
                         </div>
-                        <button onClick={() => { resetIntroSeen('moruba'); setShowIntro(true); }} className="btn-game btn-game-white rounded-circle shadow-action-sm p-0 d-flex align-items-center justify-content-center" style={{ width: 36, height: 36 }}>
+                        <button onClick={() => { resetIntroSeen('moruba'); setShowIntro(true); }} className="btn-game bg-theme-surface text-theme-main border border-2 border-theme-main rounded-circle shadow-action-sm p-0 d-flex align-items-center justify-content-center" style={{ width: 36, height: 36 }}>
                             <HelpCircle size={18} strokeWidth={3} />
                         </button>
                     </div>
@@ -435,31 +435,31 @@ const Moruba: React.FC = () => {
                 {/* PLAYER INFO CARDS - TOP SIDE BY SIDE */}
                 <div className="row g-3 mb-4">
                     <div className="col-6">
-                        <div className={`brutalist-card p-2 p-md-3 transition-all h-100 ${turn === 1 ? 'border-warning shadow-action-sm' : 'opacity-75'}`} style={{ borderWidth: turn === 1 ? '4px' : '2px' }}>
+                        <div className={`brutalist-card bg-theme-surface p-2 p-md-3 transition-all h-100 ${turn === 1 ? 'border-theme-main shadow-action-sm' : 'opacity-75'}`} style={{ borderWidth: turn === 1 ? '4px' : '2px', borderColor: turn === 1 ? 'var(--venda-yellow)' : 'var(--color-border)' }}>
                             <div className="d-flex align-items-center gap-2 mb-2">
-                                <div className="p-1 p-md-2 bg-warning bg-opacity-10 rounded-circle border border-2 border-dark d-none d-sm-block">
-                                    <User size={16} className="text-dark" strokeWidth={3} />
+                                <div className="p-1 p-md-2 bg-warning bg-opacity-10 rounded-circle border border-2 border-theme-main d-none d-sm-block">
+                                    <User size={16} className="text-theme-main" strokeWidth={3} />
                                 </div>
-                                <h5 className="fw-black mb-0 text-dark" style={{ fontSize: '0.85rem' }}>YOU (P1)</h5>
+                                <h5 className="fw-black mb-0 text-theme-main" style={{ fontSize: '0.85rem' }}>YOU (P1)</h5>
                             </div>
-                            <div className="d-flex flex-column gap-0 smallest fw-black text-muted uppercase">
-                                <span>Stones: <span className="text-dark">{p1Board.reduce((a,b)=>a+b, 0)}</span></span>
+                            <div className="d-flex flex-column gap-0 smallest fw-black text-theme-muted uppercase">
+                                <span>Stones: <span className="text-theme-main">{p1Board.reduce((a,b)=>a+b, 0)}</span></span>
                                 {turn === 1 && !isSowing && <span className="badge bg-warning text-dark p-1 mt-1 animate__animated animate__flash animate__infinite" style={{ fontSize: '9px' }}>YOUR TURN</span>}
                             </div>
                         </div>
                     </div>
 
                     <div className="col-6">
-                        <div className={`brutalist-card p-2 p-md-3 transition-all h-100 ${turn === 2 ? 'border-dark shadow-action-sm' : 'opacity-75'}`} style={{ borderWidth: turn === 2 ? '4px' : '2px' }}>
+                        <div className={`brutalist-card bg-theme-surface p-2 p-md-3 transition-all h-100 ${turn === 2 ? 'border-theme-main shadow-action-sm' : 'opacity-75'}`} style={{ borderWidth: turn === 2 ? '4px' : '2px', borderColor: turn === 2 ? 'var(--color-text)' : 'var(--color-border)' }}>
                             <div className="d-flex align-items-center gap-2 mb-2">
-                                <div className="p-1 p-md-2 bg-secondary bg-opacity-10 rounded-circle border border-2 border-dark d-none d-sm-block">
-                                    <Monitor size={16} className="text-dark" strokeWidth={3} />
+                                <div className="p-1 p-md-2 bg-secondary bg-opacity-10 rounded-circle border border-2 border-theme-main d-none d-sm-block">
+                                    <Monitor size={16} className="text-theme-main" strokeWidth={3} />
                                 </div>
-                                <h5 className="fw-black mb-0 text-dark" style={{ fontSize: '0.85rem' }}>CPU (P2)</h5>
+                                <h5 className="fw-black mb-0 text-theme-main" style={{ fontSize: '0.85rem' }}>CPU (P2)</h5>
                             </div>
-                            <div className="d-flex flex-column gap-0 smallest fw-black text-muted uppercase">
-                                <span>Stones: <span className="text-dark">{p2Board.reduce((a,b)=>a+b, 0)}</span></span>
-                                {turn === 2 && <span className="badge bg-dark text-white p-1 mt-1 animate__animated animate__pulse animate__infinite" style={{ fontSize: '9px' }}>{aiProcessing ? 'THINKING' : 'CPU TURN'}</span>}
+                            <div className="d-flex flex-column gap-0 smallest fw-black text-theme-muted uppercase">
+                                <span>Stones: <span className="text-theme-main">{p2Board.reduce((a,b)=>a+b, 0)}</span></span>
+                                {turn === 2 && <span className="badge bg-theme-main text-theme-base p-1 mt-1 animate__animated animate__pulse animate__infinite" style={{ fontSize: '9px' }}>{aiProcessing ? 'THINKING' : 'CPU TURN'}</span>}
                             </div>
                         </div>
                     </div>
@@ -483,7 +483,7 @@ const Moruba: React.FC = () => {
                         </div>
                         
                         <div className="mt-4 text-center">
-                            <p className="fw-bold text-muted small uppercase ls-1">
+                            <p className="fw-bold text-theme-muted small uppercase ls-1">
                                 {turn === 1 ? 'Select a hole with stones to start sowing.' : 'Computer is playing...'}
                             </p>
                         </div>
@@ -494,7 +494,7 @@ const Moruba: React.FC = () => {
             <style>{`
                 .moruba-game-container {
                     min-height: 100vh;
-                    background-color: #f8fafc;
+                    background-color: var(--color-bg);
                     background-image: url("data:image/svg+xml,%3Csvg width='20' height='20' viewBox='0 0 20 20' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23000000' fill-opacity='0.02' fill-rule='evenodd'%3E%3Ccircle cx='3' cy='3' r='1'/%3E%3C/g%3E%3C/svg%3E");
                 }
 

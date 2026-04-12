@@ -5,6 +5,7 @@ import { auth, db } from '../services/firebaseConfig';
 import { onAuthStateChanged } from 'firebase/auth';
 import { doc, getDoc } from 'firebase/firestore';
 import Mascot404 from "../components/Mascot404.tsx";
+import JuicyButton from "../components/JuicyButton.tsx";
 
 const NotFound: React.FC = () => {
     const navigate = useNavigate();
@@ -50,7 +51,7 @@ const NotFound: React.FC = () => {
 
     if (loading) {
         return (
-            <div className="d-flex justify-content-center align-items-center min-vh-100 bg-white">
+            <div className="d-flex justify-content-center align-items-center min-vh-100 bg-theme-base">
                 <div className="spinner-border text-venda" role="status">
                     <span className="visually-hidden">Loading...</span>
                 </div>
@@ -59,32 +60,31 @@ const NotFound: React.FC = () => {
     }
 
     return (
-        <div className="min-vh-100 d-flex flex-column justify-content-center align-items-center text-center px-4 bg-white">
+        <div className="min-vh-100 d-flex flex-column justify-content-center align-items-center text-center px-4 bg-theme-base">
             
             {/* INVESTIGATIVE MASCOT */}
             <div className="mb-4">
                 <Mascot404 width="250px" height="250px" />
             </div>
 
-            <h6 className="fw-bold text-muted text-uppercase ls-2 mb-2">404 Error</h6>
-            <h1 className="display-4 fw-bold text-dark mb-3 ls-tight">The Lost Lesson</h1>
+            <h6 className="fw-bold text-theme-muted text-uppercase ls-2 mb-2">404 Error</h6>
+            <h1 className="display-4 fw-black text-theme-main mb-3 ls-tight uppercase">The Lost Lesson</h1>
 
-            <p className="lead text-muted mb-5" style={{ maxWidth: '500px', fontSize: '1.2rem', lineHeight: '1.6' }}>
+            <p className="lead text-theme-muted mb-5 fw-bold" style={{ maxWidth: '500px', fontSize: '1.2rem', lineHeight: '1.6' }}>
                 Even with my microscope, I couldn't find the page you're looking for. It seems to have wandered off the path!
             </p>
 
-            <button 
+            <JuicyButton 
                 onClick={handleGoBack} 
-                className="btn btn-warning px-5 py-3 rounded-pill fw-bold ls-1 text-uppercase shadow-lg transition-all hover-scale"
+                className="px-5 py-3 smallest"
             >
                 <i className="bi bi-compass-fill me-2"></i>
                 {userRole === 'admin' ? 'Back to Dashboard' :
                     userRole === 'user' ? 'Back to Learning' :
                         'Return Home'}
-            </button>
+            </JuicyButton>
 
             <style>{`
-                .hover-scale:hover { transform: scale(1.05); }
                 .ls-tight { letter-spacing: -1.5px; }
                 .ls-2 { letter-spacing: 2px; }
                 .ls-1 { letter-spacing: 1px; }

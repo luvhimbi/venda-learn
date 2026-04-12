@@ -13,12 +13,12 @@ const LogoutModal: React.FC<LogoutModalProps> = ({ onClose, onConfirm }) => (
         style={{
             zIndex: 9999,
             backdropFilter: 'blur(8px)',
-            backgroundColor: 'rgba(255, 255, 255, 0.4)'
+            backgroundColor: 'var(--color-bg-overlay, rgba(255, 255, 255, 0.4))'
         }}
     >
         {/* Using shadow-action and rounded-4 from your global CSS Section 6 & 2 */}
         <div
-            className="bg-white p-5 rounded-4 text-center animate__animated animate__zoomIn border border-4 border-dark shadow-action"
+            className="bg-theme-card p-5 rounded-4 text-center animate__animated animate__zoomIn border border-4 border-theme-main shadow-action"
             style={{
                 maxWidth: '420px',
                 width: '90%'
@@ -30,11 +30,11 @@ const LogoutModal: React.FC<LogoutModalProps> = ({ onClose, onConfirm }) => (
                 <Mascot mood="sad" width="160px" height="160px" />
             </div>
 
-            <h3 className="fw-black mb-2 text-dark ls-tight text-uppercase">
+            <h3 className="fw-black mb-2 text-theme-main ls-tight text-uppercase">
                 Parking already?
             </h3>
 
-            <p className="text-dark fw-bold mb-4 opacity-75" style={{ fontSize: '1.1rem', lineHeight: '1.3' }}>
+            <p className="text-theme-muted fw-bold mb-4" style={{ fontSize: '1.1rem', lineHeight: '1.3' }}>
                 Are you sure you want to log out, chommie? The road is still open and we're making such good time!
             </p>
 

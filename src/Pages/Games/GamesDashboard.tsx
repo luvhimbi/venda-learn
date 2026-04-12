@@ -126,23 +126,23 @@ const GamesDashboard: React.FC = () => {
 
     if (isLoggedIn === null || loading) {
         return (
-            <div className="min-vh-100 d-flex align-items-center justify-content-center bg-white">
-                <div className="spinner-border text-warning" style={{ borderWidth: '4px' }} role="status"></div>
+            <div className="min-vh-100 d-flex align-items-center justify-content-center bg-theme-base">
+                <div className="spinner-border text-theme-main" style={{ borderWidth: '4px' }} role="status"></div>
             </div>
         );
     }
 
     if (!isLoggedIn) {
         return (
-            <div className="min-vh-100 d-flex align-items-center justify-content-center bg-white px-4 py-5">
-                <div className="brutalist-card bg-white p-4 p-md-5 text-center shadow-action" style={{ maxWidth: '500px' }}>
+            <div className="min-vh-100 d-flex align-items-center justify-content-center bg-theme-base px-4 py-5">
+                <div className="brutalist-card bg-theme-card p-4 p-md-5 text-center shadow-action" style={{ maxWidth: '500px' }}>
                     <div className="mb-4 text-warning d-flex justify-content-center">
-                        <div className="p-4 bg-warning bg-opacity-10 border border-dark border-3 rounded-circle shadow-action-sm">
-                            <Gamepad2 size={60} strokeWidth={2.5} className="text-dark" />
+                        <div className="p-4 bg-warning bg-opacity-10 border border-theme-main border-3 rounded-circle shadow-action-sm">
+                            <Gamepad2 size={60} strokeWidth={2.5} className="text-theme-main" />
                         </div>
                     </div>
-                    <h1 className="fw-black mb-3 ls-tight text-dark" style={{ fontSize: '2.5rem' }}>READY TO PLAY?</h1>
-                    <p className="fw-bold text-muted mb-5 px-md-4">Log in to track your scores, earn XP, and climb the leaderboard while practicing South African languages.</p>
+                    <h1 className="fw-black mb-3 ls-tight text-theme-main" style={{ fontSize: '2.5rem' }}>READY TO PLAY?</h1>
+                    <p className="fw-bold text-theme-muted mb-5 px-md-4">Log in to track your scores, earn XP, and climb the leaderboard while practicing South African languages.</p>
                     <div className="d-grid gap-3">
                         <button onClick={() => navigate('/login')} className="btn btn-game btn-game-primary py-3 smallest fw-black">
                             LOG IN TO PLAY
@@ -157,17 +157,16 @@ const GamesDashboard: React.FC = () => {
     }
 
     return (
-        <div className="min-vh-100 pt-4 pb-5" style={{ 
-            backgroundColor: '#ffffff',
-            backgroundImage: 'url("data:image/svg+xml,%3Csvg width=\'20\' height=\'20\' viewBox=\'0 0 20 20\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cg fill=\'%23000000\' fill-opacity=\'0.02\' fill-rule=\'evenodd\'%3E%3Ccircle cx=\'3\' cy=\'3\' r=\'1\'/%3E%3C/g%3E%3C/svg%3E")' 
+        <div className="min-vh-100 pt-4 pb-5 bg-theme-base" style={{ 
+            backgroundImage: 'url("data:image/svg+xml,%3Csvg width=\'20\' height=\'20\' viewBox=\'0 0 20 20\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cg fill=\'currentColor\' fill-opacity=\'0.02\' fill-rule=\'evenodd\'%3E%3Ccircle cx=\'3\' cy=\'3\' r=\'1\'/%3E%3C/g%3E%3C/svg%3E")' 
         }}>
             <div className="container">
                 <div className="text-center mb-4 mt-0 animate__animated animate__fadeInDown">
-                    <span className="badge bg-warning text-dark border border-dark border-2 rounded-pill px-3 py-1 smallest fw-black ls-1 uppercase mb-2 shadow-action-sm">
+                    <span className="badge bg-warning text-dark border border-theme-main border-2 rounded-pill px-3 py-1 smallest fw-black ls-1 uppercase mb-2 shadow-action-sm">
                         {preferredLanguage?.name || 'Local'} Quests
                     </span>
-                    <h1 className="fw-black display-3 text-dark mb-0 ls-tight">THE GAMES</h1>
-                    <p className="fw-bold text-muted uppercase tracking-widest smallest">Level up your {preferredLanguage?.name || ''} skills</p>
+                    <h1 className="fw-black display-3 text-theme-main mb-0 ls-tight">THE GAMES</h1>
+                    <p className="fw-bold text-theme-muted uppercase tracking-widest smallest">Level up your {preferredLanguage?.name || ''} skills</p>
                 </div>
 
                 <div className="row g-3 justify-content-center">
@@ -183,7 +182,7 @@ const GamesDashboard: React.FC = () => {
                             >
                                 <div className="d-flex flex-column h-100">
                                     <div
-                                        className="p-3 d-flex align-items-center justify-content-center text-white border-bottom border-dark border-4"
+                                        className="p-3 d-flex align-items-center justify-content-center text-white border-bottom border-theme-main border-4"
                                         style={{ background: game.gradient, height: '140px' }}
                                     >
                                         <div className="p-4 rounded-circle border border-white border-2 d-flex align-items-center justify-content-center" 
@@ -191,9 +190,9 @@ const GamesDashboard: React.FC = () => {
                                             {React.cloneElement(game.icon as React.ReactElement, { color: '#ffffff', strokeWidth: 2.5 } as any)}
                                         </div>
                                     </div>
-                                    <div className="p-3 flex-grow-1 bg-white d-flex flex-column">
-                                        <h3 className="fw-black mb-1 text-dark uppercase ls-1" style={{ fontSize: '1.25rem' }}>{game.title}</h3>
-                                        <p className="small fw-bold text-muted mb-3 flex-grow-1">{game.description}</p>
+                                    <div className="p-3 flex-grow-1 bg-theme-card d-flex flex-column">
+                                        <h3 className="fw-black mb-1 text-theme-main uppercase ls-1" style={{ fontSize: '1.25rem' }}>{game.title}</h3>
+                                        <p className="small fw-bold text-theme-muted mb-3 flex-grow-1">{game.description}</p>
                                         <button className="btn btn-game btn-game-primary w-100 py-3 smallest fw-black">
                                             PLAY NOW <ArrowRight size={18} className="ms-2" strokeWidth={3} />
                                         </button>
@@ -211,7 +210,7 @@ const GamesDashboard: React.FC = () => {
                 }
                 .hover-lift:hover {
                     transform: translate(-4px, -4px);
-                    box-shadow: 12px 12px 0px #000 !important;
+                    box-shadow: 12px 12px 0px var(--color-border) !important;
                 }
                 
                 .tracking-widest { letter-spacing: 0.3em; }

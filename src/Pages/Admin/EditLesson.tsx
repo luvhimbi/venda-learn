@@ -274,10 +274,10 @@ const EditLesson: React.FC = () => {
             }));
 
             await updateDoc(doc(db as Firestore, "lessons", id!), {
-                title: course.title,
-                nativeTitle: course.nativeTitle,
+                title: course.title || '',
+                nativeTitle: course.nativeTitle || '',
                 languageId: course.languageId || '',
-                difficulty: course.difficulty,
+                difficulty: course.difficulty || 'Beginner',
                 microLessons
             });
 

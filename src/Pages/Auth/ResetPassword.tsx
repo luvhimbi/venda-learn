@@ -33,19 +33,19 @@ const ResetPassword: React.FC = () => {
     };
 
     return (
-        <div className="min-vh-100 d-flex align-items-center justify-content-center bg-white px-3 py-5" style={{ fontFamily: '"Lexend", sans-serif' }}>
-            <div className="w-100" style={{ maxWidth: '440px' }}>
+        <div className="min-vh-100 d-flex align-items-center justify-content-center bg-theme-base px-3 py-5" style={{ fontFamily: '"Lexend", sans-serif' }}>
+            <div className="w-100 text-theme-main" style={{ maxWidth: '440px' }}>
 
 
                 {!submitted ? (
                     <div className="mt-4">
                         <div className="text-center mb-5">
-                            <h2 className="display-6 fw-black text-uppercase ls-tight text-dark mb-2">Forgot Password?</h2>
-                            <p className="fw-bold text-muted mb-0 small text-uppercase">Kha vha hulelwa phaswidzi yavho hafha</p>
+                            <h2 className="display-6 fw-black text-uppercase ls-tight text-theme-main mb-2">Forgot Password?</h2>
+                            <p className="fw-bold text-theme-muted mb-0 small text-uppercase">Kha vha hulelwa phaswidzi yavho hafha</p>
                         </div>
 
                         {error && (
-                            <div className="border border-4 border-dark p-3 mb-4 text-center fw-black text-uppercase shadow-action-sm"
+                            <div className="border border-4 border-theme-main p-3 mb-4 text-center fw-black text-uppercase shadow-action-sm"
                                  style={{ backgroundColor: '#FFD1D1', color: '#000', fontSize: '12px' }}>
                                 {error}
                             </div>
@@ -69,7 +69,7 @@ const ResetPassword: React.FC = () => {
 
                             <button
                                 type="submit"
-                                className="btn w-100 fw-black py-3 mb-4 text-dark border border-4 border-dark rounded-0 shadow-action text-uppercase ls-1 hover-press"
+                                className="btn w-100 fw-black py-3 mb-4 text-dark border border-4 border-theme-main rounded-0 shadow-action text-uppercase ls-1 hover-press"
                                 style={{ backgroundColor: 'var(--venda-yellow)' }}
                                 disabled={loading}
                             >
@@ -79,14 +79,14 @@ const ResetPassword: React.FC = () => {
                     </div>
                 ) : (
                     <div className="text-center mt-4">
-                        <div className="d-inline-flex align-items-center justify-content-center border border-4 border-dark mb-4 bg-white shadow-action-sm"
+                        <div className="d-inline-flex align-items-center justify-content-center border border-4 border-theme-main mb-4 bg-theme-surface shadow-action-sm"
                              style={{ width: '80px', height: '80px' }}>
-                            <MailCheck className="text-dark" size={40} />
+                            <MailCheck className="text-theme-main" size={40} />
                         </div>
-                        <h2 className="display-6 fw-black text-uppercase ls-tight text-dark mb-3">Check Email</h2>
-                        <p className="fw-bold text-muted mb-4 small text-uppercase">
+                        <h2 className="display-6 fw-black text-uppercase ls-tight text-theme-main mb-3">Check Email</h2>
+                        <p className="fw-bold text-theme-muted mb-4 small text-uppercase">
                             Instructions sent to:<br />
-                            <span className="text-dark fw-black">{email}</span>
+                            <span className="text-theme-main fw-black">{email}</span>
                         </p>
 
                         <button
@@ -98,15 +98,15 @@ const ResetPassword: React.FC = () => {
 
                         <button
                             onClick={() => setSubmitted(false)}
-                            className="btn btn-link p-0 text-decoration-underline fw-black text-dark text-uppercase smallest ls-1"
+                            className="btn btn-link p-0 text-decoration-underline fw-black text-theme-main text-uppercase smallest ls-1"
                         >
                             Try another email?
                         </button>
                     </div>
                 )}
 
-                <div className="text-center mt-5 pt-3 border-top border-4 border-dark">
-                    <Link to="/login" className="smallest fw-black text-uppercase text-decoration-none text-dark ls-1 d-flex align-items-center justify-content-center">
+                <div className="text-center mt-5 pt-3 border-top border-4 border-theme-main">
+                    <Link to="/login" className="smallest fw-black text-uppercase text-decoration-none text-theme-main ls-1 d-flex align-items-center justify-content-center">
                         <ArrowLeft size={16} className="me-2" /> Back to Sign In
                     </Link>
                 </div>

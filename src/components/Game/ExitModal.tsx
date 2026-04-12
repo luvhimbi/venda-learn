@@ -29,7 +29,7 @@ const ExitModal: React.FC<Props> = ({ onClose, onConfirm }) => (
             </div>
 
             <h2 className="fw-black text-dark mb-2 ls-tight text-uppercase">
-                Wait, Chommie!
+                Wait, Friend!
             </h2>
 
             <p className="fw-bold text-muted mb-4 px-2" style={{ fontSize: '1.1rem', lineHeight: '1.4' }}>

@@ -133,17 +133,17 @@ const Login: React.FC = () => {
     };
 
     return (
-        <div className="min-vh-100 d-flex align-items-center justify-content-center bg-white px-3 py-5" style={{ fontFamily: '"Lexend", sans-serif' }}>
-            <div className="w-100" style={{ maxWidth: '440px' }}>
+        <div className="min-vh-100 d-flex align-items-center justify-content-center bg-theme-base px-3 py-5" style={{ fontFamily: '"Lexend", sans-serif' }}>
+            <div className="w-100 text-theme-main" style={{ maxWidth: '440px' }}>
 
 
                 <div className="text-center mb-5 mt-4">
-                    <h2 className="display-5 fw-black text-uppercase ls-tight text-dark mb-2">Aweh! Back Again?</h2>
-                    <p className="fw-bold text-muted mb-0 small text-uppercase">Log in to keep your streak burning bright!</p>
+                    <h2 className="display-5 fw-black text-uppercase ls-tight text-theme-main mb-2">Aweh! Back Again?</h2>
+                    <p className="fw-bold text-theme-muted mb-0 small text-uppercase">Log in to keep your streak burning bright!</p>
                 </div>
 
                 {error && (
-                    <div className="border border-4 border-dark p-3 mb-4 text-center fw-black text-uppercase shadow-action-sm"
+                    <div className="border border-4 border-theme-main p-3 mb-4 text-center fw-black text-uppercase shadow-action-sm"
                          style={{ backgroundColor: '#FFD1D1', color: '#000', fontSize: '12px' }}>
                         {error}
                     </div>
@@ -168,7 +168,7 @@ const Login: React.FC = () => {
                     <div className="mb-4">
                         <div className="d-flex justify-content-between align-items-end">
                             <label className="form-label smallest fw-black text-uppercase ls-1">Password</label>
-                            <Link to="/reset-password" intrinsic-name="reset" className="smallest text-decoration-none fw-black text-uppercase mb-2 text-dark">
+                            <Link to="/reset-password" intrinsic-name="reset" className="smallest text-decoration-none fw-black text-uppercase mb-2 text-theme-main">
                                 Forgot?
                             </Link>
                         </div>
@@ -184,7 +184,7 @@ const Login: React.FC = () => {
                             />
                             <button
                                 type="button"
-                                className="btn border-0 p-0 text-dark me-3 shadow-none position-absolute end-0"
+                                className="btn border-0 p-0 text-theme-main me-3 shadow-none position-absolute end-0"
                                 onClick={() => setShowPassword(!showPassword)}
                                 tabIndex={-1}
                             >
@@ -195,7 +195,7 @@ const Login: React.FC = () => {
 
                     <button
                         type="submit"
-                        className="btn w-100 fw-black py-3 mb-4 text-dark border border-4 border-dark rounded-0 shadow-action text-uppercase ls-1 hover-press"
+                        className="btn w-100 fw-black py-3 mb-4 text-dark border border-4 border-theme-main rounded-0 shadow-action text-uppercase ls-1 hover-press"
                         style={{ backgroundColor: 'var(--venda-yellow)' }}
                         disabled={loading}
                     >
@@ -204,15 +204,15 @@ const Login: React.FC = () => {
                 </form>
 
                 <div className="d-flex align-items-center my-4">
-                    <div className="flex-grow-1 border-top border-4 border-dark"></div>
-                    <span className="mx-3 text-dark smallest fw-black text-uppercase ls-1">OR USE</span>
-                    <div className="flex-grow-1 border-top border-4 border-dark"></div>
+                    <div className="flex-grow-1 border-top border-4 border-theme-main"></div>
+                    <span className="mx-3 text-theme-main smallest fw-black text-uppercase ls-1">OR USE</span>
+                    <div className="flex-grow-1 border-top border-4 border-theme-main"></div>
                 </div>
 
                 <div className="d-grid gap-3">
                     <button
                         onClick={handleGoogleSignIn}
-                        className="btn w-100 fw-black py-3 bg-white border border-4 border-dark rounded-0 shadow-action d-flex align-items-center justify-content-center text-uppercase smallest ls-1 hover-press text-dark"
+                        className="btn w-100 fw-black py-3 bg-theme-surface border border-4 border-theme-main rounded-0 shadow-action d-flex align-items-center justify-content-center text-uppercase smallest ls-1 hover-press text-theme-main"
                         disabled={loading}
                     >
                         <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google" className="me-2" style={{ width: '20px' }} />
@@ -221,7 +221,7 @@ const Login: React.FC = () => {
 
                     <button
                         onClick={handleGuestSignIn}
-                        className="btn w-100 fw-black py-3 bg-white border border-4 border-dark rounded-0 shadow-action d-flex align-items-center justify-content-center text-uppercase smallest ls-1 hover-press text-dark"
+                        className="btn w-100 fw-black py-3 bg-theme-surface border border-4 border-theme-main rounded-0 shadow-action d-flex align-items-center justify-content-center text-uppercase smallest ls-1 hover-press text-theme-main"
                         disabled={loading}
                     >
                         <i className="bi bi-person-bounding-box fs-5 me-2"></i>
@@ -230,8 +230,8 @@ const Login: React.FC = () => {
                 </div>
 
                 <div className="text-center mt-5">
-                    <p className="fw-bold smallest text-uppercase text-dark">
-                        New crew? <Link to="/register" className="fw-black text-decoration-underline text-dark">Create an Account</Link>
+                    <p className="fw-bold smallest text-uppercase text-theme-main">
+                        New crew? <Link to="/register" className="fw-black text-decoration-underline text-theme-main">Create an Account</Link>
                     </p>
                 </div>
             </div>

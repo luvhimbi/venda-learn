@@ -24,10 +24,10 @@ const AchievementCard: React.FC<AchievementCardProps> = ({
         <div 
             className={`achievement-card h-100 brutalist-card transition-all p-3 ${isEarned ? 'earned' : 'locked'}`}
             style={{ 
-                backgroundColor: isEarned ? 'white' : '#f3f4f6',
+                backgroundColor: isEarned ? 'var(--color-bg)' : 'var(--color-surface-soft)',
                 borderWidth: '3px',
-                borderColor: isEarned ? '#000' : '#9ca3af',
-                boxShadow: isEarned ? '6px 6px 0px #000' : 'none',
+                borderColor: isEarned ? 'var(--color-border)' : 'var(--color-text-muted)',
+                boxShadow: isEarned ? '6px 6px 0px var(--color-border)' : 'none',
                 opacity: isEarned ? 1 : 0.6
             }}
         >
@@ -41,7 +41,7 @@ const AchievementCard: React.FC<AchievementCardProps> = ({
                     />
                     {isEarned && (
                         <div 
-                            className="position-absolute bg-success rounded-circle d-flex align-items-center justify-content-center border border-dark border-2 shadow-sm"
+                            className="position-absolute bg-success rounded-circle d-flex align-items-center justify-content-center border border-theme-main border-2 shadow-sm"
                             style={{ width: 22, height: 22, bottom: -2, right: -2, zIndex: 1 }}
                         >
                             <i className="bi bi-check text-white fw-bold" style={{ fontSize: '12px' }}></i>
@@ -50,24 +50,24 @@ const AchievementCard: React.FC<AchievementCardProps> = ({
                     {isEarned && onShare && (
                         <button 
                             onClick={(e) => { e.stopPropagation(); onShare(id); }}
-                            className="position-absolute btn-game-white rounded-circle d-flex align-items-center justify-content-center border border-dark border-2 shadow-action-sm share-badge transition-all"
+                            className="position-absolute btn-game-white rounded-circle d-flex align-items-center justify-content-center border border-theme-main border-2 shadow-action-sm share-badge transition-all"
                             style={{ width: 32, height: 32, top: -8, right: -12, zIndex: 5 }}
                             title="Share"
                         >
-                            <i className="bi bi-share-fill text-dark" style={{ fontSize: '12px' }}></i>
+                            <i className="bi bi-share-fill text-theme-main" style={{ fontSize: '12px' }}></i>
                         </button>
                     )}
                 </div>
 
-                <h6 className="fw-black text-dark uppercase ls-1 mb-2" style={{ fontSize: '0.85rem' }}>{id.replace(/_/g, ' ')}</h6>
+                <h6 className="fw-black text-theme-main uppercase ls-1 mb-2" style={{ fontSize: '0.85rem' }}>{id.replace(/_/g, ' ')}</h6>
 
                 {!isEarned && progress > 0 && (
                     <div className="w-100 mt-2 px-1">
                         <div className="d-flex justify-content-between mb-1">
-                            <span className="smallest fw-black text-muted uppercase ls-1" style={{ fontSize: '8px' }}>PROGRESS</span>
-                            <span className="smallest fw-black text-dark" style={{ fontSize: '8px' }}>{progress}%</span>
+                            <span className="smallest fw-black text-theme-muted uppercase ls-1" style={{ fontSize: '8px' }}>PROGRESS</span>
+                            <span className="smallest fw-black text-theme-main" style={{ fontSize: '8px' }}>{progress}%</span>
                         </div>
-                        <div className="progress border border-dark border-1 shadow-none" style={{ height: '8px', backgroundColor: '#e5e7eb', borderRadius: '4px' }}>
+                        <div className="progress border border-theme-main border-1 shadow-none" style={{ height: '8px', backgroundColor: 'var(--color-surface-soft)', borderRadius: '4px' }}>
                             <div 
                                 className="progress-bar" 
                                 style={{ width: `${progress}%`, backgroundColor: color, borderRadius: '0px' }}
@@ -89,7 +89,7 @@ const AchievementCard: React.FC<AchievementCardProps> = ({
                 }
                 .achievement-card.earned:hover {
                     transform: translate(-2px, -2px);
-                    box-shadow: 8px 8px 0px #000 !important;
+                    box-shadow: 8px 8px 0px var(--color-border) !important;
                 }
                 .share-badge:hover {
                     transform: scale(1.1) rotate(15deg);

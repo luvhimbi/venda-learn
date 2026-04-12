@@ -6,66 +6,93 @@ import type { AvatarConfig } from './CustomAvatar';
 export const DICEBEAR_STYLES = [
     {
         id: 'avataaars',
-        label: 'The Leader',
-        vendaName: 'Dakalo',
-        themeColor: '#FACC15',
-        story: 'Sharing the joy of Venda traditions through leading and teaching others.'
+        label: 'Tshivenda',
+        name: 'Dakalo',
+        themeColor: '#FACC15'
     },
     {
         id: 'adventurer',
-        label: 'The Voyager',
-        vendaName: 'Ronewa',
-        themeColor: '#1D4ED8',
-        story: 'Exploring the vast plains of knowledge with the spirit of the ancestors.'
+        label: 'isiZulu',
+        name: 'Sipho',
+        themeColor: '#1D4ED8'
     },
     {
         id: 'lorelei',
-        label: 'The Protector',
-        vendaName: 'Rofhiwa',
-        themeColor: '#15803D',
-        story: 'Guarding the heritage and language with grace and unwavering strength.'
+        label: 'isiXhosa',
+        name: 'Buhle',
+        themeColor: '#15803D'
     },
     {
         id: 'open-peeps',
-        label: 'The Artist',
-        vendaName: 'Tshifhiwa',
-        themeColor: '#B91D1D',
-        story: 'Preserving our culture through digital patterns and visual storytelling.'
+        label: 'Sesotho',
+        name: 'Karabo',
+        themeColor: '#B91D1D'
     },
     {
         id: 'personas',
-        label: 'The Scholar',
-        vendaName: 'Mukona',
-        themeColor: '#EA580C',
-        story: 'Mastering the ancient proverbs to bridge the wisdom of the past with the future.'
+        label: 'Setswana',
+        name: 'Odirile',
+        themeColor: '#EA580C'
     },
     {
         id: 'miniavs',
-        label: 'The Youth',
-        vendaName: 'Zwivhuya',
-        themeColor: '#4F46E5',
-        story: 'The bright new generation carrying the torch of our language forward.'
+        label: 'Xitsonga',
+        name: 'Tsakani',
+        themeColor: '#4F46E5'
     },
     {
         id: 'big-smile',
-        label: 'The Host',
-        vendaName: 'Khodani',
-        themeColor: '#059669',
-        story: 'Always welcoming others with the warm hospitality of the Venda people.'
+        label: 'Afrikaans',
+        name: 'Johan',
+        themeColor: '#059669'
     },
     {
         id: 'micah',
-        label: 'The Dreamer',
-        vendaName: 'Thabelo',
-        themeColor: '#7C3AED',
-        story: 'Finding inspiration in the sacred landscapes and rhythms of our home.'
+        label: 'English',
+        name: 'Oliver',
+        themeColor: '#7C3AED'
     },
     {
         id: 'bottts',
-        label: 'The Inventor',
-        vendaName: 'Emmanuel',
-        themeColor: '#71717a',
-        story: 'Building tools to help the tribe thrive in the digital age.'
+        label: 'isiNdebele',
+        name: 'Thando',
+        themeColor: '#71717A'
+    },
+    {
+        id: 'croodles',
+        label: 'Tshivenda',
+        name: 'Zwivhuya',
+        themeColor: '#EAB308'
+    },
+    {
+        id: 'notionists',
+        label: 'Sepedi',
+        name: 'Tshepo',
+        themeColor: '#EC4899'
+    },
+    {
+        id: 'pixel-art',
+        label: 'Siswati',
+        name: 'Gugu',
+        themeColor: '#14B8A6'
+    },
+    {
+        id: 'identicon',
+        label: 'isiXhosa',
+        name: 'Lwethu',
+        themeColor: '#8B5CF6'
+    },
+    {
+        id: 'fun-emoji',
+        label: 'isiZulu',
+        name: 'Zanele',
+        themeColor: '#F43F5E'
+    },
+    {
+        id: 'adventurer-neutral',
+        label: 'Sesotho',
+        name: 'Lethabo',
+        themeColor: '#06B6D4'
     }
 ];
 
@@ -94,7 +121,7 @@ const AvatarPicker: React.FC<AvatarPickerProps> = ({ selectedStyle, seed, onSele
                             onClick={() => onSelect(style.id)}
                             style={{ borderColor: isSelected ? style.themeColor : 'transparent' }}
                         >
-                            <div className="avatar-preview-wrapper position-relative" style={{ border: `3px solid ${isSelected ? style.themeColor : '#000'}` }}>
+                            <div className="avatar-preview-wrapper position-relative" style={{ border: `3px solid ${isSelected ? style.themeColor : 'var(--color-border)'}` }}>
                                 <img
                                     src={avatarUrl}
                                     alt={style.label}
@@ -104,8 +131,8 @@ const AvatarPicker: React.FC<AvatarPickerProps> = ({ selectedStyle, seed, onSele
                                 {/* MINWENDA ACCENT STRIPE */}
                                 <div className="minwenda-accent" style={{ background: style.themeColor }}></div>
                             </div>
-                            <span className="style-label">{style.vendaName}</span>
-                            {isSelected && <div className="selection-indicator bg-dark border-white animate__animated animate__zoomIn"></div>}
+                            <span className="style-label">{style.name}</span>
+                            {isSelected && <div className="selection-indicator bg-theme-main border-theme-card animate__animated animate__zoomIn"></div>}
                         </button>
                     );
                 })}
@@ -118,17 +145,14 @@ const AvatarPicker: React.FC<AvatarPickerProps> = ({ selectedStyle, seed, onSele
                         <div className="avatar-large flex-shrink-0 position-relative shadow-action-sm">
                              <img 
                                 src={`https://api.dicebear.com/9.x/${selectedStyleData.id}/svg?seed=${seed}&backgroundColor=FACC15&clothingColor=${selectedStyleData.themeColor.replace('#', '')}&topColor=${selectedStyleData.themeColor.replace('#', '')}`} 
-                                className="border-4 border-dark h-100 w-100" 
+                                className="border-4 border-theme-main h-100 w-100" 
                                 style={{ objectFit: 'cover', borderRadius: '16px' }}
                                 alt="preview" 
                              />
                         </div>
-                        <div className="text-dark text-center text-md-start">
-                            <h2 className="fw-black mb-1 ls-tight uppercase" style={{ fontSize: '1.75rem' }}>{selectedStyleData.vendaName}</h2>
-                            <p className="small fw-black text-uppercase ls-2 mb-3" style={{ color: selectedStyleData.themeColor }}>{selectedStyleData.label}</p>
-                            <div className="p-3 bg-light border-start border-4 border-dark italic text-secondary" style={{ borderLeftColor: selectedStyleData.themeColor + ' !important' }}>
-                                <p className="small mb-0 fw-bold">"{selectedStyleData.story}"</p>
-                            </div>
+                        <div className="text-theme-main text-center text-md-start">
+                            <h2 className="fw-black mb-1 ls-tight uppercase" style={{ fontSize: '1.75rem' }}>{selectedStyleData.name}</h2>
+                            <p className="small fw-black text-uppercase ls-2 mb-0" style={{ color: selectedStyleData.themeColor }}>{selectedStyleData.label}</p>
                         </div>
                     </div>
                 </div>
@@ -140,14 +164,14 @@ const AvatarPicker: React.FC<AvatarPickerProps> = ({ selectedStyle, seed, onSele
                     grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
                     gap: 10px;
                     padding: 12px;
-                    background: #f8fafc;
-                    border: 3px solid #000;
+                    background: var(--color-bg-surface);
+                    border: 3px solid var(--color-border);
                     border-radius: 20px;
                 }
                 .avatar-choice-btn {
                     position: relative;
                     border: 3px solid transparent;
-                    background: white;
+                    background: var(--color-bg-card);
                     border-radius: 12px;
                     padding: 10px 5px;
                     cursor: pointer;
@@ -159,10 +183,10 @@ const AvatarPicker: React.FC<AvatarPickerProps> = ({ selectedStyle, seed, onSele
                 }
                 .avatar-choice-btn:hover {
                     transform: translateY(-4px);
-                    border-color: #000;
+                    border-color: var(--color-border);
                 }
                 .avatar-choice-btn.selected {
-                    border-color: #000;
+                    border-color: var(--color-border);
                     border-width: 4px;
                     transform: scale(1.05);
                     z-index: 2;
@@ -173,7 +197,7 @@ const AvatarPicker: React.FC<AvatarPickerProps> = ({ selectedStyle, seed, onSele
                     flex-shrink: 0;
                     border-radius: 12px;
                     overflow: hidden;
-                    background: #fff;
+                    background: var(--color-bg-card);
                     transition: all 0.2s ease;
                 }
                 .avatar-img {
@@ -193,11 +217,11 @@ const AvatarPicker: React.FC<AvatarPickerProps> = ({ selectedStyle, seed, onSele
                     font-weight: 900;
                     text-transform: uppercase;
                     letter-spacing: 1px;
-                    color: #000;
+                    color: var(--color-text);
                 }
                 .selected-avatar-card {
                     position: relative;
-                    background: #ffffff;
+                    background: var(--color-bg-card);
                     overflow: hidden;
                 }
                 .minwenda-pattern-header {
@@ -234,9 +258,9 @@ const AvatarPicker: React.FC<AvatarPickerProps> = ({ selectedStyle, seed, onSele
                     right: -8px;
                     width: 24px;
                     height: 24px;
-                    border: 3px solid #fff;
+                    border: 3px solid var(--color-bg-card);
                     border-radius: 50%;
-                    box-shadow: 0 4px 0 rgba(0,0,0,1);
+                    box-shadow: 0 4px 0 var(--color-border);
                 }
             `}</style>
         </div>
@@ -269,7 +293,7 @@ export const AvatarDisplay: React.FC<{
                 style={{
                     width: `${size}px`,
                     height: `${size}px`,
-                    border: `3px solid #000`,
+                    border: `3px solid var(--color-border)`,
                     backgroundColor: config.bgColor,
                     borderRadius: '16px',
                     ...style
@@ -291,8 +315,8 @@ export const AvatarDisplay: React.FC<{
             style={{
                 width: `${size}px`,
                 height: `${size}px`,
-                border: `3px solid #000`,
-                backgroundColor: 'white',
+                border: `3px solid var(--color-border)`,
+                backgroundColor: 'var(--color-bg-card)',
                 borderRadius: '16px',
                 ...style
             }}

@@ -11,6 +11,7 @@ import ResetPassword from "./Pages/Auth/ResetPassword";
 import Onboarding from "./Pages/Auth/Onboarding";
 import Home from "./Pages/Home";
 import Profile from "./Pages/Auth/Profile";
+import Settings from "./Pages/Auth/Settings";
 import Muvhigo from "./Pages/Admin/Muvhigo";
 import GameRoom from "./Pages/Games/GameRoom";
 import DailyWordPage from "./Pages/Learning/DailyWordPage";
@@ -46,6 +47,9 @@ import WordBomb from "./Pages/Games/WordBomb";
 import AdminWordBomb from "./Pages/Admin/AdminWordBomb";
 import AdminLanguages from "./Pages/Admin/AdminLanguages";
 import AdminPicturePuzzle from "./Pages/Admin/AdminPicturePuzzle";
+import AdminSyllableBuilder from "./Pages/Admin/AdminSyllableBuilder";
+import AdminSentenceScramble from "./Pages/Admin/AdminSentenceScramble";
+import AdminGameContent from "./Pages/Admin/AdminGameContent";
 import Achievements from "./Pages/Achievements";
 import GameDataPatcher from "./Pages/Admin/GameDataPatcher";
 import Morabaraba from "./Pages/Games/Morabaraba";
@@ -111,7 +115,7 @@ const AppContent: React.FC = () => {
     }, []);
 
     return (
-        <div className={`min-vh-100 d-flex ${user && !isAdminPath && !isAuthPath ? 'flex-column flex-lg-row' : 'flex-column'} bg-light`}>
+        <div className={`min-vh-100 d-flex ${user && !isAdminPath && !isAuthPath ? 'flex-column flex-lg-row' : 'flex-column'} bg-theme-base`}>
 
             {/* Show Sidebar only for authenticated users on internal pages */}
             {user && !isAdminPath && !isAuthPath && <Sidebar />}
@@ -149,6 +153,7 @@ const AppContent: React.FC = () => {
                         <Route path="/history/add" element={<AddHistory />} />
                         <Route path="/history/:storyId" element={<HistoryDetail />} />
                         <Route path="/profile" element={<Profile />} />
+                        <Route path="/settings" element={<Settings />} />
                         <Route path="/privacy" element={<PrivacyPolicy />} />
                         <Route path="/terms" element={<TermsOfUse />} />
                         <Route path="/popiact" element={<POPIAct />} />
@@ -253,6 +258,9 @@ const AppContent: React.FC = () => {
                         <Route path="/admin/history/edit/:storyId" element={<AdminRoute><AddHistory /></AdminRoute>} />
                         <Route path="/admin/word-bomb" element={<AdminRoute><AdminWordBomb /></AdminRoute>} />
                         <Route path="/admin/languages" element={<AdminRoute><AdminLanguages /></AdminRoute>} />
+                        <Route path="/admin/game-content" element={<AdminRoute><AdminGameContent /></AdminRoute>} />
+                        <Route path="/admin/syllable-builder" element={<AdminRoute><AdminSyllableBuilder /></AdminRoute>} />
+                        <Route path="/admin/sentence-scramble" element={<AdminRoute><AdminSentenceScramble /></AdminRoute>} />
 
 
                         {/* 404 Catch-All Route */}

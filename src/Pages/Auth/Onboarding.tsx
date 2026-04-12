@@ -46,7 +46,7 @@ const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
                         initial={{ scale: 0.8, opacity: 0 }}
                         animate={{ scale: 1, opacity: 1 }}
                         transition={{ duration: 0.5 }}
-                        className="visual-circle bg-warning shadow-action-sm border border-4 border-dark"
+                        className="visual-circle bg-warning shadow-action-sm border border-4 border-theme-main"
                     >
                         <Mascot width="220px" height="220px" mood="excited" />
                     </motion.div>
@@ -55,7 +55,7 @@ const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
                         transition={{ repeat: Infinity, duration: 2 }}
                         className="floating-icon icon-1"
                     >
-                        <Sparkles size={40} className="text-dark" fill="#FACC15" />
+                        <Sparkles size={40} className="text-theme-main" fill="#FACC15" />
                     </motion.div>
                 </div>
             )
@@ -70,14 +70,14 @@ const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
                     <motion.div 
                         initial={{ rotate: -10, opacity: 0 }}
                         animate={{ rotate: 0, opacity: 1 }}
-                        className="visual-card brutalist-card p-4 bg-white d-flex flex-column align-items-center justify-content-center"
+                        className="visual-card brutalist-card p-4 bg-theme-surface border border-4 border-theme-main d-flex flex-column align-items-center justify-content-center"
                         style={{ width: '220px', height: '220px' }}
                     >
-                        <Globe size={80} strokeWidth={2.5} className="text-dark mb-3" />
+                        <Globe size={80} strokeWidth={2.5} className="text-theme-main mb-3" />
                         <div className="d-flex gap-1 flex-wrap justify-content-center">
-                            <span className="badge bg-dark rounded-0 border border-2 border-dark text-uppercase smallest-print">Venda</span>
-                            <span className="badge bg-primary rounded-0 border border-2 border-dark text-uppercase smallest-print">Zulu</span>
-                            <span className="badge bg-success rounded-0 border border-2 border-dark text-uppercase smallest-print">Xhosa</span>
+                            <span className="badge bg-dark rounded-0 border border-2 border-dark text-white text-uppercase smallest-print">Venda</span>
+                            <span className="badge bg-primary rounded-0 border border-2 border-dark text-white text-uppercase smallest-print">Zulu</span>
+                            <span className="badge bg-success rounded-0 border border-2 border-dark text-white text-uppercase smallest-print">Xhosa</span>
                         </div>
                     </motion.div>
                     <motion.div 
@@ -102,19 +102,19 @@ const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
                             initial={{ x: -20, opacity: 0 }}
                             animate={{ x: 0, opacity: 1 }}
                             transition={{ delay: 0.1 }}
-                            className="stat-pill brutalist-card--sm bg-white p-2 d-flex align-items-center gap-3"
+                            className="stat-pill brutalist-card--sm bg-theme-surface p-2 d-flex align-items-center gap-3 border border-2 border-theme-main"
                         >
                             <div className="bg-warning p-2 border border-2 border-dark"><Zap size={20} fill="#000" /></div>
-                            <span className="fw-black text-dark text-uppercase">+250 XP earned!</span>
+                            <span className="fw-black text-theme-main text-uppercase">+250 XP earned!</span>
                         </motion.div>
                         <motion.div 
                             initial={{ x: 20, opacity: 0 }}
                             animate={{ x: 0, opacity: 1 }}
                             transition={{ delay: 0.3 }}
-                            className="stat-pill brutalist-card--sm bg-white p-2 d-flex align-items-center gap-3 mx-4"
+                            className="stat-pill brutalist-card--sm bg-theme-surface p-2 d-flex align-items-center gap-3 mx-4 border border-2 border-theme-main"
                         >
                             <div className="bg-info p-2 border border-2 border-dark"><Trophy size={20} fill="#000" /></div>
-                            <span className="fw-black text-dark text-uppercase">New Achievement!</span>
+                            <span className="fw-black text-theme-main text-uppercase">New Achievement!</span>
                         </motion.div>
                     </div>
                 </div>
@@ -133,11 +133,11 @@ const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
                             rotate: [0, 2, -2, 0]
                         }}
                         transition={{ repeat: Infinity, duration: 2 }}
-                        className="visual-circle bg-white border border-4 border-dark shadow-action d-flex flex-column align-items-center justify-content-center"
+                        className="visual-circle bg-theme-surface border border-4 border-theme-main shadow-action d-flex flex-column align-items-center justify-content-center"
                         style={{ width: '200px', height: '200px' }}
                     >
                         <Flame size={100} className="text-danger" fill="#EF4444" strokeWidth={3} />
-                        <div className="mt-2 fw-black text-dark uppercase ls-1" style={{ fontSize: '1.5rem' }}>7 DAYS</div>
+                        <div className="mt-2 fw-black text-theme-main uppercase ls-1" style={{ fontSize: '1.5rem' }}>7 DAYS</div>
                     </motion.div>
                 </div>
             )
@@ -145,20 +145,20 @@ const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
     ];
 
     return (
-        <div className="onboarding-container bg-white font-auth">
+        <div className="onboarding-container bg-theme-base font-auth">
             {/* Background Pattern */}
-            <div className="onboarding-dots"></div>
+            <div className="onboarding-dots theme-aware-dots"></div>
 
             {/* Header / Progress */}
             <div className="onboarding-top">
-                <div className="progress-track brutalist-card--sm bg-light border border-2 border-dark">
+                <div className="progress-track brutalist-card--sm bg-theme-surface border border-2 border-theme-main">
                     <motion.div 
                         className="progress-fill" 
                         animate={{ width: `${((currentSlide + 1) / slides.length) * 100}%` }}
                         style={{ backgroundColor: slides[currentSlide].accent }}
                     />
                 </div>
-                <button onClick={handleComplete} className="skip-link fw-black text-uppercase smallest-print text-dark ls-1">
+                <button onClick={handleComplete} className="skip-link fw-black text-uppercase smallest-print text-theme-main ls-1">
                     Skip
                 </button>
             </div>
@@ -184,10 +184,10 @@ const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
                             <span className="slide-subtitle text-uppercase fw-black ls-1 mb-2 d-inline-block" style={{ color: slides[currentSlide].accent }}>
                                 {slides[currentSlide].subtitle}
                             </span>
-                            <h1 className="fw-black text-dark text-uppercase ls-tight mb-3 slide-title">
+                            <h1 className="fw-black text-theme-main text-uppercase ls-tight mb-3 slide-title">
                                 {slides[currentSlide].title}
                             </h1>
-                            <p className="slide-description fw-bold text-muted mx-auto" style={{ maxWidth: '380px' }}>
+                            <p className="slide-description fw-bold text-theme-muted mx-auto" style={{ maxWidth: '380px' }}>
                                 {slides[currentSlide].description}
                             </p>
                         </div>
@@ -199,7 +199,7 @@ const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
             <div className="onboarding-footer container pb-5">
                 <JuicyButton 
                     onClick={handleNext}
-                    className="btn w-100 fw-black py-3 text-dark border border-4 border-dark rounded-0 shadow-action text-uppercase ls-1 hover-press d-flex align-items-center justify-content-center gap-2"
+                    className="btn w-100 fw-black py-3 text-dark border border-4 border-theme-main rounded-0 shadow-action text-uppercase ls-1 hover-press d-flex align-items-center justify-content-center gap-2"
                     style={{ backgroundColor: 'var(--venda-yellow)' }}
                 >
                     {currentSlide === slides.length - 1 ? "Start My Quest" : "Continue"}
@@ -230,9 +230,9 @@ const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
                 .onboarding-dots {
                     position: absolute;
                     inset: 0;
-                    background-image: radial-gradient(#000 1px, transparent 1px);
+                    background-image: radial-gradient(var(--color-text) 1px, transparent 1px);
                     background-size: 32px 32px;
-                    opacity: 0.05;
+                    opacity: 0.1;
                     z-index: 0;
                 }
 

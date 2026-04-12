@@ -19,8 +19,8 @@
     color: #fff;
     padding: 1rem 1.5rem;
     border-radius: 16px;
-    border: 4px solid #000;
-    box-shadow: 0 6px 0 rgba(0,0,0,0.2);
+    border: 4px solid var(--color-border);
+    box-shadow: 0 6px 0 rgba(0, 0, 0, 0.2);
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -48,6 +48,7 @@
     font-weight: 800;
     margin: 0;
     line-height: 1.2;
+    color: #fff !important;
 }
 
 .chapter-progress-circle {
@@ -70,11 +71,11 @@
 /* Vertical Connector Line */
 .path-node-line {
     position: absolute;
-    left: calc(5% + 28px); 
+    left: calc(5% + 28px);
     top: 56px;
     bottom: -0.75rem;
     width: 6px;
-    background: #e2e8f0;
+    background: var(--color-surface-soft);
     z-index: 1;
 }
 
@@ -85,34 +86,34 @@
 .path-node-circle {
     width: 60px;
     height: 60px;
-    border: 4px solid #000;
+    border: 4px solid var(--color-border);
     border-radius: 50%;
-    background: #fff;
+    background: var(--color-bg);
     display: flex;
     align-items: center;
     justify-content: center;
     z-index: 2;
     cursor: pointer;
     transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    box-shadow: 0 4px 0 #000;
+    box-shadow: 0 4px 0 var(--color-border);
     position: relative;
     flex-shrink: 0;
 }
 
 .path-node-circle:hover:not(.locked) {
     transform: scale(1.1);
-    box-shadow: 0 8px 0 #000;
+    box-shadow: 0 8px 0 var(--color-border);
 }
 
 .path-node-circle:active:not(.locked) {
     transform: translateY(3px);
-    box-shadow: 0 2px 0 #000;
+    box-shadow: 0 2px 0 var(--color-border);
 }
 
 .path-node-circle.locked {
-    background: #e2e8f0;
-    border-color: #94a3b8;
-    box-shadow: 0 4px 0 #94a3b8;
+    background: var(--color-surface-soft);
+    border-color: var(--color-text-muted);
+    box-shadow: 0 4px 0 var(--color-text-muted);
     cursor: not-allowed;
 }
 
@@ -122,11 +123,11 @@
 }
 
 .path-node-card {
-    background: white;
-    border: 3px solid #000;
+    background: var(--color-card-bg);
+    border: 3px solid var(--color-border);
     border-radius: 12px;
     padding: 0.5rem 1rem;
-    box-shadow: 5px 5px 0px #000;
+    box-shadow: 5px 5px 0px var(--color-border);
     flex-grow: 1;
     max-width: 280px;
     cursor: pointer;
@@ -135,13 +136,13 @@
 
 .path-node-card:hover:not(.locked) {
     transform: translate(-2px, -2px);
-    box-shadow: 7px 7px 0px #000;
+    box-shadow: 7px 7px 0px var(--color-border);
 }
 
 .path-node-card.locked {
-    background-color: #f1f5f9;
-    border-color: #94a3b8;
-    box-shadow: 3px 3px 0px #94a3b8;
+    background-color: var(--color-surface-soft);
+    border-color: var(--color-text-muted);
+    box-shadow: 3px 3px 0px var(--color-text-muted);
     opacity: 0.7;
 }
 
@@ -150,7 +151,7 @@
     font-weight: 900;
     margin: 0;
     text-transform: uppercase;
-    color: #000;
+    color: var(--color-text);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -209,8 +210,8 @@
 
 /* Brutalist Course Cards */
 .course-card-professional {
-    background: white;
-    border: 4px solid #000;
+    background: var(--color-bg);
+    border: 4px solid var(--color-border);
     border-radius: 16px;
     padding: 2rem;
     cursor: pointer;
@@ -220,25 +221,25 @@
     min-height: 160px;
     position: relative;
     justify-content: center;
-    box-shadow: 8px 8px 0px #000;
+    box-shadow: 8px 8px 0px var(--color-border);
 }
 
 .course-card-professional:hover:not(.locked) {
     transform: translate(-4px, -4px);
-    box-shadow: 12px 12px 0px #000;
+    box-shadow: 12px 12px 0px var(--color-border);
 }
 
 .course-card-professional:active:not(.locked) {
     transform: translate(4px, 4px);
-    box-shadow: 0px 0px 0px #000;
+    box-shadow: 0px 0px 0px transparent;
 }
 
 /* Locked State */
 .course-card-professional.locked {
     cursor: not-allowed;
-    background-color: #f1f5f9;
-    border-color: #94a3b8;
-    box-shadow: 4px 4px 0px #94a3b8;
+    background-color: var(--color-surface-soft);
+    border-color: var(--color-text-muted);
+    box-shadow: 4px 4px 0px var(--color-text-muted);
     filter: grayscale(1);
     opacity: 0.8;
 }
@@ -258,8 +259,8 @@
 }
 
 .locked-badge {
-    background: #000;
-    color: #fff;
+    background: var(--color-border);
+    color: var(--color-text-inv);
     padding: 0.5rem 1rem;
     border-radius: 8px;
     font-weight: 900;
@@ -279,7 +280,7 @@
 .card-title {
     font-size: 1.75rem;
     font-weight: 900;
-    color: #000;
+    color: var(--color-text);
     margin-bottom: 0.25rem;
     letter-spacing: -1px;
     text-transform: uppercase;
@@ -302,8 +303,8 @@
 
 .professional-progress-container {
     height: 20px;
-    background-color: #e2e8f0;
-    border: 3px solid #000;
+    background-color: var(--color-surface-soft);
+    border: 3px solid var(--color-border);
     border-radius: 10px;
     overflow: hidden;
     position: relative;
@@ -312,7 +313,7 @@
 .professional-progress-bar {
     height: 100%;
     background-color: var(--venda-yellow);
-    border-right: 3px solid #000;
+    border-right: 3px solid var(--color-border);
     transition: width 1s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
@@ -345,22 +346,23 @@
 
 /* Pagination Brutalism */
 .pagination-btn {
-    background: #fff;
-    border: 3px solid #000 !important;
+    background: var(--color-bg);
+    border: 3px solid var(--color-border) !important;
     font-weight: 900 !important;
     text-transform: uppercase;
-    box-shadow: 4px 4px 0px #000;
+    box-shadow: 4px 4px 0px var(--color-border);
     transition: 0.1s;
+    color: var(--color-text);
 }
 
 .pagination-btn:hover:not(:disabled) {
     transform: translate(-2px, -2px);
-    box-shadow: 6px 6px 0px #000;
+    box-shadow: 6px 6px 0px var(--color-border);
 }
 
 .pagination-btn:active {
     transform: translate(2px, 2px);
-    box-shadow: 0px 0px 0px #000;
+    box-shadow: 0px 0px 0px transparent;
 }
 
 .pagination-btn.active {
@@ -386,5 +388,40 @@
         padding: 0.5rem;
         flex-direction: column;
         gap: 0.2rem;
+    }
+}
+
+/* Gamified Scroll Top Button */
+.scroll-top-btn {
+    position: fixed;
+    bottom: 2rem;
+    right: 2rem;
+    width: 56px;
+    height: 56px;
+    background: var(--venda-yellow, #FACC15);
+    border: 3px solid var(--color-border, #000);
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 6px 0 var(--color-border, #000);
+    z-index: 100;
+    color: #000 !important;
+    transition: transform 0.1s, box-shadow 0.1s;
+}
+
+.scroll-top-btn:hover {
+    background: #FFD600;
+    color: #000 !important;
+}
+
+@media (max-width: 768px) {
+    .scroll-top-btn {
+        bottom: 1.5rem;
+        right: 1.5rem;
+        width: 48px;
+        height: 48px;
+        border-radius: 12px;
     }
 }

@@ -343,8 +343,8 @@ const KnowledgeBattle: React.FC = () => {
         .battle-header-icon {
             width: 48px;
             height: 48px;
-            background: #FACC15;
-            color: #111827;
+            background: var(--color-warning);
+            color: var(--color-text-inv);
             border-radius: 12px;
             display: flex;
             align-items: center;
@@ -352,14 +352,14 @@ const KnowledgeBattle: React.FC = () => {
             font-size: 1.5rem;
         }
         .battle-btn-primary {
-            background-color: #FACC15 !important;
-            color: #111827 !important;
+            background-color: var(--color-warning) !important;
+            color: var(--color-text-inv) !important;
             border: none !important;
             border-radius: 12px;
-            box-shadow: 0 4px 0 #EAB308 !important;
+            box-shadow: 0 4px 0 var(--color-warning-dark, #EAB308) !important;
             transition: all 0.2s;
         }
-        .battle-btn-primary:active { transform: translateY(2px); box-shadow: 0 2px 0 #EAB308 !important; }
+        .battle-btn-primary:active { transform: translateY(2px); box-shadow: 0 2px 0 var(--color-warning-dark, #EAB308) !important; }
         .battle-btn-primary:disabled { opacity: 0.5; }
         .neon-dot {
             width: 8px;
@@ -384,8 +384,8 @@ const KnowledgeBattle: React.FC = () => {
             width: 120px;
             height: 120px;
             border-radius: 50%;
-            border: 4px solid #F3F4F6;
-            border-top-color: #FACC15;
+            border: 4px solid var(--color-surface-soft, #F3F4F6);
+            border-top-color: var(--color-warning);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -396,23 +396,23 @@ const KnowledgeBattle: React.FC = () => {
 
     // ---- LOADING ----
     if (loading) return (
-        <div className="min-vh-100 bg-white d-flex justify-content-center align-items-center">
+        <div className="min-vh-100 bg-theme-base d-flex justify-content-center align-items-center">
             <div className="text-center">
-                <div className="spinner-border mb-3" style={{ color: '#FACC15', width: 48, height: 48 }}></div>
-                <p className="smallest fw-bold text-muted ls-2 text-uppercase">LOADING...</p>
+                <div className="spinner-border mb-3" style={{ color: 'var(--color-warning)', width: 48, height: 48 }}></div>
+                <p className="smallest fw-bold text-theme-muted ls-2 text-uppercase">LOADING...</p>
             </div>
         </div>
     );
 
     if (!user) return (
-        <div className="min-vh-100 bg-white d-flex align-items-center justify-content-center p-3">
+        <div className="min-vh-100 bg-theme-base d-flex align-items-center justify-content-center p-3">
             <div className="text-center" style={{ maxWidth: 400 }}>
                 <div className="mb-4">
-                    <i className="bi bi-shield-lock-fill display-1 text-dark opacity-10"></i>
+                    <i className="bi bi-shield-lock-fill display-1 text-theme-main opacity-10"></i>
                 </div>
-                <h2 className="fw-bold mb-3">Sign In Required</h2>
-                <p className="text-muted mb-4">You need to be logged in to battle other learners.</p>
-                <button className="btn btn-dark rounded-pill px-5 py-2 fw-bold" onClick={() => navigate('/login')}>
+                <h2 className="fw-bold mb-3 text-theme-main">Sign In Required</h2>
+                <p className="text-theme-muted mb-4">You need to be logged in to battle other learners.</p>
+                <button className="btn btn-theme-main rounded-pill px-5 py-2 fw-bold" onClick={() => navigate('/login')}>
                     SIGN IN
                 </button>
             </div>
@@ -426,7 +426,7 @@ const KnowledgeBattle: React.FC = () => {
         const completedLessons = lessons.filter(l => completedIds.includes(l.id));
 
         return (
-            <div className="min-vh-100 py-5 px-3" style={{ background: 'linear-gradient(180deg, #111827 0%, #1F2937 30%, #F9FAFB 30%)' }}>
+            <div className="min-vh-100 py-5 px-3 bg-theme-base" style={{ background: 'linear-gradient(180deg, var(--color-bg-dark, #111827) 0%, var(--color-bg-alt, #1F2937) 30%, var(--color-bg) 30%)' }}>
                 <div className="container" style={{ maxWidth: 700 }}>
 
                     {/* Header */}
@@ -451,13 +451,13 @@ const KnowledgeBattle: React.FC = () => {
 
                     {/* Tabs */}
                     <div className="d-flex gap-2 mb-4" style={{ marginTop: -20 }}>
-                        <button className={`btn flex-fill py-2 fw-bold smallest ls-1 rounded-3 d-flex align-items-center justify-content-center gap-2 ${lobbyTab === 'find' ? 'text-dark' : 'btn-outline-secondary'}`}
-                            style={lobbyTab === 'find' ? { backgroundColor: '#FACC15', border: 'none', boxShadow: '0 2px 0 #EAB308' } : {}}
+                        <button className={`btn flex-fill py-2 fw-bold smallest ls-1 rounded-3 d-flex align-items-center justify-content-center gap-2 ${lobbyTab === 'find' ? 'text-dark' : 'btn-outline-theme'}`}
+                            style={lobbyTab === 'find' ? { backgroundColor: 'var(--color-warning)', border: 'none', boxShadow: '0 2px 0 var(--color-warning-dark)' } : {}}
                             onClick={() => setLobbyTab('find')}>
                             <Search size={14} /> FIND BATTLE
                         </button>
-                        <button className={`btn flex-fill py-2 fw-bold smallest ls-1 rounded-3 d-flex align-items-center justify-content-center gap-2 ${lobbyTab === 'history' ? 'text-dark' : 'btn-outline-secondary'}`}
-                            style={lobbyTab === 'history' ? { backgroundColor: '#FACC15', border: 'none', boxShadow: '0 2px 0 #EAB308' } : {}}
+                        <button className={`btn flex-fill py-2 fw-bold smallest ls-1 rounded-3 d-flex align-items-center justify-content-center gap-2 ${lobbyTab === 'history' ? 'text-dark' : 'btn-outline-theme'}`}
+                            style={lobbyTab === 'history' ? { backgroundColor: 'var(--color-warning)', border: 'none', boxShadow: '0 2px 0 var(--color-warning-dark)' } : {}}
                             onClick={() => setLobbyTab('history')}>
                             <History size={14} /> MY BATTLES ({myBattles.length})
                         </button>
@@ -467,9 +467,9 @@ const KnowledgeBattle: React.FC = () => {
                         <>
                             {/* NEW: Active Battles Section */}
                             {myBattles.some(b => b.status !== 'completed') && (
-                                <div className="bg-white rounded-4 shadow-sm p-4 mb-4" style={{ border: '1px solid #FDE68A', backgroundColor: '#FFFBEB' }}>
-                                    <h5 className="fw-bold mb-1 text-dark">🔴 In Progress</h5>
-                                    <p className="text-muted small mb-3">You have an active battle! Jump back in.</p>
+                                <div className="bg-theme-card rounded-4 shadow-sm p-4 mb-4" style={{ border: '1px solid var(--color-warning)', backgroundColor: 'var(--color-warning-soft, #FFFBEB)' }}>
+                                    <h5 className="fw-bold mb-1 text-theme-main">🔴 In Progress</h5>
+                                    <p className="text-theme-muted small mb-3">You have an active battle! Jump back in.</p>
                                     {myBattles.filter(b => b.status !== 'completed').map(b => (
                                         <div key={b.id} className="d-flex align-items-center justify-content-between p-3 mb-2 rounded-3 bg-white border">
                                             <div>
@@ -477,7 +477,7 @@ const KnowledgeBattle: React.FC = () => {
                                                 <div className="smallest text-muted">vs {b.challengerId === user?.uid ? (b.opponentName || 'Waiting...') : b.challengerName}</div>
                                             </div>
                                             <button className="btn btn-sm btn-primary px-3 py-1 fw-bold smallest ls-1 rounded-pill text-dark"
-                                                style={{ backgroundColor: '#FACC15', border: 'none' }}
+                                                style={{ backgroundColor: 'var(--color-warning)', border: 'none' }}
                                                 onClick={() => b.status === 'waiting' ? handleResumeWaiting(b) : handleResumeBattle(b)}>
                                                 CONTINUE
                                             </button>
@@ -487,9 +487,9 @@ const KnowledgeBattle: React.FC = () => {
                             )}
 
                             {/* Step 1: Select Lesson */}
-                            <div className="bg-white rounded-4 shadow-sm p-4 mb-4" style={{ border: '1px solid #E5E7EB' }}>
-                                <h5 className="fw-bold mb-1">① Choose a Lesson</h5>
-                                <p className="text-muted small mb-3">Pick a lesson you've completed to battle on.</p>
+                            <div className="bg-theme-card rounded-4 shadow-sm p-4 mb-4 border border-theme-soft">
+                                <h5 className="fw-bold mb-1 text-theme-main">① Choose a Lesson</h5>
+                                <p className="text-theme-muted small mb-3">Pick a lesson you've completed to battle on.</p>
 
                                 {completedLessons.length === 0 ? (
                                     <div className="text-center py-4">
@@ -522,9 +522,9 @@ const KnowledgeBattle: React.FC = () => {
 
                             {/* Step 2: Open Battles / Create */}
                             {selectedLessonId && (
-                                <div className="bg-white rounded-4 shadow-sm p-4 mb-4 animate__animated animate__fadeIn" style={{ border: '1px solid #E5E7EB' }}>
-                                    <h5 className="fw-bold mb-1">② Join or Create</h5>
-                                    <p className="text-muted small mb-3">Join an open battle or create your own room.</p>
+                                <div className="bg-theme-card rounded-4 shadow-sm p-4 mb-4 animate__animated animate__fadeIn border border-theme-soft">
+                                    <h5 className="fw-bold mb-1 text-theme-main">② Join or Create</h5>
+                                    <p className="text-theme-muted small mb-3">Join an open battle or create your own room.</p>
 
                                     {loadingAction ? (
                                         <div className="text-center py-3">
@@ -534,13 +534,13 @@ const KnowledgeBattle: React.FC = () => {
                                         <>
                                             {openBattles.length > 0 && (
                                                 <div className="mb-3">
-                                                    <p className="smallest fw-bold text-muted ls-2 text-uppercase mb-2">OPEN BATTLES</p>
+                                                    <p className="smallest fw-bold text-theme-muted ls-2 text-uppercase mb-2">OPEN BATTLES</p>
                                                     {openBattles.map(b => (
                                                         <div key={b.id} className="d-flex align-items-center justify-content-between p-3 mb-2 rounded-3"
-                                                            style={{ backgroundColor: '#F0FDF4', border: '1px solid #BBF7D0' }}>
+                                                            style={{ backgroundColor: 'var(--color-success-soft, #F0FDF4)', border: '1px solid var(--color-success, #BBF7D0)' }}>
                                                             <div>
-                                                                <span className="fw-bold">{b.challengerName}</span>
-                                                                <span className="text-muted small ms-2">is waiting...</span>
+                                                                <span className="fw-bold text-theme-main">{b.challengerName}</span>
+                                                                <span className="text-theme-muted small ms-2">is waiting...</span>
                                                             </div>
                                                             <button className="btn btn-sm px-3 py-1 fw-bold smallest ls-1 rounded-pill text-white d-flex align-items-center gap-1"
                                                                 style={{ background: 'linear-gradient(135deg, #10B981, #059669)' }}
@@ -569,7 +569,7 @@ const KnowledgeBattle: React.FC = () => {
                         </>
                     ) : (
                         /* BATTLE HISTORY TAB */
-                        <div className="bg-white rounded-4 shadow-sm p-4" style={{ border: '1px solid #E5E7EB' }}>
+                        <div className="bg-theme-card rounded-4 shadow-sm p-4 border border-theme-soft">
                             {myBattles.length === 0 ? (
                                 <div className="text-center py-4">
                                     <div className="mb-2 opacity-25">
@@ -591,12 +591,12 @@ const KnowledgeBattle: React.FC = () => {
                                     return (
                                         <div key={b.id} className="p-3 mb-2 rounded-3 d-flex align-items-center justify-content-between"
                                             style={{
-                                                backgroundColor: isWinner ? '#F0FDF4' : isDraw ? '#FFFBEB' : isWaiting ? '#F3F4F6' : '#FEF2F2',
-                                                border: `1px solid ${isWinner ? '#BBF7D0' : isDraw ? '#FDE68A' : isWaiting ? '#E5E7EB' : '#FECACA'}`
+                                                backgroundColor: isWinner ? 'var(--color-success-soft, #F0FDF4)' : isDraw ? 'var(--color-warning-soft, #FFFBEB)' : isWaiting ? 'var(--color-surface-soft, #F3F4F6)' : 'var(--color-error-soft, #FEF2F2)',
+                                                border: `1px solid ${isWinner ? 'var(--color-success, #BBF7D0)' : isDraw ? 'var(--color-warning, #FDE68A)' : isWaiting ? 'var(--color-border-soft, #E5E7EB)' : 'var(--color-error, #FECACA)'}`
                                             }}>
                                             <div>
-                                                <div className="fw-bold small">{b.lessonTitle}</div>
-                                                <div className="smallest text-muted">
+                                                <div className="fw-bold small text-theme-main">{b.lessonTitle}</div>
+                                                <div className="smallest text-theme-muted">
                                                     vs {theirName}
                                                     {b.status === 'completed' && ` • ${myScore} - ${theirScore}`}
                                                 </div>
@@ -641,19 +641,19 @@ const KnowledgeBattle: React.FC = () => {
     // =============================================
     if (view === 'waiting') {
         return (
-            <div className="min-vh-100 bg-white d-flex align-items-center justify-content-center p-3">
+            <div className="min-vh-100 bg-theme-base d-flex align-items-center justify-content-center p-3">
                 <div className="text-center" style={{ maxWidth: 500 }}>
                     <div className="mb-4">
                         <div className="battle-waiting-ring mx-auto">
                             <i className="bi bi-lightning-charge-fill display-1 text-warning"></i>
                         </div>
                     </div>
-                    <h2 className="fw-bold mb-2 ls-tight">Waiting for Opponent...</h2>
-                    <p className="text-muted mb-4">Share this battle with a friend who has completed the same lesson!</p>
+                    <h2 className="fw-bold mb-2 ls-tight text-theme-main">Waiting for Opponent...</h2>
+                    <p className="text-theme-muted mb-4">Share this battle with a friend who has completed the same lesson!</p>
 
-                    <div className="p-4 rounded-4 mb-4" style={{ backgroundColor: '#F3F4F6', border: '1px solid #E5E7EB' }}>
-                        <p className="smallest fw-bold text-muted ls-2 text-uppercase mb-2">LESSON</p>
-                        <h4 className="fw-bold mb-0">{currentBattle?.lessonTitle || '...'}</h4>
+                    <div className="p-4 rounded-4 mb-4" style={{ backgroundColor: 'var(--color-card-bg)', border: '1px solid var(--color-border)' }}>
+                        <p className="smallest fw-bold text-theme-muted ls-2 text-uppercase mb-2">LESSON</p>
+                        <h4 className="fw-bold mb-0 text-theme-main">{currentBattle?.lessonTitle || '...'}</h4>
                     </div>
 
                     {/* Pulsing dots animation */}
@@ -683,8 +683,8 @@ const KnowledgeBattle: React.FC = () => {
         const lesson = getLesson();
         if (!lesson || !lesson.questions || lesson.questions.length === 0) {
             return (
-                <div className="min-vh-100 bg-white d-flex align-items-center justify-content-center">
-                    <p className="text-muted">No questions found for this lesson.</p>
+                <div className="min-vh-100 bg-theme-base d-flex align-items-center justify-content-center">
+                    <p className="text-theme-muted">No questions found for this lesson.</p>
                 </div>
             );
         }
@@ -696,14 +696,14 @@ const KnowledgeBattle: React.FC = () => {
 
             if (!opponentFinished) {
                 return (
-                    <div className="min-vh-100 bg-white d-flex align-items-center justify-content-center p-3">
+                    <div className="min-vh-100 bg-theme-base d-flex align-items-center justify-content-center p-3">
                         <div className="text-center" style={{ maxWidth: 500 }}>
                             <div className="mb-4">
-                                <i className="bi bi-flag-fill display-1 text-dark opacity-10"></i>
+                                <i className="bi bi-flag-fill display-1 text-theme-main opacity-10"></i>
                             </div>
-                            <h2 className="fw-bold mb-2 ls-tight">You Finished!</h2>
-                            <p className="text-muted mb-2">Your Score: <strong style={{ color: '#FACC15' }}>{score} XP</strong></p>
-                            <p className="text-muted mb-4">Waiting for your opponent to finish...</p>
+                            <h2 className="fw-bold mb-2 ls-tight text-theme-main">You Finished!</h2>
+                            <p className="text-theme-muted mb-2">Your Score: <strong style={{ color: 'var(--color-warning)' }}>{score} XP</strong></p>
+                            <p className="text-theme-muted mb-4">Waiting for your opponent to finish...</p>
                             <div className="d-flex justify-content-center gap-2 mb-4">
                                 {[0, 1, 2].map(i => (
                                     <div key={i} style={{
@@ -752,7 +752,7 @@ const KnowledgeBattle: React.FC = () => {
             };
 
             return (
-                <div className="min-vh-100 bg-white py-4 px-3">
+                <div className="min-vh-100 bg-theme-base py-4 px-3">
                     <ScorePopup result={lastScoreResult} />
                     <div className="container" style={{ maxWidth: 700 }}>
 
@@ -791,11 +791,11 @@ const KnowledgeBattle: React.FC = () => {
 
                         {/* Question Header */}
                         <div className="d-flex justify-content-between align-items-center mb-3">
-                            <span className="smallest fw-bold ls-1 text-muted">Q{currentQIndex + 1}/{totalQ}</span>
-                            <span className="badge rounded-pill bg-light text-dark border smallest d-flex align-items-center gap-1">
+                            <span className="smallest fw-bold ls-1 text-theme-muted">Q{currentQIndex + 1}/{totalQ}</span>
+                            <span className="badge rounded-pill bg-theme-card text-theme-main border smallest d-flex align-items-center gap-1 border-theme-soft">
                                 {typeLabel[q.type]?.icon} {typeLabel[q.type]?.label || 'QUESTION'}
                             </span>
-                            {streak >= 2 && <span className="badge rounded-pill bg-dark text-warning smallest"><Zap size={10} fill="currentColor" /> {streak}</span>}
+                            {streak >= 2 && <span className="badge rounded-pill bg-theme-main text-warning smallest"><Zap size={10} fill="currentColor" /> {streak}</span>}
                         </div>
 
                         {/* Question */}

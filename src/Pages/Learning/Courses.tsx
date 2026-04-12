@@ -5,8 +5,8 @@ import { useNavigate } from 'react-router-dom';
 import { fetchLessons, fetchUserData, getMicroLessons, fetchLanguages, invalidateCache } from '../../services/dataCache';
 import { doc, updateDoc } from 'firebase/firestore';
 import { db } from '../../services/firebaseConfig';
-import { Key, MessageSquare, Star, Lightbulb, CheckSquare, Zap, ChevronRight, ArrowLeft, Check, Lock, Play, X } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { Key, MessageSquare, Star, Lightbulb, CheckSquare, Zap, ChevronRight, ArrowLeft, Check, Lock, Play, X, BookOpen, Sparkles, ArrowUp } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 import Skeleton from 'react-loading-skeleton';
 import 'react-loading-skeleton/dist/skeleton.css';
 import JuicyButton from '../../components/JuicyButton';
@@ -70,6 +70,7 @@ const Courses: React.FC = () => {
     const [loading, setLoading] = useState(true);
     const [isLoggedIn, setIsLoggedIn] = useState(false);
     const [currentLangPage, setCurrentLangPage] = useState(1);
+    const [showScrollTop, setShowScrollTop] = useState(false);
     const langsPerPage = 5;
 
     useEffect(() => {
@@ -106,8 +107,21 @@ const Courses: React.FC = () => {
             setLoading(false);
         };
 
+        const handleScroll = () => {
+            if (window.scrollY > 300) {
+                setShowScrollTop(true);
+            } else {
+                setShowScrollTop(false);
+            }
+        };
+
+        window.addEventListener('scroll', handleScroll);
+
         fetchData();
-        return () => unsubAuth();
+        return () => {
+            unsubAuth();
+            window.removeEventListener('scroll', handleScroll);
+        };
     }, []);
 
     const handleLanguageSelect = async (langId: string) => {
@@ -140,7 +154,7 @@ const Courses: React.FC = () => {
     };
 
     if (loading) return (
-        <div className="learning-container bg-white min-vh-100 animate__animated animate__fadeIn">
+        <div className="learning-container bg-theme-base min-vh-100 animate__animated animate__fadeIn">
             <div className="container pt-2 pb-4" style={{ maxWidth: '800px' }}>
                 <div className="mb-4" style={{ maxWidth: 280 }}>
                     <Skeleton height={36} width={200} borderRadius={8} />
@@ -162,9 +176,10 @@ const Courses: React.FC = () => {
     );
 
     const filteredCourses = courses.filter(c =>
-        c.languageId === selectedLanguageId ||
-        (!c.languageId && selectedLanguageId === 'venda')
+        c.languageId === selectedLanguageId || !c.languageId
     );
+
+    const selectedLangName = languages.find(l => l.id === selectedLanguageId)?.name || 'this language';
 
     const renderLanguageSelection = () => {
         // Sort languages so the last selected one is first
@@ -181,8 +196,8 @@ const Courses: React.FC = () => {
         return (
             <div className="animate__animated animate__fadeIn">
                 <header className="mb-3 text-center">
-                    <h4 className="fw-black mb-1 ls-tight text-dark text-uppercase">Select Your Path</h4>
-                    <p className="smallest text-muted fw-bold ls-1 text-uppercase opacity-75">Choose a language course</p>
+                    <h4 className="fw-black mb-1 ls-tight text-theme-main text-uppercase">Select Your Path</h4>
+                    <p className="smallest text-theme-muted fw-bold ls-1 text-uppercase opacity-75">Choose a language course</p>
                 </header>
 
                 <div className="d-flex flex-column gap-3 mx-auto" style={{ maxWidth: '600px' }}>
@@ -196,23 +211,23 @@ const Courses: React.FC = () => {
                                     style={{ 
                                         transition: 'all 0.3s ease', 
                                         minHeight: '100px',
-                                        boxShadow: isSelected ? '8px 8px 0px #198754' : '8px 8px 0px #000',
-                                        borderColor: isSelected ? '#198754' : '#000'
+                                        boxShadow: isSelected ? '8px 8px 0px #198754' : '8px 8px 0px var(--color-border)',
+                                        borderColor: isSelected ? '#198754' : 'var(--color-border)'
                                     }}
                                 >
                                 <div className="d-flex align-items-center justify-content-between gap-3 text-start">
                                     <div className="d-flex align-items-center gap-3 gap-md-4">
-                                        <div className="bg-white p-0 rounded-4 border overflow-hidden d-flex align-items-center justify-content-center" 
+                                        <div className="bg-theme-card p-0 rounded-4 border border-theme-main overflow-hidden d-flex align-items-center justify-content-center" 
                                              style={{ width: '70px', height: '70px', flexShrink: 0 }}>
                                             <LanguageCharacter languageName={lang.name} style={{ height: '90%', width: 'auto' }} />
                                         </div>
                                         <div>
-                                            <h6 className="fw-black text-dark mb-0 text-uppercase">{lang.name}</h6>
-                                            <p className="smallest text-muted fw-bold ls-1 uppercase opacity-75 mb-0">Explore Library</p>
+                                            <h6 className="fw-black text-theme-main mb-0 text-uppercase">{lang.name}</h6>
+                                            <p className="smallest text-theme-muted fw-bold ls-1 uppercase opacity-75 mb-0">Explore Library</p>
                                         </div>
                                     </div>
                                     <div className="d-flex align-items-center gap-2">
-                                        <span className="badge bg-light text-muted border fw-bold ls-1 px-2 py-1 d-none d-sm-inline-block" style={{ fontSize: '10px' }}>
+                                        <span className="badge bg-theme-surface text-theme-muted border border-theme-main fw-bold ls-1 px-2 py-1 d-none d-sm-inline-block" style={{ fontSize: '10px' }}>
                                             {lang.code?.toUpperCase()}
                                         </span>
                                         <ChevronRight size={18} className="text-warning" />
@@ -308,9 +323,9 @@ const Courses: React.FC = () => {
                                             onClick={() => { if (isUnlocked) navigate(`/game/${course.id}/${ml.id}`); }}
                                             whileHover={isUnlocked ? { scale: 1.15 } : {}}
                                             whileTap={isUnlocked ? { scale: 0.95 } : {}}
-                                            style={{ backgroundColor: isUnlocked ? theme.bg : '#e2e8f0' }}
+                                            style={{ backgroundColor: isUnlocked ? theme.bg : 'var(--color-surface-soft)' }}
                                         >
-                                            {!isUnlocked ? <Lock size={24} className="text-muted" /> : (isDone ? <Check size={30} className="text-success" /> : <Play size={24} fill="currentColor" />)}
+                                            {!isUnlocked ? <Lock size={24} className="text-theme-muted" /> : (isDone ? <Check size={30} className="text-success" /> : <Play size={24} fill="currentColor" />)}
                                         </motion.div>
 
                                         {/* Lesson Info Card */}
@@ -319,7 +334,7 @@ const Courses: React.FC = () => {
                                             onClick={() => { if (isUnlocked) navigate(`/game/${course.id}/${ml.id}`); }}
                                         >
                                             <div className="path-node-title">{ml.title}</div>
-                                            <div className="smallest text-muted fw-bold ls-1 uppercase mt-1">
+                                            <div className="smallest text-theme-muted fw-bold ls-1 uppercase mt-1">
                                                 {isDone ? 'COMPLETED' : (isUnlocked ? 'START MISSION' : 'LOCKED')}
                                             </div>
                                         </div>
@@ -334,11 +349,11 @@ const Courses: React.FC = () => {
     };
 
     return (
-        <div className="learning-container bg-white min-vh-100">
+        <div className="learning-container bg-theme-base min-vh-100">
             <div className="container pt-3 pb-5" style={{ maxWidth: '900px' }}>
                 <div className="d-flex justify-content-between align-items-center mb-2">
                     <JuicyButton
-                        className={`btn ${!selectedLanguageId && lastLanguageId ? 'btn-white border-3 border-dark rounded-circle p-0' : 'btn-link text-decoration-none p-0'} d-flex align-items-center justify-content-center text-dark fw-bold smallest ls-1 text-uppercase shadow-action-sm`}
+                        className={`btn ${!selectedLanguageId && lastLanguageId ? 'btn-white border-3 border-theme-main rounded-circle p-0' : 'btn-link text-decoration-none p-0'} d-flex align-items-center justify-content-center text-theme-main fw-bold smallest ls-1 text-uppercase shadow-action-sm`}
                         onClick={() => {
                             if (!selectedLanguageId && lastLanguageId) {
                                 setSelectedLanguageId(lastLanguageId);
@@ -346,7 +361,7 @@ const Courses: React.FC = () => {
                                 navigate('/');
                             }
                         }}
-                        style={!selectedLanguageId && lastLanguageId ? { width: '40px', height: '40px', backgroundColor: 'white' } : {}}
+                        style={!selectedLanguageId && lastLanguageId ? { width: '40px', height: '40px', backgroundColor: 'var(--color-bg)' } : {}}
                     >
                         {!selectedLanguageId && lastLanguageId ? <X size={24} strokeWidth={3} /> : <><ArrowLeft size={16} /> Home</>}
                     </JuicyButton>
@@ -377,13 +392,13 @@ const Courses: React.FC = () => {
                 {!selectedLanguageId ? renderLanguageSelection() : (
                     <>
                         {!isLoggedIn && (
-                            <div className="brutalist-card p-4 d-flex flex-column flex-md-row align-items-center gap-3 bg-white mb-5 shadow-action-sm">
-                                <div className="bg-warning p-3 rounded-circle border-3 border-dark">
+                            <div className="brutalist-card p-4 d-flex flex-column flex-md-row align-items-center gap-3 bg-theme-card mb-5 shadow-action-sm">
+                                <div className="bg-warning p-3 rounded-circle border-3 border-theme-main">
                                     <Key size={30} className="text-dark" />
                                 </div>
                                 <div className="flex-grow-1 text-center text-md-start">
-                                    <h5 className="fw-black text-uppercase mb-1">Save Your Progress!</h5>
-                                    <p className="small fw-bold text-muted mb-0">Sign in to sync your achievements across all devices.</p>
+                                    <h5 className="fw-black text-uppercase text-theme-main mb-1">Save Your Progress!</h5>
+                                    <p className="small fw-bold text-theme-muted mb-0">Sign in to sync your achievements across all devices.</p>
                                 </div>
                                 <JuicyButton onClick={() => navigate('/login')} className="game-btn-primary px-4 py-2 w-100 w-md-auto">
                                     SIGN IN
@@ -391,10 +406,59 @@ const Courses: React.FC = () => {
                             </div>
                         )}
 
-                        {renderPath()}
+                        {filteredCourses.length === 0 ? (
+                            <div className="animate__animated animate__fadeIn d-flex flex-column align-items-center justify-content-center py-5 text-center" style={{ minHeight: '50vh' }}>
+                                <div className="position-relative mb-4">
+                                    <div className="rounded-circle d-flex align-items-center justify-content-center mx-auto"
+                                        style={{ width: 120, height: 120, background: 'linear-gradient(135deg, #FEF3C7, #FDE68A)', border: '4px solid var(--color-border)' }}>
+                                        <BookOpen size={48} strokeWidth={2} className="text-dark" />
+                                    </div>
+                                    <div className="position-absolute rounded-circle d-flex align-items-center justify-content-center bg-warning border border-dark border-3"
+                                        style={{ width: 40, height: 40, bottom: -4, right: -4 }}>
+                                        <Sparkles size={20} className="text-dark" />
+                                    </div>
+                                </div>
+                                <h3 className="fw-black text-theme-main mb-2 ls-tight">Coming Soon!</h3>
+                                <p className="text-theme-muted fw-bold mb-1" style={{ maxWidth: 380, lineHeight: 1.6 }}>
+                                    We're currently building lessons for <strong className="text-warning">{selectedLangName}</strong>. Our team is crafting authentic, high-quality content.
+                                </p>
+                                <p className="smallest text-theme-muted fw-bold ls-1 text-uppercase mb-4 opacity-75">Check back soon or explore games in the meantime</p>
+                                <div className="d-flex flex-column flex-sm-row gap-3 w-100 justify-content-center" style={{ maxWidth: 400 }}>
+                                    <button
+                                        onClick={() => navigate('/mitambo')}
+                                        className="btn btn-game btn-game-primary py-3 px-4 flex-grow-1 smallest fw-black"
+                                    >
+                                        PLAY GAMES INSTEAD
+                                    </button>
+                                    <button
+                                        onClick={() => { setLastLanguageId(selectedLanguageId); setSelectedLanguageId(null); }}
+                                        className="btn btn-game btn-game-white py-3 px-4 flex-grow-1 smallest fw-black"
+                                    >
+                                        SWITCH LANGUAGE
+                                    </button>
+                                </div>
+                            </div>
+                        ) : renderPath()}
                     </>
                 )}
             </div>
+
+            <AnimatePresence>
+                {showScrollTop && (
+                    <motion.button
+                        className="scroll-top-btn"
+                        initial={{ opacity: 0, scale: 0.5, y: 50 }}
+                        animate={{ opacity: 1, scale: 1, y: 0 }}
+                        exit={{ opacity: 0, scale: 0.5, y: 50 }}
+                        whileHover={{ scale: 1.1, backgroundColor: '#FFD600' }}
+                        whileTap={{ scale: 0.9, y: 4 }}
+                        onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+                        aria-label="Scroll to top"
+                    >
+                        <ArrowUp size={30} strokeWidth={3} />
+                    </motion.button>
+                )}
+            </AnimatePresence>
         </div>
     );
 };
