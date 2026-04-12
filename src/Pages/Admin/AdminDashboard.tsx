@@ -1,15 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Users, Book, Zap, Database, ShieldCheck, Loader2 } from 'lucide-react';
+import { Users, Book, Zap, ShieldCheck, Loader2, Gamepad2 } from 'lucide-react';
 import AdminNavbar from '../../components/AdminNavbar';
 import { fetchAllUsers, fetchLessons } from '../../services/dataCache';
-import { seedPuzzles } from '../../services/seedPuzzles';
-import { seedSyllables } from '../../services/seedSyllables';
-import { seedDailyWords } from '../../services/seedDailyWords';
-import { seedSentences } from '../../services/seedSentences';
-import { seedWordBomb } from '../../services/seedWordBomb';
-import { seedPicturePuzzles } from '../../services/seedPicturePuzzles';
-import { popupService } from '../../services/popupService';
 
 const AdminDashboard: React.FC = () => {
     const [stats, setStats] = useState({
@@ -56,77 +49,23 @@ const AdminDashboard: React.FC = () => {
     const statCards = [
         { title: 'Total Students', value: stats.totalUsers, icon: Users, color: '#FACC15', link: '/admin/users' },
         { title: 'Active Lessons', value: stats.totalLessons, icon: Book, color: '#000', link: '/admin/lessons' },
+        { title: 'Game Puzzles', value: 'Manage', icon: Gamepad2, color: '#FACC15', link: '/admin/game-content' },
         { title: 'Community XP', value: stats.totalPoints.toLocaleString(), icon: Zap, color: '#FACC15', link: '#' },
     ];
 
     return (
-        <div className="min-vh-100 pb-5 bg-light">
+        <div className="min-vh-100 pb-5 bg-theme-base">
             <AdminNavbar />
 
-            <div className="py-5 bg-white border-bottom shadow-sm">
+            <div className="py-5 bg-theme-surface border-bottom shadow-sm">
                 <div className="container" style={{ maxWidth: '1100px' }}>
                     <div className="row g-4 align-items-center">
-                        <div className="col-md-9">
+                        <div className="col-12 text-center text-md-start">
                             <div className="px-3">
-                                <span className="fw-bold ls-2 text-uppercase smallest d-block mb-2 text-warning">System Overview</span>
-                                <h1 className="fw-bold ls-tight mb-0 text-dark" style={{ fontSize: '2.5rem' }}>
-                                    Admin <span style={{ color: '#FACC15' }}>Dashboard</span>
+                                <span className="fw-bold ls-1 text-uppercase smallest d-block mb-2 text-warning-custom">System Overview</span>
+                                <h1 className="fw-bold ls-tight mb-0 text-theme-main" style={{ fontSize: '2.5rem' }}>
+                                    Admin <span className="text-warning-custom">Dashboard</span>
                                 </h1>
-                            </div>
-                        </div>
-                        <div className="col-md-3">
-                            <div className="card border-0 shadow-sm h-100 p-3 text-center">
-                                <div className="mb-3 text-warning">
-                                    <Database size={40} className="mx-auto" />
-                                </div>
-                                <h6 className="fw-bold">Seed Puzzles</h6>
-                                <p className="text-muted small mb-3">Reset / Populate Word Puzzles</p>
-                                <button onClick={seedPuzzles} className="btn btn-outline-warning btn-sm w-100 fw-bold mb-2">
-                                    Seed Word Puzzles
-                                </button>
-                                <button onClick={seedSyllables} className="btn btn-outline-info btn-sm w-100 fw-bold mb-2">
-                                    Seed Syllables
-                                </button>
-                                <button onClick={async () => {
-                                    const confirm = await popupService.confirm("Seed Daily Words?", "Vha khou ṱoḓa u vusulusa maipfi a ḓuvha na ḓuvha?");
-                                    if (confirm.isConfirmed) {
-                                        popupService.showLoading();
-                                        const res = await seedDailyWords();
-                                        popupService.innerSuccess('Success', res.message);
-                                    }
-                                }} className="btn btn-outline-success btn-sm w-100 fw-bold mb-2">
-                                    Seed Daily Words
-                                </button>
-                                <button onClick={async () => {
-                                    const confirm = await popupService.confirm("Seed Sentences?", "Vha khou ṱoḓa u vusulusa fhungo?");
-                                    if (confirm.isConfirmed) {
-                                        popupService.showLoading();
-                                        const res = await seedSentences();
-                                        popupService.innerSuccess('Success', res.message);
-                                    }
-                                }} className="btn btn-outline-primary btn-sm w-100 fw-bold mb-2">
-                                    Seed Sentences
-                                </button>
-                                <button onClick={async () => {
-                                    const confirm = await popupService.confirm("Seed Picture Puzzles?", "This will overwrite existing standalone data.");
-                                    if (confirm.isConfirmed) {
-                                        popupService.showLoading();
-                                        const res = await seedPicturePuzzles();
-                                        popupService.innerSuccess('Success', res.message);
-                                    }
-                                }} className="btn btn-outline-danger btn-sm w-100 fw-bold mb-2">
-                                    Seed Picture Puzzles
-                                </button>
-                                <button onClick={async () => {
-                                    const confirm = await popupService.confirm("Seed Word Bomb words?", "Vha khou ṱoḓa u vusulusa maipfi a Word Bomb?");
-                                    if (confirm.isConfirmed) {
-                                        popupService.showLoading();
-                                        const res = await seedWordBomb();
-                                        popupService.innerSuccess('Success', res.message);
-                                    }
-                                }} className="btn btn-outline-dark btn-sm w-100 fw-bold mb-2">
-                                    Seed Word Bomb
-                                </button>
                             </div>
                         </div>
                     </div>
@@ -137,7 +76,7 @@ const AdminDashboard: React.FC = () => {
                 {loading ? (
                     <div className="text-center py-5">
                         <Loader2 className="animate-spin text-warning mx-auto mb-3" size={48} />
-                        <p className="ls-1 smallest fw-bold text-muted">CALCULATING ANALYTICS...</p>
+                        <p className="ls-1 smallest fw-bold text-theme-muted">CALCULATING ANALYTICS...</p>
                     </div>
                 ) : (
                     <>
@@ -145,16 +84,16 @@ const AdminDashboard: React.FC = () => {
                             {statCards.map((card, i) => (
                                 <div key={i} className="col-md-4">
                                     <Link to={card.link} className="text-decoration-none">
-                                        <div className="stat-card p-4 rounded-4 bg-white border shadow-sm h-100">
+                                        <div className="card-premium p-4 h-100 stat-card-hover">
                                             <div className="d-flex justify-content-between align-items-start mb-3">
-                                                <div className="icon-box rounded-3 d-flex align-items-center justify-content-center"
-                                                    style={{ width: '45px', height: '45px', backgroundColor: '#f8f9fa', border: `1px solid ${card.color}` }}>
-                                                    <card.icon color={card.color} size={20} />
+                                                <div className="icon-box-premium"
+                                                    style={{ border: `1.5px solid ${card.color === '#000' ? 'var(--color-text)' : card.color}` }}>
+                                                    <card.icon color={card.color === '#000' ? 'var(--color-text)' : card.color} size={20} />
                                                 </div>
-                                                <span className="smallest fw-bold text-muted ls-1">LIVE DATA</span>
+                                                <span className="smallest fw-bold text-theme-muted ls-1">LIVE DATA</span>
                                             </div>
-                                            <h2 className="fw-bold mb-1 text-dark">{card.value}</h2>
-                                            <p className="text-secondary mb-0 smallest fw-bold ls-1 text-uppercase">{card.title}</p>
+                                            <h2 className="fw-bold mb-1 text-theme-main">{card.value}</h2>
+                                            <p className="text-theme-muted mb-0 smallest fw-bold ls-1 text-uppercase">{card.title}</p>
                                         </div>
                                     </Link>
                                 </div>
@@ -163,21 +102,21 @@ const AdminDashboard: React.FC = () => {
 
                         <div className="row g-4 px-2">
                             <div className="col-lg-7">
-                                <div className="bg-white text-black p-4 rounded-4 border shadow-sm h-100">
-                                    <h6 className="fw-bold ls-1 text-uppercase text-muted mb-4 border-bottom pb-2">Lesson Breakdown</h6>
+                                <div className="card-premium p-4 h-100">
+                                    <h6 className="fw-bold ls-1 text-uppercase text-theme-muted mb-4 border-bottom border-theme-soft pb-2">Lesson Breakdown</h6>
                                     <div className="d-flex flex-column gap-4 mt-3">
                                         {Object.entries(stats.difficultyBreakdown).map(([level, count]) => (
                                             <div key={level}>
                                                 <div className="d-flex justify-content-between mb-2">
-                                                    <span className="smallest fw-bold text-uppercase ls-1">{level}</span>
-                                                    <span className="smallest fw-bold">{count} Lessons</span>
+                                                    <span className="smallest fw-bold text-uppercase ls-1 text-theme-main">{level}</span>
+                                                    <span className="smallest fw-bold text-theme-main">{count} Lessons</span>
                                                 </div>
-                                                <div className="progress" style={{ height: '8px', borderRadius: '10px' }}>
+                                                <div className="progress-premium">
                                                     <div
-                                                        className="progress-bar"
+                                                        className="progress-bar-premium"
                                                         style={{
                                                             width: `${(count / stats.totalLessons) * 100}%`,
-                                                            backgroundColor: level === 'Easy' ? '#10B981' : level === 'Medium' ? '#FACC15' : '#EF4444'
+                                                            backgroundColor: level === 'Easy' ? '#10B981' : level === 'Medium' ? 'var(--venda-yellow-dark)' : '#EF4444'
                                                         }}
                                                     ></div>
                                                 </div>
@@ -188,16 +127,16 @@ const AdminDashboard: React.FC = () => {
                             </div>
 
                             <div className="col-lg-5">
-                                <div className="bg-dark text-white p-4 rounded-4 border shadow-sm h-100 d-flex flex-column justify-content-center text-center">
+                                <div className="card-premium p-4 h-100 dark-action-card d-flex flex-column justify-content-center text-center">
                                     <div className="mb-3">
-                                        <ShieldCheck className="text-warning mx-auto" size={56} />
+                                        <ShieldCheck className="text-warning-custom mx-auto" size={56} />
                                     </div>
-                                    <h4 className="fw-bold">Quick Actions</h4>
-                                    <p className="smallest text-secondary ls-1 text-uppercase mb-4">Manage your platform content</p>
+                                    <h4 className="fw-bold text-white">Quick Actions</h4>
+                                    <p className="smallest text-white-50 ls-1 text-uppercase mb-4">Manage your platform content</p>
                                     <div className="d-grid gap-2">
-                                        <Link to="/admin/add-lesson" className="btn btn-warning fw-bold smallest ls-1 py-3 rounded-3">CREATE NEW LESSON</Link>
-                                        <Link to="/admin/reset" className="btn btn-outline-danger fw-bold smallest ls-1 py-3 rounded-3 border-2">SYSTEM RESET / MAINTENANCE</Link>
-                                        <Link to="/admin/logs" className="btn btn-outline-light fw-bold smallest ls-1 py-3 rounded-3 border-2">VIEW AUDIT LOGS</Link>
+                                        <Link to="/admin/add-lesson" className="btn btn-warning-premium">CREATE NEW LESSON</Link>
+                                        <Link to="/admin/reset" className="btn btn-outline-danger-premium">SYSTEM RESET</Link>
+                                        <Link to="/admin/logs" className="btn btn-outline-light-premium">VIEW AUDIT LOGS</Link>
                                     </div>
                                 </div>
                             </div>
@@ -207,14 +146,105 @@ const AdminDashboard: React.FC = () => {
             </div>
 
             <style>{`
-                .ls-tight { letter-spacing: -1.5px; }
-                .ls-1 { letter-spacing: 1px; }
-                .ls-2 { letter-spacing: 2px; }
-                .smallest { font-size: 11px; }
-                .stat-card { transition: all 0.3s ease; border-bottom: 4px solid transparent !important; }
-                .stat-card:hover { transform: translateY(-5px); border-bottom-color: #FACC15 !important; }
-                .progress { background-color: #f0f0f0; }
-                .btn-warning { background-color: #FACC15 !important; color: #000 !important; border: none; }
+                .text-warning-custom { color: var(--venda-yellow-dark) !important; }
+                .card-premium {
+                    background-color: var(--color-surface);
+                    border: 1px solid var(--color-border);
+                    border-radius: 20px;
+                    box-shadow: var(--shadow-premium);
+                    transition: all 0.3s ease;
+                }
+                .stat-card-hover:hover {
+                    transform: translateY(-5px);
+                    border-color: var(--venda-yellow-dark);
+                }
+                .icon-box-premium {
+                    width: 45px;
+                    height: 45px;
+                    background-color: var(--color-surface-soft);
+                    border-radius: 12px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                }
+                .progress-premium {
+                    height: 8px;
+                    background-color: var(--color-surface-soft);
+                    border-radius: 10px;
+                    overflow: hidden;
+                }
+                .progress-bar-premium {
+                    height: 100%;
+                    border-radius: 10px;
+                    transition: width 0.8s ease;
+                }
+                .btn-action-premium {
+                    background-color: var(--color-surface-soft);
+                    color: var(--color-text);
+                    border: 1px solid var(--color-border);
+                    border-radius: 10px;
+                    padding: 8px 12px;
+                    font-size: 0.75rem;
+                    font-weight: 700;
+                    transition: all 0.2s;
+                }
+                .btn-action-premium:hover {
+                    background-color: var(--color-border);
+                    border-color: var(--color-text-muted);
+                }
+                .dark-action-card {
+                    background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+                    border: none;
+                }
+                .btn-warning-premium {
+                    background-color: var(--venda-yellow) !important;
+                    color: #000 !important;
+                    font-weight: 800;
+                    font-size: 0.75rem;
+                    letter-spacing: 1px;
+                    padding: 12px;
+                    border-radius: 12px;
+                    border: none;
+                    transition: all 0.2s;
+                }
+                .btn-warning-premium:hover {
+                    background-color: var(--venda-yellow-dark) !important;
+                    transform: scale(1.02);
+                }
+                .btn-outline-danger-premium {
+                    background-color: transparent;
+                    color: #f87171;
+                    border: 2px solid #ef444433;
+                    font-weight: 800;
+                    font-size: 0.75rem;
+                    letter-spacing: 1px;
+                    padding: 12px;
+                    border-radius: 12px;
+                    transition: all 0.2s;
+                    text-decoration: none;
+                }
+                .btn-outline-danger-premium:hover {
+                    background-color: #ef444411;
+                    border-color: #ef4444;
+                    color: #ef4444;
+                }
+                .btn-outline-light-premium {
+                    background-color: transparent;
+                    color: rgba(255,255,255,0.7);
+                    border: 2px solid rgba(255,255,255,0.1);
+                    font-weight: 800;
+                    font-size: 0.75rem;
+                    letter-spacing: 1px;
+                    padding: 12px;
+                    border-radius: 12px;
+                    transition: all 0.2s;
+                    text-decoration: none;
+                }
+                .btn-outline-light-premium:hover {
+                    background-color: rgba(255,255,255,0.05);
+                    border-color: rgba(255,255,255,0.3);
+                    color: #fff;
+                }
             `}</style>
         </div>
     );

@@ -89,7 +89,7 @@ const PremiumStreakModal: React.FC<PremiumStreakModalProps> = ({
                             <button 
                                 onClick={() => {
                                     onClose();
-                                    navigate('/profile');
+                                    navigate('/streak');
                                 }}
                                 className="btn btn-game btn-game-primary w-100 py-2 rounded-4 shadow-action-sm smallest fw-black"
                             >
@@ -158,7 +158,7 @@ const PremiumStreakModal: React.FC<PremiumStreakModalProps> = ({
                             height: 32px;
                             border: 2px solid var(--color-border);
                             border-radius: 8px;
-                            background: var(--color-bg);
+                            background: var(--color-card-bg);
                             display: flex;
                             align-items: center;
                             justify-content: center;
@@ -173,15 +173,36 @@ const PremiumStreakModal: React.FC<PremiumStreakModalProps> = ({
                         }
 
                         .week-node-brutalist.frozen {
-                            background: #0ea5e9;
+                            background: linear-gradient(135deg, #7DD3FC 0%, #0EA5E9 100%);
                             color: #fff;
-                            box-shadow: 2px 2px 0px var(--color-border);
+                            border-color: #BAE6FD;
+                            box-shadow: 2px 2px 0px var(--color-border), 0 0 8px rgba(125, 211, 252, 0.4);
+                            position: relative;
+                            overflow: hidden;
+                        }
+
+                        .week-node-brutalist.frozen::after {
+                            content: '';
+                            position: absolute;
+                            top: -50%;
+                            left: -50%;
+                            width: 200%;
+                            height: 200%;
+                            background: linear-gradient(45deg, transparent 45%, rgba(255,255,255,0.3) 50%, transparent 55%);
+                            animation: ice-shimmer 3s infinite;
+                            pointer-events: none;
+                        }
+
+                        @keyframes ice-shimmer {
+                            0% { transform: translate(-30%, -30%) rotate(0deg); }
+                            100% { transform: translate(30%, 30%) rotate(0deg); }
                         }
 
                         .week-node-brutalist.current {
                             background: var(--color-surface);
                             border-color: var(--color-border);
                             border-width: 3px;
+                            color: var(--color-text);
                         }
 
                         .current-dot-brutalist {

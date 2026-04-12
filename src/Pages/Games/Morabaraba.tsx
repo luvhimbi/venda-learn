@@ -1,14 +1,16 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowLeft, HelpCircle, Info, Trophy, User, Monitor, RotateCcw, Palette, Check } from 'lucide-react';
+import { ArrowLeft, HelpCircle, Info, Trophy, User, RotateCcw, Palette, Check } from 'lucide-react';
 import { doc, updateDoc, increment, type Firestore } from 'firebase/firestore';
 import { auth, db } from '../../services/firebaseConfig';
 import GameResultModal from '../../components/GameResultModal';
-import { awardPoints } from '../../services/dataCache';
+import { awardPoints, fetchUserData } from '../../services/dataCache';
 import { useVisualJuice } from '../../hooks/useVisualJuice';
 import GameIntroModal, { resetIntroSeen } from '../../components/GameIntroModal';
 import ExitConfirmModal from '../../components/ExitConfirmModal';
+import Mascot from '../../components/Mascot';
+import { AvatarDisplay } from '../../components/AvatarPicker';
 
 // --- CONSTANTS ---
 const COWS_PER_PLAYER = 12;
@@ -29,7 +31,7 @@ interface Junction {
     x: number;
     y: number;
 }
- 
+
 interface ThemeConfig {
     id: string;
     name: string;
@@ -38,7 +40,7 @@ interface ThemeConfig {
     p1: { type: 'emoji' | 'shape'; value: string; color: string; };
     p2: { type: 'emoji' | 'shape'; value: string; color: string; };
 }
- 
+
 const THEMES: ThemeConfig[] = [
     {
         id: 'traditional',
@@ -145,7 +147,7 @@ const MORABARABA_INTRO_STEPS = [
 const Morabaraba: React.FC = () => {
     const navigate = useNavigate();
     const { playCorrect, playWrong, playClick, triggerShake, triggerHaptic } = useVisualJuice();
-    
+
     // Game State
     const [board, setBoard] = useState<(Player | null)[]>(Array(24).fill(null));
     const [turn, setTurn] = useState<Player>(1);
@@ -155,7 +157,7 @@ const Morabaraba: React.FC = () => {
     const [shootMode, setShootMode] = useState(false);
     const [selectedJunction, setSelectedJunction] = useState<number | null>(null);
     const [gameOver, setGameOver] = useState<Player | 'draw' | null>(null);
-    
+
     // UI State
     const [showIntro, setShowIntro] = useState(true);
     const [showExitConfirm, setShowExitConfirm] = useState(false);
@@ -163,15 +165,24 @@ const Morabaraba: React.FC = () => {
     const [resultData, setResultData] = useState({ isSuccess: false, title: '', message: '', points: 0 });
     const [isVsAI, setIsVsAI] = useState(true);
     const [aiProcessing, setAiProcessing] = useState(false);
+    const [userData, setUserData] = useState<any>(null);
     const [showThemePicker, setShowThemePicker] = useState(false);
     const [currentTheme, setCurrentTheme] = useState<ThemeConfig>(() => {
         const saved = localStorage.getItem('morabaraba_theme');
         return THEMES.find(t => t.id === saved) || THEMES[0];
     });
- 
+
     useEffect(() => {
         localStorage.setItem('morabaraba_theme', currentTheme.id);
     }, [currentTheme]);
+
+    useEffect(() => {
+        const loadUser = async () => {
+            const data = await fetchUserData();
+            setUserData(data || { avatarId: 'adventurer', username: 'Scholar' });
+        };
+        loadUser();
+    }, []);
 
     // Helpers
     const getCowsOnBoard = useCallback((player: Player) => {
@@ -179,7 +190,7 @@ const Morabaraba: React.FC = () => {
     }, [board]);
 
     const isJunctionInMill = useCallback((id: number, player: Player, currentBoard: (Player | null)[]) => {
-        return ALL_MILLS.some(mill => 
+        return ALL_MILLS.some(mill =>
             mill.includes(id) && mill.every(mid => currentBoard[mid] === player)
         );
     }, []);
@@ -187,7 +198,7 @@ const Morabaraba: React.FC = () => {
     const hasLegalMoves = useCallback((player: Player, currentBoard: (Player | null)[]) => {
         const playerPhase = player === 1 ? phaseP1 : phaseP2;
         if (playerPhase === 'flying') return currentBoard.some(j => j === null);
-        
+
         for (let i = 0; i < 24; i++) {
             if (currentBoard[i] === player) {
                 const neighbors = getNeighbors(i);
@@ -197,15 +208,15 @@ const Morabaraba: React.FC = () => {
         return false;
     }, [phaseP1, phaseP2]);
 
-    const checkWinCondition = useCallback((player: Player, currentBoard: (Player | null)[], currentPlacingCount: {1:number,2:number}) => {
+    const checkWinCondition = useCallback((player: Player, currentBoard: (Player | null)[], currentPlacingCount: { 1: number, 2: number }) => {
         const opponent = player === 1 ? 2 : 1;
-        
+
         // If opponent is out of placement and has < 3 cows
         if (currentPlacingCount[opponent] === 0 && getCowsOnBoard(opponent) < 3) return player;
-        
+
         // If opponent has no legal moves
         if (currentPlacingCount[opponent] === 0 && !hasLegalMoves(opponent, currentBoard)) return player;
-        
+
         return null;
     }, [getCowsOnBoard, hasLegalMoves]);
 
@@ -222,7 +233,7 @@ const Morabaraba: React.FC = () => {
             });
             playCorrect();
         }
-        
+
         setResultData({
             isSuccess: winner === 1,
             title: winner === 1 ? 'Ndi hone! (Victory)' : 'Ndi yone! (Defeat)',
@@ -244,11 +255,11 @@ const Morabaraba: React.FC = () => {
         // --- SHOOT MODE ---
         if (shootMode) {
             if (id === undefined || id === null || board[id] !== opponent) return;
-            
+
             // Check Rule: cannot shoot from a mill unless ALL opponent's pieces are in mills
             const opponentCows = board.map((o, idx) => o === opponent ? idx : -1).filter(idx => idx !== -1);
             const allInMills = opponentCows.every(cowId => isJunctionInMill(cowId, opponent, board));
-            
+
             if (!allInMills && isJunctionInMill(id, opponent, board)) {
                 playWrong();
                 triggerShake('m-board');
@@ -276,11 +287,11 @@ const Morabaraba: React.FC = () => {
         // --- PLACING PHASE ---
         if (currentPhase === 'placing') {
             if (board[id] !== null) return;
-            
+
             const newBoard = [...board];
             newBoard[id] = currentPlayer;
             const newPlacing = { ...placingCount, [currentPlayer]: placingCount[currentPlayer] - 1 };
-            
+
             setBoard(newBoard);
             setPlacingCount(newPlacing);
             playClick();
@@ -296,7 +307,7 @@ const Morabaraba: React.FC = () => {
             // Phase transition check
             if (newPlacing[1] === 0) setPhaseP1(getCowsOnBoard(1) <= 3 ? 'flying' : 'moving');
             if (newPlacing[2] === 0) setPhaseP2(getCowsOnBoard(2) <= 3 ? 'flying' : 'moving');
-            
+
             return;
         }
 
@@ -328,7 +339,7 @@ const Morabaraba: React.FC = () => {
             const newBoard = [...board];
             newBoard[selectedJunction] = null;
             newBoard[id] = currentPlayer;
-            
+
             setBoard(newBoard);
             setSelectedJunction(null);
             playClick();
@@ -352,9 +363,9 @@ const Morabaraba: React.FC = () => {
     // --- GRANDMASTER MINIMAX AI BRAIN ---
 
     // Heuristic Evaluation Function
-    const evaluateBoard = useCallback((currentBoard: (Player|null)[], p1Phase: Phase, p2Phase: Phase, p1Placing: number, p2Placing: number) => {
+    const evaluateBoard = useCallback((currentBoard: (Player | null)[], p1Phase: Phase, p2Phase: Phase, p1Placing: number, p2Placing: number) => {
         let score = 0;
-        
+
         // 1. Piece Count (Basic)
         const p1Cows = currentBoard.filter(o => o === 1).length;
         const p2Cows = currentBoard.filter(o => o === 2).length;
@@ -388,7 +399,7 @@ const Morabaraba: React.FC = () => {
             const p1c = mill.filter(id => currentBoard[id] === 1).length;
             const p2c = mill.filter(id => currentBoard[id] === 2).length;
             const emptyc = mill.filter(id => currentBoard[id] === null).length;
-            
+
             if (p1c === 2 && emptyc === 1) score -= 40;
             if (p2c === 2 && emptyc === 1) score += 40;
         });
@@ -412,16 +423,16 @@ const Morabaraba: React.FC = () => {
 
             const allInMills = targets.every(id => isJunctionInMill(id, opponent, board));
             const validTargets = targets.filter(id => allInMills || !isJunctionInMill(id, opponent, board));
-            
+
             if (validTargets.length === 0) return { type: 'shoot', id: targets[0] };
 
             let bestTarget = validTargets[0];
             let maxImpact = -1;
-            
+
             validTargets.forEach(tid => {
                 let impact = 0;
-                ALL_MILLS.forEach(m => { 
-                    if(m.includes(tid)) {
+                ALL_MILLS.forEach(m => {
+                    if (m.includes(tid)) {
                         const oppCount = m.filter(mid => board[mid] === opponent).length;
                         if (oppCount === 2) impact += 10; // Block a potential mill
                     }
@@ -441,7 +452,7 @@ const Morabaraba: React.FC = () => {
                 const tempBoard = [...board]; tempBoard[cid] = player;
                 let score = evaluateBoard(tempBoard, phaseP1, phaseP2, placingCount[1], placingCount[2] - 1);
                 if (isJunctionInMill(cid, player, tempBoard)) score += 500;
-                
+
                 if (score > bestScore) { bestScore = score; bestMove = cid; }
             });
             return { type: 'place', id: bestMove };
@@ -451,7 +462,7 @@ const Morabaraba: React.FC = () => {
         const cpuCows = board.map((v, i) => v === 2 ? i : -1).filter(i => i !== -1);
         const moves: { from: number, to: number }[] = [];
         cpuCows.forEach(from => {
-            const targets = currentPhase === 'flying' 
+            const targets = currentPhase === 'flying'
                 ? board.map((v, i) => v === null ? i : -1).filter(i => i !== -1)
                 : getNeighbors(from).filter(n => board[n] === null);
             targets.forEach(to => moves.push({ from, to }));
@@ -466,7 +477,7 @@ const Morabaraba: React.FC = () => {
             const tempBoard = [...board]; tempBoard[move.from] = null; tempBoard[move.to] = 2;
             let score = evaluateBoard(tempBoard, phaseP1, phaseP2, 0, 0);
             if (isJunctionInMill(move.to, 2, tempBoard)) score += 500;
-            
+
             if (score > bestScore) { bestScore = score; bestMove = move; }
         });
 
@@ -514,7 +525,7 @@ const Morabaraba: React.FC = () => {
 
     return (
         <div className="min-vh-100 py-3 position-relative overflow-hidden" style={{ backgroundColor: 'var(--color-bg)', backgroundImage: 'url("data:image/svg+xml,%3Csvg width=\'20\' height=\'20\' viewBox=\'0 0 20 20\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cg fill=\'%23000000\' fill-opacity=\'0.02\' fill-rule=\'evenodd\'%3E%3Ccircle cx=\'3\' cy=\'3\' r=\'1\'/%3E%3C/g%3E%3C/svg%3E")' }}>
-            
+
             {/* RESULT MODAL */}
             <GameResultModal
                 isOpen={showResult}
@@ -544,16 +555,16 @@ const Morabaraba: React.FC = () => {
                 onConfirmExit={() => navigate('/mitambo')}
                 onCancel={() => setShowExitConfirm(false)}
             />
- 
+
             {/* THEME PICKER MODAL */}
             <AnimatePresence>
                 {showThemePicker && (
-                    <motion.div 
+                    <motion.div
                         initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
                         className="position-fixed top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center p-3"
                         style={{ backgroundColor: 'rgba(0,0,0,0.8)', zIndex: 2000 }}
                     >
-                        <motion.div 
+                        <motion.div
                             initial={{ scale: 0.9, y: 20 }} animate={{ scale: 1, y: 0 }}
                             className="brutalist-card bg-theme-surface border border-4 border-theme-main p-4 w-100 shadow-action text-theme-main"
                             style={{ maxWidth: '500px' }}
@@ -562,11 +573,11 @@ const Morabaraba: React.FC = () => {
                                 <h3 className="fw-black mb-0 ls-tight">CUSTOMIZE GAME</h3>
                                 <button onClick={() => setShowThemePicker(false)} className="btn-close" style={{ filter: 'var(--close-btn-filter, none)' }}></button>
                             </div>
-                            
+
                             <div className="row g-3">
                                 {THEMES.map(theme => (
                                     <div key={theme.id} className="col-12">
-                                        <button 
+                                        <button
                                             onClick={() => { setCurrentTheme(theme); setShowThemePicker(false); }}
                                             className={`w-100 text-start brutalist-card text-theme-main p-3 transition-all d-flex align-items-center justify-content-between ${currentTheme.id === theme.id ? 'border-primary bg-theme-base shadow-action-sm' : 'border-theme-main'}`}
                                             style={{ borderWidth: '3px' }}
@@ -623,12 +634,12 @@ const Morabaraba: React.FC = () => {
                     <div className="col-6 col-lg-3 order-1 order-lg-3 d-flex flex-column">
                         <div className={`brutalist-card bg-theme-surface p-2 p-md-3 mb-3 transition-all h-100 ${turn === 1 ? 'border-theme-main shadow-action-sm' : 'opacity-75'}`} style={{ borderWidth: turn === 1 ? '4px' : '2px', borderColor: turn === 1 ? 'var(--venda-yellow)' : 'var(--color-border)' }}>
                             <div className="d-flex align-items-center gap-2 mb-1 mb-md-2">
-                                <div className="p-1 p-md-2 bg-warning bg-opacity-10 rounded-circle border border-2 border-theme-main d-none d-md-inline-block">
-                                    <User size={16} className="text-theme-main" strokeWidth={3} />
+                                <div className="rounded-circle border border-2 border-theme-main overflow-hidden d-flex align-items-center justify-content-center bg-white" style={{ width: 'clamp(32px, 10vw, 44px)', height: 'clamp(32px, 10vw, 44px)' }}>
+                                    <AvatarDisplay avatarId={userData?.avatarId || 'adventurer'} seed={userData?.username || 'user'} size={32} />
                                 </div>
-                                <h5 className="fw-black mb-0 text-theme-main" style={{ fontSize: '0.85rem' }}>YOU (P1)</h5>
+                                <h5 className="fw-black mb-0 text-theme-main smallest uppercase" style={{ fontSize: '0.75rem' }}>{userData?.username?.split(' ')[0] || 'YOU'}</h5>
                             </div>
-                            
+
                             <div className="d-flex flex-column fw-bold text-theme-main uppercase gap-0" style={{ fontSize: '0.75rem', opacity: 0.8 }}>
                                 <span>Cows: <span>{getCowsOnBoard(1)}</span></span>
                                 <span>Stock: <span>{placingCount[1]}</span></span>
@@ -676,13 +687,13 @@ const Morabaraba: React.FC = () => {
                                     <rect x="50" y="50" width="400" height="400" />
                                     <rect x="130" y="130" width="240" height="240" />
                                     <rect x="210" y="210" width="80" height="80" />
-                                    
+
                                     {/* Mid Connectors */}
                                     <line x1="250" y1="50" x2="250" y2="210" />
                                     <line x1="250" y1="290" x2="250" y2="450" />
                                     <line x1="50" y1="250" x2="210" y2="250" />
                                     <line x1="290" y1="250" x2="450" y2="250" />
-                                    
+
                                     {/* Corner Connectors (Morabaraba specials) */}
                                     <line x1="50" y1="50" x2="210" y2="210" />
                                     <line x1="450" y1="50" x2="290" y2="210" />
@@ -692,9 +703,9 @@ const Morabaraba: React.FC = () => {
 
                                 {/* Adjacency Visual for Hover (Optional Logic) */}
                                 {selectedJunction !== null && getNeighbors(selectedJunction).map(n => (
-                                     board[n] === null && (
-                                         <circle key={`hint-${n}`} cx={JUNCTIONS[n].x} cy={JUNCTIONS[n].y} r="8" fill="rgba(250, 204, 21, 0.4)" stroke="#FACC15" strokeDasharray="4" />
-                                     )
+                                    board[n] === null && (
+                                        <circle key={`hint-${n}`} cx={JUNCTIONS[n].x} cy={JUNCTIONS[n].y} r="8" fill="rgba(250, 204, 21, 0.4)" stroke="#FACC15" strokeDasharray="4" />
+                                    )
                                 ))}
 
                                 {/* Junctions & Pieces */}
@@ -702,11 +713,11 @@ const Morabaraba: React.FC = () => {
                                     <g key={j.id} style={{ cursor: 'pointer' }} onClick={() => performAction(j.id)}>
                                         {/* Interaction Area (Larger for Mobile) */}
                                         <circle cx={j.x} cy={j.y} r="35" fill="transparent" />
-                                        
+
                                         {/* Dot */}
-                                        <circle 
-                                            cx={j.x} cy={j.y} r="10" 
-                                            fill={board[j.id] ? 'none' : '#000'} 
+                                        <circle
+                                            cx={j.x} cy={j.y} r="10"
+                                            fill={board[j.id] ? 'none' : '#000'}
                                             stroke="#000" strokeWidth="2"
                                             className="transition-all"
                                         />
@@ -716,8 +727,8 @@ const Morabaraba: React.FC = () => {
                                             {board[j.id] && (
                                                 <motion.g
                                                     initial={{ scale: 0, rotate: -45 }}
-                                                    animate={{ 
-                                                        scale: selectedJunction === j.id ? 1.2 : 1, 
+                                                    animate={{
+                                                        scale: selectedJunction === j.id ? 1.2 : 1,
                                                         rotate: 0,
                                                         y: selectedJunction === j.id ? -10 : 0
                                                     }}
@@ -738,16 +749,16 @@ const Morabaraba: React.FC = () => {
                                                         }
                                                         if (p.value === 'stone') {
                                                             return (
-                                                                <path 
-                                                                    d={`M ${j.x-15} ${j.y-5} q 15 -15 30 0 q 5 15 -15 20 q -20 -5 -15 -20`}
+                                                                <path
+                                                                    d={`M ${j.x - 15} ${j.y - 5} q 15 -15 30 0 q 5 15 -15 20 q -20 -5 -15 -20`}
                                                                     fill={p.color} stroke={currentTheme.lineColor} strokeWidth="3"
                                                                 />
                                                             );
                                                         }
                                                         if (p.value === 'gem') {
                                                             return (
-                                                                <polygon 
-                                                                    points={`${j.x},${j.y-18} ${j.x+18},${j.y} ${j.x},${j.y+18} ${j.x-18},${j.y}`}
+                                                                <polygon
+                                                                    points={`${j.x},${j.y - 18} ${j.x + 18},${j.y} ${j.x},${j.y + 18} ${j.x - 18},${j.y}`}
                                                                     fill={p.color} stroke={currentTheme.lineColor} strokeWidth="3" fillOpacity="0.8"
                                                                 />
                                                             );
@@ -756,7 +767,7 @@ const Morabaraba: React.FC = () => {
                                                             <circle cx={j.x} cy={j.y} r="18" fill={p.color} stroke={currentTheme.lineColor} strokeWidth="3" className="shadow-action-sm" />
                                                         );
                                                     })()}
-                                                    
+
                                                     {/* Selection indicator */}
                                                     {selectedJunction === j.id && (
                                                         <circle cx={j.x} cy={j.y} r="22" fill="none" stroke={board[j.id] === 1 ? '#FACC15' : '#38bdf8'} strokeWidth="4" className="animate__animated animate__pulse animate__infinite" />
@@ -767,7 +778,7 @@ const Morabaraba: React.FC = () => {
                                     </g>
                                 ))}
                             </svg>
-                            
+
                             {/* Shoot Overlay */}
                             {shootMode && (
                                 <div className="position-absolute top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center pointer-events-none" style={{ backgroundColor: 'rgba(239, 68, 68, 0.1)', border: '4px solid #ef4444' }}>
@@ -788,12 +799,18 @@ const Morabaraba: React.FC = () => {
 
                     {/* PLAYER 2 / AI INFO - Side-by-side on mobile */}
                     <div className="col-6 col-lg-3 order-2 order-lg-1 d-flex flex-column">
-                         <div className={`brutalist-card bg-theme-surface p-2 p-md-3 mb-3 transition-all h-100 ${turn === 2 ? 'border-theme-main shadow-action-sm' : 'opacity-75'}`} style={{ borderWidth: turn === 2 ? '4px' : '2px', borderColor: turn === 2 ? 'var(--color-text)' : 'var(--color-border)' }}>
+                        <div className={`brutalist-card bg-theme-surface p-2 p-md-3 mb-3 transition-all h-100 ${turn === 2 ? 'border-theme-main shadow-action-sm' : 'opacity-75'}`} style={{ borderWidth: turn === 2 ? '4px' : '2px', borderColor: turn === 2 ? 'var(--color-text)' : 'var(--color-border)' }}>
                             <div className="d-flex align-items-center gap-2 mb-1 mb-md-2">
-                                <div className="p-1 p-md-2 bg-secondary bg-opacity-10 rounded-circle border border-2 border-theme-main d-none d-md-inline-block">
-                                    {isVsAI ? <Monitor size={16} className="text-theme-main" strokeWidth={3} /> : <User size={16} className="text-theme-main" strokeWidth={3} />}
+                                <div className="rounded-circle border border-2 border-theme-main overflow-hidden d-flex align-items-center justify-content-center bg-theme-base" style={{ width: 'clamp(32px, 10vw, 44px)', height: 'clamp(32px, 10vw, 44px)' }}>
+                                    {isVsAI ? (
+                                        <div style={{ transform: 'scale(1.2)' }}>
+                                            <Mascot mood={turn === 2 ? 'excited' : 'happy'} width="32px" height="32px" />
+                                        </div>
+                                    ) : (
+                                        <User size={20} className="text-theme-main" />
+                                    )}
                                 </div>
-                                <h5 className="fw-black mb-0 text-theme-main" style={{ fontSize: '0.85rem' }}>{isVsAI ? 'CPU' : 'P2'}</h5>
+                                <h5 className="fw-black mb-0 text-theme-main smallest uppercase" style={{ fontSize: '0.75rem' }}>{isVsAI ? 'MR. LUVHIMBI' : 'PLAYER 2'}</h5>
                             </div>
 
                             <div className="d-flex flex-column fw-bold text-theme-main uppercase gap-0" style={{ fontSize: '0.75rem', opacity: 0.8 }}>

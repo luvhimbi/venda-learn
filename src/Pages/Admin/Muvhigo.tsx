@@ -56,82 +56,92 @@ const Muvhigo: React.FC = () => {
 
     const handleShowGuide = () => {
         Swal.fire({
-            title: '<span class="fw-black ls-tight text-theme-main">HOW TO RANK UP</span>',
+            title: '<h3 class="fw-black ls-tight text-theme-main uppercase mb-0">How to Climb</h3>',
             html: `
-        <div class="text-start p-2">
-            <div class="mb-4 d-flex align-items-start gap-3">
-                <div class="bg-theme-surface p-3 rounded-4 border border-2 border-theme-main shadow-action-sm text-primary">
-                    <i class="bi bi-book-half fs-4"></i>
-                </div>
-                <div>
-                    <p class="smallest fw-black text-theme-main mb-1 ls-1 text-uppercase">Lessons</p>
-                    <p class="small text-theme-muted mb-0">Earn base points for every successfully completed module.</p>
-                </div>
-            </div>
+                <div class="text-start py-3 px-1">
+                    <div class="brutalist-card--sm p-3 mb-3 d-flex align-items-center gap-3 bg-theme-base border-theme-main">
+                        <div class="rounded-3 p-2 bg-success bg-opacity-10 border border-success border-2">
+                             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" class="text-success"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
+                        </div>
+                        <div>
+                            <p class="smallest fw-black text-theme-main mb-0 ls-1 uppercase">LESSONS</p>
+                            <p class="smallest fw-bold text-theme-muted mb-0">Base points per module completed.</p>
+                        </div>
+                    </div>
 
-            <div class="mb-4 d-flex align-items-start gap-3">
-                <div class="bg-theme-surface p-3 rounded-4 border border-2 border-theme-main shadow-action-sm text-warning">
-                    <i class="bi bi-zap-fill fs-4"></i>
-                </div>
-                <div>
-                    <p class="smallest fw-black text-theme-main mb-1 ls-1 text-uppercase">Streaks</p>
-                    <p class="small text-theme-muted mb-0">Maintain a daily learning streak to multiply your rewards.</p>
-                </div>
-            </div>
+                    <div class="brutalist-card--sm p-3 mb-3 d-flex align-items-center gap-3 bg-theme-base border-theme-main">
+                        <div class="rounded-3 p-2 bg-warning bg-opacity-10 border border-warning border-2">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" class="text-warning"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"></path></svg>
+                        </div>
+                        <div>
+                            <p class="smallest fw-black text-theme-main mb-0 ls-1 uppercase">STREAKS</p>
+                            <p class="smallest fw-bold text-theme-muted mb-0">Multiply rewards with daily visits.</p>
+                        </div>
+                    </div>
 
-            <div class="mb-0 d-flex align-items-start gap-3">
-                <div class="bg-theme-surface p-3 rounded-4 border border-2 border-theme-main shadow-action-sm text-danger">
-                    <i class="bi bi-target fs-4"></i>
+                    <div class="brutalist-card--sm p-3 d-flex align-items-center gap-3 bg-theme-base border-theme-main">
+                        <div class="rounded-3 p-2 bg-danger bg-opacity-10 border border-danger border-2">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" class="text-danger"><circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="12" r="6"></circle><circle cx="12" cy="12" r="2"></circle></svg>
+                        </div>
+                        <div>
+                            <p class="smallest fw-black text-theme-main mb-0 ls-1 uppercase">MUHALI BONUS</p>
+                            <p class="smallest fw-bold text-theme-muted mb-0">Extra points for perfect accuracy!</p>
+                        </div>
+                    </div>
                 </div>
-                <div>
-                    <p class="smallest fw-black text-theme-main mb-1 ls-1 text-uppercase">Accuracy</p>
-                    <p class="small text-theme-muted mb-0">Perfect scores in quizzes grant the "Muhali" bonus points.</p>
-                </div>
-            </div>
-        </div>
-    `,
-            confirmButtonText: 'GOT IT',
-            confirmButtonColor: 'var(--color-bg-inv)',
+            `,
+            confirmButtonText: 'UNDERSTOOD',
+            buttonsStyling: false,
             customClass: {
-                popup: 'rounded-4 border border-4 border-theme-main shadow-action bg-theme-card',
-                confirmButton: 'rounded-pill px-5 fw-black text-theme-inv ls-1'
+                popup: 'rounded-5 border border-4 border-theme-main shadow-action bg-theme-card p-4',
+                confirmButton: 'btn btn-game btn-game-primary px-5 py-3 fw-black smallest ls-2 uppercase',
+                title: 'text-theme-main'
             }
         });
     };
 
     const handleShowLeaguesGuide = () => {
         Swal.fire({
-            title: '<span class="fw-bold ls-tight text-theme-main">LEAGUES EXPLAINED</span>',
+            title: '<h3 class="fw-black ls-tight text-theme-main uppercase mb-0">The Leagues</h3>',
             html: `
-<div class="text-start p-2">
-    <div class="mb-4 d-flex align-items-start gap-3">
-        <div class="bg-theme-surface p-3 rounded-4 border border-theme-main" style="color: #facc15;"><i class="bi bi-gem fs-4"></i></div>
-        <div>
-            <p class="smallest fw-bold text-theme-main mb-1 ls-1 text-uppercase">The Podium (Top 3)</p>
-            <p class="small text-theme-muted mb-0">The elite learners. Your avatar is displayed dynamically at the top of the leaderboard.</p>
-        </div>
-    </div>
-    <div class="mb-4 d-flex align-items-start gap-3">
-        <div class="bg-theme-surface p-3 rounded-4 border border-theme-main" style="color: #CA8A04;"><i class="bi bi-star-fill fs-4"></i></div>
-        <div>
-            <p class="smallest fw-bold text-theme-main mb-1 ls-1 text-uppercase">Gold League</p>
-            <p class="small text-muted mb-0">The rising stars. Place between Rank 4 and Rank 10 to earn your gold shield.</p>
-        </div>
-    </div>
-    <div class="mb-0 d-flex align-items-start gap-3">
-        <div class="bg-theme-surface p-3 rounded-4 border border-theme-main" style="color: #6B7280;"><i class="bi bi-shield-fill fs-4"></i></div>
-        <div>
-            <p class="smallest fw-bold text-theme-main mb-1 ls-1 text-uppercase">Silver League</p>
-            <p class="small text-muted mb-0">The active challengers. Secure a spot between Rank 11 and Rank 20 to maintain Silver League status.</p>
-        </div>
-    </div>
-</div>
-`,
-            confirmButtonText: 'GOT IT',
-            confirmButtonColor: '#FACC15',
+                <div class="text-start py-3 px-1">
+                    <div class="brutalist-card--sm p-3 mb-3 d-flex align-items-center gap-3 bg-theme-base border-theme-main">
+                        <div class="rounded-3 p-2 border-2 border" style="background: rgba(250, 204, 21, 0.1); border-color: #facc15;">
+                             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#facc15" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"></path><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"></path><path d="M4 22h16"></path><path d="M10 14.66V17c0 .55.45 1 1 1h2c.55 0 1-.45 1-1v-2.34"></path><path d="M15.3 14.3A5 5 0 0 0 12 5a5 5 0 0 0-3.3 9.3"></path></svg>
+                        </div>
+                        <div>
+                            <p class="smallest fw-black text-theme-main mb-0 ls-1 uppercase">THE PODIUM (1-3)</p>
+                            <p class="smallest fw-bold text-theme-muted mb-0">The elite learners of the Tribe.</p>
+                        </div>
+                    </div>
+
+                    <div class="brutalist-card--sm p-3 mb-3 d-flex align-items-center gap-3 bg-theme-base border-theme-main">
+                        <div class="rounded-3 p-2 border-2 border" style="background: rgba(202, 138, 4, 0.1); border-color: #CA8A04;">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#CA8A04" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+                        </div>
+                        <div>
+                            <p class="smallest fw-black text-theme-main mb-0 ls-1 uppercase">GOLD LEAGUE (4-10)</p>
+                            <p class="smallest fw-bold text-theme-muted mb-0">Rising stars with gold shields.</p>
+                        </div>
+                    </div>
+
+                    <div class="brutalist-card--sm p-3 d-flex align-items-center gap-3 bg-theme-base border-theme-main">
+                        <div class="rounded-3 p-2 border-2 border" style="background: rgba(107, 114, 128, 0.1); border-color: #6B7280;">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#6B7280" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+                        </div>
+                        <div>
+                            <p class="smallest fw-black text-theme-main mb-0 ls-1 uppercase">SILVER LEAGUE (11-20)</p>
+                            <p class="smallest fw-bold text-theme-muted mb-0">Active challengers of the path.</p>
+                        </div>
+                    </div>
+                </div>
+            `,
+            confirmButtonText: 'LET\'S GO',
+            buttonsStyling: false,
             customClass: {
-                popup: 'rounded-5 border border-4 border-theme-main bg-theme-card shadow-lg',
-                confirmButton: 'rounded-pill px-5 fw-bold text-dark ls-1'
+                popup: 'rounded-5 border border-4 border-theme-main shadow-action bg-theme-card p-4',
+                confirmButton: 'btn btn-game btn-game-primary px-5 py-3 fw-black smallest ls-2 uppercase',
+                title: 'text-theme-main'
             }
         });
     };
@@ -202,9 +212,9 @@ const Muvhigo: React.FC = () => {
 
                 {/* BACK NAVIGATION */}
                 <button
-                    className="btn btn-white bg-theme-surface border border-3 border-theme-main rounded-circle p-0 d-flex align-items-center justify-content-center text-theme-main shadow-action-sm mb-4"
+                    className="btn btn-white bg-theme-base border border-3 border-theme-main rounded-circle p-0 d-flex align-items-center justify-content-center text-theme-main shadow-action-sm mb-4"
                     onClick={() => navigate(-1)}
-                    style={{ width: '40px', height: '40px' }}
+                    style={{ width: '44px', height: '44px' }}
                 >
                     <X size={24} strokeWidth={3} />
                 </button>
@@ -222,16 +232,16 @@ const Muvhigo: React.FC = () => {
                         </div>
                         <div className="d-flex align-items-center gap-2">
                             <button
-                                className="btn btn-outline-theme rounded-pill py-2 px-3 fw-black smallest ls-1 d-flex align-items-center gap-2 border-2"
+                                className="btn btn-game btn-game-white py-2 px-3 fw-black smallest ls-1 d-flex align-items-center gap-2 shadow-action-sm"
                                 onClick={handleShowGuide}
                             >
-                                <Info size={16} /> <span className="d-none d-sm-block text-uppercase">Scoring</span>
+                                <Info size={16} strokeWidth={3} /> <span className="d-none d-sm-block text-uppercase">Scoring</span>
                             </button>
                             <button
-                                className="btn btn-theme-main rounded-pill py-2 px-3 fw-black smallest ls-1 d-flex align-items-center gap-2 shadow-action-sm"
+                                className="btn btn-game btn-game-primary py-2 px-3 fw-black smallest ls-1 d-flex align-items-center gap-2 shadow-action-sm"
                                 onClick={handleShowLeaguesGuide}
                             >
-                                <Trophy size={16} className="text-venda" /> <span className="d-none d-sm-block text-uppercase">Leagues</span>
+                                <Trophy size={16} className="text-dark" strokeWidth={3} /> <span className="d-none d-sm-block text-uppercase">Leagues</span>
                             </button>
                         </div>
                     </div>
@@ -248,13 +258,15 @@ const Muvhigo: React.FC = () => {
                                     SIGN IN TO RANK
                                 </button>
                             </section>
-                        ) : !currentUserRank ? (
+                        ) : null}
+
+                        {players.length === 0 && !loading ? (
                             <section className="p-5 bg-theme-base border border-4 border-theme-main rounded-4 shadow-action mb-5 text-center">
                                 <Award size={64} className="mx-auto mb-3 text-warning animate-heartbeat" />
-                                <h3 className="fw-black text-theme-main mb-2">Leaderboard Locked!</h3>
-                                <p className="text-theme-muted fw-bold mb-4">Complete a lesson this week to join the rankings.</p>
+                                <h3 className="fw-black text-theme-main mb-2">A New Week Begins!</h3>
+                                <p className="text-theme-muted fw-bold mb-4">Be the first to join the rankings this week.</p>
                                 <button onClick={() => navigate('/courses')} className="btn btn-game btn-game-primary rounded-pill px-5 py-3 fw-black smallest ls-2 shadow-action-sm">
-                                    START YOUR FIRST LESSON
+                                    START LEARNING
                                 </button>
                             </section>
                         ) : (
@@ -295,6 +307,17 @@ const Muvhigo: React.FC = () => {
 
                                 {/* LEAGUES */}
                                 <section className="text-center mt-5">
+                                    {/* PERSONAL STANDINGS (If outside top 20 or haven't earned points) - Floating Sticky/Static Tip */}
+                                    {isLoggedIn && !currentUserRank && (
+                                        <div className="mb-5 mx-auto border-4 border border-warning rounded-4 p-4 bg-warning bg-opacity-10 shadow-action-sm" style={{ maxWidth: '600px' }}>
+                                            <h5 className="fw-black text-theme-main mb-2">YOU ARE CURRENTLY UNRANKED</h5>
+                                            <p className="text-theme-muted small fw-bold mb-3">Complete a lesson to join the Weekly Tribe and start climbing!</p>
+                                            <button onClick={() => navigate('/courses')} className="btn btn-game btn-game-primary rounded-pill px-4 py-2 smallest fw-black ls-1">
+                                                EARN XP NOW
+                                            </button>
+                                        </div>
+                                    )}
+
                                     {goldLeague.length > 0 && (
                                         <div className="mb-5 mx-auto" style={{ maxWidth: '600px' }}>
                                             <div className="d-flex align-items-center gap-2 mb-3 bg-theme-card py-2 px-4 rounded-pill d-inline-flex border border-4 border-theme-main shadow-action-sm">

@@ -31,14 +31,14 @@ body {
 }
 
 /* ============================================
-   BOOTSTRAP CARD OVERRIDES
+   BOOTSTRAP CARD OVERRIDES (Standard)
    ============================================ */
 .card {
     background: var(--color-surface);
-    border: 2px solid var(--color-border-soft) !important;
+    border: 1px solid var(--color-border) !important;
     border-radius: var(--game-radius) !important;
-    box-shadow: 0 4px 0 rgba(0, 0, 0, 0.2) !important;
-    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    box-shadow: var(--shadow-premium) !important;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
     overflow: hidden;
     position: relative;
     color: var(--color-text);
@@ -46,8 +46,13 @@ body {
 
 .card:hover {
     transform: translateY(-4px) !important;
-    border-color: var(--game-amber) !important;
-    box-shadow: 0 8px 0 rgba(0, 0, 0, 0.3) !important;
+    border-color: var(--venda-yellow-dark) !important;
+}
+
+/* Specific Card for Brutalist Look (if needed elsewhere) */
+.card-brutal {
+    border: 3px solid var(--color-border) !important;
+    box-shadow: var(--shadow-brutalist) !important;
 }
 
 .card-header {
@@ -77,16 +82,16 @@ body {
     padding: 0.75rem 1rem !important;
     font-size: 0.875rem;
     background: var(--color-surface) !important;
-    border: 2px solid var(--color-border-soft) !important;
-    border-radius: var(--game-radius) !important;
+    border: 1px solid var(--color-border) !important;
+    border-radius: 12px !important;
     color: var(--color-text) !important;
     transition: all 0.2s !important;
 }
 
 .form-control:focus,
 .form-select:focus {
-    border-color: var(--game-amber) !important;
-    box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.2) !important;
+    border-color: var(--venda-yellow-dark) !important;
+    box-shadow: 0 0 0 4px rgba(234, 179, 8, 0.1) !important;
     outline: none !important;
 }
 
@@ -175,6 +180,54 @@ a:hover {
 .btn-outline-primary:hover {
     background: var(--game-amber) !important;
     color: var(--game-text-dark) !important;
+}
+
+/* ============================================
+   GLOBAL THEME OVERRIDES (Wider support)
+   ============================================ */
+.bg-theme-base { background-color: var(--color-bg) !important; }
+.bg-theme-surface { background-color: var(--color-surface) !important; }
+.text-theme-main { color: var(--color-text) !important; }
+.text-theme-muted { color: var(--color-text-muted) !important; }
+
+/* Overriding Bootstrap utilities for Premium Look */
+.bg-light { background-color: var(--color-surface-soft) !important; }
+.bg-white { background-color: var(--color-surface) !important; }
+
+[data-theme='dark'] .text-dark, 
+[data-theme='dark'] .text-black { color: var(--color-text) !important; }
+
+[data-theme='dark'] .border-bottom { border-color: var(--color-border) !important; }
+
+/* Premium Action Utility Classes (Shared across admin) */
+.btn-premium-action {
+    font-weight: 700;
+    font-size: 0.75rem;
+    letter-spacing: 1px;
+    padding: 10px 16px;
+    border-radius: 12px;
+    transition: all 0.2s;
+    border: 1px solid transparent;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none !important;
+}
+
+.btn-premium-action.warning { background-color: var(--venda-yellow); color: #000; }
+.btn-premium-action.warning:hover { background-color: var(--venda-yellow-dark); transform: scale(1.02); }
+.btn-premium-action.secondary { background-color: var(--color-surface-soft); color: var(--color-text); border-color: var(--color-border); }
+.btn-premium-action.secondary:hover { background-color: var(--color-border); }
+.btn-premium-action.danger { background-color: #fee2e2; color: #ef4444; }
+.btn-premium-action.danger:hover { background-color: #fecaca; }
+[data-theme='dark'] .btn-premium-action.danger { background-color: #450a0a; color: #f87171; }
+
+.card-premium {
+    background-color: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: 20px;
+    box-shadow: var(--shadow-premium);
+    transition: all 0.3s ease;
 }
 
 /* ============================================

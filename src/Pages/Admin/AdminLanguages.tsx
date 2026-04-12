@@ -95,24 +95,24 @@ const AdminLanguages: React.FC = () => {
     };
 
     return (
-        <div className="min-vh-100 pb-5 bg-light">
+        <div className="min-vh-100 pb-5 bg-theme-base">
             <AdminNavbar />
 
             {/* HEADER */}
-            <div className="py-5 bg-white border-bottom shadow-sm">
+            <div className="py-5 bg-theme-surface border-bottom shadow-sm">
                 <div className="container" style={{ maxWidth: '1100px' }}>
                     <div className="d-flex flex-column flex-md-row justify-content-between align-items-md-end px-3">
                         <div>
-                            <span className="shumela-venda-pulse fw-bold ls-2 text-uppercase smallest d-block mb-2 text-warning">
+                            <span className="shumela-venda-pulse fw-bold ls-1 text-uppercase smallest d-block mb-2 text-warning-custom">
                                 Localization
                             </span>
-                            <h1 className="fw-bold ls-tight mb-0 text-dark" style={{ fontSize: '2.5rem' }}>
-                                Manage <span style={{ color: '#FACC15' }}>Languages</span>
+                            <h1 className="fw-bold ls-tight mb-0 text-theme-main" style={{ fontSize: '2.5rem' }}>
+                                Manage <span className="text-warning-custom">Languages</span>
                             </h1>
                         </div>
                         <div className="mt-4 mt-md-0">
                             <button onClick={() => { resetForm(); setShowForm(!showForm); }}
-                                className="btn btn-dark fw-bold smallest ls-1 px-4 py-2 rounded-pill shadow-sm d-flex align-items-center gap-2">
+                                className={`btn-premium-action ${showForm ? 'secondary' : 'warning'} px-4 py-2 d-flex align-items-center gap-2`}>
                                 {showForm ? <><X size={14} /> CANCEL</> : <><Plus size={14} /> ADD LANGUAGE</>}
                             </button>
                         </div>
@@ -124,26 +124,26 @@ const AdminLanguages: React.FC = () => {
 
                 {/* ADD/EDIT FORM */}
                 {showForm && (
-                    <div className="bg-white p-4 rounded-4 border shadow-sm mb-5">
-                        <h5 className="fw-bold ls-1 mb-4 smallest text-uppercase text-muted border-bottom pb-2">
+                    <div className="card-premium p-4 mb-5">
+                        <h5 className="fw-bold ls-1 mb-4 smallest text-uppercase text-theme-muted border-bottom border-theme-soft pb-2">
                             {editingId ? 'Edit Language' : 'Add New Language'}
                         </h5>
                         <form onSubmit={handleSubmit}>
                             <div className="row g-3">
                                 <div className="col-md-6">
-                                    <label className="smallest fw-bold ls-1 text-uppercase text-secondary mb-2 d-block">Language Name *</label>
-                                    <input className="form-control lang-input" placeholder="e.g. Zulu"
+                                    <label className="smallest fw-bold ls-1 text-uppercase text-theme-muted mb-2 d-block">Language Name *</label>
+                                    <input className="form-control premium-search" placeholder="e.g. Zulu"
                                         value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} />
                                 </div>
                                 <div className="col-md-6">
-                                    <label className="smallest fw-bold ls-1 text-uppercase text-secondary mb-2 d-block">ISO Code *</label>
-                                    <input className="form-control lang-input" placeholder="e.g. zu"
+                                    <label className="smallest fw-bold ls-1 text-uppercase text-theme-muted mb-2 d-block">ISO Code *</label>
+                                    <input className="form-control premium-search" placeholder="e.g. zu"
                                         value={form.code} onChange={e => setForm({ ...form, code: e.target.value })} />
                                 </div>
                             </div>
                             <div className="mt-4 d-flex gap-3 justify-content-end">
-                                <button type="button" onClick={resetForm} className="btn text-muted smallest fw-bold ls-1">CANCEL</button>
-                                <button type="submit" className="btn game-btn-yellow px-5 py-2 fw-bold smallest ls-1">
+                                <button type="button" onClick={resetForm} className="btn-premium-action secondary">CANCEL</button>
+                                <button type="submit" className="btn-premium-action warning px-5">
                                     {editingId ? 'SAVE CHANGES' : 'ADD LANGUAGE'}
                                 </button>
                             </div>
@@ -152,17 +152,16 @@ const AdminLanguages: React.FC = () => {
                 )}
 
                 {/* STATS */}
-                <div className="bg-white rounded-4 border shadow-sm p-4 mb-4 d-flex align-items-center gap-3">
-                    <div className="d-flex align-items-center justify-content-center rounded-3"
-                        style={{ width: 48, height: 48, backgroundColor: '#FEF3C7' }}>
-                        <Languages size={24} style={{ color: '#D97706' }} />
+                <div className="card-premium p-4 mb-4 d-flex align-items-center gap-3">
+                    <div className="icon-box-premium">
+                        <Languages size={24} className="text-warning-custom" />
                     </div>
                     <div>
-                        <p className="smallest fw-bold ls-1 text-uppercase text-muted mb-0">Total Languages Supported</p>
-                        <h3 className="fw-bold mb-0">{languages.length}</h3>
+                        <p className="smallest fw-bold ls-1 text-uppercase text-theme-muted mb-0">Total Languages Supported</p>
+                        <h3 className="fw-bold mb-0 text-theme-main">{languages.length}</h3>
                     </div>
                     <div className="ms-auto text-end d-none d-md-block">
-                        <p className="smallest text-muted mb-0">Courses and quizzes can be linked to these languages.</p>
+                        <p className="smallest text-theme-muted mb-0">Courses and quizzes can be linked to these languages.</p>
                     </div>
                 </div>
 
@@ -170,37 +169,37 @@ const AdminLanguages: React.FC = () => {
                 {loading ? (
                     <div className="text-center py-5">
                         <Loader2 className="animate-spin text-warning mx-auto mb-3" size={48} />
-                        <p className="ls-1 smallest fw-bold text-muted">LOADING LANGUAGES...</p>
+                        <p className="ls-1 smallest fw-bold text-theme-muted">LOADING LANGUAGES...</p>
                     </div>
                 ) : languages.length === 0 ? (
-                    <div className="text-center py-5 bg-white rounded-4 border">
-                        <Globe className="text-muted mx-auto mb-3" size={48} />
-                        <p className="mt-3 fw-bold text-muted">No languages yet. Add your first language!</p>
+                    <div className="text-center py-5 bg-theme-surface rounded-4 border">
+                        <Globe className="text-theme-muted mx-auto mb-3" size={48} />
+                        <p className="mt-3 fw-bold text-theme-muted">No languages yet. Add your first language!</p>
                     </div>
                 ) : (
                     <div className="row g-3 px-2">
                         {languages.map((lang) => (
                             <div key={lang.id} className="col-md-6 col-lg-4">
-                                <div className="bg-white border rounded-4 shadow-sm p-4 h-100 lang-card">
+                                <div className="card-premium p-4 h-100 lang-card">
                                     <div className="d-flex justify-content-between align-items-start mb-3">
                                         <div className="d-flex align-items-center gap-3">
-                                            <div className="bg-light rounded-3 p-1 d-flex align-items-center justify-content-center" style={{ width: 60, height: 60, flexShrink: 0 }}>
-                                                <LanguageCharacter languageName={lang.name} style={{ height: '100%', width: 'auto' }} />
+                                            <div className="avatar-premium-lg">
+                                                <LanguageCharacter languageName={lang.name} style={{ height: '70%', width: 'auto' }} />
                                             </div>
                                             <div>
-                                                <h4 className="fw-bold mb-0" style={{ color: '#111827' }}>{lang.name}</h4>
-                                                <p className="smallest fw-bold text-warning ls-1 text-uppercase mb-0">Code: {lang.code}</p>
+                                                <h4 className="fw-bold mb-0 text-theme-main">{lang.name}</h4>
+                                                <p className="smallest fw-bold text-warning-custom ls-1 text-uppercase mb-0">Code: {lang.code}</p>
                                             </div>
                                         </div>
                                         <div className="d-flex gap-2">
-                                            <button onClick={() => handleEdit(lang)} className="btn btn-sm btn-outline-dark rounded-pill px-3 d-flex align-items-center gap-1"
+                                            <button onClick={() => handleEdit(lang)} className="btn-premium-action secondary px-3 py-1"
                                                 style={{ fontSize: 11 }}>
-                                                <Edit size={12} />Edit
+                                                <Edit size={12} />
                                             </button>
                                         </div>
                                     </div>
-                                    <div className="p-2 bg-light rounded-3 mt-2">
-                                        <p className="mb-0 smallest text-muted">Language ID: <span className="fw-bold text-dark">{lang.id}</span></p>
+                                    <div className="p-2 bg-theme-surface-soft rounded-3 mt-2 border border-theme-soft">
+                                        <p className="mb-0 smallest text-theme-muted">Language ID: <span className="fw-bold text-theme-main">{lang.id}</span></p>
                                     </div>
                                 </div>
                             </div>
@@ -210,22 +209,63 @@ const AdminLanguages: React.FC = () => {
             </div>
 
             <style>{`
-                .ls-tight { letter-spacing: -1.5px; }
-                .ls-1 { letter-spacing: 1px; }
-                .ls-2 { letter-spacing: 2px; }
-                .smallest { font-size: 11px; }
-                .shumela-venda-pulse { animation: pulseAdmin 3s infinite ease-in-out; }
-                @keyframes pulseAdmin { 0% { opacity: 0.7; } 50% { opacity: 1; } 100% { opacity: 0.7; } }
-                .lang-input { background-color: #f8f9fa; border: 1px solid #dee2e6; border-radius: 8px; font-size: 14px; }
-                .lang-input:focus { border-color: #FACC15; background-color: #fff; box-shadow: none; }
-                .lang-card { transition: all 0.2s; }
-                .lang-card:hover { border-color: #FACC15 !important; border-bottom: 4px solid #FACC15 !important; transform: translateY(-2px); }
-                .game-btn-yellow {
-                    background-color: #FACC15 !important; color: #000 !important;
-                    border-radius: 8px; box-shadow: 0 4px 0 #A1810B !important; border: none;
-                    transition: all 0.1s;
+                .text-warning-custom { color: var(--venda-yellow-dark) !important; }
+                .card-premium {
+                    background-color: var(--color-surface);
+                    border: 1px solid var(--color-border);
+                    border-radius: 20px;
+                    box-shadow: var(--shadow-premium);
+                    transition: all 0.3s ease;
                 }
-                .game-btn-yellow:active { transform: translateY(2px); box-shadow: 0 2px 0 #A1810B !important; }
+                .lang-card:hover {
+                    transform: translateY(-8px);
+                    border-color: var(--venda-yellow-dark);
+                }
+                .icon-box-premium {
+                    width: 48px;
+                    height: 48px;
+                    background-color: var(--color-surface-soft);
+                    border-radius: 12px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                }
+                .avatar-premium-lg {
+                    width: 60px;
+                    height: 60px;
+                    background-color: var(--color-surface-soft);
+                    border-radius: 16px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    flex-shrink: 0;
+                }
+                .btn-premium-action {
+                    font-weight: 700;
+                    font-size: 0.75rem;
+                    letter-spacing: 1px;
+                    padding: 10px 16px;
+                    border-radius: 12px;
+                    transition: all 0.2s;
+                    border: 1px solid transparent;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                }
+                .btn-premium-action.warning { background-color: var(--venda-yellow); color: #000; }
+                .btn-premium-action.warning:hover { background-color: var(--venda-yellow-dark); }
+                .btn-premium-action.secondary { background-color: var(--color-surface-soft); color: var(--color-text); border-color: var(--color-border); }
+                .btn-premium-action.secondary:hover { background-color: var(--color-border); }
+                
+                .premium-search {
+                    background-color: var(--color-surface-soft) !important;
+                    border: 1px solid var(--color-border) !important;
+                    border-radius: 12px !important;
+                    padding: 12px 15px !important;
+                    color: var(--color-text) !important;
+                }
+                .shumela-venda-pulse { animation: pulseAdmin 3s infinite ease-in-out; }
+                @keyframes pulseAdmin { 0% { opacity: 0.7; } 50% { opacity: 1; color: var(--venda-yellow-dark); } 100% { opacity: 0.7; } }
             `}</style>
         </div>
     );
