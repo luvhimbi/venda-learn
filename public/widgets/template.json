@@ -1,0 +1,26 @@
+{
+    "$schema": "http://adaptivecards.io/schemas/adaptive-card.json",
+    "type": "AdaptiveCard",
+    "version": "1.5",
+    "body": [
+        {
+            "type": "TextBlock",
+            "text": "${title}",
+            "size": "Large",
+            "weight": "Bolder",
+            "color": "Accent"
+        },
+        {
+            "type": "TextBlock",
+            "text": "${description}",
+            "wrap": true
+        }
+    ],
+    "actions": [
+        {
+            "type": "Action.Execute",
+            "title": "Visit Chommie",
+            "verb": "visitApplication"
+        }
+    ]
+}

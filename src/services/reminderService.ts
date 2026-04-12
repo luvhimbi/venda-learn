@@ -1,12 +1,25 @@
-import { db, auth, messaging } from './firebaseConfig';
+import { db, auth } from './firebaseConfig';
 import type { Firestore } from 'firebase/firestore';
 import { doc, updateDoc, arrayUnion, getDoc } from 'firebase/firestore';
-import { getToken, onMessage } from 'firebase/messaging';
 
 export interface ReminderSettings {
     reminderEnabled: boolean;
     reminderTime: string;
 }
+
+/**
+ * Utility to convert base64 VAPID key to Uint8Array required for Push Subscription
+ */
+const urlB64ToUint8Array = (base64String: string) => {
+    const padding = '='.repeat((4 - base64String.length % 4) % 4);
+    const base64 = (base64String + padding).replace(/\-/g, '+').replace(/_/g, '/');
+    const rawData = window.atob(base64);
+    const outputArray = new Uint8Array(rawData.length);
+    for (let i = 0; i < rawData.length; ++i) {
+        outputArray[i] = rawData.charCodeAt(i);
+    }
+    return outputArray;
+};
 
 /**
  * Updates user's reminder settings in Firestore
@@ -34,7 +47,7 @@ export const updateReminderSettings = async (settings: ReminderSettings) => {
 };
 
 /**
- * Registers the current device for push notifications
+ * Registers the current device for push notifications using Native Web Push (PWABuilder standard)
  */
 export const registerForPushNotifications = async () => {
     if (!auth.currentUser) return;
@@ -43,20 +56,32 @@ export const registerForPushNotifications = async () => {
         const hasPermission = await requestNotificationPermission();
         if (!hasPermission) return false;
 
-        const token = await getToken(messaging, {
-            vapidKey: import.meta.env.VITE_FIREBASE_VAPID_KEY
-        });
+        if ('serviceWorker' in navigator && 'PushManager' in window) {
+            const registration = await navigator.serviceWorker.ready;
+            
+            const vapidPublicKey = import.meta.env.VITE_FIREBASE_VAPID_KEY;
+            if (!vapidPublicKey) {
+                console.error("VAPID key not found (VITE_FIREBASE_VAPID_KEY is missing)");
+                return false;
+            }
 
-        if (token) {
-            console.log("FCM Token earned:", token);
+            const subscription = await registration.pushManager.subscribe({
+                userVisibleOnly: true,
+                applicationServerKey: urlB64ToUint8Array(vapidPublicKey)
+            });
+
+            console.log("Push Subscription successfully generated:", subscription);
             const userRef = doc(db as Firestore, "users", auth.currentUser.uid);
             
-            // Store token in an array to support multiple devices
+            // Store stringified subscription object in an array to support multiple devices natively
             await updateDoc(userRef, {
-                fcmTokens: arrayUnion(token),
-                lastTokenUpdate: new Date().toISOString()
+                pushSubscriptions: arrayUnion(JSON.stringify(subscription)),
+                lastPushUpdate: new Date().toISOString()
             });
+
             return true;
+        } else {
+            console.warn("Push notifications are not supported by this browser.");
         }
     } catch (error) {
         console.error("Error registering for push notifications:", error);
@@ -89,21 +114,27 @@ export const requestNotificationPermission = async () => {
  * Listen for foreground messages (when app is open)
  */
 export const listenForMessages = () => {
-    onMessage(messaging, (payload) => {
-        console.log('Message received in foreground: ', payload);
-        // You can show a custom toast here if you want
-    });
+    // Listen for broadcasted messages from the native service-worker
+    if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.addEventListener('message', (event) => {
+            console.log('Message received in foreground via service worker:', event.data);
+            // Can be expanded to show custom toasts in app
+        });
+    }
 };
 
 /**
- * Helper to get user's current tokens (for testing/admin)
+ * Helper to get user's current push subscriptions (for backend push delivery)
  */
 export const getUserTokens = async (userId: string) => {
     const userSnap = await getDoc(doc(db as Firestore, "users", userId));
     if (userSnap.exists()) {
-        return userSnap.data().fcmTokens || [];
+        const data = userSnap.data();
+        return {
+            pushSubscriptions: data.pushSubscriptions || [],
+            fcmTokens: data.fcmTokens || [] // Keep legacy FCM tokens if needed for migration
+        };
     }
-    return [];
+    return { pushSubscriptions: [], fcmTokens: [] };
 };
-
 
