@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { db, auth } from '../../services/firebaseConfig';
 import { doc, getDoc, updateDoc, setDoc } from 'firebase/firestore';
 import { onAuthStateChanged } from 'firebase/auth';
-import { Compass, LogOut, Camera, Share2, MoreVertical, Settings, Trophy, Award } from 'lucide-react';
+import { Compass, LogOut, Camera, Share2, MoreVertical, Settings, Trophy } from 'lucide-react';
 import LogoutModal from '../../components/LogoutModal';
 import ShareProfileModal from '../../components/ShareProfileModal';
 import ShareStreakModal from '../../components/ShareStreakModal';
@@ -335,39 +335,29 @@ const Profile: React.FC = () => {
                     </section>
 
                     <div className="row g-4 mt-2">
-                        <div className="col-12 col-md-7">
+                        <div className={`col-12 ${(userData?.weeklyXP || 0) > 0 ? 'col-md-7' : ''}`}>
                              <WeeklyActivityGraph dailyXP={userData?.dailyXP || {}} />
                         </div>
-                        <div className="col-12 col-md-5">
-                            <div className="brutalist-card p-4 transition-all h-100 bg-theme-surface border-4" style={{ borderColor: 'var(--venda-yellow)' }}>
-                                <div className="d-flex align-items-center justify-content-between mb-4">
-                                    <h4 className="fw-black text-theme-main mb-0 uppercase ls-tight" style={{ fontSize: '1.25rem' }}>Weekly Tribe</h4>
-                                    <Trophy size={20} className="text-warning" />
-                                </div>
+                        {(userData?.weeklyXP || 0) > 0 && (
+                            <div className="col-12 col-md-5">
+                                <div className="brutalist-card p-4 transition-all h-100 bg-theme-surface border-4" style={{ borderColor: 'var(--venda-yellow)' }}>
+                                    <div className="d-flex align-items-center justify-content-between mb-4">
+                                        <h4 className="fw-black text-theme-main mb-0 uppercase ls-tight" style={{ fontSize: '1.25rem' }}>Weekly Tribe</h4>
+                                        <Trophy size={20} className="text-warning" />
+                                    </div>
 
-                                <div className="text-center py-3">
-                                    {(userData?.weeklyXP || 0) > 0 ? (
-                                        <>
-                                            <div className="display-4 fw-black text-theme-main mb-1">{userData?.weeklyXP?.toLocaleString()}</div>
-                                            <p className="smallest fw-black text-theme-muted ls-2 uppercase">Points Earned This Week</p>
-                                            <div className="mt-4">
-                                                <button onClick={() => navigate('/muvhigo')} className="btn btn-game btn-game-primary w-100 py-3 fw-black smallest ls-1 uppercase shadow-action-sm">
-                                                    VIEW LEADERBOARD
-                                                </button>
-                                            </div>
-                                        </>
-                                    ) : (
-                                        <div className="py-2">
-                                            <Award size={48} className="mx-auto mb-3 text-theme-muted opacity-50" />
-                                            <p className="fw-bold text-theme-muted mb-4 px-3">You haven't earned points this week. Complete a lesson to see your rank!</p>
-                                            <button onClick={() => navigate('/courses')} className="btn btn-game btn-game-primary w-100 py-3 fw-black smallest ls-1 uppercase shadow-action-sm">
-                                                START LEARNING
+                                    <div className="text-center py-3">
+                                        <div className="display-4 fw-black text-theme-main mb-1">{userData?.weeklyXP?.toLocaleString()}</div>
+                                        <p className="smallest fw-black text-theme-muted ls-2 uppercase">Points Earned This Week</p>
+                                        <div className="mt-4">
+                                            <button onClick={() => navigate('/muvhigo')} className="btn btn-game btn-game-primary w-100 py-3 fw-black smallest ls-1 uppercase shadow-action-sm">
+                                                VIEW LEADERBOARD
                                             </button>
                                         </div>
-                                    )}
+                                    </div>
                                 </div>
                             </div>
-                        </div>
+                        )}
                     </div>
 
 

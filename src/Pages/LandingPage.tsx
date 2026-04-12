@@ -1,9 +1,33 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Mascot from '../components/Mascot';
 
 const LandingPage: React.FC = () => {
     const navigate = useNavigate();
+    const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
+    const [isStandalone, setIsStandalone] = useState(false);
+
+    useEffect(() => {
+        const checkStandalone = window.matchMedia('(display-mode: standalone)').matches || (navigator as any).standalone === true;
+        setIsStandalone(checkStandalone);
+
+        const handler = (e: Event) => {
+            e.preventDefault();
+            setDeferredPrompt(e);
+        };
+        window.addEventListener('beforeinstallprompt', handler);
+        return () => window.removeEventListener('beforeinstallprompt', handler);
+    }, []);
+
+    const handleInstallClick = async () => {
+        if (deferredPrompt) {
+            deferredPrompt.prompt();
+            const { outcome } = await deferredPrompt.userChoice;
+            if (outcome === 'accepted') setDeferredPrompt(null);
+        } else {
+            alert("To install: Tap the Share button (iOS) or the Browser Menu (Android/Desktop) and select 'Add to Home Screen' or 'Install App'.");
+        }
+    };
 
     return (
         <div className="bg-theme-base min-vh-100" style={{ fontFamily: '"Lexend", sans-serif' }}>
@@ -230,6 +254,33 @@ const LandingPage: React.FC = () => {
                     </div>
                 </div>
             </section>
+
+            {/* --- INSTALL APP SECTION --- */}
+            {!isStandalone && (
+                <section className="py-5 bg-theme-surface border-bottom border-4 border-theme-main overflow-hidden text-theme-main text-center">
+                    <div className="container py-5">
+                        <div className="row justify-content-center">
+                            <div className="col-lg-8">
+                                <div className="p-4 p-md-5 border border-4 border-theme-main shadow-action bg-theme-card position-relative overflow-visible" style={{ marginTop: '2rem' }}>
+                                    <div className="position-absolute top-0 start-50 translate-middle">
+                                        <div className="bg-success p-3 border border-3 border-dark shadow-action-sm d-flex align-items-center justify-content-center" style={{ width: '80px', height: '80px', borderRadius: '50%' }}>
+                                            <i className="bi bi-phone-fill fs-1 text-white"></i>
+                                        </div>
+                                    </div>
+                                    <h2 className="display-6 fw-black text-uppercase mt-4 mb-3">Install the App</h2>
+                                    <p className="fw-bold fs-5 text-theme-muted mb-4">
+                                        Did you know you can install Chommie directly to your home screen? No app store needed! 
+                                        Get instant access, full screen learning, and a lightning-fast native experience.
+                                    </p>
+                                    <button className="btn btn-success btn-lg px-5 py-3 fw-black rounded-0 border-4 border-dark shadow-action hover-press text-uppercase" onClick={handleInstallClick}>
+                                        <i className="bi bi-download me-2"></i> Download App Now
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            )}
 
             {/* --- FINAL CTA --- */}
             <section className="py-5 border-top border-4 border-theme-main" style={{ backgroundColor: '#1a1a1a' }}>
