@@ -80,7 +80,7 @@ const WordBomb: React.FC = () => {
     const [showExitConfirm, setShowExitConfirm] = useState(false);
     const [showResult, setShowResult] = useState(false);
     const [resultData, setResultData] = useState({ isSuccess: false, title: '', message: '', points: 0 });
-    const { playCorrect, playWrong, playClick, triggerShake } = useVisualJuice();
+    const { playCorrect, playWrong, playClick, playWin, playLose, triggerShake } = useVisualJuice();
 
     const handleIntroDismiss = useCallback(() => setShowIntro(false), []);
 
@@ -204,7 +204,7 @@ const WordBomb: React.FC = () => {
 
         const currentActive = fallingWordsRef.current.filter(fw => fw.active);
         let newX = 10 + Math.random() * 75;
-        
+
         for (let i = 0; i < 5; i++) {
             const hasConflict = currentActive.some(fw => Math.abs(fw.x - newX) < 20);
             if (!hasConflict) break;
@@ -238,7 +238,7 @@ const WordBomb: React.FC = () => {
             try {
                 // Using centralized awardPoints to ensure weekly leaderboard sync
                 await awardPoints(finalScore);
-                
+
                 // Still update specific game performance stats
                 const userRef = doc(db as Firestore, 'users', user.uid);
                 await updateDoc(userRef, {
@@ -253,6 +253,13 @@ const WordBomb: React.FC = () => {
                 console.error("Failed to save Word Bomb score:", err);
             }
         }
+
+        if (finalScore > 50) {
+            playWin();
+        } else {
+            playLose();
+        }
+
         setGameStatus('over');
         setResultData({
             isSuccess: finalScore > 0,
@@ -261,7 +268,7 @@ const WordBomb: React.FC = () => {
             points: finalScore
         });
         setShowResult(true);
-    }, [cleanup, sessionStartTime, awardPoints]);
+    }, [cleanup, sessionStartTime, awardPoints, playWin, playLose]);
 
     const gameLoop = useCallback(() => {
         if (!isPlayingRef.current || livesRef.current <= 0) return;
@@ -494,35 +501,84 @@ const WordBomb: React.FC = () => {
     }
 
     if (gameStatus === 'over') {
-        return (
-            <div className="min-vh-100 d-flex flex-column align-items-center justify-content-center p-4 bg-theme-base">
-                <div className="text-center mb-5 d-flex flex-column align-items-center">
-                    <Mascot width="160px" height="160px" mood="sad" className="mb-4" />
-                    <h1 className="display-4 fw-bold mb-2 text-theme-main">Game Over!</h1>
-                    <p className="lead text-theme-muted mb-4">You scored {score} points</p>
-                    <div className="display-1 fw-bold text-warning mb-5">{score}</div>
-                </div>
+        const totalDuration = Math.floor((Date.now() - sessionStartTime) / 1000);
+        const minutes = Math.floor(totalDuration / 60);
+        const seconds = totalDuration % 60;
+        const timeStr = minutes > 0 ? `${minutes}m ${seconds}s` : `${seconds}s`;
 
-                <div className="d-flex flex-column gap-3 w-100" style={{ maxWidth: '400px' }}>
-                    <button
-                        onClick={() => {
-                            setScore(0);
-                            setLives(INITIAL_LIVES);
-                            setCombo(0);
-                            setGameStatus('ready');
-                        }}
-                        className="btn-game btn-game-primary w-100 p-4 rounded-4 fw-bold shadow-lg text-dark"
-                        style={{ fontSize: '1.2rem' }}
-                    >
-                        PLAY AGAIN
-                    </button>
-                    <button
-                        onClick={() => navigate('/mitambo')}
-                        className="btn btn-outline-theme w-100 p-4 rounded-4 fw-bold"
-                    >
-                        QUIT GAME
-                    </button>
+        return (
+            <div className="min-vh-100 d-flex flex-column align-items-center justify-content-center p-4 bg-theme-base animate__animated animate__fadeIn">
+                <div className="text-center w-100 brutalist-card p-4 p-md-5 shadow-action-lg position-relative overflow-hidden" style={{ maxWidth: '550px', background: 'var(--color-surface)' }}>
+                    {/* Decorative Background */}
+                    <div className="position-absolute top-0 start-0 w-100 h-100 opacity-10 pointer-events-none" style={{ backgroundImage: 'radial-gradient(var(--venda-yellow) 2px, transparent 2px)', backgroundSize: '30px 30px' }}></div>
+                    
+                    <div className="position-relative z-1">
+                        <div className="mb-4 mt-2 animate__animated animate__bounceIn d-flex justify-content-center">
+                            <Mascot width="160px" height="160px" mood="excited" />
+                        </div>
+
+                        <h1 className="fw-black display-3 text-theme-main mb-1 ls-tight uppercase animate__animated animate__jackInTheBox">
+                            {score > 0 ? 'STRONG EFFORT!' : 'KEEP GOING!'}
+                        </h1>
+                        <p className="text-theme-muted mb-5 ls-2 smallest fw-black uppercase letter-spacing-2">
+                            {score > 50 ? "YOU'RE BECOMING UNSTOPPABLE" : "EVERY ROUND MAKES YOU FASTER"}
+                        </p>
+
+                        <div className="bg-theme-surface border border-theme-main border-3 rounded-4 p-4 mb-5 shadow-action-sm animate__animated animate__fadeInUp animate__delay-1s">
+                            <div className="row g-4 d-flex align-items-center">
+                                <div className="col-6 border-end border-theme-main border-2">
+                                    <div className="d-flex flex-column align-items-center">
+                                        <span className="smallest fw-black text-theme-muted uppercase ls-1 mb-1">SCORE</span>
+                                        <h2 className="fw-black mb-0 display-6" style={{ color: 'var(--venda-yellow)', WebkitTextStroke: '1.5px var(--color-border)' }}>{score}</h2>
+                                        <span className="smallest fw-black text-theme-main opacity-50">POINTS EARNED</span>
+                                    </div>
+                                </div>
+                                <div className="col-6">
+                                    <div className="d-flex flex-column align-items-center">
+                                        <span className="smallest fw-black text-theme-muted uppercase ls-1 mb-1">STAYED ALIVE</span>
+                                        <h2 className="fw-black mb-0 display-6 text-theme-main">{timeStr}</h2>
+                                        <span className="smallest fw-black text-theme-main opacity-50">GREAT FOCUS!</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="d-flex flex-column gap-3 px-md-4">
+                            <button
+                                onClick={() => {
+                                    setScore(0);
+                                    setLives(INITIAL_LIVES);
+                                    setCombo(0);
+                                    setGameStatus('playing');
+                                    startGame();
+                                }}
+                                className="btn-game btn-game-warning w-100 py-3 fw-black ls-1 uppercase shadow-action hover-scale"
+                                style={{ fontSize: '1.25rem' }}
+                            >
+                                PLAY AGAIN
+                            </button>
+                            <button
+                                onClick={() => navigate('/mitambo')}
+                                className="btn btn-game btn-game-white w-100 py-3 fw-black ls-1 uppercase hover-scale"
+                            >
+                                BACK TO HUB
+                            </button>
+                        </div>
+                        
+                        <p className="mt-4 text-theme-muted smallest fw-black uppercase ls-1 opacity-50">
+                            {score > 0 ? "FANTASTIC! YOUR VOCABULARY IS GROWING." : "DON'T GIVE UP! RETRY TO BEAT YOUR BEST."}
+                        </p>
+                    </div>
                 </div>
+                
+                <style>{`
+                    .shadow-action-lg { box-shadow: 12px 12px 0px var(--color-border); }
+                    .letter-spacing-2 { letter-spacing: 4px; }
+                    .hover-scale { transition: transform 0.1s ease; }
+                    .hover-scale:hover { transform: scale(1.02); }
+                    .hover-scale:active { transform: scale(0.98); }
+                    .ls-tight { letter-spacing: -2px; }
+                `}</style>
             </div>
         );
     }
@@ -563,21 +619,21 @@ const WordBomb: React.FC = () => {
                                 </div>
                             </div>
                         </div>
-                        
+
                         <div className="d-flex flex-column align-items-end gap-1">
                             <div className="bg-warning text-dark brutalist-card--sm px-3 py-1 fw-black d-flex align-items-center gap-2 smallest shadow-action-sm mb-1">
                                 {lives} LIVES LEFT
                             </div>
                             <div className="d-flex gap-1">
                                 {[...Array(Math.min(INITIAL_LIVES, 10))].map((_, i) => (
-                                    <div 
-                                        key={i} 
-                                        style={{ 
-                                            width: isMobile ? 8 : 12, 
-                                            height: isMobile ? 8 : 12, 
+                                    <div
+                                        key={i}
+                                        style={{
+                                            width: isMobile ? 8 : 12,
+                                            height: isMobile ? 8 : 12,
                                             background: i < lives ? '#EF4444' : 'rgba(255,255,255,0.1)',
                                             border: i < lives ? '1px solid #000' : 'none'
-                                        }} 
+                                        }}
                                     />
                                 ))}
                             </div>

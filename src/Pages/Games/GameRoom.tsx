@@ -15,7 +15,7 @@ import { useGameLogic } from '../../hooks/useGameLogic';
 import Mascot, { type MascotMood } from '../../components/Mascot';
 import { useVisualJuice } from '../../hooks/useVisualJuice';
 import { updateStreak } from '../../services/streakUtils';
-import { HelpCircle, X, Bookmark, CheckCircle2, Volume2, Play, Flame, Zap, Users, Circle } from 'lucide-react';
+import { HelpCircle, X, Bookmark, CheckCircle2, Volume2, Play, Zap, Users, Circle } from 'lucide-react';
 import { db, auth } from '../../services/firebaseConfig';
 import { doc, updateDoc, arrayUnion } from 'firebase/firestore';
 import { onAuthStateChanged } from 'firebase/auth';
@@ -80,34 +80,17 @@ const GameRoom: React.FC = () => {
     const [mascotMood, setMascotMood] = useState<MascotMood>('happy');
     const [showSavedHint, setShowSavedHint] = useState(false);
     const [userData, setUserData] = useState<any>(null);
-    const { playCorrect, playWrong, triggerShake } = useVisualJuice();
+    const [sessionStartTime] = useState(Date.now());
+    const [hasPlayedWinSound, setHasPlayedWinSound] = useState(false);
+    const [finishedTime, setFinishedTime] = useState<number | null>(null);
+    const { playCorrect, playWrong, triggerShake, playWin, playWinner } = useVisualJuice();
 
     const handleFinishQuiz = async (finalScore: number, _finalCorrect: number, totalDuration: number) => {
         send({ type: 'FINISH', score: finalScore });
         setMascotMood('excited');
 
         if (isFirstTime) {
-            // Add celebration effect
-            const canvas = document.createElement('canvas');
-            canvas.style.position = 'fixed';
-            canvas.style.top = '0';
-            canvas.style.left = '0';
-            canvas.style.width = '100%';
-            canvas.style.height = '100%';
-            canvas.style.pointerEvents = 'none';
-            canvas.style.zIndex = '9999';
-            document.body.appendChild(canvas);
-
-            import('canvas-confetti').then((confetti) => {
-                const myConfetti = confetti.create(canvas, { resize: true });
-                myConfetti({
-                    particleCount: 150,
-                    spread: 70,
-                    origin: { y: 0.6 },
-                    colors: ['#FACC15', '#3B82F6', '#EF4444']
-                });
-                setTimeout(() => document.body.removeChild(canvas), 5000);
-            });
+            triggerConfetti();
         }
 
         if (auth.currentUser) {
@@ -116,10 +99,11 @@ const GameRoom: React.FC = () => {
             if (currentData) {
                 const mlId = microLessonId || lesson?.id || `${lessonId}__ml_0`;
                 const courseId = lesson?.courseId || lessonId;
-                const studyDuration = Math.floor((Date.now() - studyStartTime) / 1000) - totalDuration;
+                const totalSessionTime = finishedTime || Math.floor((Date.now() - sessionStartTime) / 1000);
+                const quizDuration = totalDuration || 0;
+                const studyDuration = Math.max(0, totalSessionTime - quizDuration);
 
                 if (isFirstTime) {
-                    // Using centralized awardPoints to handle weekly XP and total points
                     await awardPoints(finalScore);
                     
                     const updateData: any = {
@@ -128,8 +112,9 @@ const GameRoom: React.FC = () => {
                         [`microLessonProgress.${mlId}`]: {
                             completed: true,
                             score: finalScore,
-                            quizDuration: totalDuration,
-                            studyDuration: Math.max(0, studyDuration),
+                            quizDuration: quizDuration,
+                            studyDuration: studyDuration,
+                            totalDuration: totalSessionTime,
                             timestamp: new Date().toISOString()
                         },
                     };
@@ -191,6 +176,31 @@ const GameRoom: React.FC = () => {
         }
     };
 
+    const triggerConfetti = () => {
+        const canvas = document.createElement('canvas');
+        canvas.style.position = 'fixed';
+        canvas.style.top = '0';
+        canvas.style.left = '0';
+        canvas.style.width = '100%';
+        canvas.style.height = '100%';
+        canvas.style.pointerEvents = 'none';
+        canvas.style.zIndex = '9999';
+        document.body.appendChild(canvas);
+
+        import('canvas-confetti').then((confetti) => {
+            const myConfetti = confetti.create(canvas, { resize: true });
+            myConfetti({
+                particleCount: 150,
+                spread: 70,
+                origin: { y: 0.6 },
+                colors: ['#FACC15', '#3B82F6', '#EF4444']
+            });
+            setTimeout(() => {
+                if (document.body.contains(canvas)) document.body.removeChild(canvas);
+            }, 5000);
+        });
+    };
+
     const {
         currentQIndex, setCurrentQIndex,
         score,
@@ -225,7 +235,6 @@ const GameRoom: React.FC = () => {
         onWrong: () => {
             setMascotMood('sad');
             playWrong();
-            // triggerShake('dc-card-container');
             const arena = document.getElementById('wb-arena-shake');
             if (arena) triggerShake('wb-arena-shake');
             else triggerShake('quiz-container');
@@ -240,6 +249,18 @@ const GameRoom: React.FC = () => {
             });
         }
     });
+
+    useEffect(() => {
+        if ((gameState === 'NO_QUIZ' || gameState === 'RESULT') && !hasPlayedWinSound) {
+            const now = Date.now();
+            setFinishedTime(Math.floor((now - sessionStartTime) / 1000));
+            playWin();
+            setTimeout(() => playWinner(), 1200);
+            setHasPlayedWinSound(true);
+            setMascotMood('excited');
+            triggerConfetti();
+        }
+    }, [gameState, playWin, playWinner, hasPlayedWinSound, sessionStartTime]);
 
     const saveStateToStorage = useCallback((showHint = false) => {
         if (gameState === 'RESULT') return;
@@ -413,6 +434,91 @@ const GameRoom: React.FC = () => {
         );
     };
 
+    const renderCelebration = () => {
+        const totalSessionTime = finishedTime || Math.floor((Date.now() - sessionStartTime) / 1000);
+        const minutes = Math.floor(totalSessionTime / 60);
+        const seconds = totalSessionTime % 60;
+        const timeStr = minutes > 0 ? `${minutes}m ${seconds}s` : `${seconds}s`;
+
+        return (
+            <div className="min-vh-100 d-flex flex-column bg-theme-base animate__animated animate__fadeIn">
+                <div className="flex-grow-1 d-flex align-items-center justify-content-center p-3 p-md-4">
+                    <div className="text-center w-100 brutalist-card p-4 p-md-5 shadow-action-lg position-relative overflow-hidden" style={{ maxWidth: '550px', background: 'var(--color-surface)' }}>
+                        {/* Decorative Background Elements */}
+                        <div className="position-absolute top-0 start-0 w-100 h-100 opacity-10 pointer-events-none" style={{ backgroundImage: 'radial-gradient(var(--venda-yellow) 2px, transparent 2px)', backgroundSize: '30px 30px' }}></div>
+                        
+                        <div className="position-relative z-1">
+                            <div className="mb-4 mt-2 animate__animated animate__bounceIn d-flex justify-content-center">
+                                <Mascot mood="excited" width="160px" height="160px" />
+                            </div>
+
+                            <h1 className="fw-black display-3 text-theme-main mb-1 ls-tight uppercase animate__animated animate__jackInTheBox">
+                                {gameState === 'NO_QUIZ' ? 'ALL DONE!' : 'QUEST COMPLETE!'}
+                            </h1>
+                            <p className="text-theme-muted mb-5 ls-2 smallest fw-black uppercase letter-spacing-2">
+                                {gameState === 'NO_QUIZ' ? "YOU'VE REVIEWED ALL CONTENT" : "YOU'RE BECOMING A MASTER"}
+                            </p>
+
+                            <div className="bg-theme-surface border border-theme-main border-3 rounded-4 p-4 mb-5 shadow-action-sm animate__animated animate__fadeInUp animate__delay-1s">
+                                <div className="row g-4 d-flex align-items-center">
+                                    <div className="col-6 border-end border-theme-main border-2">
+                                        <div className="d-flex flex-column align-items-center">
+                                            <span className="smallest fw-black text-theme-muted uppercase ls-1 mb-1">POINTS</span>
+                                            <h2 className="fw-black mb-0 display-6" style={{ color: 'var(--venda-yellow)', WebkitTextStroke: '1.5px var(--color-border)' }}>
+                                                +{isFirstTime ? score : 0}
+                                            </h2>
+                                            <span className="smallest fw-black text-theme-main opacity-50">{isFirstTime ? 'XP EARNED' : 'REVIEW SESSION'}</span>
+                                        </div>
+                                    </div>
+                                    <div className="col-6">
+                                        <div className="d-flex flex-column align-items-center">
+                                            <span className="smallest fw-black text-theme-muted uppercase ls-1 mb-1">TIME TAKEN</span>
+                                            <h2 className="fw-black mb-0 display-6 text-theme-main">{timeStr}</h2>
+                                            <span className="smallest fw-black text-theme-main opacity-50">FAST WORK!</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                {isFirstTime && scoreBreakdown.streakBonus > 0 && (
+                                    <div className="mt-4 pt-3 border-top border-theme-main border-2 d-flex justify-content-center gap-3">
+                                        <span className="badge bg-danger text-white border-0 py-2 px-3 fw-black rounded-pill ls-1 smallest animate__animated animate__pulse animate__infinite">
+                                            🔥 STREAK BONUS: +{scoreBreakdown.streakBonus} XP
+                                        </span>
+                                    </div>
+                                )}
+                            </div>
+
+                            <div className="px-md-4">
+                                <button 
+                                    className="btn btn-game btn-game-primary w-100 py-3 fw-black ls-1 uppercase shadow-action hover-scale" 
+                                    onClick={async () => {
+                                        if (gameState === 'NO_QUIZ') {
+                                            await handleFinishQuiz(50, 0, 0);
+                                        }
+                                        navigate('/courses');
+                                    }}
+                                    style={{ fontSize: '1.25rem' }}>
+                                    {isFirstTime ? 'CLAIM REWARDS' : 'BACK TO MAP'}
+                                </button>
+                            </div>
+                            
+                            <p className="mt-4 text-theme-muted smallest fw-black uppercase ls-1 opacity-50">
+                                {gameState === 'NO_QUIZ' 
+                                    ? "GREAT JOB! THERE WAS NO QUIZ THIS TIME." 
+                                    : "KEEP GOING TO MAINTAIN YOUR STREAK!"}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                
+                <style>{`
+                    .shadow-action-lg { box-shadow: 12px 12px 0px var(--color-border); }
+                    .letter-spacing-2 { letter-spacing: 4px; }
+                `}</style>
+            </div>
+        );
+    };
+
     const renderContent = () => {
         if (gameState === 'STUDY') {
             const slide = lesson.slides[currentSlide];
@@ -528,34 +634,7 @@ const GameRoom: React.FC = () => {
         }
 
         if (gameState === 'NO_QUIZ') {
-            return (
-                <div className="min-vh-100 d-flex flex-column bg-theme-base">
-                    {renderProgressHeader()}
-                    <div className="flex-grow-1 d-flex align-items-center justify-content-center p-3 bg-theme-base">
-                        <div className="text-center w-100 bg-theme-surface rounded-5 p-4 p-md-5 shadow-sm border border-theme-soft animate__animated animate__zoomIn" style={{ maxWidth: '500px' }}>
-                            <div className="d-flex justify-content-center mb-4">
-                                <Mascot mood="excited" width="120px" height="120px" />
-                            </div>
-                            <h1 className="fw-900 display-5 text-theme-main mb-2 ls-tight">All Done!</h1>
-                            <p className="text-theme-muted mb-4 ls-1 smallest fw-bold uppercase">YOU'VE REVIEWED ALL THE CONTENT</p>
-                            <div className="py-4 border-top border-bottom mb-4">
-                                <p className="text-secondary small mb-0 px-3">Great job! There's no quiz for this lesson, but you've mastered the material.</p>
-                                {isFirstTime && (
-                                    <div className="mt-3">
-                                        <h2 style={{ color: '#FACC15', fontWeight: 800 }}>+50 XP</h2>
-                                        <span className="smallest text-muted fw-bold">COMPLETION BONUS</span>
-                                    </div>
-                                )}
-                            </div>
-                            <button className="btn game-btn-primary w-100 py-3 fw-900 ls-1 shadow-sm" 
-                                onClick={() => handleFinishQuiz(50, 0, 0)} 
-                                style={{ borderRadius: '18px', backgroundColor: '#FACC15', boxShadow: '0 6px 0 #EAB308' }}>
-                                {isFirstTime ? 'FINISH & COLLECT' : 'FINISH REVIEW'}
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            );
+            return renderCelebration();
         }
 
         if (gameState === 'QUIZ') {
@@ -669,45 +748,7 @@ const GameRoom: React.FC = () => {
             );
         }
 
-        return (
-            <div className="min-vh-100 d-flex flex-column bg-theme-base">
-                <div className="flex-grow-1 d-flex align-items-center justify-content-center p-3 bg-theme-base">
-                    <div className="text-center w-100 brutalist-card p-4 p-md-5 shadow-action" style={{ maxWidth: '500px' }}>
-                        <div className="d-flex justify-content-center mb-5">
-                            <Mascot mood={mascotMood} width="140px" height="140px" />
-                        </div>
-                        <h1 className="fw-black display-4 text-theme-main mb-2 ls-tight uppercase">{isFirstTime ? 'Quest Ended!' : 'Review Done!'}</h1>
-                        <p className="text-theme-muted mb-5 ls-1 smallest fw-black uppercase">{isFirstTime ? "YOU'VE MASTERED THIS CHAPTER" : "GREAT JOB REFRESHING YOUR MEMORY"}</p>
-                        
-                        {isFirstTime && (
-                           <div className="py-4 border-top border-bottom border-theme-main border-2 mb-5">
-                                <h1 className="display-2 fw-black mb-3" style={{ color: 'var(--venda-yellow)', letterSpacing: '-2px', WebkitTextStroke: '2px var(--color-border)' }}>+{score} XP</h1>
-                                <div className="d-flex flex-column gap-3 text-start mx-auto" style={{ maxWidth: 300 }}>
-                                    <div className="d-flex justify-content-between smallest text-theme-main align-items-center">
-                                        <span className="d-flex align-items-center gap-2 p-2 bg-theme-surface brutalist-card--sm rounded-pill fw-black uppercase ls-1"><Bookmark size={14} /> BASE POINTS</span>
-                                        <span className="fw-black">{scoreBreakdown.base}</span>
-                                    </div>
-                                    {scoreBreakdown.speed > 0 &&
-                                        <div className="d-flex justify-content-between smallest text-dark align-items-center">
-                                            <span className="d-flex align-items-center gap-2 p-2 bg-warning brutalist-card--sm rounded-pill fw-black uppercase ls-1"><Zap size={14} /> SPEED BONUS</span>
-                                            <span className="fw-black">+{scoreBreakdown.speed}</span>
-                                        </div>}
-                                    {scoreBreakdown.streakBonus > 0 &&
-                                        <div className="d-flex justify-content-between smallest text-dark align-items-center">
-                                            <span className="d-flex align-items-center gap-2 p-2 bg-danger text-white brutalist-card--sm rounded-pill fw-black uppercase ls-1"><Flame size={14} /> STREAK BONUS</span>
-                                            <span className="fw-black">+{scoreBreakdown.streakBonus}</span>
-                                        </div>}
-                                </div>
-                            </div>
-                        )}
-                        
-                        <button className="btn btn-game btn-game-primary w-100 py-3 fw-black ls-1 uppercase" onClick={() => navigate('/courses')}>
-                            RETURN TO MAP
-                        </button>
-                    </div>
-                </div>
-            </div>
-        );
+        return renderCelebration();
     };
 
     return (
