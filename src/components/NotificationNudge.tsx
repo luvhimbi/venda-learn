@@ -30,7 +30,7 @@ const NotificationNudge: React.FC = () => {
     if (!isVisible || dismissed) return null;
 
     return (
-        <div className="notification-nudge-container animate__animated animate__fadeInUp mb-4">
+        <div className="notification-nudge-container animate__animated animate__fadeInUp mb-4 position-relative" style={{ zIndex: 10 }}>
             <div className="brutalist-card bg-theme-surface border-theme-main border-4 shadow-action-lg overflow-hidden position-relative p-0" 
                  style={{ borderStyle: 'solid' }}>
                 
