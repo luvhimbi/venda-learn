@@ -208,7 +208,7 @@ const WordPuzzle: React.FC = () => {
         }
         setResultData({
             isSuccess: true,
-            title: 'Ndi hone! (Correct!)',
+            title: 'CORRECT!',
             message: `You found the word: <strong>${targetPuzzle?.word}</strong> (${targetPuzzle?.translation}).`,
             points: 10
         });
