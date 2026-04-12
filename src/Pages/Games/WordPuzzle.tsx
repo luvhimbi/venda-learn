@@ -118,7 +118,7 @@ const WordPuzzle: React.FC = () => {
             // Also filter by language if possible
             const validPuzzles = allPuzzles.filter((p: any) => {
                 const isCorrectLength = p.word.length === WORD_LENGTH;
-                const isCorrectLang = !activeLang || p.languageId === activeLang.id || (!p.languageId && activeLang.name.toLowerCase().includes('venda'));
+                const isCorrectLang = !activeLang || p.languageId === activeLang.id || !p.languageId;
                 return isCorrectLength && isCorrectLang;
             });
 
@@ -255,16 +255,16 @@ const WordPuzzle: React.FC = () => {
     };
 
     if (loading) return (
-        <div className="min-vh-100 bg-white d-flex flex-column justify-content-center align-items-center">
+        <div className="min-vh-100 bg-theme-base d-flex flex-column justify-content-center align-items-center">
             <Mascot width="100px" height="100px" mood="excited" />
-            <p className="text-muted mt-3 fw-bold" style={{ fontSize: '12px', letterSpacing: '2px', textTransform: 'uppercase' }}>Loading puzzle...</p>
+            <p className="text-theme-muted mt-3 fw-bold" style={{ fontSize: '12px', letterSpacing: '2px', textTransform: 'uppercase' }}>Loading puzzle...</p>
         </div>
     );
 
     return (
         <div className="min-vh-100 py-4 d-flex flex-column align-items-center" style={{ 
-            backgroundColor: '#ffffff',
-            backgroundImage: 'url("data:image/svg+xml,%3Csvg width=\'20\' height=\'20\' viewBox=\'0 0 20 20\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cg fill=\'%23000000\' fill-opacity=\'0.02\' fill-rule=\'evenodd\'%3E%3Ccircle cx=\'3\' cy=\'3\' r=\'1\'/%3E%3C/g%3E%3C/svg%3E")' 
+            backgroundColor: 'var(--color-bg)',
+            backgroundImage: 'url("data:image/svg+xml,%3Csvg width=\'20\' height=\'20\' viewBox=\'0 0 20 20\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cg fill=\'currentColor\' fill-opacity=\'0.02\' fill-rule=\'evenodd\'%3E%3Ccircle cx=\'3\' cy=\'3\' r=\'1\'/%3E%3C/g%3E%3C/svg%3E")' 
         }}>
             {/* RESULT MODAL */}
             <GameResultModal
@@ -301,20 +301,20 @@ const WordPuzzle: React.FC = () => {
             <div className="container" style={{ maxWidth: '500px' }}>
                 <div className="d-flex justify-content-between align-items-center mb-4 px-2">
                     <button onClick={handleExit} className="btn-game btn-game-white rounded-circle d-flex align-items-center justify-content-center" style={{ width: 44, height: 44, padding: 0 }}>
-                        <ArrowLeft size={24} strokeWidth={3} />
+                        <ArrowLeft size={24} strokeWidth={3} className="text-theme-main" />
                     </button>
                     <div className="text-center">
-                        <span className="smallest fw-black text-muted uppercase ls-1 mb-0 d-block">{preferredLanguage?.name || 'Local'} Word</span>
-                        <h2 className="fw-black mb-0 text-dark ls-tight" style={{ fontSize: '1.5rem' }}>U VUMBA</h2>
+                        <span className="smallest fw-black text-theme-muted uppercase ls-1 mb-0 d-block">{preferredLanguage?.name || 'Local'} Word</span>
+                        <h2 className="fw-black mb-0 text-theme-main ls-tight" style={{ fontSize: '1.5rem' }}>U VUMBA</h2>
                     </div>
                     <div className="d-flex align-items-center gap-2">
                         <button onClick={() => { resetIntroSeen('wordPuzzle'); setShowIntro(true); }} className="btn-game btn-game-white rounded-circle d-flex align-items-center justify-content-center" style={{ width: 36, height: 36, padding: 0 }} title="How to play">
-                            <HelpCircle size={18} strokeWidth={3} className="text-dark" />
+                            <HelpCircle size={18} strokeWidth={3} className="text-theme-main" />
                         </button>
                          {streak > 0 && (
-                            <div className="d-flex align-items-center flex-column bg-white brutalist-card--sm px-2 py-1" title="Daily Streak">
+                            <div className="d-flex align-items-center flex-column bg-theme-card brutalist-card--sm px-2 py-1" title="Daily Streak">
                                 <Flame size={18} color="#EF4444" fill="#EF4444" />
-                                <span className="fw-black smallest text-dark">{streak}</span>
+                                <span className="fw-black smallest text-theme-main">{streak}</span>
                             </div>
                         )}
                     </div>
@@ -331,11 +331,11 @@ const WordPuzzle: React.FC = () => {
                 {/* HINT BANNER */}
                 <div className="brutalist-card p-3 mb-4 shadow-action-sm d-flex align-items-center gap-3 animate__animated animate__fadeInDown bg-warning">
                     <div className="bg-white p-2 border border-2 border-dark rounded-circle">
-                        <Lightbulb className="text-dark" size={24} strokeWidth={3} />
+                        <Lightbulb className="text-black" size={24} strokeWidth={3} />
                     </div>
                     <div>
-                        <p className="text-uppercase smallest fw-black text-dark ls-1 mb-0 opacity-75">MURERO (HINT)</p>
-                        <p className="mb-0 fw-black text-dark uppercase">{targetPuzzle?.hint}</p>
+                        <p className="text-uppercase smallest fw-black text-black ls-1 mb-0 opacity-75">MURERO (HINT)</p>
+                        <p className="mb-0 fw-black text-black uppercase">{targetPuzzle?.hint}</p>
                     </div>
                 </div>
 
@@ -359,9 +359,9 @@ const WordPuzzle: React.FC = () => {
                         <div key={i} className="d-flex gap-2 justify-content-center">
                             {guess.split('').map((letter, j) => {
                                 const target = targetPuzzle?.word.toUpperCase() || '';
-                                let status = 'bg-white border-secondary text-dark';
+                                let status = 'bg-theme-card border-theme-soft text-theme-main';
                                 if (target[j] === letter) status = 'bg-success text-white border-success';
-                                else if (target.includes(letter)) status = 'bg-warning text-dark border-warning';
+                                else if (target.includes(letter)) status = 'bg-warning text-black border-warning';
                                 else status = 'bg-secondary text-white border-secondary';
 
                                 return (
@@ -378,13 +378,13 @@ const WordPuzzle: React.FC = () => {
                         <div className={`d-flex gap-2 justify-content-center ${shake ? 'shake-animation' : ''}`}>
                             {[...Array(WORD_LENGTH)].map((_, i) => {
                                 const letter = currentGuess[i] || '';
-                                let status = 'bg-white border-dark text-dark';
+                                let status = 'bg-theme-card border-theme-main text-theme-main';
 
                                 // Show hints if we checked the guess
                                 if (checkedGuess && letter && checkedGuess.length === WORD_LENGTH) {
                                     const target = targetPuzzle?.word.toUpperCase() || '';
                                     if (target[i] === letter) status = 'bg-success text-white border-success';
-                                    else if (target.includes(letter)) status = 'bg-warning text-dark border-warning';
+                                    else if (target.includes(letter)) status = 'bg-warning text-black border-warning';
                                     else status = 'bg-secondary text-white border-secondary';
                                 }
 
@@ -404,7 +404,7 @@ const WordPuzzle: React.FC = () => {
                     {[...Array(Math.max(0, MAX_GUESSES - 1 - guesses.length))].map((_, i) => (
                         <div key={i} className="d-flex gap-2 justify-content-center">
                             {[...Array(WORD_LENGTH)].map((_, j) => (
-                                <div key={j} className="guess-box bg-light border border-secondary-subtle text-muted d-flex align-items-center justify-content-center fs-2 rounded opacity-50">
+                                <div key={j} className="guess-box bg-theme-surface border border-theme-soft text-theme-muted d-flex align-items-center justify-content-center fs-2 rounded opacity-50">
                                 </div>
                             ))}
                         </div>
@@ -417,9 +417,9 @@ const WordPuzzle: React.FC = () => {
                         <div key={i} className="d-flex justify-content-center gap-1 mb-1">
                             {row.map(key => {
                                 const status = getKeyStatus(key);
-                                let btnClass = 'bg-white';
+                                let btnClass = 'bg-theme-card text-theme-main';
                                 if (status === 'correct') btnClass = 'bg-success text-white';
-                                else if (status === 'present') btnClass = 'bg-warning text-dark';
+                                else if (status === 'present') btnClass = 'bg-warning text-black';
                                 else if (status === 'absent') btnClass = 'bg-secondary text-white opacity-50';
 
                                 return (
@@ -447,28 +447,46 @@ const WordPuzzle: React.FC = () => {
 
             <style>{`
                 .guess-box {
-                    width: clamp(45px, 12vw, 55px);
-                    height: clamp(45px, 12vw, 55px);
-                    font-size: clamp(1.2rem, 5vw, 2rem) !important;
-                    transition: all 0.2s;
+                    width: clamp(45px, 12vw, 62px);
+                    height: clamp(45px, 12vw, 62px);
+                    border-width: 3px !important;
+                    font-weight: 900;
                     text-transform: uppercase;
+                    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
                 }
-                .key-btn {
-                    height: clamp(45px, 10vw, 55px);
-                    font-size: clamp(0.7rem, 3vw, 0.9rem);
+                .keyboard-key {
+                    min-width: clamp(30px, 8vw, 42px);
+                    height: 54px;
+                    border: 2px solid var(--color-border);
+                    border-radius: 8px;
+                    font-weight: 800;
+                    font-size: 0.9rem;
+                    cursor: pointer;
                     display: flex;
                     align-items: center;
                     justify-content: center;
-                    min-width: 0;
+                    transition: all 0.1s;
+                    box-shadow: 0 3px 0 var(--color-border);
+                    touch-action: manipulation;
                 }
-                .ls-1 { letter-spacing: 1px; }
+                .keyboard-key:active {
+                    transform: translateY(2px);
+                    box-shadow: 0 1px 0 var(--color-border);
+                }
+                .keyboard-key.wide {
+                    padding: 0 15px;
+                    flex: 1.5;
+                }
+                .keyboard-key.absent {
+                    opacity: 0.4;
+                }
                 .active-slot {
                     border-color: #FACC15 !important;
                     box-shadow: 0 0 10px rgba(250, 204, 21, 0.3);
                     transform: scale(1.05);
                 }
                 .shake-animation {
-                    animation: shake 0.5s;
+                    animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both;
                 }
                 @keyframes shake {
                     0% { transform: translate(1px, 1px) rotate(0deg); }

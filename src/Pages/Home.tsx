@@ -131,7 +131,7 @@ const Home: React.FC = () => {
 
 
     if (loading) return (
-        <div className="d-flex justify-content-center align-items-center min-vh-100 bg-white">
+        <div className="d-flex justify-content-center align-items-center min-vh-100 bg-theme-base">
             <div className="text-center">
                 <div className="spinner-border mb-3" style={{ color: '#FACC15', width: 48, height: 48 }} role="status"></div>
                 <p className="smallest fw-bold text-muted ls-2 uppercase">LOADING...</p>
@@ -145,7 +145,7 @@ const Home: React.FC = () => {
 
 
     return (
-        <div className="bg-white min-vh-100" style={{ overflowX: 'hidden' }}>
+        <div className="bg-theme-base min-vh-100" style={{ overflowX: 'hidden' }}>
 
             {/* App Tour Guide */}
             <TourGuide
@@ -155,7 +155,7 @@ const Home: React.FC = () => {
             />
 
             {/* CLEAN HERO HEADER WITH MASCOT */}
-            <div className="px-3 py-3 bg-white border-bottom border-dark border-4 position-relative overflow-hidden" style={{ background: 'url("data:image/svg+xml,%3Csvg width=\'20\' height=\'20\' viewBox=\'0 0 20 20\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cg fill=\'%23000000\' fill-opacity=\'0.03\' fill-rule=\'evenodd\'%3E%3Ccircle cx=\'3\' cy=\'3\' r=\'1\'/%3E%3C/g%3E%3C/svg%3E")' }}>
+            <div className="px-3 py-3 bg-theme-base border-bottom border-theme-main border-4 position-relative overflow-hidden" style={{ background: 'url("data:image/svg+xml,%3Csvg width=\'20\' height=\'20\' viewBox=\'0 0 20 20\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cg fill=\'currentColor\' fill-opacity=\'0.03\' fill-rule=\'evenodd\'%3E%3Ccircle cx=\'3\' cy=\'3\' r=\'1\'/%3E%3C/g%3E%3C/svg%3E")' }}>
                 <div className="container" style={{ maxWidth: '750px' }}>
                     <InstallBanner />
 
@@ -167,39 +167,39 @@ const Home: React.FC = () => {
                                 {/* Row 1: XP, STREAK, TROPHIES */}
                                 <div className="d-flex align-items-center gap-2">
                                     {/* XP Card */}
-                                    <div className="brutalist-card--sm d-flex align-items-center flex-fill gap-2 p-2 pe-3 bg-white shadow-action-sm transition-all hover-lift border border-dark border-3"
+                                    <div className="brutalist-card--sm d-flex align-items-center flex-fill gap-2 p-2 pe-3 bg-theme-card shadow-action-sm transition-all hover-lift border border-theme-main border-3"
                                          style={{ minWidth: '100px' }}>
                                         <div className="stat-icon-box rounded-3 d-flex align-items-center justify-content-center bg-warning border border-dark border-2"
                                             style={{ width: 34, height: 34 }}>
                                             <i className="bi bi-gem fs-6 text-dark"></i>
                                         </div>
                                         <div className="lh-1">
-                                            <p className="mb-0 fw-black text-dark" style={{ fontSize: '1rem' }}>{userData?.points || 0}</p>
-                                            <p className="mb-0 smallest fw-black text-muted uppercase ls-1" style={{ fontSize: '8px' }}>XP</p>
+                                            <p className="mb-0 fw-black text-theme-main" style={{ fontSize: '1rem' }}>{userData?.points || 0}</p>
+                                            <p className="mb-0 smallest fw-black text-theme-muted uppercase ls-1" style={{ fontSize: '8px' }}>XP</p>
                                         </div>
                                     </div>
 
                                     {/* Streak Card */}
                                     <div
-                                        className={`brutalist-card--sm d-flex align-items-center flex-fill gap-2 p-2 pe-3 shadow-action-sm transition-all hover-lift border border-dark border-3 streak-trigger-area ${userData?.streak > 0 ? 'bg-danger text-white' : 'bg-white text-dark'}`}
+                                        className={`brutalist-card--sm d-flex align-items-center flex-fill gap-2 p-2 pe-3 shadow-action-sm transition-all hover-lift border border-theme-main border-3 streak-trigger-area ${userData?.streak > 0 ? 'bg-danger text-white' : 'bg-theme-card text-theme-main'}`}
                                         onClick={(e) => {
                                             e.stopPropagation();
                                             setShowStreakModal(!showStreakModal);
                                         }}
                                         style={{ cursor: 'pointer', minWidth: '100px' }}
                                     >
-                                        <div className={`stat-icon-box rounded-3 d-flex align-items-center justify-content-center border border-dark border-2 ${userData?.streak > 0 ? 'bg-white text-danger' : 'bg-danger-subtle text-danger'}`}
+                                        <div className={`stat-icon-box rounded-3 d-flex align-items-center justify-content-center border border-theme-main border-2 ${userData?.streak > 0 ? 'bg-white text-danger' : 'bg-danger-subtle text-danger'}`}
                                             style={{ width: 34, height: 34 }}>
                                             <i className={`bi bi-fire fs-6 ${userData?.streak > 0 ? 'fire-shake' : ''}`}></i>
                                         </div>
                                         <div className="lh-1">
                                             <p className="mb-0 fw-black" style={{ fontSize: '1rem' }}>{userData?.streak || 0}</p>
-                                            <p className={`mb-0 smallest fw-black uppercase ls-1 ${userData?.streak > 0 ? 'opacity-75' : 'text-muted'}`} style={{ fontSize: '8px' }}>STREAK</p>
+                                            <p className={`mb-0 smallest fw-black uppercase ls-1 ${userData?.streak > 0 ? 'opacity-75' : 'text-theme-muted'}`} style={{ fontSize: '8px' }}>STREAK</p>
                                         </div>
                                     </div>
 
                                     {/* Trophies Card */}
-                                    <div className="brutalist-card--sm d-flex align-items-center flex-fill gap-2 p-2 pe-3 bg-white shadow-action-sm transition-all hover-lift border border-dark border-3"
+                                    <div className="brutalist-card--sm d-flex align-items-center flex-fill gap-2 p-2 pe-3 bg-theme-card shadow-action-sm transition-all hover-lift border border-theme-main border-3"
                                          onClick={() => navigate('/achievements')}
                                          style={{ minWidth: '100px', cursor: 'pointer' }}>
                                         <div className="stat-icon-box rounded-3 d-flex align-items-center justify-content-center bg-info border border-dark border-2"
@@ -207,19 +207,19 @@ const Home: React.FC = () => {
                                             <i className="bi bi-trophy-fill fs-6 text-dark"></i>
                                         </div>
                                         <div className="lh-1">
-                                            <p className="mb-0 fw-black text-dark" style={{ fontSize: '1rem' }}>{userData?.trophies?.length || 0}</p>
-                                            <p className="mb-0 smallest fw-black text-muted uppercase ls-1" style={{ fontSize: '8px' }}>TROPHIES</p>
+                                            <p className="mb-0 fw-black text-theme-main" style={{ fontSize: '1rem' }}>{userData?.trophies?.length || 0}</p>
+                                            <p className="mb-0 smallest fw-black text-theme-muted uppercase ls-1" style={{ fontSize: '8px' }}>TROPHIES</p>
                                         </div>
                                     </div>
                                 </div>
 
                                 {/* Row 2: Target Language (Wide) */}
                                 {currentLanguage && (
-                                    <div className="brutalist-card--sm d-flex align-items-center justify-content-between p-2 px-3 bg-white shadow-action-sm transition-all hover-lift border border-dark border-3 w-100"
+                                    <div className="brutalist-card--sm d-flex align-items-center justify-content-between p-2 px-3 bg-theme-card shadow-action-sm transition-all hover-lift border border-theme-main border-3 w-100"
                                          onClick={() => navigate('/courses')}
                                          style={{ cursor: 'pointer' }}>
                                         <div className="d-flex align-items-center gap-3">
-                                            <div className="stat-icon-box rounded-3 bg-light d-flex align-items-center justify-content-center overflow-hidden border border-dark border-2"
+                                            <div className="stat-icon-box rounded-3 bg-light d-flex align-items-center justify-content-center overflow-hidden border border-theme-main border-2"
                                                 style={{ width: 38, height: 38 }}>
                                                 <LanguageCharacter 
                                                     languageName={currentLanguage.name} 
@@ -227,11 +227,11 @@ const Home: React.FC = () => {
                                                 />
                                             </div>
                                             <div className="lh-1">
-                                                <p className="mb-0 smallest fw-black text-muted uppercase ls-1" style={{ fontSize: '9px' }}>LEARNING TARGET</p>
-                                                <p className="mb-0 fw-black text-dark" style={{ fontSize: '1.25rem' }}>{currentLanguage.name?.toUpperCase()}</p>
+                                                <p className="mb-0 smallest fw-black text-theme-muted uppercase ls-1" style={{ fontSize: '9px' }}>LEARNING TARGET</p>
+                                                <p className="mb-0 fw-black text-theme-main" style={{ fontSize: '1.25rem' }}>{currentLanguage.name?.toUpperCase()}</p>
                                             </div>
                                         </div>
-                                        <i className="bi bi-chevron-right text-dark opacity-50"></i>
+                                        <i className="bi bi-chevron-right text-theme-main opacity-50"></i>
                                     </div>
                                 )}
                             </div>
@@ -249,18 +249,18 @@ const Home: React.FC = () => {
 
                         {/* CONTINUE LEARNING */}
                         <section className="mb-5 text-start">
-                            <h6 className="fw-black text-uppercase text-dark smallest ls-2 mb-4 px-2">CONTINUE LEARNING</h6>
+                            <h6 className="fw-black text-uppercase text-theme-main smallest ls-2 mb-4 px-2">CONTINUE LEARNING</h6>
                             {lastLesson ? (
-                                <div className="p-4 p-md-5 brutalist-card shadow-action bg-white position-relative overflow-hidden">
+                                <div className="p-4 p-md-5 brutalist-card shadow-action bg-theme-card position-relative overflow-hidden">
                                     <div className="position-relative z-1">
                                         <div className="d-flex align-items-center gap-2 mb-2">
                                             <span className="px-2 py-0.5 rounded-pill fw-black ls-1 bg-warning text-dark border border-dark border-2"
                                                 style={{ fontSize: '9px' }}>
                                                 {lastLesson.savedType === 'quiz' ? <><i className="bi bi-pencil-square me-1"></i> QUIZ</> : <><i className="bi bi-journal-text me-1"></i> LESSON</>}
                                             </span>
-                                            <span className="smallest fw-black text-muted ls-1 uppercase" style={{ fontSize: '9px' }}>{lastLesson.courseTitle}</span>
+                                            <span className="smallest fw-black text-theme-muted ls-1 uppercase" style={{ fontSize: '9px' }}>{lastLesson.courseTitle}</span>
                                         </div>
-                                        <h3 className="fw-black mb-4 text-dark uppercase ls-tight" style={{ fontSize: '1.5rem' }}>{lastLesson.title}</h3>
+                                        <h3 className="fw-black mb-4 text-theme-main uppercase ls-tight" style={{ fontSize: '1.5rem' }}>{lastLesson.title}</h3>
                                         
                                         <JuicyButton
                                             onClick={() => navigate(`/game/${lastLesson.id}/${lastLesson.microLessonId}?start=${lastLesson.savedIndex}&type=${lastLesson.savedType?.toUpperCase()}`)}
@@ -269,12 +269,12 @@ const Home: React.FC = () => {
                                             <i className="bi bi-play-fill fs-6 me-1"></i> RESUME NOW
                                         </JuicyButton>
                                     </div>
-                                    <i className="bi bi-play-fill position-absolute end-0 bottom-0 opacity-10" style={{ fontSize: '120px', transform: 'translate(20%, 20%)', color: '#000' }}></i>
+                                    <i className="bi bi-play-fill position-absolute end-0 bottom-0 opacity-10" style={{ fontSize: '120px', transform: 'translate(20%, 20%)', color: 'var(--color-text)' }}></i>
                                 </div>
                             ) : (
-                                <div className="py-5 text-center brutalist-card bg-light border-dashed border-dark border-3 shadow-none">
-                                    <div className="mb-3 text-muted opacity-50"><i className="bi bi-mortarboard-fill fs-1"></i></div>
-                                    <p className="text-dark smallest fw-black uppercase ls-2 mb-3">Master your language journey</p>
+                                <div className="py-5 text-center brutalist-card bg-theme-surface border-dashed border-theme-main border-3 shadow-none">
+                                    <div className="mb-3 text-theme-muted opacity-50"><i className="bi bi-mortarboard-fill fs-1"></i></div>
+                                    <p className="text-theme-main smallest fw-black uppercase ls-2 mb-3">Master your language journey</p>
                                     <JuicyButton onClick={() => navigate('/courses')} className="btn btn-game btn-game-white px-5">
                                         EXPLORE LESSONS
                                     </JuicyButton>
@@ -286,7 +286,7 @@ const Home: React.FC = () => {
                         {userData?.trophies?.length > 0 && (
                             <section className="mb-5 text-start">
                                 <div className="d-flex justify-content-between align-items-center mb-4 px-2">
-                                    <h6 className="fw-black text-uppercase text-dark smallest ls-2 mb-0">RECENT ACHIEVEMENTS</h6>
+                                    <h6 className="fw-black text-uppercase text-theme-main smallest ls-2 mb-0">RECENT ACHIEVEMENTS</h6>
                                     <Link to="/achievements" className="smallest fw-black text-warning ls-1 uppercase text-decoration-none">COLLECTION</Link>
                                 </div>
                                 <div className="row g-3 flex-nowrap overflow-auto hide-scrollbar pb-3 px-1">
@@ -313,25 +313,25 @@ const Home: React.FC = () => {
 
                         {/* FOCUS AREAS */}
                         <section className="text-start mb-5">
-                            <h6 className="fw-black text-uppercase text-dark smallest ls-2 mb-4 px-2">FOCUS AREAS</h6>
+                            <h6 className="fw-black text-uppercase text-theme-main smallest ls-2 mb-4 px-2">FOCUS AREAS</h6>
                             <div className="row g-4">
                                 {[
                                     { to: '/courses', icon: 'bi-grid-fill', title: 'Courses & Catalog', sub: 'Explore all lessons', color: '#FACC15' },
                                     { to: '/muvhigo', icon: 'bi-trophy-fill', title: 'Leaderboard', sub: 'Compete for top rank', color: '#FACC15' },
                                 ].map((item) => (
                                     <div key={item.to} className="col-md-6">
-                                        <Link to={item.to} className="text-decoration-none d-block p-4 brutalist-card--sm shadow-action-sm transition-all bg-white hover-lift h-100">
+                                        <Link to={item.to} className="text-decoration-none d-block p-4 brutalist-card--sm shadow-action-sm transition-all bg-theme-card hover-lift h-100">
                                             <div className="d-flex justify-content-between align-items-center">
                                                 <div className="d-flex align-items-center gap-3">
-                                                    <div className="bg-warning p-2 rounded-3 border border-dark border-2 shadow-none d-flex align-items-center justify-content-center" style={{ width: 50, height: 50 }}>
+                                                    <div className="bg-warning p-2 rounded-3 border border-theme-main border-2 shadow-none d-flex align-items-center justify-content-center" style={{ width: 50, height: 50 }}>
                                                         <i className={`bi ${item.icon} text-dark fs-3`}></i>
                                                     </div>
                                                     <div>
-                                                        <h5 className="fw-black text-dark mb-1 uppercase ls-tight">{item.title}</h5>
-                                                        <p className="smallest fw-bold text-muted mb-0 uppercase ls-1">{item.sub}</p>
+                                                        <h5 className="fw-black text-theme-main mb-1 uppercase ls-tight">{item.title}</h5>
+                                                        <p className="smallest fw-bold text-theme-muted mb-0 uppercase ls-1">{item.sub}</p>
                                                     </div>
                                                 </div>
-                                                <i className="bi bi-chevron-right text-dark fs-5 fw-black"></i>
+                                                <i className="bi bi-chevron-right text-theme-main fs-5 fw-black"></i>
                                             </div>
                                         </Link>
                                     </div>

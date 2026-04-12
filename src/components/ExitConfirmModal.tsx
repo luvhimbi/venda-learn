@@ -71,9 +71,9 @@ const ExitConfirmModal: React.FC<ExitConfirmModalProps> = ({
                     to { opacity: 1; }
                 }
                 .ecm-modal {
-                    background: #ffffff;
-                    border: 4px solid #111827;
-                    box-shadow: 6px 6px 0 #111827;
+                    background: var(--color-card-bg, #ffffff);
+                    border: 4px solid var(--color-border, #111827);
+                    box-shadow: 6px 6px 0 var(--color-border, #111827);
                     width: 100%;
                     max-width: 380px;
                     padding: 28px 24px 24px;
@@ -92,8 +92,9 @@ const ExitConfirmModal: React.FC<ExitConfirmModalProps> = ({
                     position: absolute;
                     top: 10px;
                     right: 10px;
-                    background: #f3f4f6;
-                    border: 2px solid #111827;
+                    background: var(--color-surface-soft, #f3f4f6);
+                    border: 2px solid var(--color-border, #111827);
+                    color: var(--color-text);
                     width: 34px;
                     height: 34px;
                     display: flex;
@@ -104,8 +105,8 @@ const ExitConfirmModal: React.FC<ExitConfirmModalProps> = ({
                     transition: all 0.15s;
                 }
                 .ecm-close:active {
-                    background: #111827;
-                    color: white;
+                    background: var(--color-border, #111827);
+                    color: var(--color-text-inv);
                 }
                 .ecm-mascot {
                     margin-bottom: 8px;
@@ -113,8 +114,8 @@ const ExitConfirmModal: React.FC<ExitConfirmModalProps> = ({
                 .ecm-icon-wrap {
                     width: 52px;
                     height: 52px;
-                    background: #FEF2F2;
-                    border: 3px solid #FCA5A5;
+                    background: var(--color-surface-soft, #FEF2F2);
+                    border: 3px solid #EF4444;
                     border-radius: 50%;
                     display: flex;
                     align-items: center;
@@ -124,7 +125,7 @@ const ExitConfirmModal: React.FC<ExitConfirmModalProps> = ({
                 .ecm-title {
                     font-weight: 900;
                     font-size: 1.3rem;
-                    color: #111827;
+                    color: var(--color-text, #111827);
                     margin: 0 0 6px;
                     text-transform: uppercase;
                     letter-spacing: 0.5px;
@@ -133,7 +134,7 @@ const ExitConfirmModal: React.FC<ExitConfirmModalProps> = ({
                 .ecm-desc {
                     font-weight: 500;
                     font-size: 0.9rem;
-                    color: #6b7280;
+                    color: var(--color-text-muted, #6b7280);
                     margin: 0 0 20px;
                     line-height: 1.5;
                     max-width: 280px;
@@ -148,26 +149,26 @@ const ExitConfirmModal: React.FC<ExitConfirmModalProps> = ({
                     width: 100%;
                     padding: 14px 20px;
                     background: #FACC15;
-                    border: 3px solid #111827;
-                    color: #111827;
+                    border: 3px solid var(--color-border, #111827);
+                    color: #000;
                     font-weight: 900;
                     font-size: 0.9rem;
                     cursor: pointer;
                     text-transform: uppercase;
                     letter-spacing: 1px;
                     font-family: var(--game-font-family, inherit);
-                    box-shadow: 4px 4px 0 #111827;
+                    box-shadow: 4px 4px 0 var(--color-border, #111827);
                     transition: all 0.15s;
                 }
                 .ecm-btn-stay:active {
                     transform: translateY(3px);
-                    box-shadow: 1px 1px 0 #111827;
+                    box-shadow: 1px 1px 0 var(--color-border, #111827);
                 }
                 .ecm-btn-exit {
                     width: 100%;
                     padding: 12px 20px;
-                    background: #ffffff;
-                    border: 2px solid #d1d5db;
+                    background: transparent;
+                    border: 2px solid var(--color-border-soft, #d1d5db);
                     color: #EF4444;
                     font-weight: 800;
                     font-size: 0.85rem;
@@ -178,7 +179,7 @@ const ExitConfirmModal: React.FC<ExitConfirmModalProps> = ({
                     transition: all 0.15s;
                 }
                 .ecm-btn-exit:active {
-                    background: #FEF2F2;
+                    background: rgba(239, 68, 68, 0.1);
                     border-color: #EF4444;
                 }
             `}</style>

@@ -123,7 +123,7 @@ const DailyChallenge: React.FC = () => {
 
     if (loading) {
         return (
-            <div className="d-flex justify-content-center align-items-center vh-100">
+            <div className="d-flex justify-content-center align-items-center vh-100 bg-theme-base">
                 <Loader2 className="animate-spin text-warning" size={48} />
             </div>
         );
@@ -131,23 +131,23 @@ const DailyChallenge: React.FC = () => {
 
     if (isFinished) {
         return (
-            <div className="container min-vh-100 d-flex flex-column justify-content-center align-items-center text-center p-4">
-                <div className="bg-warning text-dark p-4 rounded-circle mb-4 shadow-lg animate__animated animate__bounceIn">
+            <div className="container-fluid min-vh-100 d-flex flex-column justify-content-center align-items-center text-center p-4 bg-theme-base">
+                <div className="bg-warning text-black p-4 rounded-circle mb-4 shadow-lg animate__animated animate__bounceIn border border-theme-main border-4">
                     <Trophy size={64} />
                 </div>
-                <h1 className="display-4 fw-bold mb-3">Daily Challenge Complete!</h1>
-                <p className="lead mb-5 text-muted">You scored {score} out of {questions.length}</p>
+                <h1 className="display-4 fw-black mb-3 text-theme-main uppercase ls-tight">CHALLENGE COMPLETE!</h1>
+                <p className="lead mb-5 text-theme-muted fw-bold">You scored {score} out of {questions.length}</p>
 
-                <div className="card border-0 shadow-sm p-4 w-100" style={{ maxWidth: '400px' }}>
+                <div className="brutalist-card bg-theme-card p-4 w-100 shadow-action-sm border-theme-main" style={{ maxWidth: '400px' }}>
                     <div className="progress mb-3" style={{ height: '20px' }}>
                         <div className="progress-bar bg-warning" role="progressbar"
                             style={{ width: `${(score / questions.length) * 100}%` }}>
                         </div>
                     </div>
-                    <p className="small text-muted mb-4 d-flex align-items-center justify-content-center gap-2">
-                        {score === questions.length ? <span><Star size={14} className="text-warning" fill="currentColor" /> Perfect score!</span> :
-                            score > questions.length * 0.7 ? <span><CheckCircle size={14} className="text-success" /> Great job! Keep it up!</span> :
-                                <span><BookOpen size={14} className="text-muted" /> Good practice! Come back tomorrow!</span>}
+                    <p className="small text-theme-muted mb-4 d-flex align-items-center justify-content-center gap-2 fw-bold">
+                        {score === questions.length ? <span className="text-warning"><Star size={14} fill="currentColor" /> Perfect score!</span> :
+                            score > questions.length * 0.7 ? <span className="text-success"><CheckCircle size={14} /> Great job! Keep it up!</span> :
+                                <span className="text-theme-muted"><BookOpen size={14} /> Good practice! Come back tomorrow!</span>}
                     </p>
                     <button onClick={() => navigate('/mitambo')} className="btn-game btn-game-primary w-100 p-4 rounded-4 fw-bold shadow-lg" style={{ fontSize: '1.2rem' }}>
                         Back to Games Hub
@@ -159,27 +159,27 @@ const DailyChallenge: React.FC = () => {
 
     if (questions.length === 0) {
         return (
-            <div className="d-flex flex-column justify-content-center align-items-center vh-100 text-center p-4">
-                <h2 className="fw-bold">No Daily Challenge Available</h2>
-                <p className="text-muted">Check back later or try again.</p>
-                <button onClick={() => navigate(-1)} className="btn btn-primary mt-3">Go Back</button>
+            <div className="d-flex flex-column justify-content-center align-items-center vh-100 text-center p-4 bg-theme-base">
+                <h2 className="fw-black text-theme-main uppercase ls-tight">NO CHALLENGE YET</h2>
+                <p className="text-theme-muted fw-bold">Check back later for today's tasks.</p>
+                <button onClick={() => navigate(-1)} className="btn-game btn-game-primary mt-3 px-5 py-3">GO BACK</button>
             </div>
         );
     }
 
     const currentQ = questions[currentIndex];
     return (
-        <div className="min-vh-100 bg-light d-flex flex-column">
+        <div className="min-vh-100 bg-theme-base d-flex flex-column">
             {/* Header */}
-            <header className="bg-white border-bottom p-3 sticky-top shadow-sm z-3">
+            <header className="bg-theme-card border-bottom border-theme-main border-4 p-3 sticky-top shadow-action-sm z-3">
                 <div className="container max-w-lg d-flex align-items-center justify-content-between">
-                    <button onClick={() => navigate(-1)} className="btn btn-link text-dark p-0">
+                    <button onClick={() => navigate(-1)} className="btn btn-link text-theme-main p-0">
                         <ArrowLeft size={24} />
                     </button>
                     <div className="flex-grow-1 mx-4 text-center">
-                        <h6 className="fw-bold mb-0 ls-1 small text-uppercase text-muted">Daily Challenge</h6>
+                        <h6 className="fw-black mb-0 ls-1 smallest uppercase text-theme-muted">Daily Challenge</h6>
                     </div>
-                    <div className="badge bg-warning text-dark pill px-3 py-2 fw-bold shadow-sm">
+                    <div className="badge bg-warning text-black brutalist-card--sm px-3 py-2 fw-black shadow-action-sm border border-theme-main">
                         {currentIndex + 1}/{questions.length}
                     </div>
                 </div>
@@ -188,12 +188,12 @@ const DailyChallenge: React.FC = () => {
             {/* Game Content */}
             <main className="flex-grow-1 d-flex flex-column justify-content-center p-3 p-md-4">
                 <div className="container" style={{ maxWidth: '768px' }}>
-                    <div id="dc-card-container" className="card border-0 shadow-lg rounded-4 overflow-hidden animate__animated animate__fadeIn">
+                    <div id="dc-card-container" className="brutalist-card bg-theme-card overflow-hidden animate__animated animate__fadeIn shadow-action-sm border-theme-main">
                         <div className="card-body p-4 p-md-5">
                             <div className="text-center mb-4">
                                 <Mascot width="100px" height="100px" mood={status === 'correct' ? 'excited' : status === 'wrong' ? 'sad' : 'happy'} />
                             </div>
-                            <h4 className="fw-bold mb-4 text-center">{currentQ.question}</h4>
+                            <h4 className="fw-black mb-4 text-center text-theme-main uppercase ls-tight">{currentQ.question}</h4>
 
                             <div className="mb-4" key={currentIndex}>
                                 {currentQ.type === 'multiple-choice' && (
@@ -238,13 +238,13 @@ const DailyChallenge: React.FC = () => {
                             </div>
 
                             {status && (
-                                <div className={`alert ${status === 'correct' ? 'alert-success' : 'alert-danger'} d-flex align-items-center gap-3 rounded-4 mb-0 animate__animated animate__fadeInUp`}>
+                                <div className={`alert ${status === 'correct' ? 'alert-success border-success' : 'alert-danger border-danger'} border-2 d-flex align-items-center gap-3 rounded-4 mb-0 animate__animated animate__fadeInUp`}>
                                     {status === 'correct' ? <CheckCircle size={24} /> : <XCircle size={24} />}
                                     <div>
-                                        <h6 className="fw-bold mb-0">{status === 'correct' ? 'Excellent!' : 'So Close!'}</h6>
+                                        <h6 className="fw-bold mb-0 text-theme-main">{status === 'correct' ? 'Excellent!' : 'So Close!'}</h6>
                                         {status === 'wrong' && (
-                                            <div className="mt-2 p-2 bg-white bg-opacity-50 rounded-3">
-                                                <p className="small fw-bold mb-1 text-dark border-bottom pb-1">
+                                            <div className="mt-2 p-2 bg-theme-base bg-opacity-50 rounded-3">
+                                                <p className="small fw-bold mb-1 text-theme-main border-bottom border-theme-soft pb-1">
                                                     Correct answer: <span className="text-success">{
                                                         currentQ.type === 'true-false' 
                                                             ? ((currentQ as any).correctAnswer === true ? 'NGOHO (TRUE)' : 'MAZWIFHI (FALSE)')
@@ -252,7 +252,7 @@ const DailyChallenge: React.FC = () => {
                                                     }</span>
                                                 </p>
                                                 {(currentQ as any).explanation && (
-                                                    <p className="small mb-0 text-secondary" style={{ lineHeight: '1.4' }}>{(currentQ as any).explanation}</p>
+                                                    <p className="small mb-0 text-theme-muted fw-bold" style={{ lineHeight: '1.4' }}>{(currentQ as any).explanation}</p>
                                                 )}
                                             </div>
                                         )}
@@ -262,13 +262,13 @@ const DailyChallenge: React.FC = () => {
                         </div>
 
                         {/* Footer / Next Button */}
-                        <div className="card-footer bg-white p-3 border-top d-flex justify-content-end">
+                        <div className="bg-theme-card p-4 border-top border-theme-main d-flex justify-content-end">
                             <button
                                 onClick={handleNext}
                                 disabled={!selectedAnswer}
-                                className="btn btn-dark rounded-pill px-4 py-3 fw-bold d-flex align-items-center gap-2 shadow-sm hover-scale transition-all"
+                                className="btn-game btn-game-primary px-5 py-3 rounded-pill"
                             >
-                                {currentIndex === questions.length - 1 ? 'Finish Challenge' : 'Next Question'} <ArrowRight size={18} />
+                                {currentIndex === questions.length - 1 ? 'FINISH CHALLENGE' : 'NEXT QUESTION'} <ArrowRight size={18} />
                             </button>
                         </div>
                     </div>

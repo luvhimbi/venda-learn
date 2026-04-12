@@ -41,7 +41,7 @@
   padding: 1rem;
   font-size: 1.1rem;
   font-weight: 800;
-  color: white;
+  color: var(--color-text);
   z-index: 2;
 }
 
@@ -69,7 +69,7 @@
 .word-detail-overlay {
   position: fixed;
   inset: 0;
-  background-color: var(--game-bg);
+  background-color: var(--color-bg);
   z-index: 2000;
   display: flex;
   flex-direction: column;
@@ -84,12 +84,12 @@
 }
 
 .close-btn {
-  background: rgba(255, 255, 255, 0.1);
-  border: none;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
   width: 44px;
   height: 44px;
   border-radius: 50%;
-  color: white;
+  color: var(--color-text);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -118,12 +118,13 @@
   padding: 1rem;
   display: flex;
   flex-direction: column;
-  background-color: var(--game-surface);
+  background-color: var(--color-surface);
   border-radius: 32px;
   box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
   margin: 0 auto;
   position: relative;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 4px solid var(--color-border);
+  box-shadow: 10px 10px 0px var(--color-shadow);
 }
 
 .word-info {
@@ -134,14 +135,14 @@
 .native-word {
   font-size: 2.5rem;
   font-weight: 900;
-  color: white;
+  color: var(--color-text);
   margin-bottom: 0.2rem;
 }
 
 .english-word {
   font-size: 1.4rem;
   font-weight: 600;
-  color: rgba(255, 255, 255, 0.6);
+  color: var(--color-text-muted);
 }
 
 .word-image-large {
@@ -214,7 +215,7 @@
   font-size: 13px;
   font-weight: 700;
   text-transform: uppercase;
-  color: rgba(255, 255, 255, 0.8);
+  color: var(--color-text);
   display: flex;
   align-items: center;
   gap: 10px;

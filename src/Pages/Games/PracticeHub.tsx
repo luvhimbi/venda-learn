@@ -98,12 +98,12 @@ const PracticeHub: React.FC = () => {
                 text: "Guest users get a taste of the app, but to chat with speakers and save your progress, you need a full account. It's free!",
                 icon: 'info',
                 showCancelButton: true,
-                confirmButtonColor: '#FACC15',
-                cancelButtonColor: '#111827',
+                confirmButtonColor: 'var(--venda-yellow)',
+                cancelButtonColor: 'var(--color-surface)',
                 confirmButtonText: 'Create Account',
                 cancelButtonText: 'Stay as Guest',
-                color: '#111827',
-                background: '#ffffff'
+                color: 'var(--color-text)',
+                background: 'var(--color-bg)'
             });
 
             if (isConfirmed) {
@@ -196,39 +196,39 @@ const PracticeHub: React.FC = () => {
 
     if (!user && !loadingDiscovery) {
         return (
-            <div className="min-vh-100 d-flex flex-column align-items-center justify-content-center text-center p-4">
-                <div className="mb-4 text-muted">
+            <div className="min-vh-100 d-flex flex-column align-items-center justify-content-center text-center p-4 bg-theme-base">
+                <div className="mb-4 text-theme-muted">
                     <Home size={64} strokeWidth={1} />
                 </div>
-                <h3 className="fw-bold fs-2 ls-tight mb-3">Join the Hub</h3>
-                <p className="text-muted mb-4">Please log in to discover speakers and manage your practice sessions.</p>
-                <button onClick={() => navigate('/login')} className="btn btn-dark px-5 py-3 rounded-pill fw-bold ls-1 shadow">LOG IN</button>
+                <h3 className="fw-bold fs-2 ls-tight mb-3 text-theme-main uppercase">JOIN THE HUB</h3>
+                <p className="text-theme-muted mb-4 fw-bold">Please log in to discover speakers and manage your practice sessions.</p>
+                <button onClick={() => navigate('/login')} className="btn-game btn-game-primary px-5 py-3">LOG IN</button>
             </div>
         );
     }
 
     return (
-        <div className="bg-white min-vh-100 py-5">
+        <div className="bg-theme-base min-vh-100 py-5">
             <div className="container" style={{ maxWidth: '900px' }}>
 
                 {/* HUB HEADER */}
                 <header className="mb-5 px-3">
-                    <p className="smallest-print fw-bold text-muted mb-1 ls-2 uppercase">Practice Hub</p>
-                    <h2 className="fw-bold mb-0 ls-tight">VENDA CONNECTION</h2>
+                    <p className="smallest-print fw-bold text-theme-muted mb-1 ls-2 uppercase">Practice Hub</p>
+                    <h2 className="fw-bold mb-0 ls-tight text-theme-main uppercase ls-tight">VENDA CONNECTION</h2>
                 </header>
 
                 {/* TABS */}
                 <div className="px-3 mb-5">
-                    <div className="d-flex gap-2 p-1 bg-light rounded-pill" style={{ maxWidth: '400px' }}>
+                    <div className="d-flex gap-2 p-1 bg-theme-card rounded-pill border border-theme-main border-2" style={{ maxWidth: '400px' }}>
                         <button
                             onClick={() => setActiveTab('discovery')}
-                            className={`btn flex-grow-1 rounded-pill fw-bold ls-1 smallest py-2 transition-all ${activeTab === 'discovery' ? 'btn-white shadow-sm' : 'text-muted border-0 bg-transparent'}`}
+                            className={`btn flex-grow-1 rounded-pill fw-bold ls-1 smallest py-2 transition-all ${activeTab === 'discovery' ? 'bg-theme-accent text-black shadow-sm' : 'text-theme-muted border-0 bg-transparent'}`}
                         >
                             FIND EXPERTS
                         </button>
                         <button
                             onClick={() => setActiveTab('inbox')}
-                            className={`btn flex-grow-1 rounded-pill fw-bold ls-1 smallest py-2 transition-all position-relative ${activeTab === 'inbox' ? 'btn-white shadow-sm' : 'text-muted border-0 bg-transparent'}`}
+                            className={`btn flex-grow-1 rounded-pill fw-bold ls-1 smallest py-2 transition-all position-relative ${activeTab === 'inbox' ? 'bg-theme-accent text-black shadow-sm' : 'text-theme-muted border-0 bg-transparent'}`}
                         >
                             MY CHATS
                             {chats.length > 0 && activeTab !== 'inbox' && (
@@ -251,28 +251,28 @@ const PracticeHub: React.FC = () => {
                     <div className="row g-4 px-3 animate__animated animate__fadeIn">
                         {loadingDiscovery ? (
                             <div className="col-12 text-center py-5">
-                                <div className="spinner-border text-yellow" style={{ color: '#FACC15' }}></div>
+                                <div className="spinner-border text-warning"></div>
                             </div>
                         ) : speakers.length > 0 ? (
                             speakers.map((speaker, idx) => (
                                 <div key={speaker.id} className="col-md-6 animate__animated animate__fadeInUp" style={{ animationDelay: `${idx * 0.1}s` }}>
-                                    <div className="card border-0 shadow-sm rounded-4 p-4 h-100 speaker-card transition-all">
+                                    <div className="brutalist-card bg-theme-card p-4 h-100 speaker-card transition-all border-theme-main shadow-action-sm">
                                         <div className="d-flex align-items-center gap-3 mb-3">
                                             <div className="rounded-circle d-flex align-items-center justify-content-center fw-bold shadow-sm"
-                                                style={{ width: '60px', height: '60px', fontSize: '1.5rem', backgroundColor: '#FACC15', border: '2px solid #111827' }}>
+                                                style={{ width: '60px', height: '60px', fontSize: '1.5rem', backgroundColor: 'var(--venda-yellow)', border: '2px solid var(--color-border)' }}>
                                                 {speaker.username.charAt(0).toUpperCase()}
                                             </div>
                                             <div>
-                                                <h5 className="fw-bold mb-0">{speaker.username}</h5>
-                                                <span className="badge bg-light text-muted border smallest fw-bold ls-1 uppercase">Native Speaker</span>
+                                                <h5 className="fw-black mb-0 text-theme-main uppercase">{speaker.username}</h5>
+                                                <span className="badge bg-theme-base text-theme-muted border border-theme-soft smallest fw-bold ls-1 uppercase">Native Speaker</span>
                                             </div>
                                         </div>
-                                        <p className="text-muted small mb-4 flex-grow-1" style={{ lineHeight: '1.6' }}>
+                                        <p className="text-theme-muted fw-bold small mb-4 flex-grow-1" style={{ lineHeight: '1.6' }}>
                                             {speaker.nativeSpeakerBio || "Native language speaker available for practice."}
                                         </p>
                                         <button
                                             onClick={() => startChat(speaker.id, speaker.username)}
-                                            className="btn btn-dark w-100 fw-bold py-2 rounded-pill ls-1 smallest"
+                                            className="btn-game btn-game-primary w-100 py-2"
                                         >
                                             START PRACTICE <i className="bi bi-chat-fill ms-2"></i>
                                         </button>
@@ -281,24 +281,24 @@ const PracticeHub: React.FC = () => {
                             ))
                         ) : (
                             <div className="text-center py-5 col-12">
-                                <div className="mb-3 text-muted opacity-25">
+                                <div className="mb-3 text-theme-muted opacity-25">
                                     <MessageSquare size={64} strokeWidth={1} />
                                 </div>
-                                <p className="text-muted small">No other native speakers available currently. Invite a friend!</p>
+                                <p className="text-theme-muted fw-bold small">No other native speakers available currently. Invite a friend!</p>
                             </div>
                         )}
 
                         {/* BECOME A SPEAKER CTA */}
                         <div className="col-12 mt-5">
-                            <div className="p-5 rounded-4 bg-light border-0 text-center animate__animated animate__fadeInUp">
+                            <div className="brutalist-card p-5 bg-theme-card border-theme-main text-center animate__animated animate__fadeInUp shadow-action-sm">
                                 <div className="mb-3 text-warning">
                                     <Users size={48} strokeWidth={1.5} className="mx-auto" />
                                 </div>
-                                <h4 className="fw-bold mb-2">Are you a Native Speaker?</h4>
-                                <p className="text-muted small mb-4 mx-auto" style={{ maxWidth: '500px' }}>
+                                <h4 className="fw-black mb-2 text-theme-main uppercase">Are you a Native Speaker?</h4>
+                                <p className="text-theme-muted fw-bold small mb-4 mx-auto" style={{ maxWidth: '500px' }}>
                                     Help others learn by appearing in this list. You can toggle your status in your profile settings.
                                 </p>
-                                <button onClick={() => navigate('/profile')} className="btn game-btn-primary px-4 py-2 fw-bold ls-1">UPDATE MY STATUS</button>
+                                <button onClick={() => navigate('/profile')} className="btn-game btn-game-primary px-4 py-2">UPDATE MY STATUS</button>
                             </div>
                         </div>
                     </div>
@@ -309,24 +309,24 @@ const PracticeHub: React.FC = () => {
                     <div className="d-flex flex-column gap-3 px-3 animate__animated animate__fadeIn">
                         {loadingInbox ? (
                             <div className="text-center py-5">
-                                <div className="spinner-border text-yellow" style={{ color: '#FACC15' }}></div>
+                                <div className="spinner-border text-warning"></div>
                             </div>
                         ) : chats.length > 0 ? (
                             chats.map((chat, idx) => (
                                 <div
                                     key={chat.id}
                                     onClick={() => navigate(`/chat/${chat.id}`)}
-                                    className="chat-item p-4 rounded-4 border transition-all animate__animated animate__fadeInUp bg-white cursor-pointer d-flex align-items-center gap-4 shadow-sm"
+                                    className="chat-item p-4 brutalist-card transition-all animate__animated animate__fadeInUp bg-theme-card cursor-pointer d-flex align-items-center gap-4 shadow-action-sm border-theme-main"
                                     style={{ animationDelay: `${idx * 0.05}s` }}
                                 >
-                                    <div className="rounded-circle d-flex align-items-center justify-content-center fw-bold text-dark shadow-sm bg-warning"
-                                        style={{ width: '55px', height: '55px', fontSize: '1.2rem', minWidth: '55px' }}>
+                                    <div className="rounded-circle d-flex align-items-center justify-content-center fw-bold text-black shadow-sm bg-theme-accent"
+                                        style={{ width: '55px', height: '55px', fontSize: '1.2rem', minWidth: '55px', border: '2px solid var(--color-border)' }}>
                                         {getPartnerName(chat).charAt(0).toUpperCase()}
                                     </div>
                                     <div className="flex-grow-1 overflow-hidden">
                                         <div className="d-flex justify-content-between align-items-center mb-1">
                                             <div className="d-flex align-items-center gap-2">
-                                                <h6 className="fw-bold mb-0 text-dark">{getPartnerName(chat)}</h6>
+                                                <h6 className="fw-black mb-0 text-theme-main uppercase">{getPartnerName(chat)}</h6>
 
                                                 {/* Unread Badge */}
                                                 {(chat.unreadCount?.[user?.uid] || 0) > 0 && (
@@ -343,11 +343,11 @@ const PracticeHub: React.FC = () => {
                                                     return expired && <span className="badge bg-danger border-0 smallest fw-bold ls-1 uppercase py-1 px-2">EXPIRED</span>;
                                                 })()}
                                             </div>
-                                            <span className="smallest text-muted fw-bold">
+                                            <span className="smallest text-theme-muted fw-bold">
                                                 {chat.lastTimestamp?.toDate ? chat.lastTimestamp.toDate().toLocaleDateString([], { month: 'short', day: 'numeric' }) : ''}
                                             </span>
                                         </div>
-                                        <p className="text-muted small mb-0 text-truncate" style={{ maxWidth: '90%' }}>
+                                        <p className="text-theme-muted fw-bold small mb-0 text-truncate" style={{ maxWidth: '90%' }}>
                                             {chat.lastMessage || 'Start a conversation...'}
                                         </p>
                                     </div>
@@ -365,12 +365,12 @@ const PracticeHub: React.FC = () => {
                             ))
                         ) : (
                             <div className="text-center py-5">
-                                <div className="mb-4 text-muted opacity-25">
+                                <div className="mb-4 text-theme-muted opacity-25">
                                     <Inbox size={64} strokeWidth={1} />
                                 </div>
-                                <h5 className="fw-bold">No active chats</h5>
-                                <p className="text-muted small mb-4">Start a conversation with a native speaker in the "Find Experts" tab!</p>
-                                <button onClick={() => setActiveTab('discovery')} className="btn btn-dark px-4 py-2 rounded-pill fw-bold smallest ls-1">GO TO FIND EXPERTS</button>
+                                <h5 className="fw-black text-theme-main uppercase ls-tight">NO ACTIVE CHATS</h5>
+                                <p className="text-theme-muted fw-bold small mb-4">Start a conversation with a native speaker in the "Find Experts" tab!</p>
+                                <button onClick={() => setActiveTab('discovery')} className="btn-game btn-game-primary px-4 py-2">GO TO FIND EXPERTS</button>
                             </div>
                         )}
                     </div>
@@ -384,37 +384,38 @@ const PracticeHub: React.FC = () => {
                     .smallest { font-size: 11px; }
                     .uppercase { text-transform: uppercase; }
                     .cursor-pointer { cursor: pointer; }
-                    .btn-white { background-color: #fff !important; color: #111827 !important; }
+                    .btn-white { background-color: var(--color-bg) !important; color: var(--color-text) !important; }
                     
                     .speaker-card, .chat-item {
-                        border: 1px solid #f3f4f6 !important;
+                        border: 1px solid var(--color-border-soft) !important;
                     }
                     .speaker-card:hover, .chat-item:hover {
                         transform: translateY(-5px);
-                        border-color: #FACC15 !important;
-                        box-shadow: 0 15px 30px rgba(0,0,0,0.05) !important;
+                        border-color: var(--venda-yellow) !important;
+                        box-shadow: 0 15px 30px rgba(0,0,0,0.2) !important;
                     }
 
                     .game-btn-primary { 
-                        background-color: #FACC15 !important; 
-                        color: #111827 !important; 
+                        background-color: var(--venda-yellow) !important; 
+                        color: #000 !important; 
                         border: none !important; 
                         border-radius: 8px; 
-                        box-shadow: 0 3px 0 #EAB308 !important; 
+                        box-shadow: 0 3px 0 var(--venda-yellow-dark) !important; 
                         transition: all 0.2s; 
                     }
-                    .game-btn-primary:active { transform: translateY(1px); box-shadow: 0 1px 0 #EAB308 !important; }
+                    .game-btn-primary:active { transform: translateY(1px); box-shadow: 0 1px 0 var(--venda-yellow-dark) !important; }
 
                     .chat-item:hover .delete-btn {
                         opacity: 1 !important;
                     }
 
                     .delete-btn:hover {
-                        background-color: #fee2e2 !important;
+                        background-color: rgba(239, 68, 68, 0.1) !important;
                         transform: scale(1.1);
                     }
 
                     .transition-all { transition: all 0.3s ease; }
+                    .bg-theme-accent { background-color: var(--venda-yellow) !important; }
                 `}</style>
             </div>
         </div >

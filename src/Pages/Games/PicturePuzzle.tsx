@@ -207,7 +207,7 @@ const PicturePuzzle: React.FC = () => {
             }
 
             const filtered = allSlides.filter((p: any) => {
-                const isCorrectLang = !activeLang || p.languageId === activeLang.id || (!p.languageId && activeLang.name.toLowerCase().includes('venda'));
+                const isCorrectLang = !activeLang || p.languageId === activeLang.id || !p.languageId;
                 return isCorrectLang;
             });
             const shuffled = [...filtered].sort(() => 0.5 - Math.random());
@@ -321,9 +321,9 @@ const PicturePuzzle: React.FC = () => {
     };
 
     if (loading) return (
-        <div className="min-vh-100 d-flex flex-column justify-content-center align-items-center bg-white">
+        <div className="min-vh-100 d-flex flex-column justify-content-center align-items-center bg-theme-base">
             <Mascot width="100px" height="100px" mood="excited" />
-            <p className="text-muted mt-3 fw-bold" style={{ fontSize: '12px', letterSpacing: '2px', textTransform: 'uppercase' }}>Loading game...</p>
+            <p className="text-theme-muted mt-3 fw-bold" style={{ fontSize: '12px', letterSpacing: '2px', textTransform: 'uppercase' }}>Loading game...</p>
         </div>
     );
 
@@ -333,8 +333,8 @@ const PicturePuzzle: React.FC = () => {
 
     return (
         <div className="min-vh-100 d-flex flex-column" style={{ 
-            backgroundColor: '#ffffff',
-            backgroundImage: "url(\"data:image/svg+xml,%3Csvg width='20' height='20' viewBox='0 0 20 20' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23000000' fill-opacity='0.02' fill-rule='evenodd'%3E%3Ccircle cx='3' cy='3' r='1'/%3E%3C/g%3E%3C/svg%3E\")" 
+            backgroundColor: 'var(--color-bg)',
+            backgroundImage: "url(\"data:image/svg+xml,%3Csvg width='20' height='20' viewBox='0 0 20 20' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='currentColor' fill-opacity='0.02' fill-rule='evenodd'%3E%3Ccircle cx='3' cy='3' r='1'/%3E%3C/g%3E%3C/svg%3E\")" 
         }}>
             {/* RESULT MODAL */}
             <GameResultModal
@@ -378,11 +378,11 @@ const PicturePuzzle: React.FC = () => {
             />
 
             {/* DARK HEADER */}
-            <div className="px-3 pt-4 pb-5 bg-dark text-white border-bottom border-dark border-4 shadow-action-sm">
+            <div className="px-3 pt-4 pb-5 bg-dark text-white border-bottom border-theme-main border-4 shadow-action-sm">
                 <div className="container" style={{ maxWidth: '600px' }}>
                     <div className="d-flex justify-content-between align-items-center mb-3">
                         <button onClick={handleExit} className="btn-game btn-game-white rounded-circle d-flex align-items-center justify-content-center" style={{ width: 44, height: 44, padding: 0 }}>
-                            <ArrowLeft size={24} strokeWidth={3} fill="none" className="text-dark" />
+                            <ArrowLeft size={24} strokeWidth={3} fill="none" className="text-theme-main" />
                         </button>
                         <div className="text-center">
                             <span className="smallest fw-black text-warning uppercase ls-1 mb-0 d-block">{preferredLanguage?.name || 'Local'} Race</span>
@@ -390,7 +390,7 @@ const PicturePuzzle: React.FC = () => {
                         </div>
                         <div className="d-flex align-items-center gap-2">
                             <button onClick={() => { resetIntroSeen('picturePuzzle'); setShowIntro(true); }} className="btn-game btn-game-white rounded-circle d-flex align-items-center justify-content-center" style={{ width: 36, height: 36, padding: 0 }} title="How to play">
-                                <HelpCircle size={18} strokeWidth={3} className="text-dark" />
+                                <HelpCircle size={18} strokeWidth={3} className="text-theme-main" />
                             </button>
                              {streak > 0 && (
                                 <div className="d-flex align-items-center flex-column bg-warning brutalist-card--sm px-2 py-1" title="Daily Streak">
@@ -449,7 +449,7 @@ const PicturePuzzle: React.FC = () => {
                                         className={`btn-game w-100 p-4 fw-black text-uppercase shadow-action-sm
                                             ${isCorrect ? 'bg-success text-white' : ''}
                                             ${isWrong ? 'bg-danger text-white animate__animated animate__shakeX' : ''}
-                                            ${!isSelected ? 'bg-white text-dark fw-black' : ''}
+                                            ${!isSelected ? 'bg-theme-card text-theme-main fw-black' : ''}
                                         `}
                                         style={{ 
                                             fontSize: 'clamp(0.9rem, 2.5vw, 1.25rem)', 
@@ -472,7 +472,7 @@ const PicturePuzzle: React.FC = () => {
 
                     {/* ROUND COUNT */}
                     <div className="text-center">
-                        <span className="text-muted fw-bold" style={{ fontSize: '11px', letterSpacing: '2px' }}>ROUND {roundCount + 1}</span>
+                        <span className="text-theme-muted fw-bold" style={{ fontSize: '11px', letterSpacing: '2px' }}>ROUND {roundCount + 1}</span>
                     </div>
                 </div>
             </div>
@@ -499,15 +499,15 @@ const PicturePuzzle: React.FC = () => {
 
                 /* OPTIONS */
                 .pzl-opt-default {
-                    background: white;
-                    color: #111827;
-                    border: 2px solid #E5E7EB;
-                    box-shadow: 0 3px 0 #D1D5DB;
+                    background: var(--color-card-bg);
+                    color: var(--color-text);
+                    border: 2px solid var(--color-border-soft);
+                    box-shadow: 0 3px 0 var(--color-border-soft);
                 }
                 .pzl-opt-default:hover {
                     transform: translateY(-2px);
-                    border-color: #FACC15;
-                    box-shadow: 0 5px 0 #EAB308;
+                    border-color: var(--venda-yellow, #FACC15);
+                    box-shadow: 0 5px 0 var(--color-shadow);
                 }
                 .pzl-opt-default:active {
                     transform: translateY(2px);
@@ -546,8 +546,8 @@ const PicturePuzzle: React.FC = () => {
                     filter: drop-shadow(0 6px 20px rgba(0,0,0,0.15));
                 }
                 .mascot-cheer-bubble {
-                    background: #111827;
-                    color: #FACC15;
+                    background: var(--color-border);
+                    color: var(--venda-yellow, #FACC15);
                     font-size: 13px;
                     font-weight: 800;
                     font-family: var(--game-font-family);
@@ -555,7 +555,7 @@ const PicturePuzzle: React.FC = () => {
                     border-radius: 20px;
                     margin-bottom: 4px;
                     white-space: nowrap;
-                    box-shadow: 0 4px 16px rgba(250, 204, 21, 0.25);
+                    box-shadow: 0 4px 16px var(--color-shadow);
                     position: relative;
                 }
                 .mascot-cheer-bubble::after {
@@ -567,7 +567,7 @@ const PicturePuzzle: React.FC = () => {
                     width: 0; height: 0;
                     border-left: 5px solid transparent;
                     border-right: 5px solid transparent;
-                    border-top: 5px solid #111827;
+                    border-top: 5px solid var(--color-border);
                 }
             `}</style>
         </div>

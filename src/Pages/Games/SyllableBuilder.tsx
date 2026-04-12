@@ -109,11 +109,12 @@ const SyllableBuilder: React.FC = () => {
 
             const filtered = data.filter(d => {
                 const isCorrectDifficulty = d.difficulty === level;
-                const isCorrectLang = !activeLang || d.languageId === activeLang.id || (!d.languageId && activeLang.name.toLowerCase().includes('venda'));
+                const isCorrectLang = !activeLang || d.languageId === activeLang.id || !d.languageId;
                 return isCorrectDifficulty && isCorrectLang;
             });
 
-            const shuffled = [...filtered].sort(() => 0.5 - Math.random());
+            // Shuffle and limit to 5 puzzles to avoid repetition and make the session finite
+            const shuffled = [...filtered].sort(() => 0.5 - Math.random()).slice(0, 5);
             setPuzzles(shuffled);
             if (shuffled.length > 0) {
                 setupRound(shuffled[0], 0);
@@ -177,7 +178,7 @@ const SyllableBuilder: React.FC = () => {
     };
 
     const checkAnswer = async () => {
-        if (!currentPuzzle) return;
+        if (!currentPuzzle || status !== 'playing') return;
 
         const currentWord = placed.map(p => p.text).join('').toLowerCase();
         const targetWord = currentPuzzle.word.toLowerCase();
@@ -233,7 +234,7 @@ const SyllableBuilder: React.FC = () => {
                 isSuccess: true,
                 title: 'Category Complete!',
                 message: `You've built all ${puzzles.length} words in this level. Ndi hone!`,
-                points: score
+                points: score + 5 // Include points for the last correctly answered word
             });
             setShowResult(true);
             return;
@@ -244,15 +245,15 @@ const SyllableBuilder: React.FC = () => {
     };
 
     if (loading) return (
-        <div className="min-vh-100 bg-white d-flex flex-column justify-content-center align-items-center">
+        <div className="min-vh-100 bg-theme-base d-flex flex-column justify-content-center align-items-center">
             <Mascot width="100px" height="100px" mood="excited" />
-            <p className="text-muted mt-3 fw-bold" style={{ fontSize: '12px', letterSpacing: '2px', textTransform: 'uppercase' }}>Loading puzzles...</p>
+            <p className="text-theme-muted mt-3 fw-bold" style={{ fontSize: '12px', letterSpacing: '2px', textTransform: 'uppercase' }}>Loading puzzles...</p>
         </div>
     );
 
     if (!selectedLevel) {
         return (
-            <div className="min-vh-100 p-4 d-flex flex-column align-items-center justify-content-center" style={{ backgroundColor: '#ffffff', minHeight: '100vh' }}>
+            <div className="min-vh-100 p-4 d-flex flex-column align-items-center justify-content-center bg-theme-base" style={{ minHeight: '100vh' }}>
 
                 {/* INTRO MODAL */}
                 {showIntro && (
@@ -268,7 +269,7 @@ const SyllableBuilder: React.FC = () => {
 
                 <div className="container d-flex flex-column align-items-center" style={{ maxWidth: '600px' }}>
                     <div className="w-100 d-flex justify-content-start mb-4">
-                        <button onClick={() => navigate('/mitambo')} className="btn btn-link text-decoration-none p-0 text-dark">
+                        <button onClick={() => navigate('/mitambo')} className="btn btn-link text-decoration-none p-0 text-theme-main">
                             <ArrowLeft size={24} />
                         </button>
                     </div>
@@ -277,8 +278,8 @@ const SyllableBuilder: React.FC = () => {
                         <div className="brutalist-card bg-warning p-4 mb-4 shadow-action-sm">
                             <Layout size={48} strokeWidth={3} className="text-dark" />
                         </div>
-                        <h1 className="fw-black mb-2 text-dark uppercase ls-tight display-5">SYLLABLE BUILDER</h1>
-                        <p className="fw-bold text-muted uppercase smallest ls-1">Master building {preferredLanguage?.name || ''} words</p>
+                        <h1 className="fw-black mb-2 text-theme-main uppercase ls-tight display-5">SYLLABLE BUILDER</h1>
+                        <p className="fw-bold text-theme-muted uppercase smallest ls-1">Master building {preferredLanguage?.name || ''} words</p>
                     </div>
 
                     <div className="d-flex flex-column gap-4 w-100">
@@ -286,7 +287,7 @@ const SyllableBuilder: React.FC = () => {
                             <button
                                 key={lvl}
                                 onClick={() => startLevel(lvl)}
-                                className="brutalist-card transition-all hover-lift--sm w-100 p-4 text-start bg-white shadow-action-sm"
+                                className="brutalist-card transition-all hover-lift--sm w-100 p-4 text-start bg-theme-card text-theme-main shadow-action-sm border-theme-main"
                             >
                                 <div className="d-flex justify-content-between align-items-center">
                                     <div>
@@ -295,8 +296,8 @@ const SyllableBuilder: React.FC = () => {
                                             {lvl === 'Beginner' ? 'Simple 2-syllable items' : lvl === 'Intermediate' ? 'Standard 3-syllable phrases' : 'Complex multilingual constructs'}
                                         </p>
                                     </div>
-                                    <div className="bg-warning p-2 border border-dark border-2 rounded-circle">
-                                        <ChevronRight strokeWidth={4} className="text-dark" size={20} />
+                                    <div className="bg-warning p-2 border border-theme-main border-2 rounded-circle">
+                                        <ChevronRight strokeWidth={4} className="text-black" size={20} />
                                     </div>
                                 </div>
                             </button>
@@ -315,9 +316,21 @@ const SyllableBuilder: React.FC = () => {
                 <style>{`
                     .brutalist-card:hover {
                         transform: translateY(-4px);
-                        border-color: #FACC15 !important;
-                        background-color: #FFFDF5 !important;
-                        box-shadow: 8px 8px 0 #111827 !important;
+                        border-color: var(--venda-yellow) !important;
+                        background-color: var(--venda-yellow) !important;
+                        box-shadow: 8px 8px 0 var(--color-border) !important;
+                        color: #111827 !important;
+                    }
+                    .brutalist-card:hover p, 
+                    .brutalist-card:hover h2 {
+                        color: #111827 !important;
+                    }
+                    .brutalist-card:hover .bg-warning {
+                        background-color: var(--color-border) !important;
+                        border-color: var(--color-border) !important;
+                    }
+                    .brutalist-card:hover .bg-warning svg {
+                        color: var(--venda-yellow) !important;
                     }
                 `}</style>
             </div>
@@ -327,7 +340,7 @@ const SyllableBuilder: React.FC = () => {
     const expectedSlots = currentPuzzle?.syllables.length || 0;
 
     return (
-        <div className="min-vh-100 d-flex flex-column bg-white" style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg width=\'20\' height=\'20\' viewBox=\'0 0 20 20\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cg fill=\'%23000000\' fill-opacity=\'0.01\' fill-rule=\'evenodd\'%3E%3Ccircle cx=\'3\' cy=\'3\' r=\'1\'/%3E%3C/g%3E%3C/svg%3E")' }}>
+        <div className="min-vh-100 d-flex flex-column bg-theme-base" style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg width=\'20\' height=\'20\' viewBox=\'0 0 20 20\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cg fill=\'currentColor\' fill-opacity=\'0.01\' fill-rule=\'evenodd\'%3E%3Ccircle cx=\'3\' cy=\'3\' r=\'1\'/%3E%3C/g%3E%3C/svg%3E")' }}>
             {/* RESULT MODAL */}
             <GameResultModal
                 isOpen={showResult}
@@ -348,19 +361,19 @@ const SyllableBuilder: React.FC = () => {
             />
 
             {/* HEADER */}
-            <div className="px-3 pt-4 pb-5 bg-dark text-white border-bottom border-dark border-4 shadow-action-sm">
+            <div className="px-3 pt-4 pb-5 bg-theme-surface border-bottom border-theme-main border-4 shadow-action-sm">
                 <div className="container" style={{ maxWidth: '700px' }}>
                     <div className="d-flex justify-content-between align-items-center mb-4">
                         <button onClick={handleExit} className="btn-game btn-game-white rounded-circle d-flex align-items-center justify-content-center" style={{ width: 44, height: 44, padding: 0 }}>
-                            <ArrowLeft size={24} strokeWidth={3} className="text-dark" />
+                            <ArrowLeft size={24} strokeWidth={3} className="text-theme-main" />
                         </button>
                         <div className="text-center">
                             <span className="smallest fw-black text-warning uppercase ls-1 mb-0 d-block">{preferredLanguage?.name || 'Local'} Builder</span>
-                            <h2 className="fw-black mb-0 text-white ls-tight" style={{ fontSize: '1.5rem' }}>SILEBI</h2>
+                            <h2 className="fw-black mb-0 text-theme-main ls-tight" style={{ fontSize: '1.5rem' }}>SILEBI</h2>
                         </div>
                         <div className="d-flex align-items-center gap-3">
                              {streak > 0 && (
-                                <div className="d-flex align-items-center flex-column bg-warning brutalist-card--sm px-2 py-1" title="Daily Streak">
+                                <div className="d-flex align-items-center flex-column bg-warning brutalist-card--sm px-2 py-1 border border-theme-main" title="Daily Streak">
                                     <Flame size={18} color="#000" fill="#000" />
                                     <span className="fw-black smallest text-dark">{streak}</span>
                                 </div>
@@ -388,20 +401,20 @@ const SyllableBuilder: React.FC = () => {
             {/* Rules Modal */}
             {showRules && (
                 <div className="position-fixed top-0 start-0 w-100 h-100 d-flex justify-content-center align-items-center"
-                    style={{ backgroundColor: 'rgba(0,0,0,0.6)', zIndex: 1050 }}>
-                    <div className="bg-white p-4 rounded-4 shadow-lg animate__animated animate__fadeInUp" style={{ maxWidth: '450px', width: '90%' }}>
+                    style={{ backgroundColor: 'rgba(0,0,0,0.8)', zIndex: 1050 }}>
+                    <div className="bg-theme-card p-4 rounded-4 shadow-lg animate__animated animate__fadeInUp border border-theme-main" style={{ maxWidth: '450px', width: '90%' }}>
                         <div className="d-flex justify-content-between align-items-center mb-3">
-                            <h5 className="fw-bold m-0"><i className="bi bi-book-half me-2" style={{ color: '#FACC15' }}></i>How to Play</h5>
-                            <button onClick={() => setShowRules(false)} className="btn btn-close"></button>
+                            <h5 className="fw-black m-0 text-theme-main uppercase"><HelpCircle size={20} className="text-warning me-2" strokeWidth={3} />How to Play</h5>
+                            <button onClick={() => setShowRules(false)} className="btn-close btn-close-white"></button>
                         </div>
-                        <p className="text-muted mb-3 small">Arrange the syllable blocks to build the correct word.</p>
+                        <p className="text-theme-muted mb-3 small fw-bold">Arrange the syllable blocks to build the correct word.</p>
                         <ul className="list-unstyled small mb-4">
-                            <li className="mb-2"><i className="bi bi-check-circle-fill text-success me-2"></i>Tap a block to place it in the answer zone</li>
-                            <li className="mb-2"><i className="bi bi-check-circle-fill text-success me-2"></i>Tap a placed block to remove it</li>
-                            <li className="mb-2"><i className="bi bi-check-circle-fill text-success me-2"></i>Syllables usually end in a vowel (CV pattern)</li>
-                            <li><i className="bi bi-check-circle-fill text-success me-2"></i><strong>Example:</strong> "Vunda" → <span className="badge bg-light text-dark border">Vu</span> + <span className="badge bg-light text-dark border">nda</span></li>
+                            <li className="mb-2 text-theme-main"><span className="text-success me-2">●</span>Tap a block to place it in the answer zone</li>
+                            <li className="mb-2 text-theme-main"><span className="text-success me-2">●</span>Tap a placed block to remove it</li>
+                            <li className="mb-2 text-theme-main"><span className="text-success me-2">●</span>Syllables usually end in a vowel (CV pattern)</li>
+                            <li className="text-theme-main"><span className="text-success me-2">●</span><strong>Example:</strong> "Vunda" → <span className="badge bg-theme-surface text-theme-main border border-theme-main">Vu</span> + <span className="badge bg-theme-surface text-theme-main border border-theme-main">nda</span></li>
                         </ul>
-                        <button onClick={() => setShowRules(false)} className="btn w-100 fw-bold rounded-3 py-2" style={{ background: '#FACC15', color: '#111827' }}>Got it!</button>
+                        <button onClick={() => setShowRules(false)} className="btn-game btn-game-primary w-100 py-2">Got it!</button>
                     </div>
                 </div>
             )}
@@ -411,13 +424,13 @@ const SyllableBuilder: React.FC = () => {
                 <div className="container" style={{ maxWidth: '700px' }}>
 
                     {/* PROMPT CARD */}
-                    <div className="bg-white rounded-4 shadow-sm p-4 text-center mb-4 border">
-                        <p className="text-muted fw-bold mb-1" style={{ fontSize: '11px', letterSpacing: '2px', textTransform: 'uppercase' }}>Translate this word</p>
-                        <h1 className="fw-bold mb-1" style={{ fontSize: 'clamp(2rem, 8vw, 3.5rem)', color: '#111827', letterSpacing: '-1px' }}>
+                    <div className="bg-theme-card rounded-4 shadow-sm p-4 text-center mb-4 border border-theme-main">
+                        <p className="text-theme-muted fw-bold mb-1" style={{ fontSize: '11px', letterSpacing: '2px', textTransform: 'uppercase' }}>Translate this word</p>
+                        <h1 className="fw-bold mb-1 text-theme-main" style={{ fontSize: 'clamp(2rem, 8vw, 3.5rem)', letterSpacing: '-1px' }}>
                             {currentPuzzle?.translation}
                         </h1>
-                        <p className="text-muted small mb-0">Build the correct word using the blocks below.</p>
-                        <button onClick={() => setShowRules(true)} className="btn btn-link text-muted small text-decoration-none mt-1 d-flex align-items-center justify-content-center gap-1">
+                        <p className="text-theme-muted small mb-0">Build the correct word using the blocks below.</p>
+                        <button onClick={() => setShowRules(true)} className="btn btn-link text-theme-muted small text-decoration-none mt-1 d-flex align-items-center justify-content-center gap-1">
                             <HelpCircle size={14} /> How to play
                         </button>
                     </div>
@@ -534,20 +547,20 @@ const SyllableBuilder: React.FC = () => {
                 .syl-empty-slot {
                     width: 72px;
                     height: 56px;
-                    border: 2px dashed #D1D5DB;
+                    border: 2px dashed var(--color-border-soft, #D1D5DB);
                     border-radius: 14px;
                     display: flex;
                     align-items: center;
                     justify-content: center;
-                    color: #D1D5DB;
+                    color: var(--color-text-muted, #D1D5DB);
                     font-weight: 700;
                     font-size: 1rem;
                 }
 
                 /* ANSWER ZONE STATES */
                 .syl-zone-default {
-                    background: #F9FAFB;
-                    border: 2px dashed #D1D5DB;
+                    background: var(--color-surface-soft, #F9FAFB);
+                    border: 2px dashed var(--color-border-soft, #D1D5DB);
                 }
                 .syl-zone-correct {
                     background: #ECFDF5;
@@ -567,14 +580,14 @@ const SyllableBuilder: React.FC = () => {
 
                 /* CHECK BUTTON STATES */
                 .syl-btn-check {
-                    background: #111827;
-                    color: white;
+                    background: var(--color-border, #111827);
+                    color: var(--color-text-inv, #ffffff);
                     border: none;
-                    box-shadow: 0 4px 0 #000;
+                    box-shadow: 0 4px 0 var(--color-shadow, #000);
                 }
                 .syl-btn-check:disabled {
                     opacity: 0.4;
-                    box-shadow: 0 4px 0 #555;
+                    box-shadow: 0 4px 0 var(--color-shadow, #555);
                 }
                 .syl-btn-check:active:not(:disabled) {
                     transform: translateY(3px);
@@ -613,8 +626,8 @@ const SyllableBuilder: React.FC = () => {
                     filter: drop-shadow(0 6px 20px rgba(0,0,0,0.15));
                 }
                 .mascot-cheer-bubble {
-                    background: #111827;
-                    color: #FACC15;
+                    background: var(--color-border);
+                    color: var(--venda-yellow, #FACC15);
                     font-size: 14px;
                     font-weight: 800;
                     font-family: var(--game-font-family);
@@ -623,7 +636,7 @@ const SyllableBuilder: React.FC = () => {
                     border-radius: 20px;
                     margin-bottom: 6px;
                     white-space: nowrap;
-                    box-shadow: 0 4px 16px rgba(250, 204, 21, 0.25);
+                    box-shadow: 0 4px 16px var(--color-shadow);
                     position: relative;
                 }
                 .mascot-cheer-bubble::after {
@@ -635,7 +648,7 @@ const SyllableBuilder: React.FC = () => {
                     width: 0; height: 0;
                     border-left: 6px solid transparent;
                     border-right: 6px solid transparent;
-                    border-top: 6px solid #111827;
+                    border-top: 6px solid var(--color-border);
                 }
             `}</style>
         </div>

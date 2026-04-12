@@ -2,9 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { db } from '../../services/firebaseConfig';
 import { collection, addDoc, doc, updateDoc, deleteDoc, getDocs, serverTimestamp } from 'firebase/firestore';
 import AdminNavbar from '../../components/AdminNavbar';
-import { invalidateCache } from '../../services/dataCache';
 import Swal from 'sweetalert2';
-import { BookOpen, BookText, Edit, Trash2, Loader2, Plus, X } from 'lucide-react';
+import { BookOpen, BookText, Edit, Trash2, Loader2, Plus, X, Globe, Search } from 'lucide-react';
+import { invalidateCache, fetchLanguages } from '../../services/dataCache';
 
 interface WordEntry {
     id: string;
@@ -13,25 +13,42 @@ interface WordEntry {
     explanation: string;
     example: string;
     pronunciation?: string;
+    languageId?: string;
+}
+
+interface Language {
+    id: string;
+    name: string;
 }
 
 const AdminDailyWords: React.FC = () => {
     const [words, setWords] = useState<WordEntry[]>([]);
+    const [languages, setLanguages] = useState<Language[]>([]);
     const [loading, setLoading] = useState(true);
     const [showForm, setShowForm] = useState(false);
     const [editingId, setEditingId] = useState<string | null>(null);
-    const [form, setForm] = useState({ word: '', meaning: '', explanation: '', example: '', pronunciation: '' });
+    const [form, setForm] = useState({ word: '', meaning: '', explanation: '', example: '', pronunciation: '', languageId: '' });
+    const [searchQuery, setSearchQuery] = useState('');
+    const [filterLanguage, setFilterLanguage] = useState('All');
 
     // Pagination
     const [currentPage, setCurrentPage] = useState(1);
-    const wordsPerPage = 6;
+    const wordsPerPage = 8;
 
     const loadWords = async () => {
         setLoading(true);
         try {
-            const snap = await getDocs(collection(db, "dailyWords"));
+            const [snap, langs] = await Promise.all([
+                getDocs(collection(db, "dailyWords")),
+                fetchLanguages()
+            ]);
             const list = snap.docs.map(d => ({ id: d.id, ...d.data() })) as WordEntry[];
             setWords(list);
+            setLanguages(langs || []);
+            
+            if (langs && langs.length > 0 && !form.languageId) {
+                setForm(prev => ({ ...prev, languageId: langs[0].id }));
+            }
         } catch (error) {
             console.error("Error loading words:", error);
         } finally {
@@ -41,8 +58,13 @@ const AdminDailyWords: React.FC = () => {
 
     useEffect(() => { loadWords(); }, []);
 
+    const getLangName = (langId?: string) => {
+        if (!langId) return 'No Language';
+        return languages.find(l => l.id === langId)?.name || 'Unknown';
+    };
+
     const resetForm = () => {
-        setForm({ word: '', meaning: '', explanation: '', example: '', pronunciation: '' });
+        setForm({ word: '', meaning: '', explanation: '', example: '', pronunciation: '', languageId: languages[0]?.id || '' });
         setEditingId(null);
         setShowForm(false);
     };
@@ -79,7 +101,14 @@ const AdminDailyWords: React.FC = () => {
     };
 
     const handleEdit = (w: WordEntry) => {
-        setForm({ word: w.word, meaning: w.meaning, explanation: w.explanation, example: w.example, pronunciation: w.pronunciation || '' });
+        setForm({ 
+            word: w.word, 
+            meaning: w.meaning, 
+            explanation: w.explanation, 
+            example: w.example, 
+            pronunciation: w.pronunciation || '',
+            languageId: w.languageId || '' 
+        });
         setEditingId(w.id);
         setShowForm(true);
     };
@@ -112,11 +141,19 @@ const AdminDailyWords: React.FC = () => {
         }
     };
 
-    // Pagination
+    // Filtering & pagination
+    const filtered = words.filter(w => {
+        const matchesSearch = !searchQuery ||
+            w.word.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            w.meaning.toLowerCase().includes(searchQuery.toLowerCase());
+        const matchesLanguage = filterLanguage === 'All' || w.languageId === filterLanguage || (filterLanguage === 'none' && !w.languageId);
+        return matchesSearch && matchesLanguage;
+    });
+
     const indexOfLast = currentPage * wordsPerPage;
     const indexOfFirst = indexOfLast - wordsPerPage;
-    const currentWords = words.slice(indexOfFirst, indexOfLast);
-    const totalPages = Math.ceil(words.length / wordsPerPage);
+    const currentWords = filtered.slice(indexOfFirst, indexOfLast);
+    const totalPages = Math.ceil(filtered.length / wordsPerPage);
 
     return (
         <div className="min-vh-100 pb-5 bg-light">
@@ -154,17 +191,25 @@ const AdminDailyWords: React.FC = () => {
                         </h5>
                         <form onSubmit={handleSubmit}>
                             <div className="row g-3">
-                                <div className="col-md-4">
-                                    <label className="smallest fw-bold ls-1 text-uppercase text-secondary mb-2 d-block">Venda Word *</label>
+                                <div className="col-md-3">
+                                    <label className="smallest fw-bold ls-1 text-uppercase text-secondary mb-2 d-block">Language *</label>
+                                    <select className="form-select dw-input"
+                                        value={form.languageId} onChange={e => setForm({ ...form, languageId: e.target.value })}>
+                                        <option value="">— No Language —</option>
+                                        {languages.map(l => <option key={l.id} value={l.id}>{l.name}</option>)}
+                                    </select>
+                                </div>
+                                <div className="col-md-3">
+                                    <label className="smallest fw-bold ls-1 text-uppercase text-secondary mb-2 d-block">Native Word *</label>
                                     <input className="form-control dw-input" placeholder="e.g. Vhuthu"
                                         value={form.word} onChange={e => setForm({ ...form, word: e.target.value })} />
                                 </div>
-                                <div className="col-md-4">
+                                <div className="col-md-3">
                                     <label className="smallest fw-bold ls-1 text-uppercase text-secondary mb-2 d-block">Meaning *</label>
                                     <input className="form-control dw-input" placeholder="e.g. Humanity"
                                         value={form.meaning} onChange={e => setForm({ ...form, meaning: e.target.value })} />
                                 </div>
-                                <div className="col-md-4">
+                                <div className="col-md-3">
                                     <label className="smallest fw-bold ls-1 text-uppercase text-secondary mb-2 d-block">Pronunciation</label>
                                     <input className="form-control dw-input" placeholder="e.g. voo-too"
                                         value={form.pronunciation} onChange={e => setForm({ ...form, pronunciation: e.target.value })} />
@@ -200,8 +245,19 @@ const AdminDailyWords: React.FC = () => {
                         <p className="smallest fw-bold ls-1 text-uppercase text-muted mb-0">Total Words in Pool</p>
                         <h3 className="fw-bold mb-0">{words.length}</h3>
                     </div>
-                    <div className="ms-auto text-end d-none d-md-block">
-                        <p className="smallest text-muted mb-0">Words rotate daily without repeating for each user.</p>
+                    <div className="ms-auto d-flex gap-2">
+                        <div className="position-relative">
+                            <Search size={14} className="position-absolute top-50 translate-middle-y" style={{ left: 12, color: '#9CA3AF' }} />
+                            <input className="form-control dw-input ps-4" placeholder="Search word..."
+                                style={{ minWidth: 180, fontSize: 13 }}
+                                value={searchQuery} onChange={e => { setSearchQuery(e.target.value); setCurrentPage(1); }} />
+                        </div>
+                        <select className="form-select dw-input" style={{ width: 150, fontSize: 13 }}
+                            value={filterLanguage} onChange={e => { setFilterLanguage(e.target.value); setCurrentPage(1); }}>
+                            <option value="All">All Languages</option>
+                            <option value="none">No Language</option>
+                            {languages.map(l => <option key={l.id} value={l.id}>{l.name}</option>)}
+                        </select>
                     </div>
                 </div>
 
@@ -225,7 +281,12 @@ const AdminDailyWords: React.FC = () => {
                                         <div className="d-flex justify-content-between align-items-start mb-3">
                                             <div>
                                                 <h4 className="fw-bold mb-0" style={{ color: '#111827' }}>{w.word}</h4>
-                                                <p className="smallest fw-bold text-warning ls-1 text-uppercase mb-0">{w.meaning}</p>
+                                                <div className="d-flex align-items-center gap-2">
+                                                    <span className="smallest fw-bold text-warning ls-1 text-uppercase">{w.meaning}</span>
+                                                    <span className="badge bg-light text-muted border px-2 py-0 d-flex align-items-center gap-1" style={{ fontSize: 9, fontWeight: 600 }}>
+                                                        <Globe size={9} />{getLangName(w.languageId)}
+                                                    </span>
+                                                </div>
                                             </div>
                                             <div className="d-flex gap-2">
                                                 <button onClick={() => handleEdit(w)} className="btn btn-sm btn-outline-dark rounded-pill px-3 d-flex align-items-center gap-1"

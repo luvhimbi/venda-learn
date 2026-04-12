@@ -42,7 +42,7 @@ const GameResultModal: React.FC<GameResultModalProps> = ({
                         initial={{ scale: 0.8, y: 50, opacity: 0 }}
                         animate={{ scale: 1, y: 0, opacity: 1 }}
                         exit={{ scale: 0.8, y: 50, opacity: 0 }}
-                        className="brutalist-card bg-white p-4 p-md-5 w-100 text-center shadow-action-lg position-relative overflow-hidden"
+                        className="brutalist-card bg-theme-card p-4 p-md-5 w-100 text-center shadow-action-lg position-relative overflow-hidden"
                         style={{ maxWidth: '500px' }}
                     >
                         {/* Decorative Background Elements */}
@@ -62,24 +62,24 @@ const GameResultModal: React.FC<GameResultModalProps> = ({
                             />
                         </div>
 
-                        <div className={`badge ${isSuccess ? 'bg-warning' : 'bg-danger'} text-dark border border-dark border-2 rounded-pill px-4 py-2 smallest fw-black ls-1 uppercase mb-3 shadow-action-sm`}>
+                        <div className={`badge ${isSuccess ? 'bg-theme-accent text-black' : 'bg-danger text-white'} border border-theme-main border-2 rounded-pill px-4 py-2 smallest fw-black ls-1 uppercase mb-3 shadow-action-sm`}>
                             {isSuccess ? 'MUWINA! (WINNER)' : 'LOSE (TRY AGAIN)'}
                         </div>
 
-                        <h1 className="fw-black mb-2 text-dark ls-tight uppercase" style={{ fontSize: '2.5rem' }}>
+                        <h1 className="fw-black mb-2 text-theme-main ls-tight uppercase" style={{ fontSize: '2.5rem' }}>
                             {title}
                         </h1>
                         
-                        <div className="fw-bold text-muted mb-4 fs-6" dangerouslySetInnerHTML={{ __html: message || '' }}></div>
+                        <div className="fw-bold text-theme-muted mb-4 fs-6" dangerouslySetInnerHTML={{ __html: message || '' }}></div>
 
                         {points !== undefined && isSuccess && (
-                            <div className="brutalist-card bg-warning p-3 mb-5 shadow-action-sm d-inline-flex align-items-center gap-3">
-                                <div className="p-2 bg-white rounded-circle border border-2 border-dark">
-                                    <Star className="text-warning fill-warning" size={24} strokeWidth={3} />
+                            <div className="brutalist-card bg-theme-accent p-3 mb-5 shadow-action-sm d-inline-flex align-items-center gap-3">
+                                <div className="p-2 bg-theme-base rounded-circle border border-2 border-theme-main">
+                                    <Star className="text-theme-accent fill-theme-accent" size={24} strokeWidth={3} />
                                 </div>
                                 <div className="text-start">
-                                    <span className="smallest fw-black text-dark opacity-75 uppercase d-block">Reward earned</span>
-                                    <span className="fw-black text-dark fs-4">+{points} XP</span>
+                                    <span className="smallest fw-black text-black opacity-75 uppercase d-block">Reward earned</span>
+                                    <span className="fw-black text-black fs-4">+{points} XP</span>
                                 </div>
                             </div>
                         )}
@@ -87,7 +87,7 @@ const GameResultModal: React.FC<GameResultModalProps> = ({
                         <div className="d-grid gap-3 mt-2">
                             <button 
                                 onClick={(e) => { e.stopPropagation(); onPrimaryAction(); }} 
-                                className={`btn-game ${isSuccess ? 'btn-game-warning' : 'btn-game-primary'} py-4 smallest fw-black uppercase d-flex align-items-center justify-content-center gap-2`}
+                                className={`btn-game ${isSuccess ? 'btn-game-warning shadow-action-sm' : 'btn-game-primary shadow-action-sm'} py-4 smallest fw-black uppercase d-flex align-items-center justify-content-center gap-2`}
                             >
                                 <RotateCcw size={20} strokeWidth={4} />
                                 {primaryActionText}
@@ -107,7 +107,7 @@ const GameResultModal: React.FC<GameResultModalProps> = ({
                         {!isSuccess && onSecondaryAction && !secondaryActionText && (
                             <button 
                                 onClick={(e) => { e.stopPropagation(); onSecondaryAction(); }} 
-                                className="btn border-0 text-muted smallest fw-bold mt-4 uppercase text-decoration-underline hover-opacity"
+                                className="btn border-0 text-theme-muted smallest fw-bold mt-4 uppercase text-decoration-underline hover-opacity"
                             >
                                 BACK TO DASHBOARD
                             </button>

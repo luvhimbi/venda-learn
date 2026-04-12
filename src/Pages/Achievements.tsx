@@ -50,7 +50,7 @@ const Achievements: React.FC = () => {
     };
 
     if (loading) return (
-        <div className="min-vh-100 bg-white d-flex justify-content-center align-items-center">
+        <div className="min-vh-100 bg-theme-base d-flex justify-content-center align-items-center">
             <div className="spinner-border text-venda"></div>
         </div>
     );
@@ -59,27 +59,27 @@ const Achievements: React.FC = () => {
     const totalCount = ALL_TROPHIES.length;
 
     return (
-        <div className="achievements-page bg-white min-vh-100 pb-5" style={{ background: 'url("data:image/svg+xml,%3Csvg width=\'20\' height=\'20\' viewBox=\'0 0 20 20\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cg fill=\'%23000000\' fill-opacity=\'0.03\' fill-rule=\'evenodd\'%3E%3Ccircle cx=\'3\' cy=\'3\' r=\'1\'/%3E%3C/g%3E%3C/svg%3E")' }}>
+        <div className="achievements-page bg-theme-base min-vh-100 pb-5" style={{ background: 'url("data:image/svg+xml,%3Csvg width=\'20\' height=\'20\' viewBox=\'0 0 20 20\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cg fill=\'currentColor\' fill-opacity=\'0.03\' fill-rule=\'evenodd\'%3E%3Ccircle cx=\'3\' cy=\'3\' r=\'1\'/%3E%3C/g%3E%3C/svg%3E")' }}>
             <SEO
                 title="Trophies & Achievements"
                 description="View your achievements and track your progress to mastery."
             />
 
             {/* BRUTALIST HEADER */}
-            <div className="bg-white border-bottom border-dark border-4 py-3 sticky-top shadow-sm z-3">
+            <div className="bg-theme-card border-bottom border-theme-main border-4 py-3 sticky-top shadow-sm z-3">
                 <div className="container" style={{ maxWidth: '800px' }}>
                     <div className="d-flex align-items-center justify-content-between">
                         <button
                             onClick={() => navigate(-1)}
-                            className="btn btn-game-white rounded-circle d-flex align-items-center justify-content-center p-0 border border-dark border-3 shadow-action-sm"
+                            className="btn btn-game-white rounded-circle d-flex align-items-center justify-content-center p-0 border border-theme-main border-3 shadow-action-sm"
                             style={{ width: 44, height: 44 }}
                         >
-                            <ArrowLeft size={20} strokeWidth={3} />
+                            <ArrowLeft size={20} className="text-theme-main" strokeWidth={3} />
                         </button>
                         <div className="text-center">
-                            <h5 className="fw-black mb-0 text-dark uppercase ls-tight" style={{ fontSize: '1.25rem' }}>COLLECTION</h5>
+                            <h5 className="fw-black mb-0 text-theme-main uppercase ls-tight" style={{ fontSize: '1.25rem' }}>COLLECTION</h5>
                         </div>
-                        <div className="px-3 py-1.5 bg-warning border border-dark border-3 shadow-action-sm d-flex align-items-center gap-2">
+                        <div className="px-3 py-1.5 bg-warning border border-theme-main border-3 shadow-action-sm d-flex align-items-center gap-2">
                             <TrophyIconLucide size={16} className="text-dark" strokeWidth={3} />
                             <span className="small fw-black text-dark uppercase ls-1">{earnedCount}/{totalCount}</span>
                         </div>
@@ -89,8 +89,8 @@ const Achievements: React.FC = () => {
 
             <div className="container mt-5" style={{ maxWidth: '800px' }}>
                 <div className="mb-5 text-center text-md-start">
-                    <h2 className="fw-black text-dark uppercase ls-tight mb-2">My Journey</h2>
-                    <p className="smallest fw-bold text-muted uppercase ls-2 mb-0">Track your progress and collections</p>
+                    <h2 className="fw-black text-theme-main uppercase ls-tight mb-2">My Journey</h2>
+                    <p className="smallest fw-bold text-theme-muted uppercase ls-2 mb-0">Track your progress and collections</p>
                 </div>
 
                 {/* GRID WITH BETTER DENSITY */}
@@ -123,8 +123,8 @@ const Achievements: React.FC = () => {
                 </div>
 
                 <div className="text-center pb-5">
-                    <div className="p-4 brutalist-card bg-light border-dashed border-dark border-3 shadow-none">
-                        <p className="smallest fw-black text-muted uppercase ls-1 mb-0 d-flex align-items-center justify-content-center gap-2">
+                    <div className="p-4 brutalist-card bg-theme-surface border-dashed border-theme-main border-3 shadow-none">
+                        <p className="smallest fw-black text-theme-muted uppercase ls-1 mb-0 d-flex align-items-center justify-content-center gap-2">
                              New trophies are added regularly. Keep learning!
                         </p>
                     </div>

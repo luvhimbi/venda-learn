@@ -25,11 +25,11 @@ import { fetchLessons, fetchUserData, refreshUserData, invalidateCache, getMicro
 import Swal from 'sweetalert2';
 
 const MASCOT_CHEERS = [
-    'Zwavhuḓi!',
-    'Ndi zwone!',
-    'Hu ḓo luga!',
-    'Wa ḓivha!',
-    'Ṱhonifhani!',
+    'Well done!',
+    'That is right!',
+    'You got it!',
+    'Great job!',
+    'Keep going!',
 ];
 
 const GameRoom: React.FC = () => {
@@ -374,8 +374,8 @@ const GameRoom: React.FC = () => {
 
     if (!lesson) {
         return (
-            <div className="min-vh-100 bg-white d-flex align-items-center justify-content-center">
-                <div className="spinner-border" style={{ color: '#FACC15' }}></div>
+            <div className="min-vh-100 bg-theme-base d-flex align-items-center justify-content-center">
+                <div className="spinner-border" style={{ color: 'var(--venda-yellow)' }}></div>
             </div>
         );
     }
@@ -395,23 +395,23 @@ const GameRoom: React.FC = () => {
         const modeLabel = gameState === 'STUDY' ? 'STUDY' : (gameState === 'QUIZ' ? 'QUIZ' : 'COMPLETE');
 
         return (
-            <div className="bg-white px-3 pt-3 pb-3 sticky-top border-bottom border-dark border-3" style={{ zIndex: 1000 }}>
+            <div className="bg-theme-surface px-3 pt-3 pb-3 sticky-top border-bottom border-theme-main border-3" style={{ zIndex: 1000 }}>
                 <div className="container" style={{ maxWidth: '650px' }}>
                     <div className="d-flex justify-content-between align-items-center mb-3">
-                        <div className="d-flex align-items-center gap-2 bg-warning border border-dark border-2 px-3 py-1 rounded-pill shadow-action-sm">
+                        <div className="d-flex align-items-center gap-2 bg-warning border border-theme-main border-2 px-3 py-1 rounded-pill shadow-action-sm">
                             <Zap size={16} className="text-dark" />
                             <span className="smallest fw-black uppercase ls-1" style={{ color: '#000' }}>{userData?.points || 0} XP</span>
                         </div>
                         <button className="btn p-0 btn-game-white brutalist-card--sm rounded-circle d-flex align-items-center justify-content-center" onClick={() => setShowExitModal(true)} style={{ width: 36, height: 36 }}>
-                            <X size={20} className="text-dark" />
+                            <X size={20} className="text-theme-main" />
                         </button>
                     </div>
                     <div className="d-flex flex-column gap-2">
-                        <div className="progress brutalist-card--sm p-0 overflow-hidden" style={{ height: '12px', borderRadius: 20, backgroundColor: '#eee', border: '3px solid #000' }}>
-                            <div className="progress-bar" style={{ width: `${progress}%`, backgroundColor: '#FACC15', transition: '0.6s cubic-bezier(0.34, 1.56, 0.64, 1)' }}></div>
+                        <div className="progress brutalist-card--sm p-0 overflow-hidden" style={{ height: '12px', borderRadius: 20, backgroundColor: 'var(--color-surface-soft)', border: '3px solid var(--color-border)' }}>
+                            <div className="progress-bar" style={{ width: `${progress}%`, backgroundColor: 'var(--venda-yellow)', transition: '0.6s cubic-bezier(0.34, 1.56, 0.64, 1)' }}></div>
                         </div>
                         <div className="d-flex justify-content-between align-items-center">
-                            <span className="smallest fw-black text-dark uppercase ls-1">{modeLabel}</span>
+                            <span className="smallest fw-black text-theme-main uppercase ls-1">{modeLabel}</span>
                             {gameState === 'STUDY' ? (
                                 <button className="btn btn-link p-0 text-decoration-none smallest fw-black text-success uppercase ls-1" onClick={() => saveStateToStorage(true)}>
                                     {showSavedHint ? 'PROGRESS SAVED!' : 'SAVE SESSION'}
@@ -432,10 +432,10 @@ const GameRoom: React.FC = () => {
             const isLastSlide = currentSlide + 1 >= lesson.slides.length;
 
             return (
-                <div className="min-vh-100 d-flex flex-column" style={{ background: '#FFFFFF' }}>
+                <div className="min-vh-100 d-flex flex-column bg-theme-base">
                     {renderProgressHeader()}
 
-                    <div className="flex-grow-1 overflow-auto bg-light">
+                    <div className="flex-grow-1 overflow-auto bg-theme-base">
                         <div className="container py-4" style={{ maxWidth: '600px' }}>
                             <div key={currentSlide} className="animate__animated animate__fadeIn animate__faster px-2">
                                 
@@ -444,8 +444,8 @@ const GameRoom: React.FC = () => {
                                     
                                     {/* Section 1: Phrase Display */}
                                     <div className="text-center mb-5">
-                                        <h1 className="fw-black mb-1 text-dark ls-tight uppercase" style={{ fontSize: 'clamp(2rem, 8vw, 4rem)' }}>{slide.nativeWord || slide.native || slide.word || slide.venda || slide.tshivenda}</h1>
-                                        <h4 className="text-muted fw-black uppercase ls-1" style={{ fontSize: '1.25rem' }}>{slide.english}</h4>
+                                        <h1 className="fw-black mb-1 text-theme-main ls-tight uppercase" style={{ fontSize: 'clamp(2rem, 8vw, 4rem)' }}>{slide.nativeWord || slide.native || slide.word || slide.venda || slide.tshivenda}</h1>
+                                        <h4 className="text-theme-muted fw-black uppercase ls-1" style={{ fontSize: '1.25rem' }}>{slide.english}</h4>
                                     </div>
 
                                     {/* Section 2: Audio Interaction */}
@@ -454,16 +454,16 @@ const GameRoom: React.FC = () => {
                                             <div className="d-flex align-items-center gap-4">
                                                 <button className="btn rounded-circle d-flex align-items-center justify-content-center shadow-action-light hover-scale" 
                                                     onClick={() => speakNative(slide.nativeWord || slide.native || slide.word || slide.venda || slide.tshivenda)}
-                                                    style={{ width: 80, height: 80, backgroundColor: isPlayingAudio ? '#FACC15' : '#111827', border: '5px solid #000', transition: 'all 0.1s' }}>
+                                                    style={{ width: 80, height: 80, backgroundColor: isPlayingAudio ? 'var(--venda-yellow)' : '#111827', border: '5px solid var(--color-border)', transition: 'all 0.1s' }}>
                                                     <Play size={32} fill={isPlayingAudio ? '#000' : '#FFFFFF'} className={isPlayingAudio ? 'text-dark' : 'text-white'} />
                                                 </button>
-                                                <button className="btn bg-white brutalist-card--sm rounded-circle d-flex align-items-center justify-content-center hover-scale" 
+                                                <button className="btn bg-theme-surface brutalist-card--sm rounded-circle d-flex align-items-center justify-content-center hover-scale" 
                                                     onClick={() => speakNative(slide.nativeWord || slide.native || slide.word || slide.venda || slide.tshivenda)}
                                                     style={{ width: 50, height: 50 }}>
-                                                    <span className="fw-black text-dark uppercase ls-1" style={{ fontSize: '11px' }}>0.5x</span>
+                                                    <span className="fw-black text-theme-main uppercase ls-1" style={{ fontSize: '11px' }}>0.5x</span>
                                                 </button>
                                             </div>
-                                            <span className="smallest fw-black text-muted ls-2 text-uppercase">Tap to hear pronunciation</span>
+                                            <span className="smallest fw-black text-theme-muted ls-2 text-uppercase">Tap to hear pronunciation</span>
                                         </div>
                                     </div>
 
@@ -471,7 +471,7 @@ const GameRoom: React.FC = () => {
 
                                     {/* Section 3: Usage Explanation */}
                                     <div className="mb-2 px-md-4">
-                                        <p className="smallest fw-black text-dark ls-2 mb-4 text-uppercase d-flex align-items-center gap-2">
+                                        <p className="smallest fw-black text-theme-main ls-2 mb-4 text-uppercase d-flex align-items-center gap-2">
                                             <HelpCircle size={16} className="text-warning" /> USAGE CONTEXT
                                         </p>
                                         <div className="d-flex flex-column gap-4">
@@ -479,19 +479,19 @@ const GameRoom: React.FC = () => {
                                                 if (!point.trim()) return null;
                                                 const isGenderSpecific = point.toLowerCase().includes('men') || point.toLowerCase().includes('women');
                                                 return (
-                                                    <div key={idx} className="d-flex align-items-start gap-3 p-3 bg-light brutalist-card--sm border-dark border-2 rounded-4">
+                                                    <div key={idx} className="d-flex align-items-start gap-3 p-3 bg-theme-surface brutalist-card--sm border-theme-main border-2 rounded-4">
                                                         <div className="mt-1">
                                                             {isGenderSpecific ? (
-                                                                <div className="rounded-circle bg-warning border border-dark border-2 p-2 d-flex align-items-center justify-content-center" style={{ width: 36, height: 36 }}>
+                                                                <div className="rounded-circle bg-warning border border-theme-main border-2 p-2 d-flex align-items-center justify-content-center" style={{ width: 36, height: 36 }}>
                                                                     <Users size={18} className="text-dark" />
                                                                 </div>
                                                             ) : (
-                                                                <div className="rounded-circle bg-white border border-dark border-2 p-2 d-flex align-items-center justify-content-center" style={{ width: 36, height: 36 }}>
-                                                                    <Circle size={12} fill="#000" className="text-dark" />
+                                                                <div className="rounded-circle bg-theme-surface border border-theme-main border-2 p-2 d-flex align-items-center justify-content-center" style={{ width: 36, height: 36 }}>
+                                                                    <Circle size={12} fill="var(--color-text)" className="text-theme-main" />
                                                                 </div>
                                                             )}
                                                         </div>
-                                                        <p className="mb-0 text-dark fw-bold uppercase ls-1" style={{ lineHeight: 1.4, fontSize: '0.9rem' }}>{point.endsWith('.') ? point : point + '.'}</p>
+                                                        <p className="mb-0 text-theme-main fw-bold uppercase ls-1" style={{ lineHeight: 1.4, fontSize: '0.9rem' }}>{point.endsWith('.') ? point : point + '.'}</p>
                                                     </div>
                                                 );
                                             })}
@@ -504,7 +504,7 @@ const GameRoom: React.FC = () => {
                     </div>
 
                     {/* Navigation Controls */}
-                    <div className="bg-white px-4 py-4 border-top border-dark border-3 pb-5">
+                    <div className="bg-theme-surface px-4 py-4 border-top border-theme-main border-3 pb-5">
                         <div className="container" style={{ maxWidth: '650px' }}>
                             <div className="d-flex gap-3">
                                 <button className="btn btn-game btn-game-white px-3 fw-black ls-1 flex-grow-1"
@@ -542,15 +542,15 @@ const GameRoom: React.FC = () => {
 
         if (gameState === 'NO_QUIZ') {
             return (
-                <div className="min-vh-100 d-flex flex-column" style={{ background: '#FFFFFF' }}>
+                <div className="min-vh-100 d-flex flex-column bg-theme-base">
                     {renderProgressHeader()}
-                    <div className="flex-grow-1 d-flex align-items-center justify-content-center p-3 bg-light">
-                        <div className="text-center w-100 bg-white rounded-5 p-4 p-md-5 shadow-sm border border-light animate__animated animate__zoomIn" style={{ maxWidth: '500px' }}>
+                    <div className="flex-grow-1 d-flex align-items-center justify-content-center p-3 bg-theme-base">
+                        <div className="text-center w-100 bg-theme-surface rounded-5 p-4 p-md-5 shadow-sm border border-theme-soft animate__animated animate__zoomIn" style={{ maxWidth: '500px' }}>
                             <div className="d-flex justify-content-center mb-4">
                                 <Mascot mood="excited" width="120px" height="120px" />
                             </div>
-                            <h1 className="fw-900 display-5 text-dark mb-2 ls-tight">All Done!</h1>
-                            <p className="text-muted mb-4 ls-1 smallest fw-bold uppercase">YOU'VE REVIEWED ALL THE CONTENT</p>
+                            <h1 className="fw-900 display-5 text-theme-main mb-2 ls-tight">All Done!</h1>
+                            <p className="text-theme-muted mb-4 ls-1 smallest fw-bold uppercase">YOU'VE REVIEWED ALL THE CONTENT</p>
                             <div className="py-4 border-top border-bottom mb-4">
                                 <p className="text-secondary small mb-0 px-3">Great job! There's no quiz for this lesson, but you've mastered the material.</p>
                                 {isFirstTime && (
@@ -594,7 +594,7 @@ const GameRoom: React.FC = () => {
             const currentLabel = typeLabel[q.type] || { label: 'CHALLENGE', icon: <HelpCircle size={14} /> };
 
             return (
-                <div className="min-vh-100 d-flex flex-column" style={{ background: '#FFFFFF' }}>
+                <div className="min-vh-100 d-flex flex-column bg-theme-base">
                     {renderProgressHeader()}
                     <ScorePopup result={lastScoreResult} />
                     {showMascotCheer && (
@@ -603,12 +603,12 @@ const GameRoom: React.FC = () => {
                             <Mascot width="90px" height="90px" mood={mascotMood} />
                         </div>
                     )}
-                    <div className="flex-grow-1 overflow-auto bg-light">
+                    <div className="flex-grow-1 overflow-auto bg-theme-base">
                         <div className="container py-4" style={{ maxWidth: '650px' }}>
                             <div className="animate__animated animate__fadeIn px-2">
                                 <div className="brutalist-card p-4 p-md-5 w-100 text-center shadow-action">
                                     <div className="d-flex justify-content-center mb-4">
-                                        <span className="badge brutalist-card--sm bg-white text-dark border-dark border-2 p-3 smallest fw-black uppercase ls-1 d-flex align-items-center gap-2">
+                                        <span className="badge brutalist-card--sm bg-theme-surface text-theme-main border-theme-main border-2 p-3 smallest fw-black uppercase ls-1 d-flex align-items-center gap-2">
                                             {currentLabel.icon} {currentLabel.label}
                                         </span>
                                     </div>
@@ -617,7 +617,7 @@ const GameRoom: React.FC = () => {
                                         <Mascot width="80px" height="80px" mood={mascotMood} />
                                     </div>
 
-                                    <h2 className="fw-black text-dark mb-5 ls-tight uppercase" style={{ fontSize: 'clamp(1.5rem, 5vw, 2.5rem)' }}>{q.question}</h2>
+                                    <h2 className="fw-black text-theme-main mb-5 ls-tight uppercase" style={{ fontSize: 'clamp(1.5rem, 5vw, 2.5rem)' }}>{q.question}</h2>
 
                                     <div className="w-100 text-start pb-5" style={{ marginBottom: showExplanation ? '200px' : '0', transition: 'margin-bottom 0.3s' }}>
                                         {renderQuestion()}
@@ -630,7 +630,7 @@ const GameRoom: React.FC = () => {
                     {/* Feedback Panel */}
                     {showExplanation && (
                         <div className="position-fixed bottom-0 start-0 end-0 animate__animated animate__slideInUp animate__faster" 
-                             style={{ zIndex: 9999, borderTop: '6px solid #000', backgroundColor: answerStatus === 'correct' ? '#dcfce7' : '#fee2e2', boxShadow: '0 -20px 60px rgba(0,0,0,0.2)' }}>
+                             style={{ zIndex: 9999, borderTop: '6px solid var(--color-border)', backgroundColor: answerStatus === 'correct' ? (document.documentElement.getAttribute('data-theme') === 'dark' ? '#064e3b' : '#dcfce7') : (document.documentElement.getAttribute('data-theme') === 'dark' ? '#7f1d1d' : '#fee2e2'), boxShadow: '0 -20px 60px rgba(0,0,0,0.2)' }}>
                             <div className="container pt-4 pb-sm-5 pb-5 mb-3" style={{ maxWidth: '650px' }}>
                                 {answerStatus === 'correct' ? (
                                     <div className="d-flex flex-column gap-4">
@@ -658,9 +658,9 @@ const GameRoom: React.FC = () => {
                                             </div>
                                         </div>
                                         
-                                        <div className="bg-white p-3 brutalist-card--sm border-dark border-2 border-dashed shadow-none">
-                                            <p className="smallest fw-black mb-1 ls-2 text-uppercase" style={{ color: '#666' }}>Correct Answer</p>
-                                            <p className="fs-5 fw-black mb-0 text-dark uppercase ls-1">
+                                        <div className="bg-theme-surface p-3 brutalist-card--sm border-theme-main border-2 border-dashed shadow-none">
+                                            <p className="smallest fw-black mb-1 ls-2 text-uppercase text-theme-muted">Correct Answer</p>
+                                            <p className="fs-5 fw-black mb-0 text-theme-main uppercase ls-1">
                                                 {q.type === 'true-false' ? ((q as any).correctAnswer === true ? 'NGOHO (TRUE)' : 'MAZWIFHI (FALSE)') : (q as any).correctAnswer}
                                             </p>
                                         </div>
@@ -683,21 +683,21 @@ const GameRoom: React.FC = () => {
         }
 
         return (
-            <div className="min-vh-100 d-flex flex-column" style={{ background: '#FFFFFF' }}>
-                <div className="flex-grow-1 d-flex align-items-center justify-content-center p-3 bg-light">
+            <div className="min-vh-100 d-flex flex-column bg-theme-base">
+                <div className="flex-grow-1 d-flex align-items-center justify-content-center p-3 bg-theme-base">
                     <div className="text-center w-100 brutalist-card p-4 p-md-5 shadow-action" style={{ maxWidth: '500px' }}>
                         <div className="d-flex justify-content-center mb-5">
                             <Mascot mood={mascotMood} width="140px" height="140px" />
                         </div>
-                        <h1 className="fw-black display-4 text-dark mb-2 ls-tight uppercase">{isFirstTime ? 'Quest Ended!' : 'Review Done!'}</h1>
-                        <p className="text-muted mb-5 ls-1 smallest fw-black uppercase">{isFirstTime ? "YOU'VE MASTERED THIS CHAPTER" : "GREAT JOB REFRESHING YOUR MEMORY"}</p>
+                        <h1 className="fw-black display-4 text-theme-main mb-2 ls-tight uppercase">{isFirstTime ? 'Quest Ended!' : 'Review Done!'}</h1>
+                        <p className="text-theme-muted mb-5 ls-1 smallest fw-black uppercase">{isFirstTime ? "YOU'VE MASTERED THIS CHAPTER" : "GREAT JOB REFRESHING YOUR MEMORY"}</p>
                         
                         {isFirstTime && (
-                           <div className="py-4 border-top border-bottom border-dark border-2 mb-5">
-                                <h1 className="display-2 fw-black mb-3" style={{ color: '#FACC15', letterSpacing: '-2px', WebkitTextStroke: '2px black' }}>+{score} XP</h1>
+                           <div className="py-4 border-top border-bottom border-theme-main border-2 mb-5">
+                                <h1 className="display-2 fw-black mb-3" style={{ color: 'var(--venda-yellow)', letterSpacing: '-2px', WebkitTextStroke: '2px var(--color-border)' }}>+{score} XP</h1>
                                 <div className="d-flex flex-column gap-3 text-start mx-auto" style={{ maxWidth: 300 }}>
-                                    <div className="d-flex justify-content-between smallest text-dark align-items-center">
-                                        <span className="d-flex align-items-center gap-2 p-2 bg-white brutalist-card--sm rounded-pill fw-black uppercase ls-1"><Bookmark size={14} /> BASE POINTS</span>
+                                    <div className="d-flex justify-content-between smallest text-theme-main align-items-center">
+                                        <span className="d-flex align-items-center gap-2 p-2 bg-theme-surface brutalist-card--sm rounded-pill fw-black uppercase ls-1"><Bookmark size={14} /> BASE POINTS</span>
                                         <span className="fw-black">{scoreBreakdown.base}</span>
                                     </div>
                                     {scoreBreakdown.speed > 0 &&
@@ -714,7 +714,7 @@ const GameRoom: React.FC = () => {
                             </div>
                         )}
                         
-                        <button className="btn btn-game btn-game-primary w-100 py-3 fw-black ls-1 uppercase" onClick={() => navigate(lesson?.courseId ? `/courses/${lesson.courseId}` : '/courses')}>
+                        <button className="btn btn-game btn-game-primary w-100 py-3 fw-black ls-1 uppercase" onClick={() => navigate('/courses')}>
                             RETURN TO MAP
                         </button>
                     </div>
@@ -726,7 +726,7 @@ const GameRoom: React.FC = () => {
     return (
         <div className="game-room">
             {renderContent()}
-            {showExitModal && <ExitModal onClose={() => setShowExitModal(false)} onConfirm={() => navigate(lesson?.courseId ? `/courses/${lesson.courseId}` : '/courses')} />}
+            {showExitModal && <ExitModal onClose={() => setShowExitModal(false)} onConfirm={() => navigate('/courses')} />}
             <style>{`
                 .ls-tight { letter-spacing: -2px; }
                 .ls-1 { letter-spacing: 1px; }
@@ -737,7 +737,7 @@ const GameRoom: React.FC = () => {
                 .hover-scale { transition: transform 0.1s ease; }
                 .hover-scale:hover { transform: scale(1.05); }
                 .hover-scale:active { transform: scale(0.95); }
-                .hr-fade { height: 1px; background: linear-gradient(to right, transparent, #E5E7EB, transparent); }
+                .hr-fade { height: 1px; background: linear-gradient(to right, transparent, var(--color-border-soft), transparent); }
                 .bg-warning-subtle { background-color: #FEF3C7; }
                 .bg-blue-subtle { background-color: #DBEAFE; }
                 .pulse-danger { animation: pulseDanger 1.5s infinite; }

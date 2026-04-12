@@ -115,7 +115,7 @@ const SentenceScramble: React.FC = () => {
 
             const filtered = data.filter(d => {
                 const isCorrectDifficulty = d.difficulty === level;
-                const isCorrectLang = !activeLang || d.languageId === activeLang.id || (!d.languageId && activeLang.name.toLowerCase().includes('venda'));
+                const isCorrectLang = !activeLang || d.languageId === activeLang.id || !d.languageId;
                 return isCorrectDifficulty && isCorrectLang;
             });
 
@@ -254,15 +254,15 @@ const SentenceScramble: React.FC = () => {
     };
 
     if (loading) return (
-        <div className="min-vh-100 d-flex flex-column justify-content-center align-items-center bg-white">
+        <div className="min-vh-100 d-flex flex-column justify-content-center align-items-center bg-theme-base">
             <Mascot width="100px" height="100px" mood="excited" />
-            <p className="text-muted mt-3 fw-bold" style={{ fontSize: '12px', letterSpacing: '2px', textTransform: 'uppercase' }}>Loading sentences...</p>
+            <p className="text-theme-muted mt-3 fw-bold" style={{ fontSize: '12px', letterSpacing: '2px', textTransform: 'uppercase' }}>Loading sentences...</p>
         </div>
     );
 
     if (!selectedLevel) {
         return (
-            <div className="min-vh-100 p-4 d-flex flex-column align-items-center justify-content-center" style={{ backgroundColor: '#ffffff' }}>
+            <div className="min-vh-100 p-4 d-flex flex-column align-items-center justify-content-center bg-theme-base">
 
                 {/* INTRO MODAL */}
                 {showIntro && (
@@ -278,7 +278,7 @@ const SentenceScramble: React.FC = () => {
 
                 <div className="container d-flex flex-column align-items-center" style={{ maxWidth: '600px' }}>
                     <div className="w-100 d-flex justify-content-start mb-4">
-                        <button onClick={() => navigate('/mitambo')} className="btn btn-link text-decoration-none p-0 text-dark">
+                        <button onClick={() => navigate('/mitambo')} className="btn btn-link text-decoration-none p-0 text-theme-main">
                             <ArrowLeft size={24} />
                         </button>
                     </div>
@@ -287,8 +287,8 @@ const SentenceScramble: React.FC = () => {
                         <div className="brutalist-card bg-warning p-4 mb-4 shadow-action-sm">
                             <Hash size={48} strokeWidth={3} className="text-dark" />
                         </div>
-                        <h1 className="fw-black mb-2 text-dark uppercase ls-tight display-5 text-center">SENTENCE SCRAMBLE</h1>
-                        <p className="fw-bold text-muted uppercase smallest ls-1">Master {preferredLanguage?.name || ''} sentence structures</p>
+                        <h1 className="fw-black mb-2 text-theme-main uppercase ls-tight display-5 text-center">SENTENCE SCRAMBLE</h1>
+                        <p className="fw-bold text-theme-muted uppercase smallest ls-1">Master {preferredLanguage?.name || ''} sentence structures</p>
                     </div>
 
                     <div className="d-flex flex-column gap-4 w-100">
@@ -296,7 +296,7 @@ const SentenceScramble: React.FC = () => {
                             <button
                                 key={lvl}
                                 onClick={() => startLevel(lvl)}
-                                className="brutalist-card transition-all hover-lift--sm w-100 p-4 text-start bg-white shadow-action-sm"
+                                className="brutalist-card transition-all hover-lift--sm w-100 p-4 text-start bg-theme-card text-theme-main shadow-action-sm border-theme-main"
                             >
                                 <div className="d-flex justify-content-between align-items-center">
                                     <div>
@@ -305,8 +305,8 @@ const SentenceScramble: React.FC = () => {
                                             {lvl === 'Beginner' ? 'Short everyday interactions' : lvl === 'Intermediate' ? 'Standard dialogue & structures' : 'Deep language logic & proverbs'}
                                         </p>
                                     </div>
-                                    <div className="bg-warning p-2 border border-dark border-2 rounded-circle">
-                                        <ChevronRight strokeWidth={4} className="text-dark" size={20} />
+                                    <div className="bg-warning p-2 border border-theme-main border-2 rounded-circle">
+                                        <ChevronRight strokeWidth={4} className="text-black" size={20} />
                                     </div>
                                 </div>
                             </button>
@@ -326,8 +326,20 @@ const SentenceScramble: React.FC = () => {
                     .brutalist-card:hover {
                         transform: translateY(-4px);
                         border-color: #FACC15 !important;
-                        background-color: #FFFDF5 !important;
+                        background-color: #FACC15 !important;
                         box-shadow: 8px 8px 0 #111827 !important;
+                        color: #111827 !important;
+                    }
+                    .brutalist-card:hover p, 
+                    .brutalist-card:hover h2 {
+                        color: #111827 !important;
+                    }
+                    .brutalist-card:hover .bg-warning {
+                        background-color: #111827 !important;
+                        border-color: #111827 !important;
+                    }
+                    .brutalist-card:hover .bg-warning svg {
+                        color: #FACC15 !important;
                     }
                 `}</style>
             </div>
@@ -337,9 +349,9 @@ const SentenceScramble: React.FC = () => {
     const diffColors = DIFFICULTY_COLORS[currentPuzzle?.difficulty || 'Easy'] || DIFFICULTY_COLORS['Easy'];
 
     return (
-        <div className="min-vh-100 d-flex flex-column bg-white" style={{ 
-            backgroundColor: '#ffffff',
-            backgroundImage: 'url("data:image/svg+xml,%3Csvg width=\'20\' height=\'20\' viewBox=\'0 0 20 20\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cg fill=\'%23000000\' fill-opacity=\'0.01\' fill-rule=\'evenodd\'%3E%3Ccircle cx=\'3\' cy=\'3\' r=\'1\'/%3E%3C/g%3E%3C/svg%3E")' 
+        <div className="min-vh-100 d-flex flex-column bg-theme-base" style={{ 
+            backgroundColor: 'var(--color-bg)',
+            backgroundImage: 'url("data:image/svg+xml,%3Csvg width=\'20\' height=\'20\' viewBox=\'0 0 20 20\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cg fill=\'currentColor\' fill-opacity=\'0.01\' fill-rule=\'evenodd\'%3E%3Ccircle cx=\'3\' cy=\'3\' r=\'1\'/%3E%3C/g%3E%3C/svg%3E")' 
         }}>
             {/* RESULT MODAL */}
             <GameResultModal
@@ -365,7 +377,7 @@ const SentenceScramble: React.FC = () => {
                 <div className="container" style={{ maxWidth: '700px' }}>
                     <div className="d-flex justify-content-between align-items-center mb-4">
                         <button onClick={handleExit} className="btn-game btn-game-white rounded-circle d-flex align-items-center justify-content-center" style={{ width: 44, height: 44, padding: 0 }}>
-                            <ArrowLeft size={24} strokeWidth={3} className="text-dark" />
+                            <ArrowLeft size={24} strokeWidth={3} className="text-theme-main" />
                         </button>
                         <div className="text-center">
                             <span className="smallest fw-black text-warning uppercase ls-1 mb-0 d-block">{preferredLanguage?.name || 'Local'} Grammar</span>
@@ -426,9 +438,9 @@ const SentenceScramble: React.FC = () => {
                 <div className="container" style={{ maxWidth: '700px' }}>
 
                     {/* PROMPT CARD */}
-                    <div className="bg-white rounded-4 shadow-sm p-4 text-center mb-4 border">
-                        <p className="text-muted fw-bold mb-1" style={{ fontSize: '11px', letterSpacing: '2px', textTransform: 'uppercase' }}>Translate this sentence</p>
-                        <h2 className="fw-bold mb-2" style={{ color: '#111827', letterSpacing: '-0.5px', fontSize: 'clamp(1.3rem, 5vw, 2rem)' }}>
+                    <div className="bg-theme-card rounded-4 shadow-sm p-4 text-center mb-4 border border-theme-main">
+                        <p className="text-theme-muted fw-bold mb-1" style={{ fontSize: '11px', letterSpacing: '2px', textTransform: 'uppercase' }}>Translate this sentence</p>
+                        <h2 className="fw-bold mb-2 text-theme-main" style={{ letterSpacing: '-0.5px', fontSize: 'clamp(1.3rem, 5vw, 2rem)' }}>
                             "{currentPuzzle?.translation}"
                         </h2>
                         <div className="d-flex justify-content-center gap-2 align-items-center">
@@ -546,14 +558,14 @@ const SentenceScramble: React.FC = () => {
                 .scr-empty-slot {
                     width: 60px;
                     height: 40px;
-                    border: 2px dashed #D1D5DB;
+                    border: 2px dashed var(--color-border-soft, #D1D5DB);
                     border-radius: 24px;
                 }
 
                 /* ZONE STATES */
                 .scr-zone-default {
-                    background: #F9FAFB;
-                    border: 2px dashed #D1D5DB;
+                    background: var(--color-surface-soft, #F9FAFB);
+                    border: 2px dashed var(--color-border-soft, #D1D5DB);
                 }
                 .scr-zone-correct {
                     background: #ECFDF5;
@@ -573,12 +585,12 @@ const SentenceScramble: React.FC = () => {
 
                 /* BUTTON STATES */
                 .scr-btn-check {
-                    background: #111827;
-                    color: white;
+                    background: var(--color-border, #111827);
+                    color: var(--color-text-inv, #ffffff);
                     border: none;
-                    box-shadow: 0 4px 0 #000;
+                    box-shadow: 0 4px 0 var(--color-shadow, #000);
                 }
-                .scr-btn-check:disabled { opacity: 0.4; box-shadow: 0 4px 0 #555; }
+                .scr-btn-check:disabled { opacity: 0.4; box-shadow: 0 4px 0 var(--color-shadow, #555); }
                 .scr-btn-check:active:not(:disabled) { transform: translateY(3px); box-shadow: none; }
                 .scr-btn-correct {
                     background: #10B981; color: white; border: none; box-shadow: 0 4px 0 #059669;
@@ -607,8 +619,8 @@ const SentenceScramble: React.FC = () => {
                     filter: drop-shadow(0 6px 20px rgba(0,0,0,0.15));
                 }
                 .mascot-cheer-bubble {
-                    background: #111827;
-                    color: #FACC15;
+                    background: var(--color-border);
+                    color: var(--venda-yellow, #FACC15);
                     font-size: 14px;
                     font-weight: 800;
                     font-family: var(--game-font-family);
@@ -616,7 +628,7 @@ const SentenceScramble: React.FC = () => {
                     border-radius: 20px;
                     margin-bottom: 6px;
                     white-space: nowrap;
-                    box-shadow: 0 4px 16px rgba(250, 204, 21, 0.25);
+                    box-shadow: 0 4px 16px var(--color-shadow);
                     position: relative;
                 }
                 .mascot-cheer-bubble::after {
@@ -628,7 +640,7 @@ const SentenceScramble: React.FC = () => {
                     width: 0; height: 0;
                     border-left: 6px solid transparent;
                     border-right: 6px solid transparent;
-                    border-top: 6px solid #111827;
+                    border-top: 6px solid var(--color-border);
                 }
             `}</style>
         </div>

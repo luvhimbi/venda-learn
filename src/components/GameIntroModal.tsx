@@ -136,7 +136,7 @@ const GameIntroModal: React.FC<GameIntroModalProps> = ({
                 .gim-overlay {
                     position: fixed;
                     inset: 0;
-                    background: #111827;
+                    background: var(--color-bg, #111827);
                     z-index: 2000;
                     display: flex;
                     flex-direction: column;
@@ -166,9 +166,9 @@ const GameIntroModal: React.FC<GameIntroModalProps> = ({
                     position: relative;
                 }
                 .gim-skip-btn {
-                    background: rgba(255,255,255,0.1);
-                    border: 2px solid rgba(255,255,255,0.2);
-                    color: rgba(255,255,255,0.6);
+                    background: rgba(var(--color-text-rgb, 255, 255, 255), 0.1);
+                    border: 2px solid rgba(var(--color-text-rgb, 255, 255, 255), 0.2);
+                    color: var(--color-text-muted, rgba(255,255,255,0.6));
                     font-weight: 700;
                     font-size: 13px;
                     padding: 6px 16px;
@@ -179,8 +179,8 @@ const GameIntroModal: React.FC<GameIntroModalProps> = ({
                     font-family: var(--game-font-family, inherit);
                 }
                 .gim-skip-btn:active {
-                    background: rgba(255,255,255,0.2);
-                    color: white;
+                    background: rgba(var(--color-text-rgb, 15, 23, 42), 0.2);
+                    color: var(--color-text);
                 }
                 .gim-mascot-wrap {
                     position: absolute;
@@ -204,12 +204,12 @@ const GameIntroModal: React.FC<GameIntroModalProps> = ({
                     display: flex;
                     align-items: center;
                     justify-content: center;
-                    border: 3px solid #111827;
-                    box-shadow: 4px 4px 0 rgba(0,0,0,0.3);
+                    border: 3px solid var(--color-border, #111827);
+                    box-shadow: 4px 4px 0 var(--color-shadow, rgba(0,0,0,0.3));
                     margin-bottom: 12px;
                 }
                 .gim-game-title {
-                    color: #ffffff;
+                    color: var(--color-text, #ffffff);
                     font-weight: 900;
                     font-size: clamp(1.4rem, 5vw, 1.8rem);
                     letter-spacing: -0.5px;
@@ -218,7 +218,7 @@ const GameIntroModal: React.FC<GameIntroModalProps> = ({
                     font-family: var(--game-font-family, inherit);
                 }
                 .gim-how-label {
-                    color: #FACC15;
+                    color: var(--venda-yellow, #FACC15);
                     font-weight: 800;
                     font-size: 11px;
                     letter-spacing: 3px;
@@ -228,9 +228,9 @@ const GameIntroModal: React.FC<GameIntroModalProps> = ({
 
                 /* STEP CARD */
                 .gim-step-card {
-                    background: #ffffff;
-                    border: 4px solid #111827;
-                    box-shadow: 6px 6px 0 rgba(0,0,0,0.4);
+                    background: var(--color-card-bg, #ffffff);
+                    border: 4px solid var(--color-border, #111827);
+                    box-shadow: 6px 6px 0 var(--color-shadow, rgba(0,0,0,0.4));
                     width: 100%;
                     padding: 24px 20px 28px;
                     display: flex;
@@ -255,8 +255,8 @@ const GameIntroModal: React.FC<GameIntroModalProps> = ({
                 .gim-step-pip {
                     width: 32px;
                     height: 6px;
-                    border: 1.5px solid #d1d5db;
-                    background: #e5e7eb;
+                    border: 1.5px solid var(--color-border-soft, #d1d5db);
+                    background: var(--color-surface-soft, #e5e7eb);
                     transition: all 0.3s;
                 }
                 .gim-pip-active {
@@ -269,29 +269,30 @@ const GameIntroModal: React.FC<GameIntroModalProps> = ({
                 .gim-step-icon-box {
                     width: 72px;
                     height: 72px;
-                    background: #f9fafb;
-                    border: 3px solid #e5e7eb;
+                    background: var(--color-surface-soft, #f9fafb);
+                    border: 3px solid var(--color-border-soft, #e5e7eb);
                     display: flex;
                     align-items: center;
                     justify-content: center;
                     margin-bottom: 16px;
                     border-radius: 50%;
                     transition: border-color 0.3s;
+                    color: var(--color-text);
                 }
                 .gim-step-num-badge {
                     font-weight: 900;
                     font-size: 11px;
                     letter-spacing: 2px;
-                    color: #111827;
+                    color: var(--color-text-inv, #111827);
                     padding: 4px 14px;
                     margin-bottom: 10px;
                     font-family: var(--game-font-family, inherit);
-                    border: 2px solid #111827;
+                    border: 2px solid var(--color-border, #111827);
                 }
                 .gim-step-title {
                     font-weight: 900;
                     font-size: clamp(1.1rem, 4vw, 1.3rem);
-                    color: #111827;
+                    color: var(--color-text, #111827);
                     margin: 0 0 8px;
                     text-transform: uppercase;
                     letter-spacing: 0.5px;
@@ -300,7 +301,7 @@ const GameIntroModal: React.FC<GameIntroModalProps> = ({
                 .gim-step-desc {
                     font-weight: 500;
                     font-size: clamp(0.85rem, 3.5vw, 0.95rem);
-                    color: #6b7280;
+                    color: var(--color-text-muted, #6b7280);
                     margin: 0;
                     line-height: 1.6;
                     max-width: 300px;
@@ -314,8 +315,8 @@ const GameIntroModal: React.FC<GameIntroModalProps> = ({
                 }
                 .gim-next-btn {
                     width: 100%;
-                    border: 3px solid #111827;
-                    color: #111827;
+                    border: 3px solid var(--color-border, #111827);
+                    color: var(--color-text-inv, #111827);
                     font-weight: 900;
                     font-size: 1rem;
                     padding: 16px 24px;
@@ -328,11 +329,11 @@ const GameIntroModal: React.FC<GameIntroModalProps> = ({
                     font-family: var(--game-font-family, inherit);
                     text-transform: uppercase;
                     letter-spacing: 1px;
-                    box-shadow: 4px 4px 0 #111827;
+                    box-shadow: 4px 4px 0 var(--color-border, #111827);
                 }
                 .gim-next-btn:active {
                     transform: translateY(3px);
-                    box-shadow: 1px 1px 0 #111827;
+                    box-shadow: 1px 1px 0 var(--color-border, #111827);
                 }
             `}</style>
         </div>

@@ -153,7 +153,7 @@ const WordBomb: React.FC = () => {
                 }
 
                 if (words && Array.isArray(words)) {
-                    const filtered = words.filter((w: any) => !activeLang || w.languageId === activeLang.id || (!w.languageId && activeLang.name.toLowerCase().includes('venda')));
+                    const filtered = words.filter((w: any) => !activeLang || w.languageId === activeLang.id || !w.languageId);
                     setAllWords(filtered as WordBombWord[]);
                     setGameStatus('ready');
                 }
@@ -440,7 +440,7 @@ const WordBomb: React.FC = () => {
 
     if (gameStatus === 'loading') {
         return (
-            <div className="min-vh-100 d-flex justify-content-center align-items-center bg-white">
+            <div className="min-vh-100 d-flex justify-content-center align-items-center bg-theme-base">
                 <Loader2 className="animate-spin text-warning" size={48} />
             </div>
         );
@@ -448,8 +448,8 @@ const WordBomb: React.FC = () => {
 
     if (gameStatus === 'ready') {
         return (
-            <div className="flex-grow-1 d-flex flex-column align-items-center justify-content-center p-4" style={{ backgroundColor: '#ffffff', minHeight: '80vh' }}>
-                <button onClick={() => navigate('/mitambo')} className="btn btn-link text-decoration-none p-0 text-dark position-absolute top-0 start-0 m-4">
+            <div className="flex-grow-1 d-flex flex-column align-items-center justify-content-center p-4 bg-theme-base" style={{ minHeight: '80vh' }}>
+                <button onClick={() => navigate('/mitambo')} className="btn btn-link text-decoration-none p-0 text-theme-main position-absolute top-0 start-0 m-4">
                     <ArrowLeft size={24} />
                 </button>
 
@@ -471,8 +471,8 @@ const WordBomb: React.FC = () => {
                     <div className="brutalist-card bg-warning p-4 mb-4 shadow-action-sm">
                         <Bomb size={48} strokeWidth={3} className="text-dark wb-pulse" />
                     </div>
-                    <h1 className="fw-black mb-2 text-dark uppercase ls-tight display-5">WORD BOMB</h1>
-                    <p className="fw-bold text-muted uppercase smallest ls-1">Master {preferredLanguage?.name || 'Local'} vocabulary at speed</p>
+                    <h1 className="fw-black mb-2 text-theme-main uppercase ls-tight display-5">WORD BOMB</h1>
+                    <p className="fw-bold text-theme-muted uppercase smallest ls-1">Master {preferredLanguage?.name || 'Local'} vocabulary at speed</p>
                 </div>
 
                 <div className="d-flex flex-column gap-3 w-100 mt-4 px-3" style={{ maxWidth: '400px' }}>
@@ -495,11 +495,11 @@ const WordBomb: React.FC = () => {
 
     if (gameStatus === 'over') {
         return (
-            <div className="min-vh-100 d-flex flex-column align-items-center justify-content-center p-4" style={{ backgroundColor: '#ffffff' }}>
+            <div className="min-vh-100 d-flex flex-column align-items-center justify-content-center p-4 bg-theme-base">
                 <div className="text-center mb-5 d-flex flex-column align-items-center">
                     <Mascot width="160px" height="160px" mood="sad" className="mb-4" />
-                    <h1 className="display-4 fw-bold mb-2 text-dark">Game Over!</h1>
-                    <p className="lead text-muted mb-4">You scored {score} points</p>
+                    <h1 className="display-4 fw-bold mb-2 text-theme-main">Game Over!</h1>
+                    <p className="lead text-theme-muted mb-4">You scored {score} points</p>
                     <div className="display-1 fw-bold text-warning mb-5">{score}</div>
                 </div>
 
@@ -518,7 +518,7 @@ const WordBomb: React.FC = () => {
                     </button>
                     <button
                         onClick={() => navigate('/mitambo')}
-                        className="btn btn-outline-dark w-100 p-4 rounded-4 fw-bold"
+                        className="btn btn-outline-theme w-100 p-4 rounded-4 fw-bold"
                     >
                         QUIT GAME
                     </button>
@@ -640,11 +640,11 @@ const WordBomb: React.FC = () => {
                         </div>
                     </div>
                 ) : (
-                    <form id="wb-input-zone" onSubmit={handleSubmit} className="wb-input-bar d-flex gap-3 p-4 bg-white border-top border-dark border-4 shadow-action-sm">
+                    <form id="wb-input-zone" onSubmit={handleSubmit} className="wb-input-bar d-flex gap-3 p-4 bg-theme-base border-top border-theme-main border-4 shadow-action-sm">
                         <input
                             ref={inputRef}
                             type="text"
-                            className="brutalist-card flex-grow-1 p-3 fw-black uppercase ls-1"
+                            className="brutalist-card bg-theme-card text-theme-main flex-grow-1 p-3 fw-black uppercase ls-1"
                             placeholder={`TYPE THE ${preferredLanguage?.name || 'TARGET'} WORD...`}
                             value={userInput}
                             onChange={handleInputChange}
@@ -662,7 +662,7 @@ const WordBomb: React.FC = () => {
 
             <style>{`
                 .wb-bg {
-                    background: #ffffff;
+                    background: var(--color-bg);
                     position: relative;
                     cursor: text;
                     height: 100vh;
@@ -682,14 +682,14 @@ const WordBomb: React.FC = () => {
                 }
                 .wb-word-text {
                     display: inline-block;
-                    background: #ffffff;
-                    border: 4px solid #111827;
-                    color: #111827;
+                    background: var(--color-card-bg);
+                    border: 4px solid var(--color-border);
+                    color: var(--color-text);
                     font-weight: 900;
                     padding: clamp(8px, 2vw, 12px) clamp(16px, 4vw, 32px);
                     border-radius: 0;
                     font-size: clamp(0.9rem, 3.5vw, 1.25rem);
-                    box-shadow: 4px 4px 0 #111827;
+                    box-shadow: 4px 4px 0 var(--color-border);
                     text-transform: uppercase;
                     letter-spacing: 1px;
                 }
@@ -723,16 +723,16 @@ const WordBomb: React.FC = () => {
                     box-shadow: 0 0 20px rgba(239,68,68,0.2);
                 }
                 .wb-input-bar {
-                    background: #ffffff;
-                    border-top: 1px solid rgba(0,0,0,0.1);
+                    background: var(--color-bg);
+                    border-top: 1px solid var(--color-border-soft);
                     z-index: 100;
                     padding: clamp(10px, 3vw, 20px) !important;
                 }
                 .smallest { font-size: 11px; }
                 .ls-1 { letter-spacing: 1px; }
                 .wb-palette-bar {
-                    background: #ffffff;
-                    border-top: 1px solid rgba(0,0,0,0.1);
+                    background: var(--color-bg);
+                    border-top: 1px solid var(--color-border-soft);
                     padding: 8px 6px;
                     z-index: 100;
                     position: relative;
@@ -747,9 +747,9 @@ const WordBomb: React.FC = () => {
                     padding: 4px;
                 }
                 .wb-palette-btn {
-                    background: #111827;
-                    border: 3px solid #000;
-                    color: #FACC15 !important;
+                    background: var(--color-border);
+                    border: 3px solid var(--color-border);
+                    color: var(--color-text-inv) !important;
                     border-radius: 0;
                     padding: 10px 14px;
                     font-size: 0.95rem;
@@ -758,7 +758,7 @@ const WordBomb: React.FC = () => {
                     min-height: 54px;
                     min-width: 90px;
                     transition: all 0.2s;
-                    box-shadow: 4px 4px 0 #FACC15;
+                    box-shadow: 4px 4px 0 var(--venda-yellow, #FACC15);
                     display: flex;
                     align-items: center;
                     justify-content: center;
@@ -767,9 +767,9 @@ const WordBomb: React.FC = () => {
                     line-height: 1.1;
                 }
                 .wb-palette-btn:hover {
-                    background: #1F2937;
+                    opacity: 0.9;
                     transform: translateY(-2px);
-                    box-shadow: 6px 6px 0 #FACC15;
+                    box-shadow: 6px 6px 0 var(--venda-yellow, #FACC15);
                 }
                 .wb-palette-btn:active {
                     transform: translateY(2px);

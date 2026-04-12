@@ -14,8 +14,8 @@
 @import './styles/gamification-design-system.css';
 
 body {
-    background-color: var(--game-bg);
-    color: var(--game-text);
+    background-color: var(--color-bg);
+    color: var(--color-text);
     font-family: var(--game-font);
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
@@ -34,13 +34,14 @@ body {
    BOOTSTRAP CARD OVERRIDES
    ============================================ */
 .card {
-    background: var(--game-surface);
-    border: 2px solid rgba(255, 255, 255, 0.05) !important;
+    background: var(--color-surface);
+    border: 2px solid var(--color-border-soft) !important;
     border-radius: var(--game-radius) !important;
     box-shadow: 0 4px 0 rgba(0, 0, 0, 0.2) !important;
     transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
     overflow: hidden;
     position: relative;
+    color: var(--color-text);
 }
 
 .card:hover {
@@ -75,10 +76,10 @@ body {
 .form-select {
     padding: 0.75rem 1rem !important;
     font-size: 0.875rem;
-    background: var(--game-surface) !important;
-    border: 2px solid #334155 !important;
+    background: var(--color-surface) !important;
+    border: 2px solid var(--color-border-soft) !important;
     border-radius: var(--game-radius) !important;
-    color: var(--game-text) !important;
+    color: var(--color-text) !important;
     transition: all 0.2s !important;
 }
 

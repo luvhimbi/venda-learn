@@ -513,7 +513,7 @@ const Morabaraba: React.FC = () => {
     };
 
     return (
-        <div className="min-vh-100 py-3 position-relative overflow-hidden" style={{ backgroundColor: '#ffffff', backgroundImage: 'url("data:image/svg+xml,%3Csvg width=\'20\' height=\'20\' viewBox=\'0 0 20 20\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cg fill=\'%23000000\' fill-opacity=\'0.02\' fill-rule=\'evenodd\'%3E%3Ccircle cx=\'3\' cy=\'3\' r=\'1\'/%3E%3C/g%3E%3C/svg%3E")' }}>
+        <div className="min-vh-100 py-3 position-relative overflow-hidden" style={{ backgroundColor: 'var(--color-bg)', backgroundImage: 'url("data:image/svg+xml,%3Csvg width=\'20\' height=\'20\' viewBox=\'0 0 20 20\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cg fill=\'%23000000\' fill-opacity=\'0.02\' fill-rule=\'evenodd\'%3E%3Ccircle cx=\'3\' cy=\'3\' r=\'1\'/%3E%3C/g%3E%3C/svg%3E")' }}>
             
             {/* RESULT MODAL */}
             <GameResultModal
@@ -555,12 +555,12 @@ const Morabaraba: React.FC = () => {
                     >
                         <motion.div 
                             initial={{ scale: 0.9, y: 20 }} animate={{ scale: 1, y: 0 }}
-                            className="brutalist-card bg-white p-4 w-100 shadow-action"
+                            className="brutalist-card bg-theme-surface border border-4 border-theme-main p-4 w-100 shadow-action text-theme-main"
                             style={{ maxWidth: '500px' }}
                         >
                             <div className="d-flex justify-content-between align-items-center mb-4">
                                 <h3 className="fw-black mb-0 ls-tight">CUSTOMIZE GAME</h3>
-                                <button onClick={() => setShowThemePicker(false)} className="btn-close"></button>
+                                <button onClick={() => setShowThemePicker(false)} className="btn-close" style={{ filter: 'var(--close-btn-filter, none)' }}></button>
                             </div>
                             
                             <div className="row g-3">
@@ -568,11 +568,11 @@ const Morabaraba: React.FC = () => {
                                     <div key={theme.id} className="col-12">
                                         <button 
                                             onClick={() => { setCurrentTheme(theme); setShowThemePicker(false); }}
-                                            className={`w-100 text-start brutalist-card p-3 transition-all d-flex align-items-center justify-content-between ${currentTheme.id === theme.id ? 'border-primary bg-light shadow-action-sm' : 'border-dark'}`}
+                                            className={`w-100 text-start brutalist-card text-theme-main p-3 transition-all d-flex align-items-center justify-content-between ${currentTheme.id === theme.id ? 'border-primary bg-theme-base shadow-action-sm' : 'border-theme-main'}`}
                                             style={{ borderWidth: '3px' }}
                                         >
                                             <div className="d-flex align-items-center gap-3">
-                                                <div className="rounded-2 border border-2 border-dark" style={{ width: 40, height: 40, backgroundColor: theme.boardBg }}></div>
+                                                <div className="rounded-2 border border-2 border-theme-main" style={{ width: 40, height: 40, backgroundColor: theme.boardBg }}></div>
                                                 <div>
                                                     <h6 className="fw-black mb-0 smallest uppercase">{theme.name}</h6>
                                                     <div className="d-flex gap-1 mt-1">
@@ -597,22 +597,22 @@ const Morabaraba: React.FC = () => {
 
             <div className="container" style={{ maxWidth: '800px' }}>
                 {/* HEADER */}
-                <div className="d-flex justify-content-between align-items-center mb-4 px-2">
-                    <button onClick={() => setShowExitConfirm(true)} className="btn-game btn-game-white rounded-circle d-flex align-items-center justify-content-center" style={{ width: 44, height: 44, padding: 0 }}>
+                <div className="d-flex justify-content-between align-items-center mb-4 px-2 text-theme-main">
+                    <button onClick={() => setShowExitConfirm(true)} className="btn-game bg-theme-surface text-theme-main border border-2 border-theme-main rounded-circle d-flex align-items-center justify-content-center" style={{ width: 44, height: 44, padding: 0 }}>
                         <ArrowLeft size={24} strokeWidth={3} />
                     </button>
                     <div className="text-center">
-                        <span className="smallest fw-black text-muted uppercase ls-1 mb-0 d-block">Strategy Quest</span>
-                        <h2 className="fw-black mb-0 text-dark ls-tight" style={{ fontSize: '1.5rem' }}>MORABARABA</h2>
+                        <span className="smallest fw-black text-theme-muted uppercase ls-1 mb-0 d-block">Strategy Quest</span>
+                        <h2 className="fw-black mb-0 ls-tight" style={{ fontSize: '1.5rem' }}>MORABARABA</h2>
                     </div>
                     <div className="d-flex align-items-center gap-2">
-                        <button onClick={() => setShowThemePicker(true)} className="btn-game btn-game-white rounded-circle d-flex align-items-center justify-content-center" style={{ width: 44, height: 44, padding: 0 }}>
-                            <Palette size={22} className="text-dark" strokeWidth={3} />
+                        <button onClick={() => setShowThemePicker(true)} className="btn-game bg-theme-surface text-theme-main border border-2 border-theme-main rounded-circle d-flex align-items-center justify-content-center" style={{ width: 44, height: 44, padding: 0 }}>
+                            <Palette size={22} className="text-theme-main" strokeWidth={3} />
                         </button>
-                        <button onClick={() => setIsVsAI(!isVsAI)} className={`btn-game ${isVsAI ? 'btn-game-primary' : 'btn-game-white'} rounded-pill px-3 py-1 smallest fw-black uppercase`}>
+                        <button onClick={() => setIsVsAI(!isVsAI)} className={`btn-game ${isVsAI ? 'btn-game-primary' : 'bg-theme-surface text-theme-main border border-2 border-theme-main'} rounded-pill px-3 py-1 smallest fw-black uppercase`}>
                             {isVsAI ? 'CPU' : 'PVP'}
                         </button>
-                        <button onClick={() => { resetIntroSeen('morabaraba'); setShowIntro(true); }} className="btn-game btn-game-white rounded-circle d-flex align-items-center justify-content-center" style={{ width: 36, height: 36, padding: 0 }}>
+                        <button onClick={() => { resetIntroSeen('morabaraba'); setShowIntro(true); }} className="btn-game bg-theme-surface text-theme-main border border-2 border-theme-main rounded-circle d-flex align-items-center justify-content-center" style={{ width: 36, height: 36, padding: 0 }}>
                             <HelpCircle size={18} strokeWidth={3} />
                         </button>
                     </div>
@@ -621,15 +621,15 @@ const Morabaraba: React.FC = () => {
                 <div className="row g-4 justify-content-center">
                     {/* PLAYER 1 INFO - Side-by-side on mobile */}
                     <div className="col-6 col-lg-3 order-1 order-lg-3 d-flex flex-column">
-                        <div className={`brutalist-card p-2 p-md-3 mb-3 transition-all h-100 ${turn === 1 ? 'border-warning shadow-action-sm' : 'opacity-75'}`} style={{ borderWidth: turn === 1 ? '4px' : '2px' }}>
+                        <div className={`brutalist-card bg-theme-surface p-2 p-md-3 mb-3 transition-all h-100 ${turn === 1 ? 'border-theme-main shadow-action-sm' : 'opacity-75'}`} style={{ borderWidth: turn === 1 ? '4px' : '2px', borderColor: turn === 1 ? 'var(--venda-yellow)' : 'var(--color-border)' }}>
                             <div className="d-flex align-items-center gap-2 mb-1 mb-md-2">
-                                <div className="p-1 p-md-2 bg-warning bg-opacity-10 rounded-circle border border-2 border-dark d-none d-md-inline-block">
-                                    <User size={16} className="text-dark" strokeWidth={3} />
+                                <div className="p-1 p-md-2 bg-warning bg-opacity-10 rounded-circle border border-2 border-theme-main d-none d-md-inline-block">
+                                    <User size={16} className="text-theme-main" strokeWidth={3} />
                                 </div>
-                                <h5 className="fw-black mb-0 text-dark" style={{ fontSize: '0.85rem' }}>YOU (P1)</h5>
+                                <h5 className="fw-black mb-0 text-theme-main" style={{ fontSize: '0.85rem' }}>YOU (P1)</h5>
                             </div>
                             
-                            <div className="d-flex flex-column fw-bold text-dark uppercase gap-0" style={{ fontSize: '0.75rem', opacity: 0.8 }}>
+                            <div className="d-flex flex-column fw-bold text-theme-main uppercase gap-0" style={{ fontSize: '0.75rem', opacity: 0.8 }}>
                                 <span>Cows: <span>{getCowsOnBoard(1)}</span></span>
                                 <span>Stock: <span>{placingCount[1]}</span></span>
                             </div>
@@ -788,15 +788,15 @@ const Morabaraba: React.FC = () => {
 
                     {/* PLAYER 2 / AI INFO - Side-by-side on mobile */}
                     <div className="col-6 col-lg-3 order-2 order-lg-1 d-flex flex-column">
-                         <div className={`brutalist-card p-2 p-md-3 mb-3 transition-all h-100 ${turn === 2 ? 'border-primary shadow-action-sm' : 'opacity-75'}`} style={{ borderWidth: turn === 2 ? '4px' : '2px', borderColor: '#1e293b' }}>
+                         <div className={`brutalist-card bg-theme-surface p-2 p-md-3 mb-3 transition-all h-100 ${turn === 2 ? 'border-theme-main shadow-action-sm' : 'opacity-75'}`} style={{ borderWidth: turn === 2 ? '4px' : '2px', borderColor: turn === 2 ? 'var(--color-text)' : 'var(--color-border)' }}>
                             <div className="d-flex align-items-center gap-2 mb-1 mb-md-2">
-                                <div className="p-1 p-md-2 bg-secondary bg-opacity-10 rounded-circle border border-2 border-dark d-none d-md-inline-block">
-                                    {isVsAI ? <Monitor size={16} className="text-dark" strokeWidth={3} /> : <User size={16} className="text-dark" strokeWidth={3} />}
+                                <div className="p-1 p-md-2 bg-secondary bg-opacity-10 rounded-circle border border-2 border-theme-main d-none d-md-inline-block">
+                                    {isVsAI ? <Monitor size={16} className="text-theme-main" strokeWidth={3} /> : <User size={16} className="text-theme-main" strokeWidth={3} />}
                                 </div>
-                                <h5 className="fw-black mb-0 text-dark" style={{ fontSize: '0.85rem' }}>{isVsAI ? 'CPU' : 'P2'}</h5>
+                                <h5 className="fw-black mb-0 text-theme-main" style={{ fontSize: '0.85rem' }}>{isVsAI ? 'CPU' : 'P2'}</h5>
                             </div>
 
-                            <div className="d-flex flex-column fw-bold text-dark uppercase gap-0" style={{ fontSize: '0.75rem', opacity: 0.8 }}>
+                            <div className="d-flex flex-column fw-bold text-theme-main uppercase gap-0" style={{ fontSize: '0.75rem', opacity: 0.8 }}>
                                 <span>Cows: <span>{getCowsOnBoard(2)}</span></span>
                                 <span>Stock: <span>{placingCount[2]}</span></span>
                             </div>
@@ -806,7 +806,7 @@ const Morabaraba: React.FC = () => {
                             </div>
 
                             <div className="mt-auto pt-2">
-                                {turn === 2 && !shootMode && <span className="badge bg-dark text-white fw-black smallest animate__animated animate__flash animate__infinite px-1">{isVsAI ? 'THINK' : 'TURN'}</span>}
+                                {turn === 2 && !shootMode && <span className="badge bg-theme-main text-theme-base fw-black smallest animate__animated animate__flash animate__infinite px-1">{isVsAI ? 'THINK' : 'TURN'}</span>}
                                 {turn === 2 && shootMode && <span className="badge bg-danger text-white fw-black smallest animate__animated animate__pulse animate__infinite px-1">SHOOT</span>}
                             </div>
                         </div>
@@ -814,10 +814,10 @@ const Morabaraba: React.FC = () => {
                 </div>
 
                 {/* QUICK TIPS - Hidden on very small screens or made into a footer */}
-                <div className="d-none d-md-block mt-4">
-                    <div className="brutalist-card p-3 bg-light smallest shadow-action-sm">
-                        <h6 className="fw-black uppercase mb-2">QUICK TIPS</h6>
-                        <ul className="ps-3 mb-0 fw-bold text-muted d-flex gap-4 list-unstyled">
+                <div className="d-none d-md-block mt-4 text-theme-main">
+                    <div className="brutalist-card p-3 bg-theme-surface smallest shadow-action-sm">
+                        <h6 className="fw-black uppercase mb-2 text-theme-main">QUICK TIPS</h6>
+                        <ul className="ps-3 mb-0 fw-bold text-theme-muted d-flex gap-4 list-unstyled">
                             <li><strong>Placing:</strong> Block your opponent early!</li>
                             <li><strong>Moving:</strong> Keep mills flexible.</li>
                             <li><strong>Flying:</strong> Move anywhere with 3 cows.</li>
