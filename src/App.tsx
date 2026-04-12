@@ -58,6 +58,7 @@ import AdminReviews from "./Pages/Admin/AdminReviews";
 import NotFound from "./Pages/NotFound";
 import AboutUs from "./Pages/AboutUs";
 import WordCards from "./Pages/Learning/WordCards";
+import StreakDetails from "./Pages/Auth/StreakDetails";
 import { auth, messaging } from './services/firebaseConfig';
 import { onAuthStateChanged } from 'firebase/auth';
 import { onMessage } from 'firebase/messaging';
@@ -165,6 +166,7 @@ const AppContent: React.FC = () => {
                         <Route path="/achievements" element={<Achievements />} />
                         <Route path="/about" element={<AboutUs />} />
                         <Route path="/word-cards" element={<WordCards />} />
+                        <Route path="/streak" element={<StreakDetails />} />
 
                         {/* Protected Admin Routes */}
                         <Route

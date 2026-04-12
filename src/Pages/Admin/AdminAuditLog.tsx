@@ -49,18 +49,18 @@ const AdminAuditLog: React.FC = () => {
     };
 
     return (
-        <div className="min-vh-100 pb-5 bg-light">
+        <div className="min-vh-100 pb-5 bg-theme-base">
             <AdminNavbar />
 
             {/* HEADER */}
-            <div className="py-5 bg-white border-bottom shadow-sm">
+            <div className="py-5 bg-theme-surface border-bottom shadow-sm">
                 <div className="container" style={{ maxWidth: '1100px' }}>
                     <div className="px-3">
-                        <span className="shumela-venda-pulse fw-bold ls-2 text-uppercase smallest d-block mb-2 text-warning">
+                        <span className="shumela-venda-pulse fw-bold ls-1 text-uppercase smallest d-block mb-2 text-warning-custom">
                             Security & History
                         </span>
-                        <h1 className="fw-bold ls-tight mb-0 text-dark" style={{ fontSize: '2.5rem' }}>
-                            Audit <span style={{ color: '#FACC15' }}>Logs</span>
+                        <h1 className="fw-bold ls-tight mb-0 text-theme-main" style={{ fontSize: '2.5rem' }}>
+                            Audit <span className="text-warning-custom">Logs</span>
                         </h1>
                     </div>
                 </div>
@@ -70,31 +70,35 @@ const AdminAuditLog: React.FC = () => {
                 {loading ? (
                     <div className="text-center py-5">
                         <Loader2 className="animate-spin text-warning mx-auto mb-3" size={48} />
-                        <p className="ls-1 smallest fw-bold text-muted">RETRIEVING ACTIVITY HISTORY...</p>
+                        <p className="ls-1 smallest fw-bold text-theme-muted">RETRIEVING ACTIVITY HISTORY...</p>
                     </div>
                 ) : (
                     <>
                         <div className="row g-3 px-2">
                             {currentLogs.length > 0 ? currentLogs.map((log) => (
                                 <div key={log.id} className="col-12">
-                                    <div className="bg-white p-4 rounded-4 border shadow-sm position-relative overflow-hidden">
+                                    <div className="card-premium p-4 position-relative overflow-hidden lesson-card-admin">
                                         <div className="row align-items-center">
                                             <div className="col-md-2">
                                                 <span
-                                                    className="badge w-100 py-2 fw-bold ls-1 smallest text-uppercase"
-                                                    style={{ backgroundColor: getActionColor(log.action), color: log.action === 'sync' ? '#000' : '#fff' }}
+                                                    className="badge w-100 py-2 fw-bold ls-1 smallest text-uppercase shadow-sm"
+                                                    style={{ 
+                                                        backgroundColor: getActionColor(log.action), 
+                                                        color: log.action === 'sync' || log.action === 'update' ? '#000' : '#fff',
+                                                        borderRadius: '8px'
+                                                    }}
                                                 >
                                                     {log.action}
                                                 </span>
                                             </div>
                                             <div className="col-md-7 mt-3 mt-md-0">
-                                                <h6 className="fw-bold mb-1 text-dark">{log.details || 'No additional details provided.'}</h6>
-                                                <p className="text-muted smallest fw-bold ls-1 mb-0 text-uppercase">
-                                                    Admin: <span className="text-dark">{log.adminEmail || 'System'}</span> • ID: {log.targetId || 'N/A'}
+                                                <h6 className="fw-bold mb-1 text-theme-main">{log.details || 'No additional details provided.'}</h6>
+                                                <p className="text-theme-muted smallest fw-bold ls-1 mb-0 text-uppercase">
+                                                    Admin: <span className="text-theme-main">{log.adminEmail || 'System'}</span> • ID: {log.targetId || 'N/A'}
                                                 </p>
                                             </div>
                                             <div className="col-md-3 text-md-end mt-2 mt-md-0">
-                                                <span className="smallest fw-bold text-muted ls-1 d-flex align-items-center justify-content-md-end gap-1">
+                                                <span className="smallest fw-bold text-theme-muted ls-1 d-flex align-items-center justify-content-md-end gap-1">
                                                     <Clock size={12} />
                                                     {log.formattedDate}
                                                 </span>
@@ -104,8 +108,8 @@ const AdminAuditLog: React.FC = () => {
                                     </div>
                                 </div>
                             )) : (
-                                <div className="text-center py-5 bg-white rounded-4 border">
-                                    <p className="text-muted ls-1 fw-bold">No activity logs found in the database.</p>
+                                <div className="text-center py-5 bg-theme-surface rounded-4 border shadow-sm">
+                                    <p className="text-theme-muted ls-1 fw-bold">No activity logs found in the database.</p>
                                 </div>
                             )}
                         </div>
@@ -114,7 +118,7 @@ const AdminAuditLog: React.FC = () => {
                         {totalPages > 1 && (
                             <div className="d-flex justify-content-center mt-5 gap-2">
                                 <button
-                                    className="btn btn-white border shadow-sm btn-sm px-3 fw-bold ls-1 smallest"
+                                    className="btn-pagination"
                                     disabled={currentPage === 1}
                                     onClick={() => setCurrentPage(currentPage - 1)}
                                 >
@@ -123,14 +127,14 @@ const AdminAuditLog: React.FC = () => {
                                 {[...Array(totalPages)].map((_, i) => (
                                     <button
                                         key={i}
-                                        className={`btn btn-sm px-3 fw-bold smallest ${currentPage === i + 1 ? 'btn-warning text-dark' : 'btn-white border'}`}
+                                        className={`btn-pagination ${currentPage === i + 1 ? 'active' : ''}`}
                                         onClick={() => setCurrentPage(i + 1)}
                                     >
                                         {i + 1}
                                     </button>
                                 ))}
                                 <button
-                                    className="btn btn-white border shadow-sm btn-sm px-3 fw-bold ls-1 smallest"
+                                    className="btn-pagination"
                                     disabled={currentPage === totalPages}
                                     onClick={() => setCurrentPage(currentPage + 1)}
                                 >
@@ -143,13 +147,39 @@ const AdminAuditLog: React.FC = () => {
             </div>
 
             <style>{`
-                .ls-tight { letter-spacing: -1px; }
-                .ls-1 { letter-spacing: 1px; }
-                .ls-2 { letter-spacing: 2px; }
-                .smallest { font-size: 10px; }
-                
+                .text-warning-custom { color: var(--venda-yellow-dark) !important; }
+                .card-premium {
+                    background-color: var(--color-surface);
+                    border: 1px solid var(--color-border);
+                    border-radius: 20px;
+                    box-shadow: var(--shadow-premium);
+                    transition: all 0.3s ease;
+                }
+                .lesson-card-admin:hover {
+                    transform: translateX(8px);
+                    border-color: var(--venda-yellow-dark);
+                }
+                .btn-pagination {
+                    background-color: var(--color-surface);
+                    color: var(--color-text-muted);
+                    border: 1px solid var(--color-border);
+                    padding: 8px 16px;
+                    font-weight: 700;
+                    font-size: 0.75rem;
+                    border-radius: 10px;
+                    transition: all 0.2s;
+                }
+                .btn-pagination.active {
+                    background-color: var(--venda-yellow);
+                    color: #000;
+                    border-color: var(--venda-yellow);
+                }
+                .btn-pagination:hover:not(:disabled) {
+                    background-color: var(--color-surface-soft);
+                    color: var(--color-text);
+                }
                 .shumela-venda-pulse { animation: pulseAdmin 3s infinite ease-in-out; }
-                @keyframes pulseAdmin { 0% { opacity: 0.7; } 50% { opacity: 1; } 100% { opacity: 0.7; } }
+                @keyframes pulseAdmin { 0% { opacity: 0.7; } 50% { opacity: 1; color: var(--venda-yellow-dark); } 100% { opacity: 0.7; } }
             `}</style>
         </div>
     );

@@ -1,19 +1,19 @@
 import React, { useEffect, useState } from 'react';
 import { db, auth } from '../../services/firebaseConfig';
-import { doc, getDoc, updateDoc, setDoc, increment } from 'firebase/firestore';
+import { doc, getDoc, updateDoc, setDoc } from 'firebase/firestore';
 import { onAuthStateChanged } from 'firebase/auth';
-import { Compass, LogOut, Camera, Share2, MoreVertical, Settings } from 'lucide-react';
+import { Compass, LogOut, Camera, Share2, MoreVertical, Settings, Trophy, Award } from 'lucide-react';
 import LogoutModal from '../../components/LogoutModal';
 import ShareProfileModal from '../../components/ShareProfileModal';
 import ShareStreakModal from '../../components/ShareStreakModal';
 import { AvatarDisplay } from '../../components/AvatarPicker';
-import StreakCalendar from '../../components/StreakCalendar';
 import AchievementCard from '../../components/AchievementCard';
 import { ALL_TROPHIES } from '../../services/achievementService';
-import { invalidateCache, refreshUserData, fetchUserData, fetchLearnedStats } from '../../services/dataCache';
+import { invalidateCache, fetchUserData } from '../../services/dataCache';
 import ReviewModal from '../../components/ReviewModal';
 import AvatarBuilder from '../../components/AvatarBuilder';
 import AvatarPicker from '../../components/AvatarPicker';
+import WeeklyActivityGraph from '../../components/WeeklyActivityGraph';
 
 import Swal from 'sweetalert2';
 import { useNavigate, Link } from "react-router-dom";
@@ -32,6 +32,7 @@ interface UserProfile {
     trophies?: string[];
     streakFreezes?: number;
     activityHistory?: string[];
+    dailyXP?: Record<string, number>;
     frozenDays?: string[];
     reminderEnabled?: boolean;
     reminderTime?: string;
@@ -59,10 +60,7 @@ const Profile: React.FC = () => {
     useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth, async (user) => {
             if (user) {
-                const [data] = await Promise.all([
-                    fetchUserData(),
-                    fetchLearnedStats()
-                ]);
+                const data = await fetchUserData();
 
                 if (data) {
                     const profile = data as UserProfile;
@@ -91,63 +89,6 @@ const Profile: React.FC = () => {
 
         return () => unsubscribe();
     }, []);
-
-    const handleBuyFreeze = async () => {
-        if (!userData) return;
-
-        if (userData.streak === 0) {
-            Swal.fire({
-                title: 'No Active Streak!',
-                text: 'You need an active streak to protect before you can buy a freeze.',
-                icon: 'info',
-                confirmButtonColor: '#FACC15',
-                customClass: { popup: 'rounded-4' }
-            });
-            return;
-        }
-
-        if (userData.points < 100) {
-            Swal.fire({
-                title: 'Insufficient XP!',
-                text: 'You need 100 XP points to buy a streak freeze.',
-                icon: 'warning',
-                confirmButtonColor: '#FACC15',
-                customClass: { popup: 'rounded-4' }
-            });
-            return;
-        }
-
-        try {
-            setUpdateLoading(true);
-            const userRef = doc(db, "users", auth.currentUser!.uid);
-            await updateDoc(userRef, {
-                points: increment(-100),
-                streakFreezes: increment(1)
-            });
-
-            setUserData((prev: UserProfile | null) => prev ? {
-                ...prev,
-                points: prev.points - 100,
-                streakFreezes: (prev.streakFreezes || 0) + 1
-            } : null);
-
-            invalidateCache(`user_${auth.currentUser!.uid}`);
-            refreshUserData();
-
-            Swal.fire({
-                title: 'Freeze Purchased!',
-                text: 'Your streak is now protected for one missed day.',
-                icon: 'success',
-                confirmButtonColor: '#FACC15',
-                customClass: { popup: 'rounded-4' }
-            });
-        } catch (err) {
-            console.error("Error buying freeze:", err);
-            Swal.fire('Error', 'Could not purchase freeze.', 'error');
-        } finally {
-            setUpdateLoading(false);
-        }
-    };
 
     const handleUpdate = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -393,17 +334,43 @@ const Profile: React.FC = () => {
                         </div>
                     </section>
 
-                    <div className="mt-4">
-                        <StreakCalendar
-                            activityHistory={userData?.activityHistory || []}
-                            frozenDays={userData?.frozenDays || []}
-                            streakFreezes={userData?.streakFreezes || 0}
-                            points={userData?.points || 0}
-                            streak={userData?.streak || 0}
-                            onBuyFreeze={handleBuyFreeze}
-                            onShareClick={() => setIsShareStreakOpen(true)}
-                        />
+                    <div className="row g-4 mt-2">
+                        <div className="col-12 col-md-7">
+                             <WeeklyActivityGraph dailyXP={userData?.dailyXP || {}} />
+                        </div>
+                        <div className="col-12 col-md-5">
+                            <div className="brutalist-card p-4 transition-all h-100 bg-theme-surface border-4" style={{ borderColor: 'var(--venda-yellow)' }}>
+                                <div className="d-flex align-items-center justify-content-between mb-4">
+                                    <h4 className="fw-black text-theme-main mb-0 uppercase ls-tight" style={{ fontSize: '1.25rem' }}>Weekly Tribe</h4>
+                                    <Trophy size={20} className="text-warning" />
+                                </div>
+
+                                <div className="text-center py-3">
+                                    {(userData?.weeklyXP || 0) > 0 ? (
+                                        <>
+                                            <div className="display-4 fw-black text-theme-main mb-1">{userData?.weeklyXP?.toLocaleString()}</div>
+                                            <p className="smallest fw-black text-theme-muted ls-2 uppercase">Points Earned This Week</p>
+                                            <div className="mt-4">
+                                                <button onClick={() => navigate('/muvhigo')} className="btn btn-game btn-game-primary w-100 py-3 fw-black smallest ls-1 uppercase shadow-action-sm">
+                                                    VIEW LEADERBOARD
+                                                </button>
+                                            </div>
+                                        </>
+                                    ) : (
+                                        <div className="py-2">
+                                            <Award size={48} className="mx-auto mb-3 text-theme-muted opacity-50" />
+                                            <p className="fw-bold text-theme-muted mb-4 px-3">You haven't earned points this week. Complete a lesson to see your rank!</p>
+                                            <button onClick={() => navigate('/courses')} className="btn btn-game btn-game-primary w-100 py-3 fw-black smallest ls-1 uppercase shadow-action-sm">
+                                                START LEARNING
+                                            </button>
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                        </div>
                     </div>
+
+
                 </div>
 
                 {/* MODALS */}

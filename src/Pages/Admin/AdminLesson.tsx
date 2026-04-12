@@ -168,30 +168,30 @@ const AdminLessons: React.FC = () => {
     };
 
     return (
-        <div className="min-vh-100 pb-5 bg-light">
+        <div className="min-vh-100 pb-5 bg-theme-base">
             <AdminNavbar />
 
-            <div className="py-5 bg-white border-bottom shadow-sm">
+            <div className="py-5 bg-theme-surface border-bottom shadow-sm">
                 <div className="container" style={{ maxWidth: '1100px' }}>
                     <div className="d-flex flex-column flex-md-row justify-content-between align-items-md-end px-3">
                         <div>
-                            <span className="shumela-venda-pulse fw-bold ls-2 text-uppercase smallest d-block mb-2 text-warning">
+                            <span className="shumela-venda-pulse fw-bold ls-1 text-uppercase smallest d-block mb-2 text-warning-custom">
                                 Admin Control
                             </span>
-                            <h1 className="fw-bold ls-tight mb-0 text-dark" style={{ fontSize: '2.5rem' }}>
-                                Manage <span style={{ color: '#FACC15' }}>Courses</span>
+                            <h1 className="fw-bold ls-tight mb-0 text-theme-main" style={{ fontSize: '2.5rem' }}>
+                                Manage <span className="text-warning-custom">Courses</span>
                             </h1>
                         </div>
                         <div className="mt-4 mt-md-0 d-flex gap-3">
                             <button
                                 onClick={handleSeedDatabase}
-                                className="btn btn-outline-dark fw-bold smallest ls-1 px-4 py-2 shadow-none border-2 d-flex align-items-center gap-2"
+                                className="btn-premium-action secondary d-flex align-items-center gap-2"
                             >
                                 <RefreshCw size={14} /> SYNC DATA
                             </button>
                             <Link
                                 to="/admin/add-lesson"
-                                className="btn game-btn-yellow fw-bold smallest ls-1 px-4 py-2 shadow-none d-flex align-items-center gap-2"
+                                className="btn-premium-action warning d-flex align-items-center gap-2 text-decoration-none"
                             >
                                 <Plus size={14} /> ADD COURSE
                             </Link>
@@ -204,58 +204,57 @@ const AdminLessons: React.FC = () => {
                 {loading ? (
                     <div className="text-center py-5">
                         <Loader2 className="animate-spin text-warning mx-auto mb-3" size={48} />
-                        <p className="ls-1 smallest fw-bold text-muted">FETCHING DATABASE...</p>
+                        <p className="ls-1 smallest fw-bold text-theme-muted">FETCHING DATABASE...</p>
                     </div>
                 ) : (
                     <div className="row g-4 px-2">
                         {groupedData.length === 0 ? (
-                            <div className="text-center py-5 bg-white rounded-4 border w-100">
-                                <Folder className="text-muted mx-auto mb-3" size={48} />
-                                <p className="mt-3 fw-bold text-muted">No courses found. Add your first course to a language!</p>
+                            <div className="text-center py-5 bg-theme-surface rounded-4 border w-100 shadow-sm">
+                                <Folder className="text-theme-muted mx-auto mb-3" size={48} />
+                                <p className="mt-3 fw-bold text-theme-muted">No courses found. Add your first course to a language!</p>
                             </div>
                         ) : (
                             groupedData.map((group) => (
                                 <div key={group.id} className="col-12 mb-3">
                                     <div 
                                         onClick={() => toggleFolder(group.id)}
-                                        className="folder-header d-flex align-items-center justify-content-between p-3 rounded-4 bg-white border-2 dash-border cursor-pointer mb-3"
-                                        style={{ cursor: 'pointer', transition: 'all 0.2s' }}
+                                        className="folder-header p-3 rounded-4 bg-theme-surface border border-theme-soft cursor-pointer shadow-sm d-flex align-items-center justify-content-between"
+                                        style={{ transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)' }}
                                     >
                                         <div className="d-flex align-items-center gap-3">
-                                            <div className="folder-icon-wrapper rounded-3 bg-light d-flex align-items-center justify-content-center"
-                                                style={{ width: 44, height: 44, backgroundColor: '#FEF3C7' }}>
-                                                <Folder size={20} style={{ color: '#D97706' }} />
+                                            <div className="icon-box-premium" style={{ backgroundColor: 'var(--color-bg)' }}>
+                                                <Folder size={20} className="text-warning-custom" />
                                             </div>
                                             <div>
-                                                <h5 className="fw-bold mb-0 text-dark d-flex align-items-center gap-2">
+                                                <h5 className="fw-bold mb-0 text-theme-main d-flex align-items-center gap-2">
                                                     {group.name}
-                                                    <span className="badge bg-light text-muted border smallest fw-bold ls-1" style={{ fontSize: 10 }}>
+                                                    <span className="badge-pill-premium" style={{ fontSize: 10 }}>
                                                         {group.code.toUpperCase()}
                                                     </span>
                                                 </h5>
-                                                <p className="smallest text-muted fw-bold ls-1 mb-0 uppercase">
+                                                <p className="smallest text-theme-muted fw-bold ls-1 mb-0 text-uppercase">
                                                     {group.lessons.length} COURSE{group.lessons.length !== 1 ? 'S' : ''} INSIDE
                                                 </p>
                                             </div>
                                         </div>
-                                        <div className="text-muted">
+                                        <div className="text-theme-muted">
                                             {expandedFolders[group.id] ? <ChevronDown size={20} /> : <ChevronRight size={20} />}
                                         </div>
                                     </div>
 
                                     {expandedFolders[group.id] && (
-                                        <div className="row g-3 px-3">
+                                        <div className="row g-3 px-3 mt-2">
                                             {group.lessons.sort((a: any, b: any) => (a.order || 0) - (b.order || 0)).map((lesson: any) => (
                                                 <div key={lesson.id} className="col-12">
-                                                    <div className="admin-lesson-card-light p-4 rounded-4 bg-white border shadow-sm position-relative overflow-hidden">
+                                                    <div className="card-premium p-4 position-relative overflow-hidden lesson-card-admin">
                                                         <div className="row align-items-center">
                                                             <div className="col-md-5">
                                                                 <div className="d-flex align-items-center gap-3 mb-2">
-                                                                    <div className="d-flex align-items-center bg-light border rounded-pill px-2 py-1 shadow-sm" style={{ width: 'fit-content' }}>
-                                                                        <ArrowDownUp size={12} className="text-muted me-1" />
+                                                                    <div className="d-flex align-items-center bg-theme-base border border-theme-soft rounded-pill px-2 py-1" style={{ width: 'fit-content' }}>
+                                                                        <ArrowDownUp size={12} className="text-theme-muted me-1" />
                                                                         <input 
                                                                             type="number" 
-                                                                            className="border-0 bg-transparent text-center smallest fw-bold ls-1 p-0 m-0" 
+                                                                            className="border-0 bg-transparent text-center smallest fw-bold ls-1 p-0 m-0 text-theme-main" 
                                                                             style={{ width: '30px', outline: 'none' }}
                                                                             defaultValue={lesson.order || ''}
                                                                             placeholder="—"
@@ -264,34 +263,32 @@ const AdminLessons: React.FC = () => {
                                                                             title="Set course order (1 = first)"
                                                                         />
                                                                     </div>
-                                                                    <span className={`badge rounded-pill smallest ls-1 fw-bold text-uppercase px-3 ${lesson.difficulty === 'Beginner' ? 'bg-success text-white' :
-                                                                            lesson.difficulty === 'Intermediate' ? 'bg-warning text-dark' :
-                                                                                'bg-danger text-white'
-                                                                        }`}>
+                                                                    <span className={`badge-pill-difficulty ${lesson.difficulty === 'Beginner' ? 'beginner' :
+                                                                            lesson.difficulty === 'Intermediate' ? 'intermediate' : 'expert'}`}>
                                                                         {lesson.difficulty}
                                                                     </span>
-                                                                    <span className="text-muted smallest fw-bold ls-1">ID: {lesson.id}</span>
+                                                                    <span className="text-theme-muted smallest fw-bold ls-1">ID: {lesson.id}</span>
                                                                 </div>
-                                                                <h3 className="fw-bold mb-1 ls-1 text-dark">
-                                                                    {lesson.title} <span className="text-muted">/ {lesson.vendaTitle}</span>
+                                                                <h3 className="fw-bold mb-1 ls-1 text-theme-main">
+                                                                    {lesson.title} <span className="text-theme-muted" style={{ fontWeight: 400 }}>/ {lesson.vendaTitle}</span>
                                                                 </h3>
-                                                                <p className="text-secondary mb-0 smallest fw-bold ls-1 text-uppercase">
+                                                                <p className="text-theme-muted mb-0 smallest fw-bold ls-1 text-uppercase">
                                                                     {getMicroLessons(lesson).length} Micro Lessons • {getMicroLessons(lesson).reduce((acc: number, ml: any) => acc + (ml.slides?.length || 0), 0)} Slides
                                                                 </p>
                                                             </div>
                                                             <div className="col-md-7 text-md-end mt-3 mt-md-0 d-flex gap-2 justify-content-md-end">
-                                                                <button onClick={() => handleExport(lesson)} className="btn btn-outline-primary fw-bold smallest ls-1 px-3 d-flex align-items-center justify-content-center" title="Export Course JSON">
+                                                                <button onClick={() => handleExport(lesson)} className="btn-premium-action secondary" title="Export Course JSON">
                                                                     <Download size={16} />
                                                                 </button>
-                                                                <Link to={`/admin/edit-lesson/${lesson.id}`} className="btn btn-outline-secondary fw-bold smallest ls-1 px-4 d-flex align-items-center gap-2">
+                                                                <Link to={`/admin/edit-lesson/${lesson.id}`} className="btn-premium-action secondary d-flex align-items-center gap-2 text-decoration-none">
                                                                     <Edit size={14} /> EDIT
                                                                 </Link>
-                                                                <button onClick={() => handleDelete(lesson.id)} className="btn btn-outline-danger fw-bold smallest ls-1 px-3 d-flex align-items-center justify-content-center">
+                                                                <button onClick={() => handleDelete(lesson.id)} className="btn-premium-action danger">
                                                                     <Trash2 size={16} />
                                                                 </button>
                                                             </div>
                                                         </div>
-                                                        <div style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: '4px', backgroundColor: '#FACC15' }}></div>
+                                                        <div className="accent-bar-premium"></div>
                                                     </div>
                                                 </div>
                                             ))}
@@ -305,27 +302,81 @@ const AdminLessons: React.FC = () => {
             </div>
 
             <style>{`
-                .ls-tight { letter-spacing: -1px; }
-                .ls-1 { letter-spacing: 1px; }
-                .ls-2 { letter-spacing: 2px; }
-                .smallest { font-size: 11px; }
-                input[type=number]::-webkit-inner-spin-button, 
-                input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
-                input[type=number] { -moz-appearance: textfield; }
-                .admin-lesson-card-light { transition: all 0.2s ease; }
-                .admin-lesson-card-light:hover { transform: translateX(5px); border-color: #FACC15 !important; }
-                .game-btn-yellow { 
-                    background-color: #FACC15 !important; 
-                    color: #000 !important; 
-                    border: none !important; 
-                    border-radius: 8px; 
-                    box-shadow: 0 4px 0 #A1810B !important; 
+                .text-warning-custom { color: var(--venda-yellow-dark) !important; }
+                .card-premium {
+                    background-color: var(--color-surface);
+                    border: 1px solid var(--color-border);
+                    border-radius: 20px;
+                    box-shadow: var(--shadow-premium);
+                    transition: all 0.3s ease;
                 }
-                .game-btn-yellow:active { transform: translateY(2px); box-shadow: 0 2px 0 #A1810B !important; }
+                .lesson-card-admin:hover {
+                    transform: translateX(8px);
+                    border-color: var(--venda-yellow-dark);
+                }
+                .accent-bar-premium {
+                    position: absolute;
+                    left: 0;
+                    top: 0;
+                    bottom: 0;
+                    width: 5px;
+                    background-color: var(--venda-yellow);
+                }
+                .icon-box-premium {
+                    width: 44px;
+                    height: 44px;
+                    background-color: var(--color-surface-soft);
+                    border-radius: 12px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                }
+                .badge-pill-premium {
+                    background-color: var(--color-surface-soft);
+                    color: var(--color-text-muted);
+                    padding: 4px 10px;
+                    border-radius: 50px;
+                    border: 1px solid var(--color-border);
+                }
+                .badge-pill-difficulty {
+                    padding: 4px 12px;
+                    border-radius: 50px;
+                    font-size: 10px;
+                    font-weight: 800;
+                    letter-spacing: 1px;
+                    text-transform: uppercase;
+                }
+                .badge-pill-difficulty.beginner { background-color: #dcfce7; color: #166534; }
+                .badge-pill-difficulty.intermediate { background-color: #fef3c7; color: #92400e; }
+                .badge-pill-difficulty.expert { background-color: #fee2e2; color: #b91c1c; }
+                
+                [data-theme='dark'] .badge-pill-difficulty.beginner { background-color: #064e3b; color: #6ee7b7; }
+                [data-theme='dark'] .badge-pill-difficulty.intermediate { background-color: #451a03; color: #fcd34d; }
+                [data-theme='dark'] .badge-pill-difficulty.expert { background-color: #450a0a; color: #f87171; }
+
+                .btn-premium-action {
+                    font-weight: 700;
+                    font-size: 0.75rem;
+                    letter-spacing: 1px;
+                    padding: 10px 16px;
+                    border-radius: 12px;
+                    transition: all 0.2s;
+                    border: 1px solid transparent;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                }
+                .btn-premium-action.warning { background-color: var(--venda-yellow); color: #000; }
+                .btn-premium-action.warning:hover { background-color: var(--venda-yellow-dark); }
+                .btn-premium-action.secondary { background-color: var(--color-surface-soft); color: var(--color-text); border-color: var(--color-border); }
+                .btn-premium-action.secondary:hover { background-color: var(--color-border); }
+                .btn-premium-action.danger { background-color: #fee2e2; color: #ef4444; }
+                .btn-premium-action.danger:hover { background-color: #fecaca; }
+                [data-theme='dark'] .btn-premium-action.danger { background-color: #450a0a; color: #f87171; }
+                
+                .folder-header:hover { border-color: var(--venda-yellow-dark) !important; transform: scale(1.01); }
                 .shumela-venda-pulse { animation: pulseAdmin 3s infinite ease-in-out; }
-                @keyframes pulseAdmin { 0% { opacity: 0.7; } 50% { opacity: 1; } 100% { opacity: 0.7; } }
-                .folder-header:hover { border-color: #FACC15 !important; transform: scale(1.005); }
-                .dash-border { border-style: dashed !important; border-width: 2px !important; }
+                @keyframes pulseAdmin { 0% { opacity: 0.7; } 50% { opacity: 1; color: var(--venda-yellow-dark); } 100% { opacity: 0.7; } }
             `}</style>
         </div>
     );

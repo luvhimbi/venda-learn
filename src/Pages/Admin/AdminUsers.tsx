@@ -161,30 +161,33 @@ const AdminUsers: React.FC = () => {
     };
 
     return (
-        <div className="min-vh-100 pb-5 bg-light">
+        <div className="min-vh-100 pb-5 bg-theme-base">
             <AdminNavbar />
 
             {/* HEADER SECTION */}
-            <div className="py-5 bg-white border-bottom shadow-sm">
+            <div className="py-5 bg-theme-surface border-bottom shadow-sm">
                 <div className="container" style={{ maxWidth: '1100px' }}>
                     <div className="d-flex flex-column flex-md-row justify-content-between align-items-md-end px-3">
                         <div>
-                            <span className="shumela-venda-pulse fw-bold ls-2 text-uppercase smallest d-block mb-2 text-warning">
+                            <span className="shumela-venda-pulse fw-bold ls-1 text-uppercase smallest d-block mb-2 text-warning-custom">
                                 Student Management
                             </span>
-                            <h1 className="fw-bold ls-tight mb-0 text-dark" style={{ fontSize: '2.5rem' }}>
-                                Active <span style={{ color: '#FACC15' }}>Students</span>
+                            <h1 className="fw-bold ls-tight mb-0 text-theme-main" style={{ fontSize: '2.5rem' }}>
+                                Active <span className="text-warning-custom">Students</span>
                             </h1>
                         </div>
-                        <div className="mt-4 mt-md-0">
-                            <input
-                                type="text"
-                                className="form-control light-bordered-input shadow-none"
-                                placeholder="Search by name or email..."
-                                value={searchTerm}
-                                onChange={(e) => { setSearchTerm(e.target.value); setCurrentPage(1); }}
-                                style={{ minWidth: '320px' }}
-                            />
+                        <div className="mt-4 mt-md-0 position-relative">
+                            <div className="search-container">
+                                <Search size={18} className="search-icon text-theme-muted" />
+                                <input
+                                    type="text"
+                                    className="form-control premium-search shadow-none"
+                                    placeholder="Search by name or email..."
+                                    value={searchTerm}
+                                    onChange={(e) => { setSearchTerm(e.target.value); setCurrentPage(1); }}
+                                    style={{ minWidth: '320px', paddingLeft: '45px' }}
+                                />
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -194,18 +197,18 @@ const AdminUsers: React.FC = () => {
                 {loading ? (
                     <div className="text-center py-5">
                         <Loader2 className="animate-spin text-warning mx-auto mb-3" size={48} />
-                        <p className="ls-1 smallest fw-bold text-muted">SYNCHRONIZING RECORDS...</p>
+                        <p className="ls-1 smallest fw-bold text-theme-muted">SYNCHRONIZING RECORDS...</p>
                     </div>
                 ) : (
                     <>
                         <div className="row g-4 px-2">
                             {currentUsers.length > 0 ? currentUsers.map((user) => (
                                 <div key={user.id} className="col-12">
-                                    <div className="user-card-light p-4 rounded-4 bg-white border shadow-sm position-relative">
+                                    <div className="card-premium p-4">
                                         <div className="row align-items-center">
                                             {/* Avatar Column */}
                                             <div className="col-md-1 text-center d-none d-md-block">
-                                                <div className="avatar-placeholder rounded-circle bg-warning d-flex align-items-center justify-content-center fw-bold text-dark mx-auto" style={{ width: '50px', height: '50px', fontSize: '1.2rem' }}>
+                                                <div className="avatar-premium">
                                                     {user.username?.charAt(0).toUpperCase() || 'U'}
                                                 </div>
                                             </div>
@@ -213,40 +216,40 @@ const AdminUsers: React.FC = () => {
                                             {/* Info Column */}
                                             <div className="col-md-7">
                                                 <div className="d-flex align-items-center gap-2 mb-1">
-                                                    <h5 className="fw-bold mb-0 text-dark">{user.username || 'Anonymous'}</h5>
+                                                    <h5 className="fw-bold mb-0 text-theme-main">{user.username || 'Anonymous'}</h5>
                                                     {user.points > 1000 && <BadgeCheck className="text-primary" size={18} />}
                                                 </div>
-                                                <p className="text-muted smallest fw-bold ls-1 mb-3">{user.email}</p>
+                                                <p className="text-theme-muted smallest fw-bold ls-1 mb-3">{user.email}</p>
 
-                                                <div className="d-flex flex-wrap gap-3">
-                                                    <div className="bg-light px-3 py-1 rounded-pill border">
-                                                        <span className="smallest fw-bold text-uppercase text-secondary">
-                                                            Score: <span className="text-dark">{user.points || 0} XP</span>
+                                                <div className="d-flex flex-wrap gap-2">
+                                                    <div className="badge-pill-premium">
+                                                        <span className="smallest fw-bold text-uppercase">
+                                                            Score: <span className="text-theme-main">{user.points || 0} XP</span>
                                                         </span>
                                                     </div>
-                                                    <div className="bg-light px-3 py-1 rounded-pill border">
-                                                        <span className="smallest fw-bold text-uppercase text-secondary">
-                                                            Lessons: <span className="text-dark">{user.completedLessons?.length || 0} Completed</span>
+                                                    <div className="badge-pill-premium">
+                                                        <span className="smallest fw-bold text-uppercase">
+                                                            Lessons: <span className="text-theme-main">{user.completedLessons?.length || 0}</span>
                                                         </span>
                                                     </div>
                                                     {user.nativeVerificationStatus === 'pending' && (
-                                                        <div className="bg-warning-subtle px-3 py-1 rounded-pill border border-warning">
-                                                            <span className="smallest fw-bold text-uppercase text-warning-emphasis d-flex align-items-center gap-1">
+                                                        <div className="badge-pill-warning">
+                                                            <span className="smallest fw-bold text-uppercase d-flex align-items-center gap-1">
                                                                 <ShieldAlert size={14} /> Pending Vetting
                                                             </span>
                                                         </div>
                                                     )}
                                                     {user.isNativeSpeaker && (
-                                                        <div className="bg-success-subtle px-3 py-1 rounded-pill border border-success">
-                                                            <span className="smallest fw-bold text-uppercase text-success d-flex align-items-center gap-1">
+                                                        <div className="badge-pill-success">
+                                                            <span className="smallest fw-bold text-uppercase d-flex align-items-center gap-1">
                                                                 <BadgeCheck size={14} /> Verified Native
                                                             </span>
                                                         </div>
                                                     )}
                                                 </div>
                                                 {user.nativeVerificationStatus === 'pending' && user.nativeSpeakerBio && (
-                                                    <div className="mt-3 p-2 bg-light rounded border border-dashed small text-muted">
-                                                        <span className="smallest fw-bold text-uppercase text-muted d-block mb-1">Vetting Bio:</span>
+                                                    <div className="mt-3 p-3 bg-theme-surface border border-dashed rounded-3 small text-theme-muted">
+                                                        <span className="smallest fw-bold text-uppercase text-theme-muted d-block mb-1">Vetting Bio:</span>
                                                         "{user.nativeSpeakerBio}"
                                                     </div>
                                                 )}
@@ -256,17 +259,16 @@ const AdminUsers: React.FC = () => {
                                             <div className="col-md-4 text-md-end mt-4 mt-md-0 d-flex gap-2 justify-content-md-end">
                                                 <button
                                                     onClick={() => handleEditUser(user)}
-                                                    className="btn btn-warning fw-bold smallest ls-1 px-3 shadow-none border-dark"
-                                                    style={{ border: '2px solid #000' }}
+                                                    className="btn-premium-action warning"
                                                 >
-                                                    EDIT
+                                                    EDIT RECORDS
                                                 </button>
-                                                <button className="btn btn-outline-dark fw-bold smallest ls-1 px-3">
+                                                <button className="btn-premium-action secondary">
                                                     HISTORY
                                                 </button>
                                                 <button
                                                     onClick={() => handleDeleteUser(user.id, user.username)}
-                                                    className="btn btn-outline-danger fw-bold smallest ls-1 px-3"
+                                                    className="btn-premium-action danger"
                                                 >
                                                     <UserMinus size={18} />
                                                 </button>
@@ -275,9 +277,9 @@ const AdminUsers: React.FC = () => {
                                     </div>
                                 </div>
                             )) : (
-                                <div className="text-center py-5 bg-white rounded-4 border shadow-sm">
-                                    <Search className="text-muted mx-auto mb-3" size={48} />
-                                    <p className="text-muted ls-1 fw-bold mt-3 mb-0">No students found matching your search.</p>
+                                <div className="text-center py-5 bg-theme-surface rounded-4 border shadow-sm">
+                                    <Search className="text-theme-muted mx-auto mb-3" size={48} />
+                                    <p className="text-theme-muted ls-1 fw-bold mt-3 mb-0">No students found matching your search.</p>
                                 </div>
                             )}
                         </div>
@@ -286,7 +288,7 @@ const AdminUsers: React.FC = () => {
                         {totalPages > 1 && (
                             <div className="d-flex justify-content-center mt-5 gap-2">
                                 <button
-                                    className="btn btn-white border shadow-sm btn-sm px-3 fw-bold ls-1 smallest"
+                                    className="btn-pagination"
                                     disabled={currentPage === 1}
                                     onClick={() => setCurrentPage(currentPage - 1)}
                                 >
@@ -295,14 +297,14 @@ const AdminUsers: React.FC = () => {
                                 {[...Array(totalPages)].map((_, i) => (
                                     <button
                                         key={i}
-                                        className={`btn btn-sm px-3 fw-bold smallest ${currentPage === i + 1 ? 'btn-warning text-dark' : 'btn-white border'}`}
+                                        className={`btn-pagination ${currentPage === i + 1 ? 'active' : ''}`}
                                         onClick={() => setCurrentPage(i + 1)}
                                     >
                                         {i + 1}
                                     </button>
                                 ))}
                                 <button
-                                    className="btn btn-white border shadow-sm btn-sm px-3 fw-bold ls-1 smallest"
+                                    className="btn-pagination"
                                     disabled={currentPage === totalPages}
                                     onClick={() => setCurrentPage(currentPage + 1)}
                                 >
@@ -315,33 +317,139 @@ const AdminUsers: React.FC = () => {
             </div>
 
             <style>{`
-                .ls-tight { letter-spacing: -1px; }
-                .ls-1 { letter-spacing: 1px; }
-                .ls-2 { letter-spacing: 2px; }
-                .smallest { font-size: 11px; }
-                
-                .light-bordered-input { 
-                    background-color: #ffffff; 
-                    border: 1px solid #ced4da; 
-                    border-radius: 8px; 
-                    padding: 10px 15px; 
+                .text-warning-custom { color: var(--venda-yellow-dark) !important; }
+                .card-premium {
+                    background-color: var(--color-surface);
+                    border: 1px solid var(--color-border);
+                    border-radius: 20px;
+                    box-shadow: var(--shadow-premium);
+                    transition: all 0.3s ease;
                 }
-                .light-bordered-input:focus {
-                    border-color: #FACC15;
-                    box-shadow: 0 0 0 0.2rem rgba(250, 204, 21, 0.1);
+                .card-premium:hover {
+                    border-color: var(--venda-yellow-dark);
                 }
-
-                .user-card-light { transition: all 0.2s ease; border-left: 5px solid transparent !important; }
-                .user-card-light:hover { 
-                    transform: translateX(4px); 
-                    border-left: 5px solid #FACC15 !important;
-                    border-color: #FACC15 !important;
+                .avatar-premium {
+                    width: 50px;
+                    height: 50px;
+                    background-color: var(--venda-yellow);
+                    color: #000;
+                    border-radius: 12px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    font-weight: 800;
+                    font-size: 1.2rem;
+                    margin: 0 auto;
                 }
-
+                .badge-pill-premium {
+                    background-color: var(--color-surface-soft);
+                    color: var(--color-text-muted);
+                    padding: 4px 12px;
+                    border-radius: 50px;
+                    border: 1px solid var(--color-border);
+                }
+                .badge-pill-warning {
+                    background-color: #fef3c7;
+                    color: #92400e;
+                    padding: 4px 12px;
+                    border-radius: 50px;
+                    border: 1px solid #fde68a;
+                }
+                [data-theme='dark'] .badge-pill-warning {
+                    background-color: #451a03;
+                    color: #fcd34d;
+                    border-color: #78350f;
+                }
+                .badge-pill-success {
+                    background-color: #dcfce7;
+                    color: #166534;
+                    padding: 4px 12px;
+                    border-radius: 50px;
+                    border: 1px solid #bbf7d0;
+                }
+                [data-theme='dark'] .badge-pill-success {
+                    background-color: #064e3b;
+                    color: #6ee7b7;
+                    border-color: #065f46;
+                }
+                .btn-premium-action {
+                    font-weight: 700;
+                    font-size: 0.75rem;
+                    letter-spacing: 1px;
+                    padding: 10px 16px;
+                    border-radius: 12px;
+                    transition: all 0.2s;
+                    border: 1px solid transparent;
+                }
+                .btn-premium-action.warning {
+                    background-color: var(--venda-yellow);
+                    color: #000;
+                }
+                .btn-premium-action.warning:hover {
+                    background-color: var(--venda-yellow-dark);
+                }
+                .btn-premium-action.secondary {
+                    background-color: var(--color-surface-soft);
+                    color: var(--color-text);
+                    border-color: var(--color-border);
+                }
+                .btn-premium-action.secondary:hover {
+                    background-color: var(--color-border);
+                }
+                .btn-premium-action.danger {
+                    background-color: #fee2e2;
+                    color: #ef4444;
+                }
+                .btn-premium-action.danger:hover {
+                    background-color: #fecaca;
+                }
+                [data-theme='dark'] .btn-premium-action.danger {
+                    background-color: #450a0a;
+                    color: #f87171;
+                }
+                [data-theme='dark'] .btn-premium-action.danger:hover {
+                    background-color: #7f1d1d;
+                }
+                .premium-search {
+                    background-color: var(--color-surface-soft) !important;
+                    border: 1px solid var(--color-border) !important;
+                    border-radius: 12px !important;
+                    padding: 12px 15px !important;
+                    color: var(--color-text) !important;
+                }
+                .search-container {
+                    position: relative;
+                    display: flex;
+                    align-items: center;
+                }
+                .search-icon {
+                    position: absolute;
+                    left: 15px;
+                    z-index: 10;
+                }
+                .btn-pagination {
+                    background-color: var(--color-surface);
+                    color: var(--color-text-muted);
+                    border: 1px solid var(--color-border);
+                    padding: 8px 16px;
+                    font-weight: 700;
+                    font-size: 0.75rem;
+                    border-radius: 10px;
+                    transition: all 0.2s;
+                }
+                .btn-pagination.active {
+                    background-color: var(--venda-yellow);
+                    color: #000;
+                    border-color: var(--venda-yellow);
+                }
+                .btn-pagination:hover:not(:disabled) {
+                    background-color: var(--color-surface-soft);
+                    color: var(--color-text);
+                }
                 .shumela-venda-pulse { animation: pulseAdmin 3s infinite ease-in-out; }
-                @keyframes pulseAdmin { 0% { opacity: 0.7; } 50% { opacity: 1; } 100% { opacity: 0.7; } }
+                @keyframes pulseAdmin { 0% { opacity: 0.7; } 50% { opacity: 1; color: var(--venda-yellow-dark); } 100% { opacity: 0.7; } }
             `}</style>
-        </div >
+        </div>
     );
 };
 

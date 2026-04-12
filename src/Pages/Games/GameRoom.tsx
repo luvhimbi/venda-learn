@@ -15,7 +15,6 @@ import { useGameLogic } from '../../hooks/useGameLogic';
 import Mascot, { type MascotMood } from '../../components/Mascot';
 import { useVisualJuice } from '../../hooks/useVisualJuice';
 import { updateStreak } from '../../services/streakUtils';
-import { popupService } from '../../services/popupService';
 import { HelpCircle, X, Bookmark, CheckCircle2, Volume2, Play, Flame, Zap, Users, Circle } from 'lucide-react';
 import { db, auth } from '../../services/firebaseConfig';
 import { doc, updateDoc, arrayUnion } from 'firebase/firestore';
@@ -186,18 +185,6 @@ const GameRoom: React.FC = () => {
                             });
                         }
                     }, 1300);
-                }
-
-                if (isFirstTime) {
-                    popupService.innerSuccess(
-                        'Quiz Finished!',
-                        `<p style="font-size:14px;color:#666">You've completed this session.</p><h2 style="color:#FACC15;font-weight:800">+${finalScore} XP</h2>`
-                    ).then(() => { navigate('/mitambo'); });
-                } else {
-                    popupService.innerSuccess(
-                        'Review Complete!',
-                        `<p style="font-size:14px;color:#666">Great job refreshing your knowledge.</p>`
-                    ).then(() => { navigate('/mitambo'); });
                 }
             }
             localStorage.removeItem(storageKey);

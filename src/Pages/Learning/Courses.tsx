@@ -5,7 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import { fetchLessons, fetchUserData, getMicroLessons, fetchLanguages, invalidateCache } from '../../services/dataCache';
 import { doc, updateDoc } from 'firebase/firestore';
 import { db } from '../../services/firebaseConfig';
-import { Key, MessageSquare, Star, Lightbulb, CheckSquare, Zap, ChevronRight, ArrowLeft, Check, Lock, Play, X, BookOpen, Sparkles, ArrowUp } from 'lucide-react';
+import { Key, MessageSquare, Star, Lightbulb, CheckSquare, Zap, ChevronRight, Check, Lock, Play, X, BookOpen, Sparkles, ArrowUp } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Skeleton from 'react-loading-skeleton';
 import 'react-loading-skeleton/dist/skeleton.css';
@@ -351,9 +351,9 @@ const Courses: React.FC = () => {
     return (
         <div className="learning-container bg-theme-base min-vh-100">
             <div className="container pt-3 pb-5" style={{ maxWidth: '900px' }}>
-                <div className="d-flex justify-content-between align-items-center mb-2">
+                <div className="d-flex justify-content-between align-items-center mb-4">
                     <JuicyButton
-                        className={`btn ${!selectedLanguageId && lastLanguageId ? 'btn-white border-3 border-theme-main rounded-circle p-0' : 'btn-link text-decoration-none p-0'} d-flex align-items-center justify-content-center text-theme-main fw-bold smallest ls-1 text-uppercase shadow-action-sm`}
+                        className="btn btn-white border-3 border-theme-main rounded-circle p-0 d-flex align-items-center justify-content-center text-theme-main shadow-action-sm"
                         onClick={() => {
                             if (!selectedLanguageId && lastLanguageId) {
                                 setSelectedLanguageId(lastLanguageId);
@@ -361,9 +361,9 @@ const Courses: React.FC = () => {
                                 navigate('/');
                             }
                         }}
-                        style={!selectedLanguageId && lastLanguageId ? { width: '40px', height: '40px', backgroundColor: 'var(--color-bg)' } : {}}
+                        style={{ width: '44px', height: '44px', backgroundColor: 'var(--color-bg)' }}
                     >
-                        {!selectedLanguageId && lastLanguageId ? <X size={24} strokeWidth={3} /> : <><ArrowLeft size={16} /> Home</>}
+                        <X size={24} strokeWidth={3} />
                     </JuicyButton>
 
                     {selectedLanguageId && (

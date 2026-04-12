@@ -7,6 +7,7 @@ import type { Firestore } from 'firebase/firestore';
 import { collection, getDocs, doc, getDoc, setDoc, query, orderBy, limit, where, deleteDoc, updateDoc, increment } from 'firebase/firestore';
 import { getCurrentWeekIdentifier } from './levelUtils';
 import { syncStreak } from './streakUtils';
+import dayjs from 'dayjs';
 
 
 interface CacheEntry<T> {
@@ -200,10 +201,18 @@ export const awardPoints = async (points: number): Promise<void> => {
 
         const userData = userSnap.data() as any;
         const currentWeek = getCurrentWeekIdentifier();
+        const today = dayjs().format('YYYY-MM-DD'); 
 
         const updateData: any = {
-            points: increment(points)
+            points: increment(points),
         };
+
+        // Ensure dailyXP object exists before incrementing nested field
+        if (!userData.dailyXP) {
+            updateData.dailyXP = { [today]: points };
+        } else {
+            updateData[`dailyXP.${today}`] = increment(points);
+        }
 
         if (userData.lastActiveWeek !== currentWeek) {
             updateData.weeklyXP = points;

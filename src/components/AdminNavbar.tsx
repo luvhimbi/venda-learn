@@ -4,7 +4,7 @@ import { onAuthStateChanged, signOut, type User } from 'firebase/auth';
 import { auth } from '../services/firebaseConfig';
 import { invalidateCache } from '../services/dataCache';
 import { popupService } from '../services/popupService';
-import { Menu, LogOut, ClipboardList } from 'lucide-react';
+import { Menu, LogOut } from 'lucide-react';
 
 
 
@@ -51,77 +51,70 @@ const AdminNavbar: React.FC = () => {
     const isActive = (path: string) => location.pathname === path;
 
     return (
-        <nav className="navbar navbar-expand-lg sticky-top bg-dark border-bottom border-secondary py-3">
+        <nav className="navbar navbar-expand-lg sticky-top border-bottom py-3 admin-nav-premium">
             <div className="container" style={{ maxWidth: '1100px' }}>
 
-                {/* BRAND LOGO - Matches Student UI exactly */}
+                {/* BRAND LOGO */}
                 <Link className="navbar-brand d-flex align-items-center mb-0 text-decoration-none shadow-none" to="/admin/dashboard">
-                    <img src="/images/Logo.png" alt="Language Learning Platform Logo" height="45" className="object-fit-contain" />
+                    <img src="/images/Logo.png" alt="Platform Logo" height="40" className="object-fit-contain logo-filter" />
                 </Link>
 
                 {/* MOBILE TOGGLER */}
                 <button
-                    className="navbar-toggler border-0 shadow-none bg-secondary"
+                    className="navbar-toggler border-0 shadow-none"
                     type="button"
                     data-bs-toggle="collapse"
                     data-bs-target="#adminNavbar"
                 >
-                    <Menu size={32} className="text-white" />
+                    <Menu size={28} className="text-theme-main" />
                 </button>
 
                 {/* ADMIN SPECIFIC NAV LINKS */}
                 <div className="collapse navbar-collapse" id="adminNavbar">
-                    <ul className="navbar-nav ms-auto gap-lg-4 align-items-center">
-                        <li className="nav-item w-100 w-lg-auto text-center">
-                            <Link className={`nav-link nav-custom-link ${isActive('/admin/dashboard') ? 'active-link' : ''}`} to="/admin/dashboard">
+                    <ul className="navbar-nav ms-auto gap-lg-3 align-items-center">
+                        <li className="nav-item">
+                            <Link className={`nav-link admin-nav-link ${isActive('/admin/dashboard') ? 'active' : ''}`} to="/admin/dashboard">
                                 Overview
                             </Link>
                         </li>
-                        <li className="nav-item w-100 w-lg-auto text-center">
-                            <Link className={`nav-link nav-custom-link ${isActive('/admin/lesson') ? 'active-link' : ''}`} to="/admin/lessons">
-                                Content Editor
+                        <li className="nav-item">
+                            <Link className={`nav-link admin-nav-link ${isActive('/admin/lessons') || isActive('/admin/lesson') ? 'active' : ''}`} to="/admin/lessons">
+                                Content
                             </Link>
                         </li>
-                        <li className="nav-item w-100 w-lg-auto text-center">
-                            <Link className={`nav-link nav-custom-link ${isActive('/admin/reviews') ? 'active-link' : ''}`} to="/admin/reviews">
-                                <ClipboardList size={14} className="me-1" /> Reviews
+                        <li className="nav-item">
+                            <Link className={`nav-link admin-nav-link ${isActive('/admin/game-content') ? 'active' : ''}`} to="/admin/game-content">
+                                Games
                             </Link>
                         </li>
-                        <li className="nav-item w-100 w-lg-auto text-center">
-                            <Link className={`nav-link nav-custom-link ${isActive('/admin/users') ? 'active-link' : ''}`} to="/admin/users">
-                                User Records
+                        <li className="nav-item">
+                            <Link className={`nav-link admin-nav-link ${isActive('/admin/reviews') ? 'active' : ''}`} to="/admin/reviews">
+                                Reviews
                             </Link>
                         </li>
-
-                        <li className="nav-item w-100 w-lg-auto text-center">
-                            <Link className={`nav-link nav-custom-link ${isActive('/admin/languages') ? 'active-link' : ''}`} to="/admin/languages">
+                        <li className="nav-item">
+                            <Link className={`nav-link admin-nav-link ${isActive('/admin/users') ? 'active' : ''}`} to="/admin/users">
+                                Users
+                            </Link>
+                        </li>
+                        <li className="nav-item">
+                            <Link className={`nav-link admin-nav-link ${isActive('/admin/languages') ? 'active' : ''}`} to="/admin/languages">
                                 Languages
                             </Link>
                         </li>
-
-                        <li className="nav-item w-100 w-lg-auto text-center">
-                            <Link className={`nav-link nav-custom-link ${isActive('/admin/game-content') ? 'active-link' : ''}`} to="/admin/game-content">
-                                Game Content
-                            </Link>
-                        </li>
-                        {/* <li className="nav-item w-100 w-lg-auto text-center">
-                            <button onClick={handleSeedGames} className="btn nav-link nav-custom-link text-warning border-0 bg-transparent">
-                                <Database size={14} className="me-1" /> SEED GAMES
-                            </button>
-                        </li> */}
-                        <li className="nav-item w-100 w-lg-auto text-center">
-                            <Link className="nav-link nav-custom-link" to="/">
-                                Exit to Site
+                        <li className="nav-item border-start ps-lg-3 ms-lg-2">
+                            <Link className="nav-link admin-nav-link text-warning-custom d-flex align-items-center gap-1" to="/">
+                                Site View
                             </Link>
                         </li>
 
                         {user && (
-                            <li className="nav-item ms-lg-2 w-100 w-lg-auto text-center mt-3 mt-lg-0">
+                            <li className="nav-item ms-lg-2">
                                 <button
                                     onClick={handleLogout}
-                                    className="btn game-btn-admin-logout fw-bold smallest ls-1 px-4 py-2 shadow-none d-flex align-items-center gap-2"
+                                    className="btn btn-logout-premium"
                                 >
-                                    <LogOut size={16} /> LOGOUT
+                                    <LogOut size={16} />
                                 </button>
                             </li>
                         )}
@@ -130,75 +123,63 @@ const AdminNavbar: React.FC = () => {
             </div>
 
             <style>{`
-                .ls-tight { letter-spacing: -1.5px; }
-                .ls-1 { letter-spacing: 1px; }
-                .ls-2 { letter-spacing: 2px; }
-                .smallest { font-size: 11px; }
+                .admin-nav-premium {
+                    background-color: var(--color-surface) !important;
+                    border-color: var(--color-border) !important;
+                    backdrop-filter: blur(10px);
+                    -webkit-backdrop-filter: blur(10px);
+                }
                 
-                .nav-custom-link {
-                    font-weight: 700 !important;
-                    font-size: 11px !important;
-                    letter-spacing: 2px !important;
-                    text-transform: uppercase !important;
-                    color: #9CA3AF !important;
-                    padding: 0.5rem 0 !important;
-                    position: relative;
-                    transition: color 0.2s ease;
-                    text-decoration: none !important;
-                    outline: none !important;
+                .admin-nav-link {
+                    font-weight: 600 !important;
+                    font-size: 0.85rem !important;
+                    color: var(--color-text-muted) !important;
+                    padding: 0.5rem 0.75rem !important;
+                    border-radius: 8px;
+                    transition: all 0.2s ease;
                 }
 
-                .nav-custom-link:hover {
-                    color: #FACC15 !important;
+                .admin-nav-link:hover {
+                    color: var(--venda-yellow-dark) !important;
+                    background-color: var(--color-surface-soft);
                 }
 
-                .active-link {
-                    color: black !important;
+                .admin-nav-link.active {
+                    color: var(--color-text) !important;
+                    background-color: var(--color-surface-soft);
                 }
 
-                @media (min-width: 992px) {
-                    .active-link::after {
-                        content: '';
-                        position: absolute;
-                        bottom: -2px;
-                        left: 0;
-                        width: 100%;
-                        height: 3px;
-                        background-color: #FACC15;
-                        border-radius: 10px;
-                    }
+                .text-warning-custom {
+                    color: var(--venda-yellow-dark) !important;
                 }
 
-                .shumela-venda-pulse {
-                    font-size: 9px;
-                    color: #6B7280;
-                    animation: pulseAdmin 3s infinite ease-in-out;
+                .btn-logout-premium {
+                    background-color: var(--color-surface-soft);
+                    color: var(--color-text-muted);
+                    border: 1px solid var(--color-border);
+                    border-radius: 10px;
+                    padding: 8px 12px;
+                    transition: all 0.2s;
                 }
 
-                @keyframes pulseAdmin {
-                    0% { opacity: 0.6; transform: scale(1); }
-                    50% { opacity: 1; color: #FACC15; transform: scale(1.02); }
-                    100% { opacity: 0.6; transform: scale(1); }
+                .btn-logout-premium:hover {
+                    background-color: #fee2e2;
+                    color: #ef4444;
+                    border-color: #fecaca;
                 }
 
-                .game-btn-admin-logout { 
-                    background-color: #374151 !important; 
-                    color: #FFFFFF !important; 
-                    border: 1px solid #4B5563 !important; 
-                    border-radius: 8px; 
-                    box-shadow: 0 3px 0 #111827 !important; 
-                    transition: all 0.2s; 
-                    text-decoration: none;
+                [data-theme='dark'] .btn-logout-premium:hover {
+                    background-color: #450a0a;
+                    color: #f87171;
+                    border-color: #7f1d1d;
                 }
 
-                .game-btn-admin-logout:hover {
-                    background-color: #B91C1C !important;
-                    border-color: #991B1B !important;
+                .logo-filter {
+                    transition: filter 0.3s ease;
                 }
 
-                .game-btn-admin-logout:active { 
-                    transform: translateY(1px); 
-                    box-shadow: 0 1px 0 #111827 !important; 
+                [data-theme='dark'] .logo-filter {
+                    filter: brightness(1.2);
                 }
             `}</style>
         </nav>

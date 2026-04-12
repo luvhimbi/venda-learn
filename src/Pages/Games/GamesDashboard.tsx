@@ -1,6 +1,6 @@
 import React, {useState, useEffect, useMemo} from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Puzzle, Image, Layout, FileText, Gamepad2, Bomb, ArrowRight, Trophy } from 'lucide-react';
+import { Puzzle, Image, Layout, FileText, Gamepad2, Bomb, ArrowRight, Trophy, X } from 'lucide-react';
 import { popupService } from '../../services/popupService';
 import { fetchUserData, fetchLanguages, warmupGameCache } from '../../services/dataCache';
 import { onAuthStateChanged } from "firebase/auth";
@@ -161,6 +161,17 @@ const GamesDashboard: React.FC = () => {
             backgroundImage: 'url("data:image/svg+xml,%3Csvg width=\'20\' height=\'20\' viewBox=\'0 0 20 20\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cg fill=\'currentColor\' fill-opacity=\'0.02\' fill-rule=\'evenodd\'%3E%3Ccircle cx=\'3\' cy=\'3\' r=\'1\'/%3E%3C/g%3E%3C/svg%3E")' 
         }}>
             <div className="container">
+                <div className="mb-4 d-flex align-items-center">
+                    <button
+                        className="btn btn-white border-3 border-theme-main rounded-circle p-0 d-flex align-items-center justify-content-center text-theme-main shadow-action-sm"
+                        onClick={() => navigate('/')}
+                        style={{ width: '44px', height: '44px', backgroundColor: 'var(--color-bg)' }}
+                        title="Back to Dashboard"
+                    >
+                        <X size={24} strokeWidth={3} />
+                    </button>
+                </div>
+
                 <div className="text-center mb-4 mt-0 animate__animated animate__fadeInDown">
                     <span className="badge bg-warning text-dark border border-theme-main border-2 rounded-pill px-3 py-1 smallest fw-black ls-1 uppercase mb-2 shadow-action-sm">
                         {preferredLanguage?.name || 'Local'} Quests

@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { Smartphone, Download, X, Share } from 'lucide-react';
 
 const InstallBanner: React.FC = () => {
     const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
@@ -7,27 +8,21 @@ const InstallBanner: React.FC = () => {
     const [isStandalone, setIsStandalone] = useState(false);
 
     useEffect(() => {
-        // 1. Check if already installed/standalone
         const checkStandalone = window.matchMedia('(display-mode: standalone)').matches
             || (navigator as any).standalone === true;
         setIsStandalone(checkStandalone);
 
-        // 2. Detect iOS
         const ios = /iPad|iPhone|iPod/.test(navigator.userAgent) && !(window as any).MSStream;
         setIsIOS(ios);
 
-        // 3. Handle Android/Chrome Install Prompt
         const handler = (e: Event) => {
-            // Prevent Chrome 67 and earlier from automatically showing the prompt
             e.preventDefault();
-            // Stash the event so it can be triggered later.
             setDeferredPrompt(e);
             setIsVisible(true);
         };
 
         window.addEventListener('beforeinstallprompt', handler);
 
-        // 4. If iOS and not standalone, show instructions
         if (ios && !checkStandalone) {
             setIsVisible(true);
         }
@@ -37,38 +32,28 @@ const InstallBanner: React.FC = () => {
 
     const handleInstallClick = async () => {
         if (!deferredPrompt) return;
-
-        // Show the native install prompt
         deferredPrompt.prompt();
-
-        // Wait for the user to respond to the prompt
         const { outcome } = await deferredPrompt.userChoice;
-
         if (outcome === 'accepted') {
-            console.log('User accepted the install prompt');
             setIsVisible(false);
-        } else {
-            console.log('User dismissed the install prompt');
         }
         setDeferredPrompt(null);
     };
 
-    // Don't show anything if already installed or logic dictates hidden
     if (!isVisible || isStandalone) return null;
 
     return (
-        <div className="install-banner p-3 mb-4 rounded-4 border d-flex align-items-center justify-content-between shadow-sm animate-fade-in"
-             style={{ backgroundColor: '#FFFBEB', borderColor: '#FDE68A' }}>
+        <div className="install-banner p-3 mb-4 rounded-4 border-3 d-flex align-items-center justify-content-between animate-fade-in bg-theme-surface border-theme-main shadow-action-sm">
             <div className="d-flex align-items-center gap-3">
-                <div className="bg-warning rounded-3 p-2 d-flex align-items-center justify-content-center shadow-sm" style={{ width: '44px', height: '44px' }}>
-                    <span className="fw-bold text-dark fs-5">V</span>
+                <div className="bg-warning rounded-3 border border-dark border-2 p-2 d-flex align-items-center justify-content-center shadow-action-sm" style={{ width: '48px', height: '48px' }}>
+                    <Smartphone size={24} className="text-dark" strokeWidth={2.5} />
                 </div>
                 <div className="text-start">
-                    <h6 className="fw-bold mb-0 text-dark" style={{ fontSize: '14px' }}>Install Language App</h6>
-                    <p className="text-muted mb-0" style={{ fontSize: '11px' }}>
+                    <h6 className="fw-black mb-0 text-theme-main ls-tight" style={{ fontSize: '15px' }}>INSTALL CHOMMIE</h6>
+                    <p className="small fw-bold text-theme-muted mb-0 opacity-75" style={{ fontSize: '11px' }}>
                         {isIOS
-                            ? 'Tap the "Share" icon then "Add to Home Screen"'
-                            : 'Access lessons directly from your home screen'}
+                            ? 'Tap "Share" then "Add to Home Screen"'
+                            : 'Learn languages faster from your home screen'}
                     </p>
                 </div>
             </div>
@@ -77,21 +62,21 @@ const InstallBanner: React.FC = () => {
                 {!isIOS ? (
                     <button
                         onClick={handleInstallClick}
-                        className="btn btn-dark btn-sm rounded-3 px-3 fw-bold smallest uppercase ls-1"
+                        className="btn btn-game btn-game-primary px-3 py-2 smallest fw-black ls-1"
                     >
-                        Install
+                        <Download size={14} className="me-1" strokeWidth={3} /> INSTALL
                     </button>
                 ) : (
-                    <div className="text-dark">
-                        <i className="bi bi-box-arrow-up fs-5"></i>
+                    <div className="p-2 bg-theme-base border border-theme-main rounded-circle d-flex align-items-center justify-content-center text-theme-main">
+                        <Share size={18} strokeWidth={2.5} />
                     </div>
                 )}
                 <button
                     onClick={() => setIsVisible(false)}
-                    className="btn btn-link text-muted p-1"
+                    className="btn btn-link text-theme-muted p-1 hover-scale"
                     style={{ textDecoration: 'none' }}
                 >
-                    <i className="bi bi-x-lg" style={{ fontSize: '12px' }}></i>
+                    <X size={20} strokeWidth={3} />
                 </button>
             </div>
 
@@ -101,8 +86,10 @@ const InstallBanner: React.FC = () => {
                     to { opacity: 1; transform: translateY(0); }
                 }
                 .animate-fade-in {
-                    animation: fadeIn 0.4s ease-out forwards;
+                    animation: fadeIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
                 }
+                .hover-scale { transition: transform 0.2s; }
+                .hover-scale:hover { transform: scale(1.1); }
             `}</style>
         </div>
     );
