@@ -99,7 +99,7 @@ The app includes a built-in **Admin Panel** for managing lessons, languages, and
 ---
 
 ## 🎨 Design Philosophy
-Chommie uses a **Premium Brutalist Slate & Amber** palette. Every interaction is designed to feel alive, with subtle micro-animations and smooth transitions that respect user focus. **Note: No purple colors are used in the platform design.**
+Chommie uses a **Premium Brutalist Slate & Amber** palette. Every interaction is designed to feel alive, with subtle micro-animations and smooth transitions that respect user focus. 
 
 ---
 *Built with ❤️ for the Mzansi Community. Speak the Culture.*

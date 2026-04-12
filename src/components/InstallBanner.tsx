@@ -12,7 +12,7 @@ const InstallBanner: React.FC = () => {
             || (navigator as any).standalone === true;
         setIsStandalone(checkStandalone);
 
-        const ios = /iPad|iPhone|iPod/.test(navigator.userAgent) && !(window as any).MSStream;
+        const ios = /Macintosh|Mac OS X|iPad|iPhone|iPod/.test(navigator.userAgent) && !(window as any).MSStream;
         setIsIOS(ios);
 
         const handler = (e: Event) => {

@@ -55,12 +55,12 @@ const GameRoom: React.FC = () => {
     const initialPersistentState = getSavedState();
 
     const [state, send] = useMachine(gameRoomMachine);
-    
+
     // Map XState value to original gameState string formats for UI logic
-    const gameState = state.value === 'idle' 
-        ? (initialPersistentState?.gameState || startType || 'STUDY') 
+    const gameState = state.value === 'idle'
+        ? (initialPersistentState?.gameState || startType || 'STUDY')
         : state.value.toString().toUpperCase();
-        
+
     const isFirstTime = state.value === 'idle' ? true : state.context.isFirstTime;
 
     const [lesson, setLesson] = useState<any>(null);
@@ -105,7 +105,7 @@ const GameRoom: React.FC = () => {
 
                 if (isFirstTime) {
                     await awardPoints(finalScore);
-                    
+
                     const updateData: any = {
                         completedLessons: arrayUnion(mlId),
                         lastLessonId: null,
@@ -325,9 +325,9 @@ const GameRoom: React.FC = () => {
                     const completed = userData.completedLessons || [];
                     const mlId = microLessonId || `${lessonId}__ml_0`;
                     const isFirst = !completed.includes(mlId);
-                    
-                    send({ 
-                        type: 'INITIALIZE', 
+
+                    send({
+                        type: 'INITIALIZE',
                         isFirstTime: isFirst,
                         startType: initialPersistentState?.gameState || startType || 'STUDY'
                     });
@@ -391,7 +391,7 @@ const GameRoom: React.FC = () => {
     const renderProgressHeader = () => {
         let current = 0;
         let total = 1;
-        
+
         if (gameState === 'STUDY') {
             current = currentSlide + 1;
             total = lesson.slides.length;
@@ -446,7 +446,7 @@ const GameRoom: React.FC = () => {
                     <div className="text-center w-100 brutalist-card p-4 p-md-5 shadow-action-lg position-relative overflow-hidden" style={{ maxWidth: '550px', background: 'var(--color-surface)' }}>
                         {/* Decorative Background Elements */}
                         <div className="position-absolute top-0 start-0 w-100 h-100 opacity-10 pointer-events-none" style={{ backgroundImage: 'radial-gradient(var(--venda-yellow) 2px, transparent 2px)', backgroundSize: '30px 30px' }}></div>
-                        
+
                         <div className="position-relative z-1">
                             <div className="mb-4 mt-2 animate__animated animate__bounceIn d-flex justify-content-center">
                                 <Mascot mood="excited" width="160px" height="160px" />
@@ -478,7 +478,7 @@ const GameRoom: React.FC = () => {
                                         </div>
                                     </div>
                                 </div>
-                                
+
                                 {isFirstTime && scoreBreakdown.streakBonus > 0 && (
                                     <div className="mt-4 pt-3 border-top border-theme-main border-2 d-flex justify-content-center gap-3">
                                         <span className="badge bg-danger text-white border-0 py-2 px-3 fw-black rounded-pill ls-1 smallest animate__animated animate__pulse animate__infinite">
@@ -489,8 +489,8 @@ const GameRoom: React.FC = () => {
                             </div>
 
                             <div className="px-md-4">
-                                <button 
-                                    className="btn btn-game btn-game-primary w-100 py-3 fw-black ls-1 uppercase shadow-action hover-scale" 
+                                <button
+                                    className="btn btn-game btn-game-primary w-100 py-3 fw-black ls-1 uppercase shadow-action hover-scale"
                                     onClick={async () => {
                                         if (gameState === 'NO_QUIZ') {
                                             await handleFinishQuiz(50, 0, 0);
@@ -501,16 +501,16 @@ const GameRoom: React.FC = () => {
                                     {isFirstTime ? 'CLAIM REWARDS' : 'BACK TO MAP'}
                                 </button>
                             </div>
-                            
+
                             <p className="mt-4 text-theme-muted smallest fw-black uppercase ls-1 opacity-50">
-                                {gameState === 'NO_QUIZ' 
-                                    ? "GREAT JOB! THERE WAS NO QUIZ THIS TIME." 
+                                {gameState === 'NO_QUIZ'
+                                    ? "GREAT JOB! THERE WAS NO QUIZ THIS TIME."
                                     : "KEEP GOING TO MAINTAIN YOUR STREAK!"}
                             </p>
                         </div>
                     </div>
                 </div>
-                
+
                 <style>{`
                     .shadow-action-lg { box-shadow: 12px 12px 0px var(--color-border); }
                     .letter-spacing-2 { letter-spacing: 4px; }
@@ -531,10 +531,10 @@ const GameRoom: React.FC = () => {
                     <div className="flex-grow-1 overflow-auto bg-theme-base">
                         <div className="container py-4" style={{ maxWidth: '600px' }}>
                             <div key={currentSlide} className="animate__animated animate__fadeIn animate__faster px-2">
-                                
+
                                 {/* Main Lesson Card */}
                                 <div className="brutalist-card p-4 p-md-5 w-100 position-relative shadow-action" style={{ overflow: 'hidden' }}>
-                                    
+
                                     {/* Section 1: Phrase Display */}
                                     <div className="text-center mb-5">
                                         <h1 className="fw-black mb-1 text-theme-main ls-tight uppercase" style={{ fontSize: 'clamp(2rem, 8vw, 4rem)' }}>{slide.nativeWord || slide.native || slide.word || slide.venda || slide.tshivenda}</h1>
@@ -545,12 +545,12 @@ const GameRoom: React.FC = () => {
                                     <div className="text-center mb-5">
                                         <div className="d-flex flex-column align-items-center gap-4">
                                             <div className="d-flex align-items-center gap-4">
-                                                <button className="btn rounded-circle d-flex align-items-center justify-content-center shadow-action-light hover-scale" 
+                                                <button className="btn rounded-circle d-flex align-items-center justify-content-center shadow-action-light hover-scale"
                                                     onClick={() => speakNative(slide.nativeWord || slide.native || slide.word || slide.venda || slide.tshivenda)}
                                                     style={{ width: 80, height: 80, backgroundColor: isPlayingAudio ? 'var(--venda-yellow)' : '#111827', border: '5px solid var(--color-border)', transition: 'all 0.1s' }}>
                                                     <Play size={32} fill={isPlayingAudio ? '#000' : '#FFFFFF'} className={isPlayingAudio ? 'text-dark' : 'text-white'} />
                                                 </button>
-                                                <button className="btn bg-theme-surface brutalist-card--sm rounded-circle d-flex align-items-center justify-content-center hover-scale" 
+                                                <button className="btn bg-theme-surface brutalist-card--sm rounded-circle d-flex align-items-center justify-content-center hover-scale"
                                                     onClick={() => speakNative(slide.nativeWord || slide.native || slide.word || slide.venda || slide.tshivenda)}
                                                     style={{ width: 50, height: 50 }}>
                                                     <span className="fw-black text-theme-main uppercase ls-1" style={{ fontSize: '11px' }}>0.5x</span>
@@ -692,11 +692,11 @@ const GameRoom: React.FC = () => {
                             </div>
                         </div>
                     </div>
-                    
+
                     {/* Feedback Panel */}
                     {showExplanation && (
-                        <div className="position-fixed bottom-0 start-0 end-0 animate__animated animate__slideInUp animate__faster" 
-                             style={{ zIndex: 9999, borderTop: '6px solid var(--color-border)', backgroundColor: answerStatus === 'correct' ? (document.documentElement.getAttribute('data-theme') === 'dark' ? '#064e3b' : '#dcfce7') : (document.documentElement.getAttribute('data-theme') === 'dark' ? '#7f1d1d' : '#fee2e2'), boxShadow: '0 -20px 60px rgba(0,0,0,0.2)' }}>
+                        <div className="position-fixed bottom-0 start-0 end-0 animate__animated animate__slideInUp animate__faster"
+                            style={{ zIndex: 9999, borderTop: '6px solid var(--color-border)', backgroundColor: answerStatus === 'correct' ? (document.documentElement.getAttribute('data-theme') === 'dark' ? '#064e3b' : '#dcfce7') : (document.documentElement.getAttribute('data-theme') === 'dark' ? '#7f1d1d' : '#fee2e2'), boxShadow: '0 -20px 60px rgba(0,0,0,0.2)' }}>
                             <div className="container pt-4 pb-sm-5 pb-5 mb-3" style={{ maxWidth: '650px' }}>
                                 {answerStatus === 'correct' ? (
                                     <div className="d-flex flex-column gap-4">
@@ -706,8 +706,8 @@ const GameRoom: React.FC = () => {
                                             </div>
                                             <h2 className="fw-black mb-0 ls-tight uppercase" style={{ color: '#16a34a', fontSize: '2.5rem' }}>Perfect!</h2>
                                         </div>
-                                        <button className="btn btn-game w-100 py-3 text-white border-0" 
-                                            style={{ backgroundColor: '#22c55e', boxShadow: '0 8px 0 #16a34a', fontSize: '1.4rem' }} 
+                                        <button className="btn btn-game w-100 py-3 text-white border-0"
+                                            style={{ backgroundColor: '#22c55e', boxShadow: '0 8px 0 #16a34a', fontSize: '1.4rem' }}
                                             onClick={() => nextQuestion(score, correctCount)}>
                                             CONTINUE QUEST
                                         </button>
@@ -723,7 +723,7 @@ const GameRoom: React.FC = () => {
                                                 <p className="smallest fw-black ls-1 mb-0 text-uppercase mt-1" style={{ color: '#dc2626' }}>You'll get another chance</p>
                                             </div>
                                         </div>
-                                        
+
                                         <div className="bg-theme-surface p-3 brutalist-card--sm border-theme-main border-2 border-dashed shadow-none">
                                             <p className="smallest fw-black mb-1 ls-2 text-uppercase text-theme-muted">Correct Answer</p>
                                             <p className="fs-5 fw-black mb-0 text-theme-main uppercase ls-1">
@@ -731,8 +731,8 @@ const GameRoom: React.FC = () => {
                                             </p>
                                         </div>
 
-                                        <button className="btn btn-game w-100 py-3 text-white border-0" 
-                                            style={{ backgroundColor: '#ef4444', boxShadow: '0 8px 0 #dc2626', fontSize: '1.4rem' }} 
+                                        <button className="btn btn-game w-100 py-3 text-white border-0"
+                                            style={{ backgroundColor: '#ef4444', boxShadow: '0 8px 0 #dc2626', fontSize: '1.4rem' }}
                                             onClick={() => {
                                                 const newScore = isFirstTime ? awardConsolation() : score;
                                                 nextQuestion(newScore);

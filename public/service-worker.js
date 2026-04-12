@@ -1,13 +1,13 @@
-// VendaLearn Service Worker — Network-First with Cache Fallback
-const CACHE_NAME = 'venda-learn-v5';
-const AVATAR_CACHE = 'venda-avatars-v1';
-const IMAGE_CACHE = 'venda-images-v1';
+// Chommie Language Companion Service Worker — Network-First with Cache Fallback
+const CACHE_NAME = 'chommie-language-v5';
+const AVATAR_CACHE = 'chommie-avatars-v1';
+const IMAGE_CACHE = 'chommie-images-v1';
 const KNOWN_CACHES = [CACHE_NAME, AVATAR_CACHE, IMAGE_CACHE];
 
 // Pre-cache these on install (app shell)
 const PRECACHE_URLS = [
     '/',
-    '/images/Logo.png'
+    '/images/elphie.png'
 ];
 
 // Install: pre-cache shell
@@ -144,4 +144,84 @@ self.addEventListener('fetch', (event) => {
                 });
             })
     );
+});
+
+// Push notification event listener (PWABuilder native feature)
+self.addEventListener('push', (event) => {
+    let data = {};
+    if (event.data) {
+        try {
+            data = event.data.json();
+        } catch (e) {
+            data = { title: 'New Notification', body: event.data.text() };
+        }
+    }
+
+    const title = data.title || 'Chommie Activity';
+    const options = {
+        body: data.body || 'You have new activity!',
+        icon: '/images/elphie.png',
+        badge: '/images/elphie.png',
+        data: data,
+    };
+
+    event.waitUntil(
+        self.registration.showNotification(title, options)
+    );
+});
+
+// Push notification click event
+self.addEventListener('notificationclick', (event) => {
+    event.notification.close();
+    event.waitUntil(
+        clients.matchAll({ type: 'window', includeUncontrolled: true }).then((windowClients) => {
+            // Check if there is already a window/tab open with the target URL
+            for (let i = 0; i < windowClients.length; i++) {
+                const client = windowClients[i];
+                if (client.url === '/' && 'focus' in client) {
+                    return client.focus();
+                }
+            }
+            // If not, open a new window
+            if (clients.openWindow) {
+                return clients.openWindow('/');
+            }
+        })
+    );
+});
+
+// PWA Widget Events
+self.addEventListener('widgetinstall', (event) => {
+    event.waitUntil(
+        // Optionally update the widget data on install
+        clients.matchAll().then(() => {
+            console.log('Widget installed');
+        })
+    );
+});
+
+self.addEventListener('widgetresume', (event) => {
+    event.waitUntil(
+        clients.matchAll().then(() => {
+            console.log('Widget resumed');
+        })
+    );
+});
+
+self.addEventListener('widgetclick', (event) => {
+    if (event.action === 'visitApplication') {
+        event.waitUntil(
+            clients.matchAll({ type: 'window', includeUncontrolled: true }).then((windowClients) => {
+                for (let i = 0; i < windowClients.length; i++) {
+                    const client = windowClients[i];
+                    if (client.url.includes('/') && 'focus' in client) {
+                        return client.focus();
+                    }
+                }
+                if (clients.openWindow) {
+                    return clients.openWindow('/');
+                }
+            })
+        );
+    }
 });

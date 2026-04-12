@@ -511,7 +511,7 @@ const WordBomb: React.FC = () => {
                 <div className="text-center w-100 brutalist-card p-4 p-md-5 shadow-action-lg position-relative overflow-hidden" style={{ maxWidth: '550px', background: 'var(--color-surface)' }}>
                     {/* Decorative Background */}
                     <div className="position-absolute top-0 start-0 w-100 h-100 opacity-10 pointer-events-none" style={{ backgroundImage: 'radial-gradient(var(--venda-yellow) 2px, transparent 2px)', backgroundSize: '30px 30px' }}></div>
-                    
+
                     <div className="position-relative z-1">
                         <div className="mb-4 mt-2 animate__animated animate__bounceIn d-flex justify-content-center">
                             <Mascot width="160px" height="160px" mood="excited" />
@@ -564,13 +564,13 @@ const WordBomb: React.FC = () => {
                                 BACK TO HUB
                             </button>
                         </div>
-                        
+
                         <p className="mt-4 text-theme-muted smallest fw-black uppercase ls-1 opacity-50">
                             {score > 0 ? "FANTASTIC! YOUR VOCABULARY IS GROWING." : "DON'T GIVE UP! RETRY TO BEAT YOUR BEST."}
                         </p>
                     </div>
                 </div>
-                
+
                 <style>{`
                     .shadow-action-lg { box-shadow: 12px 12px 0px var(--color-border); }
                     .letter-spacing-2 { letter-spacing: 4px; }
