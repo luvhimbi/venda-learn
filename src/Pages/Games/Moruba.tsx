@@ -36,7 +36,7 @@ const MORUBA_INTRO_STEPS = [
 
 const Moruba: React.FC = () => {
     const navigate = useNavigate();
-    const { playCorrect, playClick, triggerHaptic } = useVisualJuice();
+    const { playCorrect, playClick, playWin, playLose, triggerHaptic } = useVisualJuice();
 
     // Game State
     // P1 (Bottom): Inner (Index 0-7), Outer (Index 8-15)
@@ -195,7 +195,9 @@ const Moruba: React.FC = () => {
             await updateDoc(userRef, {
                 morubaWins: increment(1)
             });
-            playCorrect();
+            playWin();
+        } else {
+            playLose();
         }
         
         setResultData({

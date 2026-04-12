@@ -6,6 +6,9 @@ const sounds = {
     correct: new Howl({ src: ['https://assets.mixkit.co/active_storage/sfx/2013/2013-preview.mp3'], volume: 0.5 }),
     wrong: new Howl({ src: ['https://assets.mixkit.co/active_storage/sfx/2018/2018-preview.mp3'], volume: 0.4 }),
     click: new Howl({ src: ['https://assets.mixkit.co/active_storage/sfx/2568/2568-preview.mp3'], volume: 0.3 }),
+    win: new Howl({ src: ['/Audio/you_win.ogg'], volume: 0.6 }),
+    lose: new Howl({ src: ['/Audio/you_lose.ogg'], volume: 0.6 }),
+    winner: new Howl({ src: ['/Audio/winner.ogg'], volume: 0.6 }),
 };
 
 export const useVisualJuice = () => {
@@ -34,6 +37,18 @@ export const useVisualJuice = () => {
         if (preferences.sound) sounds.click.play();
     }, [preferences.sound]);
 
+    const playWin = useCallback(() => {
+        if (preferences.sound) sounds.win.play();
+    }, [preferences.sound]);
+
+    const playLose = useCallback(() => {
+        if (preferences.sound) sounds.lose.play();
+    }, [preferences.sound]);
+
+    const playWinner = useCallback(() => {
+        if (preferences.sound) sounds.winner.play();
+    }, [preferences.sound]);
+
     const triggerHaptic = useCallback((type: 'light' | 'medium' | 'heavy' = 'light') => {
         if (!preferences.haptic || !window.navigator.vibrate) return;
         
@@ -51,6 +66,6 @@ export const useVisualJuice = () => {
         }
     }, []);
 
-    return { playCorrect, playWrong, playClick, triggerHaptic, triggerShake };
+    return { playCorrect, playWrong, playClick, playWin, playLose, playWinner, triggerHaptic, triggerShake };
 };
 

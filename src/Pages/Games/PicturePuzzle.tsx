@@ -144,7 +144,7 @@ const PicturePuzzle: React.FC = () => {
     const [showExitConfirm, setShowExitConfirm] = useState(false);
     const [showResult, setShowResult] = useState(false);
     const [resultData, setResultData] = useState({ isSuccess: false, title: '', message: '', points: 0 });
-    const { playCorrect, playWrong, playClick, triggerShake } = useVisualJuice();
+    const { playCorrect, playWrong, playClick, playWin, playLose, triggerShake } = useVisualJuice();
     const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
     // Mascot
@@ -309,6 +309,13 @@ const PicturePuzzle: React.FC = () => {
         }
 
         const isSuccess = score > 0;
+
+        if (isSuccess) {
+            playWin();
+        } else {
+            playLose();
+        }
+
         setResultData({
             isSuccess,
             title: isSuccess ? 'Tshifhinga tsho fhela!' : 'Game Over',

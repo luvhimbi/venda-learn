@@ -146,7 +146,7 @@ const MORABARABA_INTRO_STEPS = [
 
 const Morabaraba: React.FC = () => {
     const navigate = useNavigate();
-    const { playCorrect, playWrong, playClick, triggerShake, triggerHaptic } = useVisualJuice();
+    const { playCorrect, playWrong, playClick, playWin, playLose, triggerShake, triggerHaptic } = useVisualJuice();
 
     // Game State
     const [board, setBoard] = useState<(Player | null)[]>(Array(24).fill(null));
@@ -231,7 +231,9 @@ const Morabaraba: React.FC = () => {
             await updateDoc(userRef, {
                 morabarabaWins: increment(1)
             });
-            playCorrect();
+            playWin();
+        } else {
+            playLose();
         }
 
         setResultData({

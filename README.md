@@ -1,43 +1,38 @@
-# 🐘 Venda Learn (Tshivenda)
+# 🐘 Chommie Language Companion
 
 [![Vite](https://img.shields.io/badge/vite-%23FACC15.svg?style=for-the-badge&logo=vite&logoColor=black)](https://vitejs.dev/)
 [![React](https://img.shields.io/badge/react-%231E293B.svg?style=for-the-badge&logo=react&logoColor=%23FACC15)](https://reactjs.org/)
 [![Firebase](https://img.shields.io/badge/firebase-%23FACC15.svg?style=for-the-badge&logo=firebase&logoColor=black)](https://firebase.google.com/)
 
-**Venda Learn** is a premium, gamified language learning platform designed to make mastering Tshivenda (Venda) engaging, interactive, and culturally immersive. Featuring a friendly mascot, interactive tours, and real-time practice hubs, it's the ultimate companion for the Venda language warrior.
+**Chommie Language Companion** is South Africa's #1 premium, gamified language quest. Built to make mastering our 11 official languages engaging, interactive, and culturally immersive, Chommie is for the whole crew. Whether you're learning IsiZulu, IsiXhosa, Afrikaans, or any other Mzansi tongue, Elphie the elephant guide is here to help you **Speak the Culture.**
 
 ---
 
 ## ✨ Key Features
 
-### 🐘 Ndou the Mascot
-*Meet Ndou*, our animated baby elephant guide! Ndou isn't just a static image; he has a range of **dynamic moods** (Happy, Excited, Sad) that react to your actions—celebrating your wins and encouraging you when you're away.
+### 🐘 Elphie the Mascot
+*Meet Elphie*, our animated baby elephant guide! Elphie isn't just a static image; he's your personal language coach with **dynamic moods** (Happy, Excited, Sad) that react to your progress—celebrating your wins and encouraging you to keep the streak alive.
 
 ### 🧭 App Tour Guide
-Never feel lost. Our custom **Viewport-Safe Tour Guide** greets new users with a step-by-step walkthrough. It automatically adjusts to your screen size and scrolls sidebar elements into view to ensure a seamless onboarding experience.
+Never feel lost. Our custom **Viewport-Safe Tour Guide** greets new users with a step-by-step walkthrough. It automatically adjusts to your screen size and ensures a seamless onboarding experience.
 
-### � Structured Lessons & Quizzes
-- **Bvelelani Phanda (Continue Learning)**: Pick up exactly where you left off with our smart lesson tracking.
-- **Interactive Slides**: Lessons are broken down into digestible slides with Venda text, English translations, and cultural context.
-- **Rapid-Fire Quizzes**: Test your knowledge at the end of each module with multiple-choice quizzes and instant feedback.
+### 📚 Quick Quests & Lessons
+- **Bite-Sized Learning**: Pick up exactly where you left off with smart lesson tracking.
+- **Interactive Slides**: Lessons are broken down into digestible slides with native text, English translations, and cultural context.
+- **Rapid-Fire Quizzes**: Test your knowledge at the end of each module with instant feedback and XP rewards.
 
-### 🎮 Cultural Games (Mitambo)
-- **Picture-to-Word Matching**: A high-speed race against time to match Venda words with their visual representations.
-- **Cultural Challenges**: Games that teach you about Venda traditions while you play.
+### 🎮 Lekker Games (Mitambo)
+- **Word Bomb**: A high-speed race against time to master vocabulary.
+- **Syllable Builder**: Construct words piece by piece to understand linguistic structure.
+- **Picture Puzzles**: Match words with visual representations in a fun, arcade-style environment.
 
-### 🏆 Leaderboard & Progression
-- **Top Learners (Leaderboard)**: Compete with the community! See how you rank against other Venda warriors based on your total LP.
-- **Level System**: Advance through levels from **Mugudi** (Learner) to **Venda Master**. 
-- **Learning Points (LP)**: Earn points for every successful lesson, quiz, or game win.
-
-### � Practice Hub
-Connect with **Native Speakers** in real-time.
-- **Timed Sessions**: High-intensity 1-hour focus sessions.
-- **Unread Tracking**: Never miss a reply with real-time notification badges.
-- **Discussion Starters**: Get the conversation flowing with pre-built cultural prompts.
+### 🏆 Leaderboards & Progression
+- **Top Learners**: Compete with the community! Climb the ranks and see how you match up against other language warriors.
+- **Level System**: Advance from a **Traveler** to a **Language Boss**.
+- **XP & Trophies**: Earn XP for every successful quest and unlock unique trophies for your collection.
 
 ### 🔥 Daily Streak System
-Keep the fire alive! The streak system tracks your daily consistency. Missing a day resets the fire, encouraging daily engagement with the language.
+Keep the fire alive! The streak system tracks your daily consistency. Missing a day resets the fire, encouraging daily engagement with your chosen language.
 
 ---
 
@@ -45,10 +40,10 @@ Keep the fire alive! The streak system tracks your daily consistency. Missing a 
 
 - **Frontend**: [React 19](https://reactjs.org/) + [TypeScript](https://www.typescriptlang.org/)
 - **Build Tool**: [Vite](https://vitejs.dev/)
-- **Database & Auth**: [Firebase](https://firebase.google.com/) (Firestore, Authentication)
-- **Styling**: [Bootstrap 5](https://getbootstrap.com/) + Custom **Slate & Amber** Design System
-- **Animations**: [Animate.css](https://animate.style/) + CSS Keyframes
-- **Notifications**: [SweetAlert2](https://sweetalert2.github.io/)
+- **Database & Auth**: [Firebase](https://firebase.google.com/) (Firestore, Authentication, Cloud Messaging)
+- **Styling**: [Bootstrap 5](https://getbootstrap.com/) + Custom **Brutalist Slate & Amber** Design System
+- **Animations**: [Framer Motion](https://www.framer.com/motion/) + CSS Keyframes
+- **State Management**: [XState](https://stately.ai/docs/xstate) (for complex game logic)
 
 ---
 
@@ -92,19 +87,19 @@ Keep the fire alive! The streak system tracks your daily consistency. Missing a 
 ## 🏗️ Architecture
 
 - `/src/components`: UI components (Mascot, TourGuide, Sidebar, etc.)
-- `/src/Pages`: Core application views (Home, PracticeHub, Profile, Lessons)
-- `/src/services`: Business logic (Firebase config, `dataCache.ts` for performance, `updateStreak.ts`)
+- `/src/Pages`: Core application views (Home, Games, Profile, Lessons)
+- `/src/services`: Business logic (Firebase config, `dataCache.ts` for performance, achievement handling)
 - `/src/config`: Static configuration (Tour steps, Level thresholds)
 
 ---
 
 ## 🛡️ Admin & Safety
-The app includes a built-in **Admin Panel** for managing lessons and a robust **Reporting System** in the Practice Hub to ensure a safe learning community for everyone.
+The app includes a built-in **Admin Panel** for managing lessons, languages, and games, ensuring high-quality content for the entire Mzansi community.
 
 ---
 
 ## 🎨 Design Philosophy
-Venda Learn uses a **Premium Slate & Amber** palette. Every interaction is designed to feel alive, with subtle micro-animations and smooth transitions that respect user focus.
+Chommie uses a **Premium Brutalist Slate & Amber** palette. Every interaction is designed to feel alive, with subtle micro-animations and smooth transitions that respect user focus. **Note: No purple colors are used in the platform design.**
 
 ---
-*Built with ❤️ for the Venda Community.*
+*Built with ❤️ for the Mzansi Community. Speak the Culture.*

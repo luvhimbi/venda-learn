@@ -18,7 +18,8 @@ interface Player {
 const LEAGUES = {
     PODIUM: { min: 1, max: 3, color: '#facc15' },
     GOLD: { min: 4, max: 10, color: '#CA8A04' },
-    SILVER: { min: 11, max: 20, color: '#6B7280' }
+    SILVER: { min: 11, max: 20, color: '#6B7280' },
+    BRONZE: { min: 21, max: 50, color: '#92400e' }
 };
 
 interface RankItemProps {
@@ -30,7 +31,7 @@ interface RankItemProps {
 
 const RankItem: React.FC<RankItemProps> = ({ player, rank, leagueColor, isMe }) => (
     <div className={`list-group-item bg-transparent border-0 px-3 py-3 d-flex align-items-center ${isMe ? 'border-start border-4' : ''}`} style={isMe ? { borderLeftColor: leagueColor, backgroundColor: 'var(--color-surface)' } : {}}>
-        <span className="me-3 fw-black text-theme-muted smallest" style={{ width: '25px' }}>#{rank > 20 ? '20+' : rank}</span>
+        <span className="me-3 fw-black text-theme-muted smallest" style={{ width: '25px' }}>#{rank > 50 ? '50+' : rank}</span>
         <div className="me-3">
             <AvatarDisplay avatarId={player.avatarId || 'adventurer'} seed={player.username} size={40} />
         </div>
@@ -153,7 +154,7 @@ const Muvhigo: React.FC = () => {
 
         const fetchLeaderboard = async () => {
             try {
-                const playersData = await fetchTopLearnersByWeek(20);
+                const playersData = await fetchTopLearnersByWeek(50);
                 const currentUserData = await fetchUserData();
                 const currentWeek = getCurrentWeekIdentifier();
 
@@ -169,10 +170,10 @@ const Muvhigo: React.FC = () => {
                         }
                     });
 
-                    // If user is active but not in top 20, show them as "Unranked" but with points
+                    // If user is active but not in top 50, show them as unranked or high rank
                     if (!foundMe && currentUserData && currentUserData.lastActiveWeek === currentWeek && (currentUserData.weeklyXP || 0) > 0) {
                         setCurrentUserRank({
-                            rank: 21, // Use 21 as local indicator for "20+" or just outside Top 20
+                            rank: 51, // Local indicator for 50+
                             player: {
                                 id: auth.currentUser?.uid || '',
                                 username: currentUserData.username || 'Anonymous',
@@ -205,6 +206,7 @@ const Muvhigo: React.FC = () => {
     const topThree = players.slice(0, 3);
     const goldLeague = players.slice(3, 10);
     const silverLeague = players.slice(10, 20);
+    const bronzeLeague = players.slice(20, 50);
 
     return (
         <div className="bg-theme-base min-vh-100 pt-3 pb-5" style={{ overflowX: 'hidden' }}>
@@ -274,33 +276,51 @@ const Muvhigo: React.FC = () => {
                                 {/* PODIUM */}
                                 <div className="row align-items-end mb-5 g-0 text-center border-bottom border-4 border-theme-main pb-5 mx-auto" style={{ maxWidth: '600px' }}>
                                     {topThree[1] && (
-                                        <div className="col-4 px-2 d-flex flex-column justify-content-end">
-                                            <div className="d-flex justify-content-center mb-2">
-                                                <AvatarDisplay avatarId={topThree[1].avatarId || 'adventurer'} seed={topThree[1].username} size={60} />
+                                        <div className="col-4 px-1 d-flex flex-column justify-content-end">
+                                            <div className={`d-flex justify-content-center mb-2 position-relative`}>
+                                                <AvatarDisplay 
+                                                    avatarId={topThree[1].avatarId || 'adventurer'} 
+                                                    seed={topThree[1].username} 
+                                                    size={60} 
+                                                    className={auth.currentUser?.uid === topThree[1].id ? "border-warning border-3" : ""}
+                                                />
                                             </div>
                                             <Award className="text-secondary mx-auto mb-1" size={24} />
-                                            <div className="fw-black text-theme-main text-truncate small mb-1">{topThree[1].username}</div>
-                                            <div className="rounded-top-3 border-top border-start border-end border-4 border-theme-main mx-auto w-100" style={{ height: '80px', backgroundColor: '#9CA3AF' }}></div>
+                                            <div className="fw-black text-theme-main text-truncate small mb-0 px-2">{topThree[1].username}</div>
+                                            {auth.currentUser?.uid === topThree[1].id && <div className="smallest fw-black text-warning ls-1 uppercase">(YOU)</div>}
+                                            <div className="rounded-top-3 border-top border-start border-end border-4 border-theme-main mx-auto w-100 mt-1" style={{ height: '80px', backgroundColor: '#9CA3AF' }}></div>
                                         </div>
                                     )}
                                     {topThree[0] && (
-                                        <div className="col-4 px-2 d-flex flex-column justify-content-end">
-                                            <div className="d-flex justify-content-center mb-2">
-                                                <AvatarDisplay avatarId={topThree[0].avatarId || 'adventurer'} seed={topThree[0].username} size={85} />
+                                        <div className="col-4 px-1 d-flex flex-column justify-content-end">
+                                            <div className="d-flex justify-content-center mb-2 position-relative">
+                                                <AvatarDisplay 
+                                                    avatarId={topThree[0].avatarId || 'adventurer'} 
+                                                    seed={topThree[0].username} 
+                                                    size={85} 
+                                                    className={auth.currentUser?.uid === topThree[0].id ? "border-warning border-4" : ""}
+                                                />
                                             </div>
                                             <Trophy className="text-venda mx-auto mb-1" size={32} />
-                                            <div className="fw-black text-theme-main text-truncate mb-1">{topThree[0].username}</div>
-                                            <div className="rounded-top-3 border-top border-start border-end border-4 border-theme-main mx-auto w-100" style={{ height: '140px', backgroundColor: '#FACC15' }}></div>
+                                            <div className="fw-black text-theme-main text-truncate mb-0 px-2">{topThree[0].username}</div>
+                                            {auth.currentUser?.uid === topThree[0].id && <div className="smallest fw-black text-warning ls-1 uppercase">(YOU)</div>}
+                                            <div className="rounded-top-3 border-top border-start border-end border-4 border-theme-main mx-auto w-100 mt-1" style={{ height: '140px', backgroundColor: '#FACC15' }}></div>
                                         </div>
                                     )}
                                     {topThree[2] && (
-                                        <div className="col-4 px-2 d-flex flex-column justify-content-end">
-                                            <div className="d-flex justify-content-center mb-2">
-                                                <AvatarDisplay avatarId={topThree[2].avatarId || 'adventurer'} seed={topThree[2].username} size={50} />
+                                        <div className="col-4 px-1 d-flex flex-column justify-content-end">
+                                            <div className="d-flex justify-content-center mb-2 position-relative">
+                                                <AvatarDisplay 
+                                                    avatarId={topThree[2].avatarId || 'adventurer'} 
+                                                    seed={topThree[2].username} 
+                                                    size={50} 
+                                                    className={auth.currentUser?.uid === topThree[2].id ? "border-warning border-3" : ""}
+                                                />
                                             </div>
                                             <Award style={{ color: '#CD7F32' }} className="mx-auto mb-1" size={24} />
-                                            <div className="fw-black text-theme-main text-truncate small mb-1">{topThree[2].username}</div>
-                                            <div className="rounded-top-3 border-top border-start border-end border-4 border-theme-main mx-auto w-100" style={{ height: '50px', backgroundColor: '#CD7F32' }}></div>
+                                            <div className="fw-black text-theme-main text-truncate small mb-0 px-2">{topThree[2].username}</div>
+                                            {auth.currentUser?.uid === topThree[2].id && <div className="smallest fw-black text-warning ls-1 uppercase">(YOU)</div>}
+                                            <div className="rounded-top-3 border-top border-start border-end border-4 border-theme-main mx-auto w-100 mt-1" style={{ height: '50px', backgroundColor: '#CD7F32' }}></div>
                                         </div>
                                     )}
                                 </div>
@@ -358,8 +378,28 @@ const Muvhigo: React.FC = () => {
                                         </div>
                                     )}
 
-                                    {/* PERSONAL STANDINGS (If outside top 20) */}
-                                    {currentUserRank && currentUserRank.rank > 20 && (
+                                    {bronzeLeague.length > 0 && (
+                                        <div className="mb-5 mx-auto" style={{ maxWidth: '600px' }}>
+                                            <div className="d-flex align-items-center gap-2 mb-3 bg-theme-card py-2 px-4 rounded-pill d-inline-flex border border-4 border-theme-main shadow-action-sm">
+                                                <i className="bi bi-shield-fill-check text-secondary" style={{ color: '#92400e' }}></i>
+                                                <h6 className="mb-0 fw-black ls-1 text-uppercase text-theme-muted" style={{ fontSize: "12px", color: '#92400e' }}>Bronze League</h6>
+                                            </div>
+                                            <div className="list-group shadow-action rounded-4 border border-4 border-theme-main bg-theme-card overflow-hidden">
+                                                {bronzeLeague.map((player, index) => (
+                                                    <RankItem 
+                                                        key={player.id} 
+                                                        player={player} 
+                                                        rank={index + 21} 
+                                                        leagueColor={LEAGUES.BRONZE.color} 
+                                                        isMe={isLoggedIn && player.id === auth.currentUser?.uid} 
+                                                    />
+                                                ))}
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {/* PERSONAL STANDINGS (If outside top 50) */}
+                                    {currentUserRank && currentUserRank.rank > 50 && (
                                         <div className="mt-5 pt-4 border-top border-4 border-theme-main border-dashed mx-auto" style={{ maxWidth: '600px' }}>
                                             <p className="smallest fw-black text-theme-muted ls-2 text-uppercase mb-3">Your Progress</p>
                                             <div className="list-group shadow-action rounded-4 border border-4 border-theme-main bg-theme-base overflow-hidden">
@@ -370,7 +410,7 @@ const Muvhigo: React.FC = () => {
                                                     isMe={true} 
                                                 />
                                                 <div className="bg-theme-surface p-3 border-top border-2 border-theme-main text-center">
-                                                    <p className="small fw-bold text-theme-muted mb-0">You are just outside the Top 20. Keep learning to break into the Silver League!</p>
+                                                    <p className="small fw-bold text-theme-muted mb-0">You are just outside the Top 50. Keep learning to break into the Bronze League!</p>
                                                 </div>
                                             </div>
                                         </div>
