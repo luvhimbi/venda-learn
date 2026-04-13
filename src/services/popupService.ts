@@ -1,7 +1,7 @@
 import Swal from 'sweetalert2';
 
 /**
- * Premium Popup Service for Venda Learn
+ * Premium Popup Service for Chommie
  * Provides standardized, brand-consistent UI feedback using SweetAlert2.
  */
 export const popupService = {

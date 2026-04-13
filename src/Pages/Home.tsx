@@ -58,7 +58,9 @@ const Home: React.FC = () => {
 
                     if (userData) {
                         setUserData(userData);
-                        const prefId = userData.preferredLanguageId || localStorage.getItem('chommie_student_lang');
+                        const prefId = userData.preferredLanguageId
+                            || localStorage.getItem('chommie_student_lang')
+                            || localStorage.getItem('venda_student_lang');
                         if (prefId) {
                             const lang = languages.find((l: any) => l.id === prefId);
                             if (lang) setCurrentLanguage(lang);

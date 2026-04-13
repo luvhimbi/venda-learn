@@ -1,6 +1,9 @@
 import { useEffect, useRef } from 'react';
 import { useNotification } from '../contexts/NotificationContext';
 
+const getStorageValue = (primaryKey: string, legacyKey?: string) =>
+    localStorage.getItem(primaryKey) ?? (legacyKey ? localStorage.getItem(legacyKey) : null);
+
 export const useRetentionEngine = (userData: any, shouldDelay: boolean = false) => {
     const { showNotification } = useNotification();
     const hasFired = useRef(false); // Ensure we only fire once per session/mount
@@ -29,7 +32,7 @@ export const useRetentionEngine = (userData: any, shouldDelay: boolean = false) 
 
     const evaluateRetentionTriggers = (data: any) => {
         // Enforce a 10-minute global cooldown using localStorage
-        const lastShown = localStorage.getItem('vendalearn_last_nudge');
+        const lastShown = getStorageValue('chommie_last_nudge', 'vendalearn_last_nudge');
         if (lastShown) {
             const timeSince = Date.now() - parseInt(lastShown, 10);
             if (timeSince < 10 * 60 * 1000) {
@@ -46,13 +49,13 @@ export const useRetentionEngine = (userData: any, shouldDelay: boolean = false) 
         // Helper to mark fired
         const fireNotification = (options: any) => {
             showNotification(options);
-            localStorage.setItem('vendalearn_last_nudge', Date.now().toString());
+            localStorage.setItem('chommie_last_nudge', Date.now().toString());
         };
 
         // 1. STREAK PROTECTOR (Highest Priority)
         // If they have an active streak, but haven't played today
         if (data.streak && data.streak > 0 && !activeToday) {
-            const lastStreakNudge = localStorage.getItem('vendalearn_last_streak_risk_date');
+            const lastStreakNudge = getStorageValue('chommie_last_streak_risk_date', 'vendalearn_last_streak_risk_date');
             if (lastStreakNudge !== todayStr) {
                 fireNotification({
                     title: "Streak at Risk!",
@@ -60,7 +63,7 @@ export const useRetentionEngine = (userData: any, shouldDelay: boolean = false) 
                     type: 'streak',
                     duration: 8000
                 });
-                localStorage.setItem('vendalearn_last_streak_risk_date', todayStr);
+                localStorage.setItem('chommie_last_streak_risk_date', todayStr);
                 return; // Only show one notification at a time
             }
         }
@@ -81,7 +84,7 @@ export const useRetentionEngine = (userData: any, shouldDelay: boolean = false) 
                 if (diffDays > 3) {
                     fireNotification({
                         title: "We've missed you! 👋",
-                        message: "Welcome back to VendaLearn! Ready to pick up where you left off?",
+                        message: "Welcome back to Chommie! Ready to pick up where you left off?",
                         type: 'info',
                         duration: 6000
                     });
@@ -116,7 +119,7 @@ export const useRetentionEngine = (userData: any, shouldDelay: boolean = false) 
             
             if (isMatch) {
                 // Check if we already fired a reminder today to avoid multiple notifications in the same minute
-                const lastReminderDate = localStorage.getItem('vendalearn_last_reminder_date');
+                const lastReminderDate = getStorageValue('chommie_last_reminder_date', 'vendalearn_last_reminder_date');
                 if (lastReminderDate !== todayStr) {
                     fireNotification({
                         title: "Time to Learn! 📚",
@@ -124,7 +127,7 @@ export const useRetentionEngine = (userData: any, shouldDelay: boolean = false) 
                         type: 'info',
                         duration: 8000
                     });
-                    localStorage.setItem('vendalearn_last_reminder_date', todayStr);
+                    localStorage.setItem('chommie_last_reminder_date', todayStr);
                 }
             }
         }

@@ -1,7 +1,7 @@
 import React from 'react';
 
 /**
- * Premium, animated SVG Trophy Icons for VendaLearn.
+ * Premium, animated SVG Trophy Icons for Chommie.
  * Includes Bronze, Silver, Gold, and Special variants.
  */
 

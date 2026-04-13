@@ -4,26 +4,26 @@
   "description": "A platform for people who want to learn South African languages through interactive lessons, stories, and games.",
   "icons": [
     {
-      "src": "/images/elphie.png",
-      "sizes": "1368x768",
+      "src": "/images/ven.png",
+      "sizes": "500x500",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "/images/elphie.png",
-      "sizes": "1368x768",
+      "src": "/images/ven.png",
+      "sizes": "500x500",
       "type": "image/png",
       "purpose": "maskable"
     },
     {
-      "src": "/images/elphie.png",
-      "sizes": "1368x768",
+      "src": "/images/ven.png",
+      "sizes": "500x500",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "/images/elphie.png",
-      "sizes": "1368x768",
+      "src": "/images/ven.png",
+      "sizes": "500x500",
       "type": "image/png",
       "purpose": "maskable"
     }
@@ -82,15 +82,15 @@
       "type": "application/json",
       "screenshots": [
         {
-          "src": "/images/elphie.png",
-          "sizes": "1368x768",
+          "src": "/images/ven.png",
+          "sizes": "500x500",
           "label": "Chommie Widget"
         }
       ],
       "icons": [
         {
-          "src": "/images/elphie.png",
-          "sizes": "1368x768",
+          "src": "/images/ven.png",
+          "sizes": "500x500",
           "type": "image/png"
         }
       ]

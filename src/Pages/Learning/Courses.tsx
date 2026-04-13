@@ -88,7 +88,9 @@ const Courses: React.FC = () => {
 
                 setLanguages(langsData);
 
-                const prefId = userData?.preferredLanguageId || localStorage.getItem('venda_student_lang');
+                const prefId = userData?.preferredLanguageId
+                    || localStorage.getItem('chommie_student_lang')
+                    || localStorage.getItem('venda_student_lang');
                 if (prefId) {
                     setSelectedLanguageId(prefId);
                     setLastLanguageId(prefId);
@@ -127,7 +129,7 @@ const Courses: React.FC = () => {
     const handleLanguageSelect = async (langId: string) => {
         setSelectedLanguageId(langId);
         setLastLanguageId(langId);
-        localStorage.setItem('venda_student_lang', langId);
+        localStorage.setItem('chommie_student_lang', langId);
 
         if (auth.currentUser) {
             try {

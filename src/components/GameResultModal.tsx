@@ -47,7 +47,7 @@ const GameResultModal: React.FC<GameResultModalProps> = ({
                     >
                         {/* Decorative Background Elements */}
                         {isSuccess && (
-                            <div className="position-absolute top-0 start-0 w-100 h-100 opacity-10 pointer-events-none">
+                            <div className="position-absolute top-0 start-0 w-100 h-100 pe-none opacity-10" style={{ pointerEvents: 'none', zIndex: 0 }}>
                                 <Sparkles className="position-absolute" style={{ top: '10%', left: '10%' }} size={40} />
                                 <Star className="position-absolute" style={{ top: '20%', right: '15%' }} size={32} />
                                 <Trophy className="position-absolute" style={{ bottom: '15%', left: '20%' }} size={36} />
@@ -56,17 +56,17 @@ const GameResultModal: React.FC<GameResultModalProps> = ({
 
                         <div className="mb-4 d-flex justify-content-center">
                             <Mascot 
-                                width="140px" 
-                                height="140px" 
+                                width="100px" 
+                                height="100px" 
                                 mood={isSuccess ? "excited" : "sad"} 
                             />
                         </div>
 
                         <div className={`badge ${isSuccess ? 'bg-theme-accent text-black' : 'bg-danger text-white'} border border-theme-main border-2 rounded-pill px-4 py-2 smallest fw-black ls-1 uppercase mb-3 shadow-action-sm`}>
-                            {isSuccess ? 'MUWINA! (WINNER)' : 'LOSE (TRY AGAIN)'}
+                            {isSuccess ? 'WINNER!' : 'TRY AGAIN'}
                         </div>
 
-                        <h1 className="fw-black mb-2 text-theme-main ls-tight uppercase" style={{ fontSize: '2.5rem' }}>
+                        <h1 className="fw-black mb-2 text-theme-main ls-tight uppercase" style={{ fontSize: '1.75rem' }}>
                             {title}
                         </h1>
                         
@@ -84,9 +84,9 @@ const GameResultModal: React.FC<GameResultModalProps> = ({
                             </div>
                         )}
 
-                        <div className="d-grid gap-3 mt-2">
+                        <div className="d-grid gap-3 mt-2 position-relative" style={{ zIndex: 10 }}>
                             <button 
-                                onClick={(e) => { e.stopPropagation(); onPrimaryAction(); }} 
+                                onClick={(e) => { e.preventDefault(); e.stopPropagation(); onPrimaryAction(); }} 
                                 className={`btn-game ${isSuccess ? 'btn-game-warning shadow-action-sm' : 'btn-game-primary shadow-action-sm'} py-4 smallest fw-black uppercase d-flex align-items-center justify-content-center gap-2`}
                             >
                                 <RotateCcw size={20} strokeWidth={4} />
@@ -95,7 +95,7 @@ const GameResultModal: React.FC<GameResultModalProps> = ({
                             
                             {secondaryActionText && onSecondaryAction && (
                                 <button 
-                                    onClick={(e) => { e.stopPropagation(); onSecondaryAction(); }} 
+                                    onClick={(e) => { e.preventDefault(); e.stopPropagation(); onSecondaryAction(); }} 
                                     className="btn-game btn-game-white py-3 smallest fw-black uppercase d-flex align-items-center justify-content-center gap-2"
                                 >
                                     <ArrowRight size={20} strokeWidth={4} />

@@ -18,20 +18,22 @@ interface DailyWelcomeModalProps {
 const DailyWelcomeModal: React.FC<DailyWelcomeModalProps> = ({ username, streak, lastLesson, onClose }) => {
     const [isVisible, setIsVisible] = useState(false);
     const [shouldRender, setShouldRender] = useState(false);
+    const welcomeKey = 'chommie_last_welcome';
+    const legacyWelcomeKey = 'vendalearn_last_welcome';
 
     useEffect(() => {
         // Only run once per day
-        const lastWelcomeStr = localStorage.getItem('vendalearn_last_welcome');
+        const lastWelcomeStr = localStorage.getItem(welcomeKey) ?? localStorage.getItem(legacyWelcomeKey);
         const todayStr = new Date().toISOString().split('T')[0];
 
         if (lastWelcomeStr !== todayStr) {
             setShouldRender(true);
             requestAnimationFrame(() => setIsVisible(true));
-            localStorage.setItem('vendalearn_last_welcome', todayStr);
+            localStorage.setItem(welcomeKey, todayStr);
         } else {
             onClose(); // Instantly close if already seen today
         }
-    }, [onClose]);
+    }, [legacyWelcomeKey, onClose, welcomeKey]);
 
     const handleClose = () => {
         setIsVisible(false);
