@@ -17,7 +17,8 @@ interface CacheEntry<T> {
 
 const cache = new Map<string, CacheEntry<any>>();
 const CACHE_TTL = 24 * 60 * 60 * 1000; // 24 hours for offline resilience
-const STORAGE_PREFIX = 'venda_cache_';
+const STORAGE_PREFIX = 'chommie_cache_';
+const LEGACY_STORAGE_PREFIX = 'venda_cache_';
 
 const getCached = <T>(key: string): T | null => {
     // 1. Check in-memory first
@@ -26,7 +27,10 @@ const getCached = <T>(key: string): T | null => {
         if (Date.now() - entry.timestamp > CACHE_TTL) {
             cache.delete(key);
             // Also invalidate storage if expired
-            try { localStorage.removeItem(STORAGE_PREFIX + key); } catch (e) { }
+            try {
+                localStorage.removeItem(STORAGE_PREFIX + key);
+                localStorage.removeItem(LEGACY_STORAGE_PREFIX + key);
+            } catch (e) { }
             return null;
         }
         return entry.data as T;
@@ -34,11 +38,12 @@ const getCached = <T>(key: string): T | null => {
 
     // 2. Check localStorage (persists across sessions for offline support)
     try {
-        const stored = localStorage.getItem(STORAGE_PREFIX + key);
+        const stored = localStorage.getItem(STORAGE_PREFIX + key) ?? localStorage.getItem(LEGACY_STORAGE_PREFIX + key);
         if (stored) {
             const parsed = JSON.parse(stored) as CacheEntry<T>;
             if (Date.now() - parsed.timestamp > CACHE_TTL) {
                 localStorage.removeItem(STORAGE_PREFIX + key);
+                localStorage.removeItem(LEGACY_STORAGE_PREFIX + key);
                 return null;
             }
             // Hydrate in-memory cache
@@ -86,20 +91,24 @@ export const invalidateCache = (key?: string) => {
             try {
                 Object.keys(localStorage).forEach(k => {
                     const actualKey = k.startsWith(STORAGE_PREFIX) ? k.slice(STORAGE_PREFIX.length) : k;
-                    if (actualKey.startsWith(prefix)) localStorage.removeItem(k);
+                    const legacyKey = k.startsWith(LEGACY_STORAGE_PREFIX) ? k.slice(LEGACY_STORAGE_PREFIX.length) : k;
+                    if (actualKey.startsWith(prefix) || legacyKey.startsWith(prefix)) localStorage.removeItem(k);
                 });
             } catch (e) { }
         } else {
             // Exact match
             cache.delete(key);
-            try { localStorage.removeItem(STORAGE_PREFIX + key); } catch (e) { }
+            try {
+                localStorage.removeItem(STORAGE_PREFIX + key);
+                localStorage.removeItem(LEGACY_STORAGE_PREFIX + key);
+            } catch (e) { }
         }
     } else {
         cache.clear();
         try {
             // Clear only our keys
             Object.keys(localStorage).forEach(k => {
-                if (k.startsWith(STORAGE_PREFIX)) localStorage.removeItem(k);
+                if (k.startsWith(STORAGE_PREFIX) || k.startsWith(LEGACY_STORAGE_PREFIX)) localStorage.removeItem(k);
             });
         } catch (e) { }
     }

@@ -81,13 +81,13 @@ const Navbar: React.FC = () => {
                         className="navbar-toggler border-0 shadow-none"
                         type="button"
                         data-bs-toggle="collapse"
-                        data-bs-target="#vendaNavbar"
+                        data-bs-target="#chommieNavbar"
                     >
                         <Menu size={32} className="text-dark" />
                     </button>
 
                     {/* NAV LINKS & USER ACTIONS */}
-                    <div className="collapse navbar-collapse" id="vendaNavbar">
+                    <div className="collapse navbar-collapse" id="chommieNavbar">
                         <ul className="navbar-nav ms-auto gap-lg-4 align-items-center">
                             <li className="nav-item w-100 w-lg-auto text-center">
                                 <Link className={`nav-link nav-custom-link ${isActive('/') ? 'active-link' : ''}`} to="/">

@@ -8,7 +8,7 @@ export const ALL_TROPHIES: Trophy[] = [
     {
         id: 'first_login',
         title: 'The First Step',
-        description: 'Awarded for your first login to VendaLearn. Your journey to mastery begins here.',
+        description: 'Awarded for your first login to Chommie. Your journey to mastery begins here.',
         icon: 'bi-door-open-fill',
         color: '#10b981', // Emerald
         rarity: 'bronze',
@@ -17,7 +17,7 @@ export const ALL_TROPHIES: Trophy[] = [
     {
         id: 'level_5',
         title: 'Aspiring Scholar',
-        description: 'Earn 1,000 XP. You are building a strong foundation in Tshivenda.',
+        description: 'Earn 1,000 XP. You are building a strong foundation in your target language.',
         icon: 'bi-patch-check-fill',
         color: '#4f46e5', // Indigo
         rarity: 'silver',
@@ -44,7 +44,7 @@ export const ALL_TROPHIES: Trophy[] = [
     {
         id: 'level_50',
         title: 'Living Legend',
-        description: 'Earn 10,000 XP. You have achieved total mastery of the Tshivenda melody.',
+        description: 'Earn 10,000 XP. You have reached elite fluency on your learning path.',
         icon: 'bi-stars',
         color: '#f43f5e', // Rose
         rarity: 'special',
@@ -71,7 +71,7 @@ export const ALL_TROPHIES: Trophy[] = [
     {
         id: 'points_10000',
         title: 'Wealth of Wisdom',
-        description: 'Accumulate 10,000 XP. A true tycoon of the Venda heritage.',
+        description: 'Accumulate 10,000 XP. A true powerhouse of language learning.',
         icon: 'bi-lightning-charge-fill',
         color: '#3b82f6', // Blue
         rarity: 'gold',
@@ -125,7 +125,7 @@ export const ALL_TROPHIES: Trophy[] = [
     {
         id: 'streak_100',
         title: 'Guardian of Heritage',
-        description: '100 day streak! You are now a vital part of Venda history.',
+        description: '100 day streak! You are now a pillar of the Chommie learning community.',
         icon: 'bi-infinity',
         color: '#6366f1', // Indigo
         rarity: 'special',
