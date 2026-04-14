@@ -81,22 +81,38 @@ const Login: React.FC = () => {
         try {
             const result = await signInWithPopup(auth, googleProvider);
             const user = result.user;
-            const userDoc = await getDoc(doc(db as Firestore, 'users', user.uid));
-
-            if (!userDoc.exists()) {
-                await setDoc(doc(db as Firestore, 'users', user.uid), {
-                    username: user.displayName || 'Learner',
-                    email: user.email,
-                    points: 0,
-                    streak: 0,
-                    completedLessons: [],
-                    isNativeSpeaker: false,
-                    tourCompleted: false,
-                    createdAt: new Date().toISOString()
-                });
+            
+            if (!user.email) {
+                setError("Google didn't give us your email. Try regular login.");
+                return;
             }
 
-            const userData = !userDoc.exists() ? null : userDoc.data();
+            // Check for existing profile by UID
+            const userDoc = await getDoc(doc(db as Firestore, 'users', user.uid));
+            
+            // If UID doc exists, we're good. If not, try to consolidate by email.
+            if (!userDoc.exists()) {
+                const { consolidateUserProfile } = await import('../../services/authService');
+                const wasConsolidated = await consolidateUserProfile(user.uid, user.email);
+                
+                // If not found by email either, create a fresh one
+                if (!wasConsolidated) {
+                    await setDoc(doc(db as Firestore, 'users', user.uid), {
+                        username: user.displayName || 'Learner',
+                        email: user.email.toLowerCase(),
+                        points: 0,
+                        streak: 0,
+                        completedLessons: [],
+                        isNativeSpeaker: false,
+                        tourCompleted: false,
+                        createdAt: new Date().toISOString()
+                    });
+                }
+            }
+
+            // Fetch final data to check role
+            const finalUserDoc = await getDoc(doc(db as Firestore, 'users', user.uid));
+            const userData = finalUserDoc.data();
             const isAdmin = userData?.role === 'admin';
 
             if (isAdmin) {

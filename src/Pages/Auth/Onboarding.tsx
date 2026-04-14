@@ -3,6 +3,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import Mascot from '../../components/Mascot';
 import JuicyButton from '../../components/JuicyButton';
+import { useVisualJuice } from '../../hooks/useVisualJuice';
 import { ArrowRight, Flame, Sparkles, Star, Trophy, Globe, Zap } from 'lucide-react';
 
 interface OnboardingProps {
@@ -13,9 +14,12 @@ const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
     const navigate = useNavigate();
     const [searchParams] = useSearchParams();
     const [currentSlide, setCurrentSlide] = useState(0);
+    const { playSwipe, triggerHaptic } = useVisualJuice();
 
     const handleNext = () => {
         if (currentSlide < slides.length - 1) {
+            playSwipe();
+            triggerHaptic('medium');
             setCurrentSlide(prev => prev + 1);
         } else {
             handleComplete();

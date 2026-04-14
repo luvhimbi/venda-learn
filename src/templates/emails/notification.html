@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chommie Notification</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;700;900&family=Poppins:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        /* Base Reset */
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #F8FAFC;
+            font-family: 'Outfit', 'Poppins', Arial, sans-serif;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        table {
+            border-collapse: collapse;
+        }
+
+        img {
+            max-width: 100%;
+            height: auto;
+            display: block;
+        }
+
+        /* Container */
+        .wrapper {
+            width: 100%;
+            table-layout: fixed;
+            background-color: #F8FAFC;
+            padding-bottom: 40px;
+        }
+
+        .main {
+            background-color: #FFFFFF;
+            margin: 0 auto;
+            width: 100%;
+            max-width: 600px;
+            border-spacing: 0;
+            border: 1px solid #E2E8F0;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
+        }
+
+        /* Header */
+        .header {
+            padding: 40px 0 20px 0;
+            text-align: center;
+        }
+
+        /* Content */
+        .content {
+            padding: 20px 40px 40px 40px;
+            color: #0F172A;
+            line-height: 1.6;
+            font-size: 16px;
+        }
+
+        h1 {
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: -1px;
+            font-size: 28px;
+            margin-bottom: 24px;
+            color: #0F172A;
+        }
+
+        p {
+            margin-bottom: 20px;
+            color: #475569;
+        }
+
+        /* Brutalist Button */
+        .button-container {
+            padding: 20px 0;
+            text-align: center;
+        }
+
+        .btn-brutalist {
+            display: inline-block;
+            background-color: #FACC15;
+            color: #000000 !important;
+            text-decoration: none;
+            padding: 16px 32px;
+            font-weight: 900;
+            text-transform: uppercase;
+            font-size: 14px;
+            border: 4px solid #000000;
+            border-radius: 12px;
+            box-shadow: 6px 6px 0px #000000;
+            transition: all 0.2s ease;
+        }
+
+        /* Footer */
+        .footer {
+            padding: 40px 40px;
+            text-align: center;
+            color: #64748B;
+            font-size: 13px;
+        }
+
+        .footer p {
+            margin: 5px 0;
+            color: #64748B;
+        }
+
+        /* Link adjustments */
+        a {
+            color: #FACC15;
+            text-decoration: underline;
+        }
+
+        @media screen and (max-width: 600px) {
+            .content {
+                padding: 20px 20px 40px 20px;
+            }
+            .main {
+                border-radius: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <center class="wrapper">
+        <div class="header">
+            <img src="https://chommielanguage.com/images/ven.png" alt="Chommie Logo" width="120" style="margin: 0 auto; display: block;">
+        </div>
+        
+        <table class="main" role="presentation">
+            <tr>
+                <td class="content">
+                    <h1>{{title}}</h1>
+                    <p>Hello,</p>
+                    <p>{{message}}</p>
+                    
+                    {{#if actionLink}}
+                    <div class="button-container">
+                        <a href="{{actionLink}}" class="btn-brutalist">{{actionText}}</a>
+                    </div>
+                    {{/if}}
+                    
+                    <p>If you have any questions, feel free to reach out to us!</p>
+                    
+                    <p style="margin-top: 40px;">Best regards,<br><strong>Your Chommie Team</strong></p>
+                </td>
+            </tr>
+        </table>
+        
+        <div class="footer">
+            <p>&copy; 2026 Chommie Language Companion. All rights reserved.</p>
+            <p><a href="https://chommielanguage.com">Visit our website</a></p>
+        </div>
+    </center>
+</body>
+</html>

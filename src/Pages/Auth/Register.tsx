@@ -45,7 +45,24 @@ const Register: React.FC = () => {
         if (step === 2) {
             const emailRegex = /^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$/;
             if (!emailRegex.test(formData.email)) { setError("That email doesn't look right."); return; }
-            setStep(3);
+            
+            setLoading(true);
+            try {
+                const { findUserByEmail } = await import('../../services/authService');
+                const existingProfile = await findUserByEmail(formData.email);
+                
+                if (existingProfile) {
+                    setError("Email already exists.");
+                    setLoading(false);
+                    return;
+                }
+                setStep(3);
+            } catch (err) {
+                console.error("Email check error:", err);
+                setError("Email already exists.");
+            } finally {
+                setLoading(false);
+            }
             return;
         }
 
@@ -69,6 +86,17 @@ const Register: React.FC = () => {
                 setLoading(false);
                 return;
             }
+
+            // --- ADDED: Check if profile exists by email in Firestore first ---
+            const { findUserByEmail } = await import('../../services/authService');
+            const existingProfile = await findUserByEmail(formData.email);
+            
+            if (existingProfile) {
+                setError("Account already exists with this email. Sharp-sharp, just log in!");
+                setLoading(false);
+                return;
+            }
+            // ------------------------------------------------------------------
 
             const userCredential = await createUserWithEmailAndPassword(auth, formData.email, formData.password);
             await setDoc(doc(db as Firestore, "users", userCredential.user.uid), {
@@ -107,22 +135,34 @@ const Register: React.FC = () => {
         try {
             const result = await signInWithPopup(auth, googleProvider);
             const user = result.user;
+            
+            if (!user.email) {
+                setError("Google didn't provide an email. Try regular registration.");
+                return;
+            }
+
             const userDoc = await getDoc(doc(db as Firestore, 'users', user.uid));
 
             if (!userDoc.exists()) {
-                await setDoc(doc(db as Firestore, 'users', user.uid), {
-                    username: user.displayName || 'Learner',
-                    email: user.email,
-                    points: 0,
-                    streak: 0,
-                    completedLessons: [],
-                    isNativeSpeaker: false,
-                    tourCompleted: false,
-                    createdAt: new Date().toISOString()
-                });
+                const { consolidateUserProfile } = await import('../../services/authService');
+                const wasConsolidated = await consolidateUserProfile(user.uid, user.email);
+
+                if (!wasConsolidated) {
+                    await setDoc(doc(db as Firestore, 'users', user.uid), {
+                        username: user.displayName || 'Learner',
+                        email: user.email.toLowerCase(),
+                        points: 0,
+                        streak: 0,
+                        completedLessons: [],
+                        isNativeSpeaker: false,
+                        tourCompleted: false,
+                        createdAt: new Date().toISOString()
+                    });
+                }
             }
             navigate('/');
         } catch (err: any) {
+            console.error("Google Sign-In Error:", err);
             setError("Google login failed.");
         } finally { setLoading(false); }
     };

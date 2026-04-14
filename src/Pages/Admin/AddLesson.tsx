@@ -125,10 +125,7 @@ const SortableSlide: React.FC<SortableSlideProps> = ({ id, index, slide, onUpdat
                             <label className="editor-label">English</label>
                             <input className="editor-input" placeholder="e.g. Hello" value={slide.english} onChange={(e) => onUpdate('english', e.target.value)} />
                         </div>
-                        <div className="col-12">
-                            <label className="editor-label">Context / Notes</label>
-                            <textarea className="editor-input" rows={2} placeholder="How is this word used?" value={slide.context} onChange={(e) => onUpdate('context', e.target.value)} />
-                        </div>
+
                     </div>
                 </div>
             </div>
@@ -149,7 +146,7 @@ const AddLesson: React.FC = () => {
             {
                 id: `ml-${Date.now()}`,
                 title: 'Part 1',
-                slides: [{ id: `s-${Date.now()}`, nativeWord: '', english: '', context: '' }],
+                slides: [{ id: `s-${Date.now()}`, nativeWord: '', english: '' }],
                 questions: []
             }
         ]
@@ -223,7 +220,7 @@ const AddLesson: React.FC = () => {
     const publishedRef = useRef(false);
 
     const hasWork = Boolean(course.id || course.title || course.nativeTitle ||
-        course.microLessons.some((ml: any) => ml.title || ml.slides.some((s: any) => s.venda || s.english || s.context) || ml.questions.length > 0));
+        course.microLessons.some((ml: any) => ml.title || ml.slides.some((s: any) => s.venda || s.english) || ml.questions.length > 0));
 
     useEffect(() => {
         const handleBeforeUnload = (e: BeforeUnloadEvent) => {
@@ -319,7 +316,7 @@ const AddLesson: React.FC = () => {
         const newMl = {
             id: `ml-${Date.now()}`,
             title: `Part ${course.microLessons.length + 1}`,
-            slides: [{ id: `s-${Date.now()}`, nativeWord: '', english: '', context: '' }],
+            slides: [{ id: `s-${Date.now()}`, nativeWord: '', english: '' }],
             questions: []
         };
         setCourse({ ...course, microLessons: [...course.microLessons, newMl] });
@@ -342,7 +339,7 @@ const AddLesson: React.FC = () => {
         updateMl('slides', newSlides);
     };
 
-    const addSlide = () => updateMl('slides', [...currentMl.slides, { id: `s-${Date.now()}`, nativeWord: '', english: '', context: '' }]);
+    const addSlide = () => updateMl('slides', [...currentMl.slides, { id: `s-${Date.now()}`, nativeWord: '', english: '' }]);
 
     const removeSlide = (index: number) => {
         if (currentMl.slides.length <= 1) return Swal.fire('Notice', 'A micro lesson must have at least one slide.', 'info');
@@ -353,23 +350,23 @@ const AddLesson: React.FC = () => {
         const { value: text } = await Swal.fire({
             title: 'Bulk Add Slides',
             input: 'textarea',
-            inputLabel: 'Paste words (Target Language | English | Context)',
-            inputPlaceholder: 'Ndaa | Hello | Greeting\nVukani | Wake up\nMasiari | Afternoon',
+            inputLabel: 'Paste words (Target Language | English)',
+            inputPlaceholder: 'Ndaa | Hello\nVukani | Wake up\nMasiari | Afternoon',
             showCancelButton: true,
             confirmButtonColor: '#FACC15',
             confirmButtonText: 'Add Slides',
-            footer: '<small>Format: Target Language | English | Context (one per line)</small>'
+            footer: '<small>Format: Target Language | English (one per line)</small>'
         });
 
         if (text) {
             const lines = text.split('\n').filter((l: string) => l.trim());
             const newSlides = lines.map((line: string, i: number) => {
                 const parts = line.split('|').map((p: string) => p.trim());
-                return { id: `s-${Date.now()}-${i}`, nativeWord: parts[0] || '', english: parts[1] || '', context: parts[2] || '' };
+                return { id: `s-${Date.now()}-${i}`, nativeWord: parts[0] || '', english: parts[1] || '' };
             });
             if (newSlides.length > 0) {
                 const current = [...currentMl.slides];
-                if (current.length === 1 && !current[0].venda && !current[0].english && !current[0].context) {
+                if (current.length === 1 && !current[0].venda && !current[0].english) {
                     updateMl('slides', newSlides);
                 } else {
                     updateMl('slides', [...current, ...newSlides]);

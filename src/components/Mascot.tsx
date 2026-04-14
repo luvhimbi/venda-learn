@@ -1,4 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
+import gsap from 'gsap';
+import { useGSAP } from '@gsap/react';
 
 export type MascotMood = 'happy' | 'sad' | 'excited';
 
@@ -12,6 +14,8 @@ interface MascotProps {
 
 const Mascot: React.FC<MascotProps> = ({ width = "150px", height = "150px", style = {}, mood = 'happy', className = "" }) => {
     const [isWaving, setIsWaving] = useState(false);
+    const containerRef = useRef<HTMLDivElement>(null);
+    const mascotContentRef = useRef<SVGGElement>(null);
 
     // Auto-wave if excited
     useEffect(() => {
@@ -19,8 +23,75 @@ const Mascot: React.FC<MascotProps> = ({ width = "150px", height = "150px", styl
         else setIsWaving(false);
     }, [mood]);
 
+    useGSAP(() => {
+        // Organic floating animation
+        gsap.to(mascotContentRef.current, {
+            y: -10,
+            duration: 2,
+            repeat: -1,
+            yoyo: true,
+            ease: "sine.inOut"
+        });
+
+        // Mouse tracking effect
+        const handleMouseMove = (e: MouseEvent) => {
+            if (!containerRef.current) return;
+            const rect = containerRef.current.getBoundingClientRect();
+            const x = (e.clientX - rect.left) / rect.width - 0.5;
+            const y = (e.clientY - rect.top) / rect.height - 0.5;
+
+            // Move eyes
+            gsap.to(".mascot-tracking-eye", {
+                x: x * 8,
+                y: y * 5,
+                duration: 0.3,
+                ease: "power2.out"
+            });
+
+            // Move tusks subtly
+            gsap.to(".mascot-tracking-tusk", {
+                x: x * 3,
+                y: y * 2,
+                duration: 0.4,
+                ease: "power2.out"
+            });
+
+            // Tilt head slightly
+            gsap.to(mascotContentRef.current, {
+                rotate: x * 2,
+                duration: 0.5,
+                ease: "power2.out"
+            });
+        };
+
+        const container = containerRef.current;
+        if (container) {
+            container.addEventListener('mousemove', handleMouseMove);
+            container.addEventListener('mouseleave', () => {
+                gsap.to([".mascot-tracking-eye", ".mascot-tracking-tusk"], {
+                    x: 0,
+                    y: 0,
+                    duration: 0.6,
+                    ease: "elastic.out(1, 0.5)"
+                });
+                gsap.to(mascotContentRef.current, {
+                    rotate: 0,
+                    duration: 0.6,
+                    ease: "elastic.out(1, 0.5)"
+                });
+            });
+        }
+
+        return () => {
+            if (container) {
+                container.removeEventListener('mousemove', handleMouseMove);
+            }
+        };
+    }, { scope: containerRef });
+
     return (
         <div
+            ref={containerRef}
             className={`mascot-container cursor-pointer ${className}`}
             style={{ width, height, position: 'relative', ...style }}
             onMouseEnter={() => mood !== 'sad' && setIsWaving(true)}
@@ -99,7 +170,7 @@ const Mascot: React.FC<MascotProps> = ({ width = "150px", height = "150px", styl
                     `}
                 </style>
 
-                <g className={mood}>
+                <g ref={mascotContentRef} className={mood}>
                     {/* BODY SHADOW */}
                     <ellipse cx="100" cy="180" rx="60" ry="12" fill="#000" opacity="0.1" />
 
@@ -131,19 +202,21 @@ const Mascot: React.FC<MascotProps> = ({ width = "150px", height = "150px", styl
                     )}
 
                     {/* EYES */}
-                    <g className="eye" transform="translate(-16, -5)">
-                        <circle cx="85" cy={mood === 'sad' ? 92 : 90} r="6" fill="#1E293B" />
-                        <circle cx="87" cy={mood === 'sad' ? 90 : 88} r="2.5" fill="white" />
-                        <circle cx="83" cy="92" r="1.5" fill="white" opacity="0.5" />
-                    </g>
-                    <g className="eye" transform="translate(16, -5)">
-                        <circle cx="115" cy={mood === 'sad' ? 92 : 90} r="6" fill="#1E293B" />
-                        <circle cx="117" cy={mood === 'sad' ? 90 : 88} r="2.5" fill="white" />
-                        <circle cx="113" cy="92" r="1.5" fill="white" opacity="0.5" />
+                    <g className="mascot-tracking-eye">
+                        <g className="eye" transform="translate(-16, -5)">
+                            <circle cx="85" cy={mood === 'sad' ? 92 : 90} r="6" fill="#1E293B" />
+                            <circle cx="87" cy={mood === 'sad' ? 90 : 88} r="2.5" fill="white" />
+                            <circle cx="83" cy="92" r="1.5" fill="white" opacity="0.5" />
+                        </g>
+                        <g className="eye" transform="translate(16, -5)">
+                            <circle cx="115" cy={mood === 'sad' ? 92 : 90} r="6" fill="#1E293B" />
+                            <circle cx="117" cy={mood === 'sad' ? 90 : 88} r="2.5" fill="white" />
+                            <circle cx="113" cy="92" r="1.5" fill="white" opacity="0.5" />
+                        </g>
                     </g>
 
                     {/* GLASSES (Mentor/Adult look) */}
-                    <g className="glasses" opacity="0.95" transform="translate(0, -5)">
+                    <g className="glasses mascot-tracking-eye" opacity="0.95" transform="translate(0, -5)">
                         <circle cx="85" cy="90" r="18" fill="rgba(255,255,255,0.05)" stroke="#334155" strokeWidth="2.5" />
                         <circle cx="115" cy="90" r="18" fill="rgba(255,255,255,0.05)" stroke="#334155" strokeWidth="2.5" />
                         <path d="M103 90 L 97 90" stroke="#334155" strokeWidth="2.5" />
@@ -190,12 +263,12 @@ const Mascot: React.FC<MascotProps> = ({ width = "150px", height = "150px", styl
                     </g>
 
                     {/* TUSKS - Significantly Larger/Longer for mature look */}
-                    <path d="M80 110 Q 70 145, 55 135" fill="none" stroke="#F8FAFC" strokeWidth="7" strokeLinecap="round" filter="drop-shadow(2px 2px 2px rgba(0,0,0,0.1))" />
-                    <path d="M120 110 Q 130 145, 145 135" fill="none" stroke="#F8FAFC" strokeWidth="7" strokeLinecap="round" filter="drop-shadow(2px 2px 2px rgba(0,0,0,0.1))" />
+                    <g className="mascot-tracking-tusk">
+                        <path d="M80 110 Q 70 145, 55 135" fill="none" stroke="#F8FAFC" strokeWidth="7" strokeLinecap="round" filter="drop-shadow(2px 2px 2px rgba(0,0,0,0.1))" />
+                        <path d="M120 110 Q 130 145, 145 135" fill="none" stroke="#F8FAFC" strokeWidth="7" strokeLinecap="round" filter="drop-shadow(2px 2px 2px rgba(0,0,0,0.1))" />
+                    </g>
                 </g>
             </svg>
-
-
         </div>
     );
 };

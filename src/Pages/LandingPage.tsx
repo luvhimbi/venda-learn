@@ -1,11 +1,17 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Mascot from '../components/Mascot';
+import gsap from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { useGSAP } from '@gsap/react';
+
+gsap.registerPlugin(ScrollTrigger);
 
 const LandingPage: React.FC = () => {
     const navigate = useNavigate();
     const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
     const [isStandalone, setIsStandalone] = useState(false);
+    const containerRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
         const checkStandalone = window.matchMedia('(display-mode: standalone)').matches || (navigator as any).standalone === true;
@@ -29,24 +35,117 @@ const LandingPage: React.FC = () => {
         }
     };
 
+    useGSAP(() => {
+        // Hero Section Animation
+        const heroTl = gsap.timeline();
+        heroTl.from(".hero-badge", {
+            y: -30,
+            opacity: 0,
+            duration: 0.8,
+            ease: "back.out(1.7)"
+        })
+        .from(".hero-title", {
+            x: -50,
+            opacity: 0,
+            duration: 1,
+            ease: "power3.out"
+        }, "-=0.4")
+        .from(".hero-lead", {
+            y: 20,
+            opacity: 0,
+            duration: 0.8,
+            ease: "power2.out"
+        }, "-=0.6")
+        .from(".hero-cta", {
+            scale: 0.8,
+            opacity: 0,
+            duration: 0.6,
+            stagger: 0.2,
+            ease: "back.out(2)"
+        }, "-=0.4")
+        .from(".hero-mascot-card", {
+            x: 100,
+            opacity: 0,
+            duration: 1,
+            rotate: 5,
+            ease: "power4.out"
+        }, "-=0.8");
+
+        // Core Features - Scroll Trigger
+        gsap.from(".feature-card", {
+            scrollTrigger: {
+                trigger: ".features-grid",
+                start: "top 80%",
+            },
+            y: 50,
+            opacity: 0,
+            duration: 0.8,
+            stagger: 0.2,
+            ease: "back.out(1.4)"
+        });
+
+        // Mzansi's Voices - Scroll Trigger
+        gsap.from(".voice-card", {
+            scrollTrigger: {
+                trigger: ".voices-grid",
+                start: "top 85%",
+            },
+            scale: 0.8,
+            opacity: 0,
+            duration: 0.6,
+            stagger: {
+                amount: 0.8,
+                grid: "auto",
+                from: "start"
+            },
+            ease: "power2.out"
+        });
+
+        // Why Chommie - Scroll Trigger
+        gsap.from(".why-card", {
+            scrollTrigger: {
+                trigger: ".why-grid",
+                start: "top 80%",
+            },
+            x: (i) => i % 2 === 0 ? -100 : 100,
+            opacity: 0,
+            duration: 1,
+            stagger: 0.3,
+            ease: "power3.out"
+        });
+
+        // Install Section Reveal
+        gsap.from(".install-card", {
+            scrollTrigger: {
+                trigger: ".install-section",
+                start: "top 85%",
+            },
+            y: 100,
+            opacity: 0,
+            duration: 1,
+            ease: "expo.out"
+        });
+
+    }, { scope: containerRef });
+
     return (
-        <div className="bg-theme-base min-vh-100" style={{ fontFamily: '"Lexend", sans-serif' }}>
+        <div ref={containerRef} className="bg-theme-base min-vh-100" style={{ fontFamily: '"Lexend", sans-serif', overflowX: 'hidden' }}>
             {/* --- HERO SECTION --- */}
             <header className="py-5 border-bottom border-4 border-theme-main" style={{ backgroundColor: 'var(--venda-yellow)' }}>
                 <div className="container py-5">
                     <div className="row align-items-center g-5">
                         <div className="col-lg-7 text-center text-lg-start">
-                            <div className="d-inline-block bg-dark text-white px-3 py-1 fw-bold mb-4 border border-2 border-dark shadow-action-sm text-uppercase">
+                            <div className="hero-badge d-inline-block bg-dark text-white px-3 py-1 fw-bold mb-4 border border-2 border-dark shadow-action-sm text-uppercase">
                                 Aweh! Mzansi's #1 Language Quest
                             </div>
-                            <h1 className="display-2 fw-black text-theme-main mb-4 ls-tight text-uppercase">
+                            <h1 className="hero-title display-2 fw-black text-theme-main mb-4 ls-tight text-uppercase">
                                 Speak the <br />
                                 <span className="bg-theme-surface px-3 border border-4 border-theme-main d-inline-block mt-2">Culture.</span>
                             </h1>
-                            <p className="lead fw-bold text-theme-main mb-5 pe-lg-5">
+                            <p className="hero-lead lead fw-bold text-theme-main mb-5 pe-lg-5">
                                 Chommie is for the whole crew. Meet Elphie, your guide to mastering South Africa's 11 official languages through Quick Quests, Word Bombs, and real-world lingo.
                             </p>
-                            <div className="d-flex flex-column flex-md-row gap-4 justify-content-center justify-content-lg-start">
+                            <div className="hero-cta d-flex flex-column flex-md-row gap-4 justify-content-center justify-content-lg-start">
                                 <button onClick={() => navigate('/onboarding')} className="btn btn-dark btn-lg px-5 py-3 fw-black rounded-0 border-4 border-dark shadow-action hover-press text-uppercase">
                                     Start Quest with Elphie
                                 </button>
@@ -61,7 +160,7 @@ const LandingPage: React.FC = () => {
                         </div>
 
                         <div className="col-lg-5 text-center">
-                            <div className="p-4 bg-theme-surface border border-4 border-theme-main shadow-action position-relative text-theme-main">
+                            <div className="hero-mascot-card p-4 bg-theme-surface border border-4 border-theme-main shadow-action position-relative text-theme-main">
                                 <div className="bg-dark text-white p-2 border border-2 border-dark position-absolute top-0 start-50 translate-middle-x shadow-action-sm" style={{ marginTop: '-20px', width: '220px' }}>
                                     <span className="fw-black text-uppercase small">Sharp-Sharp! I'm Elphie! 👋</span>
                                 </div>
@@ -97,8 +196,8 @@ const LandingPage: React.FC = () => {
                         <h2 className="display-4 fw-black text-uppercase mb-2">How We Roll</h2>
                         <p className="fw-bold text-theme-muted">More than just an app—it's a whole Mzansi experience.</p>
                     </div>
-                    <div className="row g-4 text-center">
-                        <div className="col-md-4">
+                    <div className="row g-4 text-center features-grid">
+                        <div className="col-md-4 feature-card">
                             <div className="p-4 bg-theme-card border border-4 border-theme-main shadow-action h-100 hover-press">
                                 <div className="bg-info d-inline-block p-3 border border-3 border-dark mb-4 shadow-action-sm">
                                     <i className="bi bi-lightning-charge-fill fs-1 text-white"></i>
@@ -107,7 +206,7 @@ const LandingPage: React.FC = () => {
                                 <p className="fw-bold text-muted mb-0">Got 5 minutes? That's all you need. Short lessons and quick-fire quizzes that fit your busy schedule.</p>
                             </div>
                         </div>
-                        <div className="col-md-4">
+                        <div className="col-md-4 feature-card">
                             <div className="p-4 bg-theme-card border border-4 border-theme-main shadow-action h-100 hover-press">
                                 <div className="bg-danger d-inline-block p-3 border border-3 border-dark mb-4 shadow-action-sm">
                                     <i className="bi bi-controller fs-1 text-white"></i>
@@ -116,7 +215,7 @@ const LandingPage: React.FC = () => {
                                 <p className="fw-bold text-theme-muted mb-0">From Word Bombs to Syllable Builders, master vocabulary while having a blast.</p>
                             </div>
                         </div>
-                        <div className="col-md-4">
+                        <div className="col-md-4 feature-card">
                             <div className="p-4 bg-theme-card border border-4 border-theme-main shadow-action h-100 hover-press">
                                 <div className="bg-warning d-inline-block p-3 border border-3 border-dark mb-4 shadow-action-sm">
                                     <i className="bi bi-bar-chart-fill fs-1 text-dark"></i>
@@ -164,7 +263,7 @@ const LandingPage: React.FC = () => {
                 <div className="container py-5">
                     <div className="row align-items-center g-5">
                         <div className="col-lg-6 order-2 order-lg-1">
-                            <div className="row g-3">
+                            <div className="row g-3 voices-grid">
                                 {[
                                     { lang: "IsiZulu", greeting: "Sawubona!", color: "#FF6B6B" },
                                     { lang: "IsiXhosa", greeting: "Molo!", color: "#FF9F43" },
@@ -177,7 +276,7 @@ const LandingPage: React.FC = () => {
                                     { lang: "Tshivenda", greeting: "Nda! / Aa!", color: "#2980B9" },
                                     { lang: "isiNdebele", greeting: "Lotjhani!", color: "#EE5253" }
                                 ].map((item, index) => (
-                                    <div key={index} className="col-6 col-md-4">
+                                    <div key={index} className="col-6 col-md-4 voice-card">
                                         <div className="p-3 border border-3 border-theme-main bg-theme-card shadow-action-sm hover-press text-center h-100 d-flex flex-column justify-content-center">
                                             <div className="fw-black text-uppercase small mb-1">{item.lang}</div>
                                             <div className="fw-bold text-theme-muted smallest-print">{item.greeting}</div>
@@ -202,12 +301,12 @@ const LandingPage: React.FC = () => {
             {/* --- WHY CHOMMIE SECTION --- */}
             <section className="py-5 bg-theme-base border-bottom border-4 border-theme-main overflow-hidden text-theme-main">
                 <div className="container py-5">
-                    <div className="row align-items-center">
+                    <div className="row align-items-center why-grid">
                         <div className="col-lg-12 text-center mb-5">
                             <h2 className="display-4 fw-black text-uppercase mb-2">Why Chommie?</h2>
                             <div className="bg-theme-main mx-auto" style={{ height: '8px', width: '120px', backgroundColor: 'var(--color-border)' }}></div>
                         </div>
-                        <div className="col-md-6 mb-4">
+                        <div className="col-md-6 mb-4 why-card">
                             <div className="d-flex align-items-start gap-4 p-4 border border-4 border-theme-main shadow-action bg-theme-card h-100 hover-press">
                                 <div className="bg-info p-3 border border-3 border-dark shadow-action-sm flex-shrink-0">
                                     <i className="bi bi-heart-fill fs-2 text-white"></i>
@@ -218,7 +317,7 @@ const LandingPage: React.FC = () => {
                                 </div>
                             </div>
                         </div>
-                        <div className="col-md-6 mb-4">
+                        <div className="col-md-6 mb-4 why-card">
                             <div className="d-flex align-items-start gap-4 p-4 border border-4 border-theme-main shadow-action bg-theme-card h-100 hover-press">
                                 <div className="bg-success p-3 border border-3 border-dark shadow-action-sm flex-shrink-0">
                                     <i className="bi bi-graph-up-arrow fs-2 text-white"></i>
@@ -229,7 +328,7 @@ const LandingPage: React.FC = () => {
                                 </div>
                             </div>
                         </div>
-                        <div className="col-md-6 mb-4">
+                        <div className="col-md-6 mb-4 why-card">
                             <div className="d-flex align-items-start gap-4 p-4 border border-4 border-theme-main shadow-action bg-theme-card h-100 hover-press">
                                 <div className="bg-warning p-3 border border-3 border-dark shadow-action-sm flex-shrink-0">
                                     <i className="bi bi-lightning-charge-fill fs-2 text-dark"></i>
@@ -240,7 +339,7 @@ const LandingPage: React.FC = () => {
                                 </div>
                             </div>
                         </div>
-                        <div className="col-md-6 mb-4">
+                        <div className="col-md-6 mb-4 why-card">
                             <div className="d-flex align-items-start gap-4 p-4 border border-4 border-theme-main shadow-action bg-theme-card h-100 hover-press">
                                 <div className="bg-danger p-3 border border-3 border-dark shadow-action-sm flex-shrink-0">
                                     <i className="bi bi-people-fill fs-2 text-white"></i>
@@ -257,11 +356,11 @@ const LandingPage: React.FC = () => {
 
             {/* --- INSTALL APP SECTION --- */}
             {!isStandalone && (
-                <section className="py-5 bg-theme-surface border-bottom border-4 border-theme-main overflow-hidden text-theme-main text-center">
+                <section className="install-section py-5 bg-theme-surface border-bottom border-4 border-theme-main overflow-hidden text-theme-main text-center">
                     <div className="container py-5">
                         <div className="row justify-content-center">
                             <div className="col-lg-8">
-                                <div className="p-4 p-md-5 border border-4 border-theme-main shadow-action bg-theme-card position-relative overflow-visible" style={{ marginTop: '2rem' }}>
+                                <div className="install-card p-4 p-md-5 border border-4 border-theme-main shadow-action bg-theme-card position-relative overflow-visible" style={{ marginTop: '2rem' }}>
                                     <div className="position-absolute top-0 start-50 translate-middle">
                                         <div className="bg-success p-3 border border-3 border-dark shadow-action-sm d-flex align-items-center justify-content-center" style={{ width: '80px', height: '80px', borderRadius: '50%' }}>
                                             <i className="bi bi-phone-fill fs-1 text-white"></i>
@@ -301,3 +400,4 @@ const LandingPage: React.FC = () => {
 };
 
 export default LandingPage;
+ LandingPage;

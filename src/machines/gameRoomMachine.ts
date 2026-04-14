@@ -9,6 +9,7 @@ export const gameRoomMachine = setup({
     events: {} as
       | { type: 'INITIALIZE'; isFirstTime: boolean; startType: string }
       | { type: 'START_QUIZ' }
+      | { type: 'CONTINUE_STUDY' }
       | { type: 'SKIP_QUIZ' }
       | { type: 'FINISH'; score: number; }
       | { type: 'RESTART' }
@@ -77,6 +78,7 @@ export const gameRoomMachine = setup({
     },
     quiz: {
       on: {
+        CONTINUE_STUDY: { target: 'study' },
         FINISH: {
           target: 'result',
           actions: 'recordResults'

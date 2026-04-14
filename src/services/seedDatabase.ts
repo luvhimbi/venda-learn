@@ -13,8 +13,8 @@ const lessonsData = [
                 id: 'greetings__ml_0',
                 title: 'Basic Hello',
                 slides: [
-                    { nativeWord: "Ndaa", english: "Hello (Male)", context: "Used by men and boys. It is polite to bow slightly or lower your eyes." },
-                    { nativeWord: "Aa", english: "Hello (Female)", context: "Used by women and girls. Usually accompanied by a soft hand clap." }
+                    { nativeWord: "Ndaa", english: "Hello (Male)" },
+                    { nativeWord: "Aa", english: "Hello (Female)" }
                 ],
                 questions: [
                     { id: 1, question: "How do you say 'Hello' as man?", options: ["Ndaa", "Aa", "Matsheloni"], correctAnswer: "Ndaa", explanation: "'Ndaa' is specifically for men. 'Aa' is used by women, and 'Matsheloni' means morning.", type: "multiple-choice" },
@@ -25,9 +25,9 @@ const lessonsData = [
                 id: 'greetings__ml_1',
                 title: 'Time of Day',
                 slides: [
-                    { nativeWord: "Ndi matsheloni", english: "Good morning", context: "Used from sunrise until about 11:00 AM." },
-                    { nativeWord: "Ndi masiari", english: "Good afternoon", context: "used during the day from 13h00 pm" },
-                    { nativeWord: "Ndi madekwana", english: "Good night", context: "Used from 17h00 pm to show its night." }
+                    { nativeWord: "Ndi matsheloni", english: "Good morning" },
+                    { nativeWord: "Ndi masiari", english: "Good afternoon" },
+                    { nativeWord: "Ndi madekwana", english: "Good night" }
                 ],
                 questions: [
                     { id: 1, question: "Ndi ___ (Good morning)", correctAnswer: "matsheloni", hint: "matsh...", explanation: "'Ndi matsheloni' means Good morning in Tshivenda.", type: "fill-in-the-blank" },
@@ -47,11 +47,11 @@ const lessonsData = [
                 id: 'numbers__ml_0',
                 title: 'Numbers 1-5',
                 slides: [
-                    { nativeWord: "Nthihi", english: "One", context: "1 - The starting point." },
-                    { nativeWord: "Vhuvhili", english: "Two", context: "2" },
-                    { nativeWord: "Raru", english: "Three", context: "3" },
-                    { nativeWord: "Ina", english: "Four", context: "4" },
-                    { nativeWord: "Ṱhanu", english: "Five", context: "5" }
+                    { nativeWord: "Nthihi", english: "One" },
+                    { nativeWord: "Vhuvhili", english: "Two" },
+                    { nativeWord: "Raru", english: "Three" },
+                    { nativeWord: "Ina", english: "Four" },
+                    { nativeWord: "Ṱhanu", english: "Five" }
                 ],
                 questions: [
                     { id: 1, question: "How do you say 'One' in Tshivenda?", options: ["Nthihi", "Vhuvhili", "Raru"], correctAnswer: "Nthihi", explanation: "Nthihi is 1. Vhuvhili is 2, and Raru is 3.", type: "multiple-choice" },
@@ -62,11 +62,11 @@ const lessonsData = [
                 id: 'numbers__ml_1',
                 title: 'Numbers 6-10',
                 slides: [
-                    { nativeWord: "Ṱhanu na nthihi", english: "Six", context: "6 (Five and one)" },
-                    { nativeWord: "Ṱhanu na vhuvhili", english: "Seven", context: "7 (Five and two)" },
-                    { nativeWord: "Ṱhanu na raru", english: "Eight", context: "8 (Five and three)" },
-                    { nativeWord: "Ṱhanu na ina", english: "Nine", context: "9 (Five and four)" },
-                    { nativeWord: "Fumi", english: "Ten", context: "10" }
+                    { nativeWord: "Ṱhanu na nthihi", english: "Six" },
+                    { nativeWord: "Ṱhanu na vhuvhili", english: "Seven" },
+                    { nativeWord: "Ṱhanu na raru", english: "Eight" },
+                    { nativeWord: "Ṱhanu na ina", english: "Nine" },
+                    { nativeWord: "Fumi", english: "Ten" }
                 ],
                 questions: [
                     { id: 1, question: "Ṱhanu na ___ = Seven (Ṱhanu + ?)", correctAnswer: "vhuvhili", hint: "vhuv...", explanation: "Seven is 'Ṱhanu na vhuvhili' (Five and Two).", type: "fill-in-the-blank" },
@@ -77,11 +77,11 @@ const lessonsData = [
                 id: 'numbers__ml_2',
                 title: 'Big Numbers',
                 slides: [
-                    { nativeWord: "Fumi na nthihi", english: "Eleven", context: "11 (Ten and one)" },
-                    { nativeWord: "Fumi na vhuvhili", english: "Twelve", context: "12" },
-                    { nativeWord: "Fahuvhili", english: "Twenty", context: "20 (Two tens)" },
-                    { nativeWord: "Fahuraru", english: "Thirty", context: "30 (Three tens)" },
-                    { nativeWord: "Ḓana", english: "One Hundred", context: "100" }
+                    { nativeWord: "Fumi na nthihi", english: "Eleven" },
+                    { nativeWord: "Fumi na vhuvhili", english: "Twelve" },
+                    { nativeWord: "Fahuvhili", english: "Twenty" },
+                    { nativeWord: "Fahuraru", english: "Thirty" },
+                    { nativeWord: "Ḓana", english: "One Hundred" }
                 ],
                 questions: [
                     { id: 1, nativeWord: "Ṱhanu", question: "What number did you hear?", options: ["Three", "Five", "Ten"], correctAnswer: "Five", explanation: "'Ṱhanu' means Five (5) in Tshivenda.", type: "listen-and-choose" },
@@ -100,11 +100,11 @@ const lessonsData = [
                 id: 'identity__ml_0',
                 title: 'Children & Siblings',
                 slides: [
-                    { nativeWord: "Mutukana", english: "Boy", context: "Refers to a young male child." },
-                    { nativeWord: "Musidzana", english: "Girl", context: "Refers to a young female child." },
-                    { nativeWord: "Murathu", english: "Younger sibling", context: "Used to refer to a sibling younger than you, regardless of gender." },
-                    { nativeWord: "khaladzi", english: "Sister", context: "Used to refer to your blood sister" },
-                    { nativeWord: "Muzwala", english: "cousin", context: "used to refer to your uncle kids." }
+                    { nativeWord: "Mutukana", english: "Boy" },
+                    { nativeWord: "Musidzana", english: "Girl" },
+                    { nativeWord: "Murathu", english: "Younger sibling" },
+                    { nativeWord: "khaladzi", english: "Sister" },
+                    { nativeWord: "Muzwala", english: "cousin" }
                 ],
                 questions: [
                     { id: 1, question: "How do you say 'Boy' in Tshivenda?", options: ["Mutukana", "Musidzana", "Munna"], correctAnswer: "Mutukana", explanation: "Mutukana is a boy. Musidzana is a girl, and Munna is a man.", type: "multiple-choice" },
@@ -115,10 +115,10 @@ const lessonsData = [
                 id: 'identity__ml_1',
                 title: 'Adults & Babies',
                 slides: [
-                    { nativeWord: "lutshetshe", english: "new born baby", context: "A general term for a very young child or toddler." },
-                    { nativeWord: "nwana", english: "a young child", context: "A general term for a very young child or toddler." },
-                    { nativeWord: "Munna", english: "Man", context: "An adult male." },
-                    { nativeWord: "Musadzi", english: "Woman", context: "An adult female." }
+                    { nativeWord: "lutshetshe", english: "new born baby" },
+                    { nativeWord: "nwana", english: "a young child" },
+                    { nativeWord: "Munna", english: "Man" },
+                    { nativeWord: "Musadzi", english: "Woman" }
                 ],
                 questions: [
                     { id: 1, question: "A young girl is called a ___ in Tshivenda.", correctAnswer: "musidzana", hint: "musid...", explanation: "Musidzana specifically refers to a young girl.", type: "fill-in-the-blank" },
@@ -138,10 +138,10 @@ const lessonsData = [
                 id: 'objects__ml_0',
                 title: 'Household Items',
                 slides: [
-                    { nativeWord: "Ndilo", english: "Plate", context: "A traditional wooden plate or a modern eating plate.", imageUrl: "https://cdn-icons-png.flaticon.com/512/662/662731.png" },
-                    { nativeWord: "Vhaisene", english: "Television", context: "The screen used for watching news and shows.", imageUrl: "https://cdn-icons-png.flaticon.com/512/716/716429.png" },
-                    { nativeWord: "Vothi", english: "Door", context: "The entrance to a room or house.", imageUrl: "https://cdn-icons-png.flaticon.com/512/59/59802.png" },
-                    { nativeWord: "Tshitepulu", english: "Table", context: "Where you eat or work.", imageUrl: "https://cdn-icons-png.flaticon.com/512/2256/2256920.png" }
+                    { nativeWord: "Ndilo", english: "Plate", imageUrl: "https://cdn-icons-png.flaticon.com/512/662/662731.png" },
+                    { nativeWord: "Vhaisene", english: "Television", imageUrl: "https://cdn-icons-png.flaticon.com/512/716/716429.png" },
+                    { nativeWord: "Vothi", english: "Door", imageUrl: "https://cdn-icons-png.flaticon.com/512/59/59802.png" },
+                    { nativeWord: "Tshitepulu", english: "Table", imageUrl: "https://cdn-icons-png.flaticon.com/512/2256/2256920.png" }
                 ],
                 questions: [
                     { id: 1, question: "How do you say 'Plate' in Tshivenda?", options: ["Ndilo", "Vothi", "Vhaisene"], correctAnswer: "Ndilo", explanation: "Ndilo is a plate. Vothi is a door and Vhaisene is a TV.", type: "multiple-choice" },
@@ -160,11 +160,11 @@ const lessonsData = [
                 id: 'days-of-the-week__ml_0',
                 title: 'Weekdays',
                 slides: [
-                    { nativeWord: "Musumbuluwo", english: "Monday", context: "The first day of the work week.", imageUrl: "https://cdn-icons-png.flaticon.com/512/3652/3652191.png" },
-                    { nativeWord: "Ḽavhuvhili", english: "Tuesday", context: "The second day. 'Vhu-vhili' comes from the number two (mbili).", imageUrl: "https://cdn-icons-png.flaticon.com/512/3652/3652213.png" },
-                    { nativeWord: "Ḽavhuraru", english: "Wednesday", context: "Midweek. 'Vhu-raru' comes from the number three (raru).", imageUrl: "https://cdn-icons-png.flaticon.com/512/3652/3652243.png" },
-                    { nativeWord: "Ḽavhuṋa", english: "Thursday", context: "The fourth day. 'Vhu-ṋa' comes from the number four (iṋa).", imageUrl: "https://cdn-icons-png.flaticon.com/512/3652/3652267.png" },
-                    { nativeWord: "Ḽavhuṱanu", english: "Friday", context: "The last work day. 'Vhu-ṱanu' comes from the number five (ṱanu).", imageUrl: "https://cdn-icons-png.flaticon.com/512/3652/3652295.png" }
+                    { nativeWord: "Musumbuluwo", english: "Monday", imageUrl: "https://cdn-icons-png.flaticon.com/512/3652/3652191.png" },
+                    { nativeWord: "Ḽavhuvhili", english: "Tuesday", imageUrl: "https://cdn-icons-png.flaticon.com/512/3652/3652213.png" },
+                    { nativeWord: "Ḽavhuraru", english: "Wednesday", imageUrl: "https://cdn-icons-png.flaticon.com/512/3652/3652243.png" },
+                    { nativeWord: "Ḽavhuṋa", english: "Thursday", imageUrl: "https://cdn-icons-png.flaticon.com/512/3652/3652267.png" },
+                    { nativeWord: "Ḽavhuṱanu", english: "Friday", imageUrl: "https://cdn-icons-png.flaticon.com/512/3652/3652295.png" }
                 ],
                 questions: [
                     { id: 1, question: "Which day is 'Ḽavhuvhili'?", options: ["Monday", "Tuesday", "Friday"], correctAnswer: "Tuesday", explanation: "Ḽavhuvhili is Tuesday. Remember 'vhili' sounds like 'mbili' (two).", type: "multiple-choice" },
@@ -175,8 +175,8 @@ const lessonsData = [
                 id: 'days-of-the-week__ml_1',
                 title: 'Weekend',
                 slides: [
-                    { nativeWord: "Mugivhibi", english: "Saturday", context: "The first day of the weekend.", imageUrl: "https://cdn-icons-png.flaticon.com/512/3652/3652320.png" },
-                    { nativeWord: "Swondaha", english: "Sunday", context: "A day for rest or church.", imageUrl: "https://cdn-icons-png.flaticon.com/512/3652/3652347.png" }
+                    { nativeWord: "Mugivhibi", english: "Saturday", imageUrl: "https://cdn-icons-png.flaticon.com/512/3652/3652320.png" },
+                    { nativeWord: "Swondaha", english: "Sunday", imageUrl: "https://cdn-icons-png.flaticon.com/512/3652/3652347.png" }
                 ],
                 questions: [
                     { id: 1, question: "What is 'Swondaha'?", options: ["Saturday", "Sunday", "Wednesday"], correctAnswer: "Sunday", explanation: "Swondaha is Sunday. It sounds very similar to the English word!", type: "multiple-choice" }
@@ -194,12 +194,12 @@ const lessonsData = [
                 id: 'months-of-the-year-full__ml_0',
                 title: 'January - June',
                 slides: [
-                    { nativeWord: "Phando", english: "January", context: "Opening the year.", imageUrl: "https://cdn-icons-png.flaticon.com/512/3652/3652191.png" },
-                    { nativeWord: "Luhuhi", english: "February", context: "Month of wind.", imageUrl: "https://cdn-icons-png.flaticon.com/512/1154/1154562.png" },
-                    { nativeWord: "Ṱhafamuhala", english: "March", context: "Harvest starts.", imageUrl: "https://cdn-icons-png.flaticon.com/512/862/862856.png" },
-                    { nativeWord: "Lambamai", english: "April", context: "Abundance of fruit.", imageUrl: "https://cdn-icons-png.flaticon.com/512/3069/3069172.png" },
-                    { nativeWord: "Shundunthule", english: "May", context: "Winnowing corn.", imageUrl: "https://cdn-icons-png.flaticon.com/512/2322/2322701.png" },
-                    { nativeWord: "Fulwi", english: "June", context: "Deep winter.", imageUrl: "https://cdn-icons-png.flaticon.com/512/642/642000.png" }
+                    { nativeWord: "Phando", english: "January", imageUrl: "https://cdn-icons-png.flaticon.com/512/3652/3652191.png" },
+                    { nativeWord: "Luhuhi", english: "February", imageUrl: "https://cdn-icons-png.flaticon.com/512/1154/1154562.png" },
+                    { nativeWord: "Ṱhafamuhala", english: "March", imageUrl: "https://cdn-icons-png.flaticon.com/512/862/862856.png" },
+                    { nativeWord: "Lambamai", english: "April", imageUrl: "https://cdn-icons-png.flaticon.com/512/3069/3069172.png" },
+                    { nativeWord: "Shundunthule", english: "May", imageUrl: "https://cdn-icons-png.flaticon.com/512/2322/2322701.png" },
+                    { nativeWord: "Fulwi", english: "June", imageUrl: "https://cdn-icons-png.flaticon.com/512/642/642000.png" }
                 ],
                 questions: [
                     { id: 1, question: "Which month is 'Phando'?", options: ["January", "June", "December"], correctAnswer: "January", explanation: "Phando is the first month of the year.", type: "multiple-choice" }
@@ -209,12 +209,12 @@ const lessonsData = [
                 id: 'months-of-the-year-full__ml_1',
                 title: 'July - December',
                 slides: [
-                    { nativeWord: "Fulwana", english: "July", context: "Little winter.", imageUrl: "https://cdn-icons-png.flaticon.com/512/4814/4814268.png" },
-                    { nativeWord: "Thangule", english: "August", context: "Stripping leaves.", imageUrl: "https://cdn-icons-png.flaticon.com/512/959/959711.png" },
-                    { nativeWord: "Khubvumedzi", english: "September", context: "Spring growth.", imageUrl: "https://cdn-icons-png.flaticon.com/512/2917/2917575.png" },
-                    { nativeWord: "Tshimedzi", english: "October", context: "Planting season.", imageUrl: "https://cdn-icons-png.flaticon.com/512/3126/3126354.png" },
-                    { nativeWord: "Ḽara", english: "November", context: "Summer rains.", imageUrl: "https://cdn-icons-png.flaticon.com/512/2675/2675848.png" },
-                    { nativeWord: "Nyendavhusiku", english: "December", context: "Festive travel.", imageUrl: "https://cdn-icons-png.flaticon.com/512/3967/3967657.png" }
+                    { nativeWord: "Fulwana", english: "July", imageUrl: "https://cdn-icons-png.flaticon.com/512/4814/4814268.png" },
+                    { nativeWord: "Thangule", english: "August", imageUrl: "https://cdn-icons-png.flaticon.com/512/959/959711.png" },
+                    { nativeWord: "Khubvumedzi", english: "September", imageUrl: "https://cdn-icons-png.flaticon.com/512/2917/2917575.png" },
+                    { nativeWord: "Tshimedzi", english: "October", imageUrl: "https://cdn-icons-png.flaticon.com/512/3126/3126354.png" },
+                    { nativeWord: "Ḽara", english: "November", imageUrl: "https://cdn-icons-png.flaticon.com/512/2675/2675848.png" },
+                    { nativeWord: "Nyendavhusiku", english: "December", imageUrl: "https://cdn-icons-png.flaticon.com/512/3967/3967657.png" }
                 ],
                 questions: [
                     { id: 1, question: "In which month do strong winds strip leaves (Thangule)?", options: ["August", "April", "October"], correctAnswer: "August", explanation: "Thangule (August) is known for its strong winds.", type: "multiple-choice" },
@@ -243,4 +243,5 @@ export const seedLessons = async () => {
         alert("Failed to seed database.");
     }
 };
+
 

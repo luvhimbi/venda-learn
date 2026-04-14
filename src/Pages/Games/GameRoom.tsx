@@ -15,7 +15,7 @@ import { useGameLogic } from '../../hooks/useGameLogic';
 import Mascot, { type MascotMood } from '../../components/Mascot';
 import { useVisualJuice } from '../../hooks/useVisualJuice';
 import { updateStreak } from '../../services/streakUtils';
-import { HelpCircle, X, Bookmark, CheckCircle2, Volume2, Play, Zap, Users, Circle } from 'lucide-react';
+import { HelpCircle, X, Bookmark, CheckCircle2, Volume2, Play, Zap, Users } from 'lucide-react';
 import { db, auth } from '../../services/firebaseConfig';
 import { doc, updateDoc, arrayUnion } from 'firebase/firestore';
 import { onAuthStateChanged } from 'firebase/auth';
@@ -206,7 +206,7 @@ const GameRoom: React.FC = () => {
         score,
         lastScoreResult,
         answerStatus, setAnswerStatus,
-        showExplanation,
+        showExplanation, setShowExplanation,
         scoreBreakdown,
         correctCount,
         streak,
@@ -390,17 +390,21 @@ const GameRoom: React.FC = () => {
 
     const renderProgressHeader = () => {
         let current = 0;
-        let total = 1;
+        let total = (lesson.slides?.length || 0) + (lesson.questions?.length || 0);
 
         if (gameState === 'STUDY') {
-            current = currentSlide + 1;
-            total = lesson.slides.length;
+            // We've completed currentSlide previous slides and currentQIndex previous quizzes
+            current = currentSlide + currentQIndex + 1;
         } else if (gameState === 'QUIZ') {
-            current = currentQIndex + 1;
-            total = lesson.questions.length;
+            // We've completed currentSlide+1 slides and currentQIndex previous quizzes
+            current = currentSlide + currentQIndex + 1;
         }
-        const progress = (current / total) * 100;
-        const modeLabel = gameState === 'STUDY' ? 'STUDY' : (gameState === 'QUIZ' ? 'QUIZ' : 'COMPLETE');
+        
+        // Ensure current doesn't exceed total in edge cases
+        current = Math.min(current, total);
+        
+        const progress = total > 0 ? (current / total) * 100 : 0;
+        const modeLabel = gameState === 'STUDY' ? 'LEARN' : (gameState === 'QUIZ' ? 'PRACTICE' : 'COMPLETE');
 
         return (
             <div className="bg-theme-surface px-3 pt-3 pb-3 sticky-top border-bottom border-theme-main border-3" style={{ zIndex: 1000 }}>
@@ -560,36 +564,7 @@ const GameRoom: React.FC = () => {
                                         </div>
                                     </div>
 
-                                    <div className="hr-fade mb-5"></div>
 
-                                    {/* Section 3: Usage Explanation */}
-                                    <div className="mb-2 px-md-4">
-                                        <p className="smallest fw-black text-theme-main ls-2 mb-4 text-uppercase d-flex align-items-center gap-2">
-                                            <HelpCircle size={16} className="text-warning" /> USAGE CONTEXT
-                                        </p>
-                                        <div className="d-flex flex-column gap-4">
-                                            {slide.context.split('. ').map((point: string, idx: number) => {
-                                                if (!point.trim()) return null;
-                                                const isGenderSpecific = point.toLowerCase().includes('men') || point.toLowerCase().includes('women');
-                                                return (
-                                                    <div key={idx} className="d-flex align-items-start gap-3 p-3 bg-theme-surface brutalist-card--sm border-theme-main border-2 rounded-4">
-                                                        <div className="mt-1">
-                                                            {isGenderSpecific ? (
-                                                                <div className="rounded-circle bg-warning border border-theme-main border-2 p-2 d-flex align-items-center justify-content-center" style={{ width: 36, height: 36 }}>
-                                                                    <Users size={18} className="text-dark" />
-                                                                </div>
-                                                            ) : (
-                                                                <div className="rounded-circle bg-theme-surface border border-theme-main border-2 p-2 d-flex align-items-center justify-content-center" style={{ width: 36, height: 36 }}>
-                                                                    <Circle size={12} fill="var(--color-text)" className="text-theme-main" />
-                                                                </div>
-                                                            )}
-                                                        </div>
-                                                        <p className="mb-0 text-theme-main fw-bold uppercase ls-1" style={{ lineHeight: 1.4, fontSize: '0.9rem' }}>{point.endsWith('.') ? point : point + '.'}</p>
-                                                    </div>
-                                                );
-                                            })}
-                                        </div>
-                                    </div>
 
                                 </div>
                             </div>
@@ -607,15 +582,33 @@ const GameRoom: React.FC = () => {
                                 </button>
                                 {!isLastSlide ? (
                                     <button className="btn btn-game btn-game-primary px-3 fw-black ls-1 flex-grow-2"
-                                        onClick={() => { setAudioUrl(null); const next = currentSlide + 1; setCurrentSlide(next); saveProgress(next, 'STUDY'); }}
+                                        onClick={() => {
+                                            setAudioUrl(null);
+                                            // Interleaving logic: if there is a question for this slide, go to quiz.
+                                            // Otherwise, go to next slide.
+                                            if (lesson.questions && lesson.questions.length > currentSlide) {
+                                                setCurrentQIndex(currentSlide);
+                                                send({ type: 'START_QUIZ' });
+                                                saveProgress(currentSlide, 'QUIZ');
+                                            } else {
+                                                const next = currentSlide + 1;
+                                                setCurrentSlide(next);
+                                                saveProgress(next, 'STUDY');
+                                            }
+                                        }}
                                         style={{ flex: 2 }}>
-                                        NEXT SLIDE
+                                        {lesson.questions && lesson.questions.length > currentSlide ? 'TAKE QUIZ' : 'NEXT SLIDE'}
                                     </button>
                                 ) : (
                                     <button className="btn btn-game btn-game-dark px-3 fw-black ls-1 flex-grow-2 shadow-action-light"
                                         style={{ flex: 2 }}
                                         onClick={() => {
-                                            if (lesson.questions && lesson.questions.length > 0) {
+                                            if (lesson.questions && lesson.questions.length > currentSlide) {
+                                                setCurrentQIndex(currentSlide);
+                                                send({ type: 'START_QUIZ' });
+                                                saveProgress(currentSlide, 'QUIZ');
+                                            } else if (lesson.questions && lesson.questions.length > 0) {
+                                              // Fallback to start quiz if we reached the end of slides but have questions left
                                                 send({ type: 'START_QUIZ' });
                                                 saveProgress(0, 'QUIZ');
                                             } else {
@@ -623,7 +616,7 @@ const GameRoom: React.FC = () => {
                                                 setMascotMood('excited');
                                             }
                                         }}>
-                                        {lesson.questions?.length > 0 ? 'START QUIZ' : 'FINISH LESSON'}
+                                        {lesson.questions?.length > currentSlide ? 'TAKE QUIZ' : 'FINISH'}
                                     </button>
                                 )}
                             </div>
@@ -639,6 +632,20 @@ const GameRoom: React.FC = () => {
 
         if (gameState === 'QUIZ') {
             const q = lesson.questions[currentQIndex] as Question;
+
+            if (!q) {
+                // Defensive check to prevent crash if data/index is invalid
+                return (
+                    <div className="min-vh-100 d-flex flex-column bg-theme-base align-items-center justify-content-center p-4 text-center">
+                        <Mascot mood="sad" width="120px" height="120px" />
+                        <h2 className="fw-black text-theme-main mt-4">Oops! Something went wrong.</h2>
+                        <p className="text-theme-muted mb-4">We couldn't find the next challenge.</p>
+                        <button className="btn btn-game btn-game-primary px-5" onClick={() => navigate('/courses')}>
+                            BACK TO COURSES
+                        </button>
+                    </div>
+                );
+            }
 
             const renderQuestion = () => {
                 switch (q.type) {
@@ -696,7 +703,7 @@ const GameRoom: React.FC = () => {
                     {/* Feedback Panel */}
                     {showExplanation && (
                         <div className="position-fixed bottom-0 start-0 end-0 animate__animated animate__slideInUp animate__faster"
-                            style={{ zIndex: 9999, borderTop: '6px solid var(--color-border)', backgroundColor: answerStatus === 'correct' ? (document.documentElement.getAttribute('data-theme') === 'dark' ? '#064e3b' : '#dcfce7') : (document.documentElement.getAttribute('data-theme') === 'dark' ? '#7f1d1d' : '#fee2e2'), boxShadow: '0 -20px 60px rgba(0,0,0,0.2)' }}>
+                            style={{ zIndex: 9999, borderTop: '6px solid var(--color-border)', backgroundColor: answerStatus === 'correct' ? (document.documentElement.getAttribute('data-theme') === 'dark' ? '#064e3b' : '#dcfce7') : (document.documentElement.getAttribute('data-theme') === 'dark' ? '#1f2937' : '#f8fafc'), boxShadow: '0 -20px 60px rgba(0,0,0,0.2)' }}>
                             <div className="container pt-4 pb-sm-5 pb-5 mb-3" style={{ maxWidth: '650px' }}>
                                 {answerStatus === 'correct' ? (
                                     <div className="d-flex flex-column gap-4">
@@ -708,7 +715,19 @@ const GameRoom: React.FC = () => {
                                         </div>
                                         <button className="btn btn-game w-100 py-3 text-white border-0"
                                             style={{ backgroundColor: '#22c55e', boxShadow: '0 8px 0 #16a34a', fontSize: '1.4rem' }}
-                                            onClick={() => nextQuestion(score, correctCount)}>
+                                            onClick={() => {
+                                                // After a correct answer in interleaved mode, check if we should go to STUDY or next QUIZ
+                                                if (lesson.slides && lesson.slides.length > currentSlide + 1) {
+                                                    send({ type: 'CONTINUE_STUDY' });
+                                                    const nextSlideIndex = currentSlide + 1;
+                                                    setCurrentSlide(nextSlideIndex);
+                                                    saveProgress(nextSlideIndex, 'STUDY');
+                                                    // Move the quiz logic pointer forward internally too
+                                                    nextQuestion(score, correctCount);
+                                                } else {
+                                                    nextQuestion(score, correctCount);
+                                                }
+                                            }}>
                                             CONTINUE QUEST
                                         </button>
                                     </div>
@@ -716,11 +735,11 @@ const GameRoom: React.FC = () => {
                                     <div className="d-flex flex-column gap-4">
                                         <div className="d-flex align-items-center gap-4 px-2">
                                             <div className="bg-white brutalist-card--sm rounded-circle d-flex align-items-center justify-content-center" style={{ width: 64, height: 64 }}>
-                                                <X size={40} color="#dc2626" />
+                                                <HelpCircle size={40} color="#f59e0b" />
                                             </div>
                                             <div>
-                                                <h2 className="fw-black mb-0 ls-tight uppercase" style={{ color: '#dc2626', fontSize: '2.5rem' }}>Focus!</h2>
-                                                <p className="smallest fw-black ls-1 mb-0 text-uppercase mt-1" style={{ color: '#dc2626' }}>You'll get another chance</p>
+                                                <h2 className="fw-black mb-0 ls-tight uppercase" style={{ color: 'var(--color-text)', fontSize: '2.2rem' }}>Nice Try!</h2>
+                                                <p className="smallest fw-black ls-1 mb-0 text-uppercase mt-1" style={{ color: 'var(--color-text)', opacity: 0.7 }}>You're almost there, let's learn!</p>
                                             </div>
                                         </div>
 
@@ -731,14 +750,38 @@ const GameRoom: React.FC = () => {
                                             </p>
                                         </div>
 
-                                        <button className="btn btn-game w-100 py-3 text-white border-0"
-                                            style={{ backgroundColor: '#ef4444', boxShadow: '0 8px 0 #dc2626', fontSize: '1.4rem' }}
-                                            onClick={() => {
-                                                const newScore = isFirstTime ? awardConsolation() : score;
-                                                nextQuestion(newScore);
-                                            }}>
-                                            I UNDERSTAND
-                                        </button>
+                                        <div className="d-flex flex-column gap-2">
+                                            <button className="btn btn-game w-100 py-3 text-white border-0"
+                                                style={{ backgroundColor: '#ef4444', boxShadow: '0 8px 0 #dc2626', fontSize: '1.4rem' }}
+                                                onClick={() => {
+                                                    // Retry the question by resetting the explanation/answer status
+                                                    setAnswerStatus(null);
+                                                    setShowExplanation(false);
+                                                    setSelectedOption(null);
+                                                    setSelectedTF(null);
+                                                    // We can optionally deduct some potential points here if we wanted
+                                                }}>
+                                                RETRY QUESTION
+                                            </button>
+                                            <div className="d-flex gap-2">
+                                                <button className="btn btn-game flex-grow-1 py-3 text-white border-0"
+                                                    style={{ backgroundColor: 'var(--color-surface-darker)', boxShadow: '0 8px 0 var(--color-border)', fontSize: '1.1rem' }}
+                                                    onClick={() => {
+                                                        send({ type: 'CONTINUE_STUDY' });
+                                                        saveProgress(currentSlide, 'STUDY');
+                                                    }}>
+                                                    REVIEW SLIDE
+                                                </button>
+                                                <button className="btn btn-game flex-grow-1 py-3 text-white border-0"
+                                                    style={{ backgroundColor: '#64748b', boxShadow: '0 8px 0 #475569', fontSize: '1.1rem' }}
+                                                    onClick={() => {
+                                                        const newScore = isFirstTime ? awardConsolation() : score;
+                                                        nextQuestion(newScore);
+                                                    }}>
+                                                    SKIP FOR NOW
+                                                </button>
+                                            </div>
+                                        </div>
                                     </div>
                                 )}
                             </div>
