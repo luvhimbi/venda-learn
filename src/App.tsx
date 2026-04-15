@@ -74,6 +74,9 @@ const AppContent: React.FC = () => {
     const location = useLocation();
     const isAdminPath = location.pathname.startsWith('/admin');
     const isAuthPath = ['/login', '/register', '/reset-password', '/onboarding'].includes(location.pathname);
+    const gamePaths = ['/game/', '/word-puzzle', '/picture-puzzle', '/syllable-builder', '/word-bomb', '/moruba', '/morabaraba'];
+    const isGameRoomPath = gamePaths.some(path => location.pathname.startsWith(path));
+    const isStandalonePath = isAuthPath || isGameRoomPath;
     const [user, setUser] = useState<any>(null);
     const [showPushPrompt, setShowPushPrompt] = useState(false);
 
@@ -116,19 +119,18 @@ const AppContent: React.FC = () => {
     }, []);
 
     return (
-        <div className={`min-vh-100 d-flex ${user && !isAdminPath && !isAuthPath ? 'flex-column flex-lg-row' : 'flex-column'} bg-theme-base`}>
+        <div className={`min-vh-100 d-flex ${user && !isAdminPath && !isStandalonePath ? 'flex-column flex-lg-row' : 'flex-column'} bg-theme-base`}>
 
             {/* Show Sidebar only for authenticated users on internal pages */}
-            {user && !isAdminPath && !isAuthPath && <Sidebar />}
+            {user && !isAdminPath && !isStandalonePath && <Sidebar />}
 
-            <div className={`flex-grow-1 d-flex flex-column ${user && !isAdminPath && !isAuthPath ? 'main-container' : ''}`}>
+            <div className={`flex-grow-1 d-flex flex-column ${user && !isAdminPath && !isStandalonePath ? 'main-container' : ''}`}>
 
-                {/* Show minimalist AuthNavbar for Login/Register or public users */}
-                {!isAdminPath && (!user || isAuthPath) && <AuthNavbar user={user} />}
-
+                {/* Show minimalist AuthNavbar for public users */}
+                {!isAdminPath && !user && !isAuthPath && !isGameRoomPath && <AuthNavbar user={user} />}
 
                 <OfflineBanner />
-                <InstallBanner />
+                {!isGameRoomPath && <InstallBanner />}
 
                 <main className="flex-grow-1">
                     <Routes>
@@ -268,10 +270,10 @@ const AppContent: React.FC = () => {
                         {/* 404 Catch-All Route */}
                         <Route path="*" element={<NotFound />} />
                     </Routes>
-                    <GuestNudge />
+                    {!isGameRoomPath && <GuestNudge />}
                 </main>
 
-                {!isAdminPath && !user && <Footer />}
+                {!isAdminPath && !user && !isAuthPath && !isGameRoomPath && <Footer />}
 
                 {/* Push Notification Prompt Overlay */}
                 {showPushPrompt && (

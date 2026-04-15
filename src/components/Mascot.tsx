@@ -92,7 +92,7 @@ const Mascot: React.FC<MascotProps> = ({ width = "150px", height = "150px", styl
     return (
         <div
             ref={containerRef}
-            className={`mascot-container cursor-pointer ${className}`}
+            className={`mascot-container cursor-pointer ${className} ${isWaving ? 'waving' : ''}`}
             style={{ width, height, position: 'relative', ...style }}
             onMouseEnter={() => mood !== 'sad' && setIsWaving(true)}
             onMouseLeave={() => mood !== 'excited' && setIsWaving(false)}
@@ -167,12 +167,35 @@ const Mascot: React.FC<MascotProps> = ({ width = "150px", height = "150px", styl
                         
                         .tear { animation: tearDrop 2s infinite ease-in; }
                         .animate-bounce { animation: bounce 1s infinite ease-in-out; }
+
+                        @keyframes waveRightArm {
+                            0% { transform: rotate(0deg); }
+                            15% { transform: rotate(-140deg); }
+                            35% { transform: rotate(-100deg); }
+                            55% { transform: rotate(-140deg); }
+                            75% { transform: rotate(-100deg); }
+                            100% { transform: rotate(0deg); }
+                        }
+                        .arm-right { transform-origin: 152px 135px; transition: transform 0.5s ease; }
+                        .waving .arm-right { animation: waveRightArm 1.8s infinite ease-in-out; }
                     `}
                 </style>
 
                 <g ref={mascotContentRef} className={mood}>
                     {/* BODY SHADOW */}
                     <ellipse cx="100" cy="180" rx="60" ry="12" fill="#000" opacity="0.1" />
+
+                    {/* LEGS */}
+                    <path d="M80 185 L 80 195" stroke="url(#headGradient)" strokeWidth="18" strokeLinecap="round" />
+                    <path d="M120 185 L 120 195" stroke="url(#headGradient)" strokeWidth="18" strokeLinecap="round" />
+
+                    {/* ARMS */}
+                    <g className="arm-left">
+                        <path d="M48 135 Q 25 150, 35 175" fill="none" stroke="url(#headGradient)" strokeWidth="16" strokeLinecap="round" />
+                    </g>
+                    <g className="arm-right">
+                        <path d="M152 135 Q 175 150, 165 175" fill="none" stroke="url(#headGradient)" strokeWidth="16" strokeLinecap="round" />
+                    </g>
 
                     {/* BODY - Larger for mature look */}
                     <circle cx="100" cy="135" r="65" fill="url(#headGradient)" stroke="#64748B" strokeWidth="1" />

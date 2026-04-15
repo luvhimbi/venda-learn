@@ -31,11 +31,11 @@ const LogoutModal: React.FC<LogoutModalProps> = ({ onClose, onConfirm }) => (
             </div>
 
             <h3 className="fw-black mb-2 text-theme-main ls-tight text-uppercase">
-                Parking already?
+                Taking a break?
             </h3>
 
             <p className="text-theme-muted fw-bold mb-4" style={{ fontSize: '1.1rem', lineHeight: '1.3' }}>
-                Are you sure you want to log out, chommie? The road is still open and we're making such good time!
+                Are you sure you want to log out, chommie? Your language journey is just getting to the fun part!
             </p>
 
             <div className="d-flex flex-column gap-3 mt-2">
@@ -44,7 +44,7 @@ const LogoutModal: React.FC<LogoutModalProps> = ({ onClose, onConfirm }) => (
                     className="btn game-btn-primary w-100 py-3 px-4"
                     onClick={onClose}
                 >
-                    NO, KEEP ROLLING! 🚀
+                    NO, KEEP LEARNING! 🚀
                 </JuicyButton>
 
                 {/* Section 3 & 5: Using utility classes for the secondary link */}

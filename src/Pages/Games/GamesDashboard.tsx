@@ -101,15 +101,6 @@ const GamesDashboard: React.FC = () => {
                 route: '/morabaraba',
                 color: 'var(--venda-dark)',
                 gradient: 'linear-gradient(135deg, #1e293b 0%, #0f172a 100%)'
-            },
-            {
-                id: 'moruba',
-                title: 'Moruba Traditional',
-                description: 'A traditional 4-row mancala game. Use your wit to capture the opponent\'s stones.',
-                icon: <Trophy size={48} />,
-                route: '/moruba',
-                color: '#5d4037',
-                gradient: 'linear-gradient(135deg, #78350f 0%, #451a03 100%)'
             }
         ];
     }, [preferredLanguage]);
@@ -184,21 +175,21 @@ const GamesDashboard: React.FC = () => {
                     {shuffledGames.map((game, idx) => (
                         <div key={game.id} className="col-md-6 animate__animated animate__fadeInUp" style={{ animationDelay: `${idx * 0.1}s` }}>
                             <div
-                                className="brutalist-card h-100 shadow-action-sm transition-all hover-lift overflow-hidden"
+                                className="brutalist-card shadow-action-sm transition-all hover-lift overflow-hidden"
                                 onClick={() => {
                                     if (isLoggedIn) navigate(game.route);
                                     else handleLoginNagger();
                                 }}
                                 style={{ cursor: 'pointer' }}
                             >
-                                <div className="d-flex flex-column h-100">
+                                <div className="d-flex flex-column">
                                     <div
-                                        className="p-3 d-flex align-items-center justify-content-center text-white border-bottom border-theme-main border-4"
-                                        style={{ background: game.gradient, height: '140px' }}
+                                        className="py-4 d-flex align-items-center justify-content-center text-white border-bottom border-theme-main border-4"
+                                        style={{ background: game.gradient }}
                                     >
-                                        <div className="p-4 rounded-circle border border-white border-2 d-flex align-items-center justify-content-center" 
-                                             style={{ backgroundColor: 'rgba(255, 255, 255, 0.2)', width: '100px', height: '100px' }}>
-                                            {React.cloneElement(game.icon as React.ReactElement, { color: '#ffffff', strokeWidth: 2.5 } as any)}
+                                        <div className="p-3 rounded-circle border border-white border-2 d-flex align-items-center justify-content-center" 
+                                             style={{ backgroundColor: 'rgba(255, 255, 255, 0.2)' }}>
+                                            {React.cloneElement(game.icon as React.ReactElement, { color: '#ffffff', strokeWidth: 2.5, size: 40 } as any)}
                                         </div>
                                     </div>
                                     <div className="p-3 flex-grow-1 bg-theme-card d-flex flex-column">

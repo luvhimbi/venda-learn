@@ -110,17 +110,17 @@ const PICTURE_PUZZLE_INTRO_STEPS = [
     {
         icon: <Eye size={28} strokeWidth={3} />,
         title: 'See the English Word',
-        description: 'A word appears in English with an icon to help you identify it.'
+        description: 'A word like "Dog" or "Happy" appears with an icon to help you identify it.'
     },
     {
         icon: <MousePointerClick size={28} strokeWidth={3} />,
         title: 'Pick the Translation',
-        description: 'Choose the correct translation from 4 options. Tap the right answer!'
+        description: 'Choose the correct local language translation from the 4 options below (e.g. pick "Mmbwa").'
     },
     {
         icon: <Timer size={28} strokeWidth={3} />,
         title: 'Beat the Clock!',
-        description: 'Score as many points as possible before time runs out. Each correct answer = +5 XP!'
+        description: 'Match as many words as you can in 60 seconds! Rapidly tap the right answers. Correct answers = +5 XP!'
     }
 ];
 
@@ -170,6 +170,18 @@ const PicturePuzzle: React.FC = () => {
     useEffect(() => {
         loadGameData();
         return () => stopTimer();
+    }, []);
+
+    useEffect(() => {
+        const originalOverflow = document.body.style.overflow;
+        const originalOverscroll = document.body.style.overscrollBehavior;
+        document.body.style.overflow = 'hidden';
+        document.body.style.overscrollBehavior = 'none';
+
+        return () => {
+            document.body.style.overflow = originalOverflow;
+            document.body.style.overscrollBehavior = originalOverscroll;
+        };
     }, []);
 
     useEffect(() => {
@@ -328,7 +340,7 @@ const PicturePuzzle: React.FC = () => {
     };
 
     if (loading) return (
-        <div className="min-vh-100 d-flex flex-column justify-content-center align-items-center bg-theme-base">
+        <div className="d-flex flex-column justify-content-center align-items-center bg-theme-base overflow-hidden" style={{ height: '100dvh' }}>
             <Mascot width="100px" height="100px" mood="excited" />
             <p className="text-theme-muted mt-3 fw-bold" style={{ fontSize: '12px', letterSpacing: '2px', textTransform: 'uppercase' }}>Loading game...</p>
         </div>
@@ -339,7 +351,8 @@ const PicturePuzzle: React.FC = () => {
     const timerColor = timeLeft > 20 ? '#FACC15' : timeLeft > 10 ? '#F97316' : '#EF4444';
 
     return (
-        <div className="min-vh-100 d-flex flex-column" style={{ 
+        <div className="d-flex flex-column overflow-hidden" style={{ 
+            height: '100dvh',
             backgroundColor: 'var(--color-bg)',
             backgroundImage: "url(\"data:image/svg+xml,%3Csvg width='20' height='20' viewBox='0 0 20 20' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='currentColor' fill-opacity='0.02' fill-rule='evenodd'%3E%3Ccircle cx='3' cy='3' r='1'/%3E%3C/g%3E%3C/svg%3E\")" 
         }}>
@@ -385,7 +398,7 @@ const PicturePuzzle: React.FC = () => {
             />
 
             {/* DARK HEADER */}
-            <div className="px-3 pt-4 pb-5 bg-dark text-white border-bottom border-theme-main border-4 shadow-action-sm">
+            <div className="px-3 pt-4 pb-4">
                 <div className="container" style={{ maxWidth: '600px' }}>
                     <div className="d-flex justify-content-between align-items-center mb-3">
                         <button onClick={handleExit} className="btn-game btn-game-white rounded-circle d-flex align-items-center justify-content-center" style={{ width: 44, height: 44, padding: 0 }}>
@@ -393,38 +406,29 @@ const PicturePuzzle: React.FC = () => {
                         </button>
                         <div className="text-center">
                             <span className="smallest fw-black text-warning uppercase ls-1 mb-0 d-block">{preferredLanguage?.name || 'Local'} Race</span>
-                            <h2 className="fw-black mb-0 text-white ls-tight" style={{ fontSize: '1.5rem' }}>TSHIFANISO</h2>
+                            <h2 className="fw-black mb-0 text-theme-main ls-tight" style={{ fontSize: '1.5rem' }}>TSHIFANISO</h2>
                         </div>
                         <div className="d-flex align-items-center gap-2">
                             <button onClick={() => { resetIntroSeen('picturePuzzle'); setShowIntro(true); }} className="btn-game btn-game-white rounded-circle d-flex align-items-center justify-content-center" style={{ width: 36, height: 36, padding: 0 }} title="How to play">
                                 <HelpCircle size={18} strokeWidth={3} className="text-theme-main" />
                             </button>
-                             {streak > 0 && (
-                                <div className="d-flex align-items-center flex-column bg-warning brutalist-card--sm px-2 py-1" title="Daily Streak">
-                                    <Flame size={18} color="#000" fill="#000" />
-                                    <span className="fw-black smallest text-dark">{streak}</span>
-                                </div>
-                            )}
                         </div>
                     </div>
-                    <div className="d-flex align-items-center justify-content-between">
+                    <div className="d-flex align-items-center justify-content-center">
                         {/* TIMER */}
-                        <div className="d-flex align-items-center gap-2 bg-white bg-opacity-10 rounded-pill px-3 py-1">
+                        <div className="d-flex align-items-center gap-2 bg-theme-surface rounded-pill px-3 py-1 border border-theme-main">
                             <Clock size={16} style={{ color: timerColor }} />
-                            <div style={{ width: '60px', height: '8px', borderRadius: 10, background: 'rgba(255,255,255,0.1)' }} className="border border-white border-opacity-10 overflow-hidden">
+                            <div style={{ width: '60px', height: '8px', borderRadius: 10, background: 'var(--color-surface-soft)' }} className="border border-theme-soft overflow-hidden">
                                 <div style={{ width: `${timerPercent}%`, height: '100%', background: timerColor, transition: 'all 0.3s' }}></div>
                             </div>
                             <span className="fw-black smallest" style={{ color: timerColor }}>{timeLeft}S</span>
-                        </div>
-                        <div className="bg-warning text-dark brutalist-card--sm px-3 py-1 fw-black d-flex align-items-center gap-2 smallest shadow-action-sm">
-                            <Star size={14} fill="currentColor" /> {score} XP
                         </div>
                     </div>
                 </div>
             </div>
 
             {/* MAIN CONTENT */}
-            <div id="pzl-game-arena" className="flex-grow-1 px-3" style={{ marginTop: '-20px' }}>
+            <div id="pzl-game-arena" className="flex-grow-1 px-3 overflow-auto">
                 <div className="container" style={{ maxWidth: '600px' }}>
 
                     {/* ENGLISH WORD PROMPT CARD */}

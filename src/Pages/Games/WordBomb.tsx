@@ -44,17 +44,17 @@ const WORD_BOMB_INTRO_STEPS = [
     {
         icon: <Eye size={28} strokeWidth={3} />,
         title: 'Words Fall Down',
-        description: 'English words fall from the sky. Read them quickly before they reach the bottom!'
+        description: 'English words (e.g. "Water") fall from the sky. Read them quickly before they reach the bottom!'
     },
     {
         icon: <Keyboard size={28} strokeWidth={3} />,
         title: 'Type the Translation',
-        description: 'Type or tap the correct translation. On mobile, use the word palette below!'
+        description: 'Quickly type or tap the correct translation (e.g. "Madi"). On mobile, just select it from the word palette below!'
     },
     {
         icon: <AlertTriangle size={28} strokeWidth={3} />,
         title: "Don't Let Them Drop!",
-        description: 'You have 10 lives. Each missed word costs a life. Build combos for bonus points!'
+        description: 'You have 10 lives. Each missed word costs a life. Build combos by answering fast without mistakes for bonus points!'
     }
 ];
 
@@ -114,7 +114,17 @@ const WordBomb: React.FC = () => {
         };
         handleResize();
         window.addEventListener('resize', handleResize);
-        return () => window.removeEventListener('resize', handleResize);
+
+        const originalOverflow = document.body.style.overflow;
+        const originalOverscroll = document.body.style.overscrollBehavior;
+        document.body.style.overflow = 'hidden';
+        document.body.style.overscrollBehavior = 'none';
+
+        return () => {
+            window.removeEventListener('resize', handleResize);
+            document.body.style.overflow = originalOverflow;
+            document.body.style.overscrollBehavior = originalOverscroll;
+        };
     }, []);
 
     const cleanup = useCallback(() => {
@@ -447,7 +457,7 @@ const WordBomb: React.FC = () => {
 
     if (gameStatus === 'loading') {
         return (
-            <div className="min-vh-100 d-flex justify-content-center align-items-center bg-theme-base">
+            <div className="d-flex justify-content-center align-items-center bg-theme-base overflow-hidden" style={{ height: '100dvh' }}>
                 <Loader2 className="animate-spin text-warning" size={48} />
             </div>
         );
@@ -455,9 +465,12 @@ const WordBomb: React.FC = () => {
 
     if (gameStatus === 'ready') {
         return (
-            <div className="flex-grow-1 d-flex flex-column align-items-center justify-content-center p-4 bg-theme-base" style={{ minHeight: '80vh' }}>
-                <button onClick={() => navigate('/mitambo')} className="btn btn-link text-decoration-none p-0 text-theme-main position-absolute top-0 start-0 m-4">
-                    <ArrowLeft size={24} />
+            <div className="flex-grow-1 d-flex flex-column align-items-center justify-content-center p-4 bg-theme-base overflow-hidden position-relative" style={{ height: '100dvh' }}>
+                <button onClick={() => navigate('/mitambo')} className="btn-game btn-game-white rounded-circle d-flex align-items-center justify-content-center position-absolute" style={{ top: '20px', left: '20px', width: 44, height: 44, padding: 0, zIndex: 10 }}>
+                    <ArrowLeft size={24} strokeWidth={3} className="text-theme-main" />
+                </button>
+                <button onClick={() => { resetIntroSeen('wordBomb'); setShowIntro(true); }} className="btn-game btn-game-white rounded-circle d-flex align-items-center justify-content-center position-absolute" style={{ top: '20px', right: '20px', width: 44, height: 44, padding: 0, zIndex: 10 }}>
+                    <HelpCircle size={24} strokeWidth={3} className="text-theme-main" />
                 </button>
 
                 {showIntro && (
@@ -471,29 +484,23 @@ const WordBomb: React.FC = () => {
                     />
                 )}
 
-                <div className="text-center mb-5 d-flex flex-column align-items-center">
-                    <div className="mb-4">
-                        <Mascot width="120px" height="120px" mood="excited" />
+                <div className="text-center mb-4 d-flex flex-column align-items-center mt-3">
+                    <div className="mb-3">
+                        <Mascot width="80px" height="80px" mood="excited" />
                     </div>
-                    <div className="brutalist-card bg-warning p-4 mb-4 shadow-action-sm">
-                        <Bomb size={48} strokeWidth={3} className="text-dark wb-pulse" />
+                    <div className="brutalist-card bg-warning p-3 mb-3 shadow-action-sm">
+                        <Bomb size={32} strokeWidth={3} className="text-dark wb-pulse" />
                     </div>
-                    <h1 className="fw-black mb-2 text-theme-main uppercase ls-tight display-5">WORD BOMB</h1>
-                    <p className="fw-bold text-theme-muted uppercase smallest ls-1">Master {preferredLanguage?.name || 'Local'} vocabulary at speed</p>
+                    <h1 className="fw-black mb-1 text-theme-main uppercase ls-tight text-center" style={{ fontSize: '1.75rem' }}>WORD BOMB</h1>
+                    <p className="fw-bold text-theme-muted uppercase mb-0 ls-1" style={{ fontSize: '0.75rem' }}>Master {preferredLanguage?.name || 'Local'} vocabulary at speed</p>
                 </div>
 
-                <div className="d-flex flex-column gap-3 w-100 mt-4 px-3" style={{ maxWidth: '400px' }}>
+                <div className="d-flex flex-column gap-3 w-100 mt-2 px-3" style={{ maxWidth: '400px' }}>
                     <button
                         onClick={startGame}
-                        className="btn-game btn-game-warning w-100 p-4 rounded-4 shadow-action-lg"
+                        className="btn-game btn-game-warning w-100 p-3 rounded-4 shadow-action-lg fw-black ls-1 uppercase" style={{ fontSize: '1.1rem' }}
                     >
                         START GAME
-                    </button>
-                    <button
-                        onClick={() => { resetIntroSeen('wordBomb'); setShowIntro(true); }}
-                        className="btn-game btn-game-white w-100 p-3 rounded-4 d-flex align-items-center justify-content-center gap-2"
-                    >
-                        <HelpCircle size={18} strokeWidth={3} /> HOW TO PLAY
                     </button>
                 </div>
             </div>
@@ -507,7 +514,7 @@ const WordBomb: React.FC = () => {
         const timeStr = minutes > 0 ? `${minutes}m ${seconds}s` : `${seconds}s`;
 
         return (
-            <div className="min-vh-100 d-flex flex-column align-items-center justify-content-center p-4 bg-theme-base animate__animated animate__fadeIn">
+            <div className="d-flex flex-column align-items-center justify-content-center p-4 bg-theme-base animate__animated animate__fadeIn overflow-hidden" style={{ height: '100dvh' }}>
                 <div className="text-center w-100 brutalist-card p-4 p-md-5 shadow-action-lg position-relative overflow-hidden" style={{ maxWidth: '550px', background: 'var(--color-surface)' }}>
                     {/* Decorative Background */}
                     <div className="position-absolute top-0 start-0 w-100 h-100 opacity-10 pointer-events-none" style={{ backgroundImage: 'radial-gradient(var(--venda-yellow) 2px, transparent 2px)', backgroundSize: '30px 30px' }}></div>
@@ -584,7 +591,7 @@ const WordBomb: React.FC = () => {
     }
 
     return (
-        <div className="min-vh-100 d-flex flex-column wb-bg" onClick={() => inputRef.current?.focus()}>
+        <div className="d-flex flex-column wb-bg overflow-hidden" style={{ height: '100dvh' }} onClick={() => inputRef.current?.focus()}>
             <GameResultModal
                 isOpen={showResult}
                 isSuccess={resultData.isSuccess}
@@ -604,7 +611,7 @@ const WordBomb: React.FC = () => {
             />
 
             {gameStatus === 'playing' && (
-                <div className="px-3 pt-3 pb-4 bg-dark text-white border-bottom border-dark border-4 shadow-action-sm w-100 d-flex justify-content-between align-items-center mb-3 position-relative" style={{ zIndex: 100 }}>
+                <div className="px-3 pt-3 pb-4 w-100 d-flex justify-content-between align-items-center mb-3 position-relative" style={{ zIndex: 100 }}>
                     <div className="container-fluid d-flex justify-content-between align-items-center">
                         <div className="d-flex align-items-center gap-2 gap-md-3">
                             <button onClick={handleExit} className="btn-game btn-game-white rounded-circle d-flex align-items-center justify-content-center" style={{ width: 40, height: 40, padding: 0 }}>

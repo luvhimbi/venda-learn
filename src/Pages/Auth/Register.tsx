@@ -1,15 +1,17 @@
 import React, { useState, type FormEvent, type ChangeEvent } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { doc, setDoc, getDoc, type Firestore } from 'firebase/firestore';
-import { createUserWithEmailAndPassword, signInWithPopup } from 'firebase/auth';
+import { createUserWithEmailAndPassword, signInWithPopup, signInAnonymously } from 'firebase/auth';
 import { Loader2, Eye, EyeOff, ArrowLeft } from 'lucide-react';
 import { useGoogleReCaptcha } from 'react-google-recaptcha-v3';
 import { auth, db, googleProvider } from '../../services/firebaseConfig';
+import { useVisualJuice } from '../../hooks/useVisualJuice';
 
 import Onboarding from './Onboarding';
 
 const Register: React.FC = () => {
     const navigate = useNavigate();
+    const { playClick, triggerHaptic } = useVisualJuice();
     const [searchParams] = useSearchParams();
     const referrerId = searchParams.get('ref');
     const skipIntro = searchParams.get('skipIntro') === 'true';
@@ -37,7 +39,9 @@ const Register: React.FC = () => {
         setError(null);
 
         if (step === 1) {
-            if (!formData.username.trim()) { setError("Input your name, boss."); return; }
+            if (!formData.username.trim()) { setError("Input your name, boss."); triggerHaptic('light'); return; }
+            playClick();
+            triggerHaptic('medium');
             setStep(2);
             return;
         }
@@ -53,9 +57,12 @@ const Register: React.FC = () => {
                 
                 if (existingProfile) {
                     setError("Email already exists.");
+                    triggerHaptic('light');
                     setLoading(false);
                     return;
                 }
+                playClick();
+                triggerHaptic('medium');
                 setStep(3);
             } catch (err) {
                 console.error("Email check error:", err);
@@ -167,32 +174,75 @@ const Register: React.FC = () => {
         } finally { setLoading(false); }
     };
 
+    const handleGuestSignIn = async () => {
+        setError(null);
+        setLoading(true);
+        try {
+            await signInAnonymously(auth);
+            navigate('/');
+        } catch (err: any) {
+            console.error("Guest Sign-In Error:", err);
+            setError("Couldn't jump in. Try again.");
+        } finally {
+            setLoading(false);
+        }
+    };
+
     // If step 0, show Onboarding
     if (step === 0) {
         return <Onboarding onComplete={() => setStep(1)} />;
     }
 
     return (
-        <div className="min-vh-100 d-flex align-items-center justify-content-center bg-theme-base px-3 py-5 font-auth">
-            <div className="w-100 text-theme-main" style={{ maxWidth: '440px' }}>
+        <div className="min-vh-100 d-flex flex-column bg-theme-base font-auth position-relative overflow-hidden">
+            {/* Background Pattern */}
+            <div className="position-absolute inset-0" style={{ 
+                backgroundImage: 'radial-gradient(var(--color-text) 1px, transparent 1px)', 
+                backgroundSize: '32px 32px', 
+                opacity: 0.05, 
+                zIndex: 0 
+            }}></div>
 
-                <div className="text-center mb-5 mt-4">
-                    <div className="d-flex align-items-center justify-content-center position-relative">
-                        {step > 1 && (
-                            <button
-                                className="btn p-0 position-absolute start-0 text-theme-main border-0 shadow-none"
-                                onClick={() => setStep(step - 1)}
-                            >
-                                <ArrowLeft size={24} />
-                            </button>
-                        )}
-                        <h2 className="display-6 fw-black text-uppercase ls-tight text-theme-main mb-0">
-                            {step === 2 && formData.username ? `Hi ${formData.username}!` : 'Join the Crew'}
-                        </h2>
-                    </div>
-                    <p className="fw-bold text-theme-muted mt-2 mb-0 small text-uppercase">
-                        {step === 2 ? "Now, let's get your email address" : `Step ${step} of 3: ${step === 1 ? 'Profile' : step === 2 ? 'Account' : 'Security'}`}
-                    </p>
+            {/* Header / Progress Fill */}
+            <div className="w-100 py-3 px-3 d-flex align-items-center justify-content-center position-relative" style={{ zIndex: 10 }}>
+                {step > 1 && (
+                    <button 
+                        onClick={() => {
+                            playClick();
+                            triggerHaptic('light');
+                            setStep(step - 1);
+                        }}
+                        className="btn p-0 text-theme-main border-0 shadow-none hover-press me-3"
+                        style={{ flexShrink: 0 }}
+                    >
+                        <ArrowLeft size={28} strokeWidth={2.5} />
+                    </button>
+                )}
+                <div className="brutalist-card p-0" style={{ flexGrow: 1, maxWidth: '500px', height: '22px', backgroundColor: 'var(--color-surface-soft)' }}>
+                    <div 
+                        style={{ 
+                            height: '100%', 
+                            width: `${(step / 3) * 100}%`, 
+                            backgroundColor: 'var(--venda-yellow)',
+                            transition: 'width 0.5s cubic-bezier(0.34, 1.56, 0.64, 1)'
+                        }} 
+                    />
+                </div>
+                {step > 1 && <div style={{ width: '28px', flexShrink: 0 }} className="ms-3 d-none d-md-block"></div>}
+            </div>
+
+            <div className="w-100 text-theme-main px-3 py-4 mx-auto" style={{ maxWidth: '440px', zIndex: 10 }}>
+
+                <div className="text-center mb-4 mt-2">
+                    <img src="/images/Logo.png" alt="Logo" style={{ height: '60px', objectFit: 'contain' }} />
+                </div>
+
+                <div className="text-center mb-4 mt-2">
+                    <h2 className="fw-black text-uppercase ls-tight text-theme-main mb-2" style={{ fontSize: '1.6rem' }}>
+                        {step === 1 ? "What's your name?" :
+                         step === 2 ? `Thanks ${formData.username}, what's your email?` :
+                         `Almost there ${formData.username}! Pick a password.`}
+                    </h2>
                 </div>
 
                 {error && (
@@ -206,7 +256,7 @@ const Register: React.FC = () => {
 
                     {step === 1 && (
                         <div className="mb-4">
-                            <label className="form-label smallest fw-black text-uppercase ls-1">Learner Name</label>
+                            <label className="form-label smallest fw-black text-uppercase ls-1">Your Name</label>
                             <div className="custom-input-group custom-input-group--brutalist">
                                 <input name="username" type="text" className="fw-bold" placeholder="What should we call you?" value={formData.username} onChange={handleChange} required autoFocus disabled={loading} />
                             </div>
@@ -263,20 +313,42 @@ const Register: React.FC = () => {
                             <div className="flex-grow-1 border-top border-4 border-theme-main"></div>
                         </div>
 
-                        <button
-                            onClick={handleGoogleSignIn}
-                            className="btn w-100 fw-black py-3 bg-theme-surface border border-4 border-theme-main rounded-0 shadow-action d-flex align-items-center justify-content-center text-uppercase smallest ls-1 hover-press text-theme-main mb-4"
-                            disabled={loading}
-                        >
-                            <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google" className="me-2" style={{ width: '20px' }} />
-                            Google Sign-Up
-                        </button>
+                        <div className="row g-2 mb-4">
+                            <div className="col-6">
+                                <button
+                                    onClick={handleGoogleSignIn}
+                                    className="btn w-100 h-100 fw-black py-3 bg-theme-surface border border-4 border-theme-main rounded-0 shadow-action d-flex align-items-center justify-content-center text-uppercase smallest ls-1 hover-press text-theme-main"
+                                    disabled={loading}
+                                >
+                                    <div className="d-flex align-items-center justify-content-center me-2" style={{ width: '20px', height: '20px' }}>
+                                        <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+                                    </div>
+                                    Google
+                                </button>
+                            </div>
+                            <div className="col-6">
+                                <button
+                                    onClick={handleGuestSignIn}
+                                    className="btn w-100 h-100 fw-black py-3 bg-theme-surface border border-4 border-theme-main rounded-0 shadow-action d-flex align-items-center justify-content-center text-uppercase smallest ls-1 hover-press text-theme-main"
+                                    disabled={loading}
+                                >
+                                    <div className="d-flex align-items-center justify-content-center me-2" style={{ width: '20px', height: '20px' }}>
+                                        <i className="bi bi-person-bounding-box fs-5 m-0 d-flex align-items-center" style={{ lineHeight: 1 }}></i>
+                                    </div>
+                                    Guest
+                                </button>
+                            </div>
+                        </div>
                     </>
                 )}
 
-                <div className="text-center mt-4">
-                    <p className="fw-bold smallest text-uppercase text-theme-main">
+                <div className="text-center mt-5 mb-4">
+                    <p className="fw-bold smallest text-uppercase text-theme-main mb-4">
                         Got an account? <Link to="/login" className="fw-black text-decoration-underline text-theme-main">Log In</Link>
+                    </p>
+
+                    <p className="text-theme-muted mx-auto" style={{ fontSize: '11px', maxWidth: '320px' }}>
+                        This site is protected by reCAPTCHA and the Google <a href="https://policies.google.com/privacy" className="text-theme-muted text-decoration-underline" target="_blank" rel="noreferrer">Privacy Policy</a> and <a href="https://policies.google.com/terms" className="text-theme-muted text-decoration-underline" target="_blank" rel="noreferrer">Terms of Service</a> apply.
                     </p>
                 </div>
             </div>

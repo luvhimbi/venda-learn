@@ -27,17 +27,17 @@ const WORD_PUZZLE_INTRO_STEPS = [
     {
         icon: <Lightbulb size={28} strokeWidth={3} />,
         title: 'Read the Hint',
-        description: 'A hint is shown to help you guess the hidden word. Use it wisely!'
+        description: 'A hint is shown (e.g. "A large animal with a trunk") to help you guess the hidden word. Use it wisely!'
     },
     {
         icon: <Keyboard size={28} strokeWidth={3} />,
         title: 'Type Your Guess',
-        description: 'Use the keyboard to type a 5-letter word and press Enter to check it.'
+        description: 'Use the keyboard to type a 5-letter local word (e.g. "NDOUA" for elephant) and press Enter to check it.'
     },
     {
         icon: <Palette size={28} strokeWidth={3} />,
         title: 'Follow the Colors',
-        description: 'Green = correct spot, Yellow = wrong spot, Grey = not in word. Fix your guess until you get it right!'
+        description: 'Green = right letter & spot. Yellow = right letter, wrong spot. Grey = not in word. You get 6 tries to find the word!'
     }
 ];
 
@@ -78,6 +78,18 @@ const WordPuzzle: React.FC = () => {
 
     useEffect(() => {
         loadGame();
+    }, []);
+
+    useEffect(() => {
+        const originalOverflow = document.body.style.overflow;
+        const originalOverscroll = document.body.style.overscrollBehavior;
+        document.body.style.overflow = 'hidden';
+        document.body.style.overscrollBehavior = 'none';
+
+        return () => {
+            document.body.style.overflow = originalOverflow;
+            document.body.style.overscrollBehavior = originalOverscroll;
+        };
     }, []);
 
     useEffect(() => {
@@ -255,14 +267,15 @@ const WordPuzzle: React.FC = () => {
     };
 
     if (loading) return (
-        <div className="min-vh-100 bg-theme-base d-flex flex-column justify-content-center align-items-center">
+        <div className="d-flex flex-column justify-content-center align-items-center bg-theme-base overflow-hidden" style={{ height: '100dvh' }}>
             <Mascot width="100px" height="100px" mood="excited" />
             <p className="text-theme-muted mt-3 fw-bold" style={{ fontSize: '12px', letterSpacing: '2px', textTransform: 'uppercase' }}>Loading puzzle...</p>
         </div>
     );
 
     return (
-        <div className="min-vh-100 py-4 d-flex flex-column align-items-center" style={{ 
+        <div className="py-4 d-flex flex-column align-items-center overflow-auto" style={{ 
+            height: '100dvh',
             backgroundColor: 'var(--color-bg)',
             backgroundImage: 'url("data:image/svg+xml,%3Csvg width=\'20\' height=\'20\' viewBox=\'0 0 20 20\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cg fill=\'currentColor\' fill-opacity=\'0.02\' fill-rule=\'evenodd\'%3E%3Ccircle cx=\'3\' cy=\'3\' r=\'1\'/%3E%3C/g%3E%3C/svg%3E")' 
         }}>

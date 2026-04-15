@@ -709,3 +709,11 @@ h3 { font-size: 1.5rem; }
     border-radius: 8px;
     border: 2px solid var(--color-border);
 }
+
+/* ============================================
+   16. MISC / VENDOR OVERRIDES
+   ============================================ */
+/* Hide the floating Google reCAPTCHA badge, per Google's terms if text is provided in flow */
+.grecaptcha-badge {
+    visibility: hidden !important;
+}
