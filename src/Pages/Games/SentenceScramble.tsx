@@ -8,7 +8,7 @@ import Mascot from '../../components/Mascot';
 import confetti from 'canvas-confetti';
 import { updateStreak } from "../../services/streakUtils.ts";
 import { useVisualJuice } from '../../hooks/useVisualJuice';
-import { Flame, ArrowLeft, ChevronRight, Hash, Star, HelpCircle, BookOpen, MousePointerClick, Trophy } from 'lucide-react';
+import { ArrowLeft, ChevronRight, Hash, HelpCircle, BookOpen, MousePointerClick, Trophy } from 'lucide-react';
 import GameIntroModal, { resetIntroSeen } from '../../components/GameIntroModal';
 import ExitConfirmModal from '../../components/ExitConfirmModal';
 
@@ -73,7 +73,7 @@ const SentenceScramble: React.FC = () => {
     const [answerZone, setAnswerZone] = useState<{ id: string, text: string, colorIdx: number }[]>([]);
     const [status, setStatus] = useState<'playing' | 'correct' | 'wrong'>('playing');
     const [score, setScore] = useState(0);
-    const [streak, setStreak] = useState(0);
+    const [, setStreak] = useState(0);
     const [sessionStartTime, setSessionStartTime] = useState(Date.now());
     const { playCorrect, playWrong, playClick, triggerShake } = useVisualJuice();
 

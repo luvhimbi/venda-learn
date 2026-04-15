@@ -1,7 +1,7 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import { fetchSyllables, fetchUserData, fetchLanguages, awardPoints } from '../../services/dataCache';
 import { useNavigate } from 'react-router-dom';
-import { Layout, Star, HelpCircle, ArrowLeft, ChevronRight, Flame, MousePointerClick, Trophy } from 'lucide-react';
+import { Layout, HelpCircle, ArrowLeft, ChevronRight, MousePointerClick, Trophy } from 'lucide-react';
 import { auth, db } from '../../services/firebaseConfig';
 import GameResultModal from '../../components/GameResultModal';
 import { doc, updateDoc, getDoc, type Firestore } from 'firebase/firestore';
@@ -67,7 +67,7 @@ const SyllableBuilder: React.FC = () => {
     const [placed, setPlaced] = useState<{ id: string, text: string, colorIdx: number }[]>([]);
     const [status, setStatus] = useState<'playing' | 'correct' | 'wrong'>('playing');
     const [score, setScore] = useState(0);
-    const [streak, setStreak] = useState(0);
+    const [, setStreak] = useState(0);
     const [sessionStartTime, setSessionStartTime] = useState(Date.now());
     const { playCorrect, playWrong, playClick, triggerShake } = useVisualJuice();
 

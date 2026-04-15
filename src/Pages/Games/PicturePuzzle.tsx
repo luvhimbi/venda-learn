@@ -139,7 +139,7 @@ const PicturePuzzle: React.FC = () => {
     const [answerStatus, setAnswerStatus] = useState<'correct' | 'wrong' | null>(null);
     const [cardBg, setCardBg] = useState(CARD_BGNDS[0]);
     const [roundCount, setRoundCount] = useState(0);
-    const [streak, setStreak] = useState(0);
+    const [, setStreak] = useState(0);
     const [showIntro, setShowIntro] = useState(true);
     const [showExitConfirm, setShowExitConfirm] = useState(false);
     const [showResult, setShowResult] = useState(false);

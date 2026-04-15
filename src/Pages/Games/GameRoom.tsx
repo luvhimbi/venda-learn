@@ -15,7 +15,7 @@ import { useGameLogic } from '../../hooks/useGameLogic';
 import Mascot, { type MascotMood } from '../../components/Mascot';
 import { useVisualJuice } from '../../hooks/useVisualJuice';
 import { updateStreak } from '../../services/streakUtils';
-import { HelpCircle, X, Bookmark, CheckCircle2, Volume2, Play, Zap, Users } from 'lucide-react';
+import { HelpCircle, X, Bookmark, CheckCircle2, Volume2, Play, Users } from 'lucide-react';
 import { db, auth } from '../../services/firebaseConfig';
 import { doc, updateDoc, arrayUnion } from 'firebase/firestore';
 import { onAuthStateChanged } from 'firebase/auth';
@@ -79,7 +79,7 @@ const GameRoom: React.FC = () => {
     const [mascotCheerText, setMascotCheerText] = useState(MASCOT_CHEERS[0]);
     const [mascotMood, setMascotMood] = useState<MascotMood>('happy');
     const [showSavedHint, setShowSavedHint] = useState(false);
-    const [userData, setUserData] = useState<any>(null);
+    const [, setUserData] = useState<any>(null);
     const [sessionStartTime] = useState(Date.now());
     const [hasPlayedWinSound, setHasPlayedWinSound] = useState(false);
     const [finishedTime, setFinishedTime] = useState<number | null>(null);

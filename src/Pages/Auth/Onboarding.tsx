@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import Mascot from '../../components/Mascot';
 import { useVisualJuice } from '../../hooks/useVisualJuice';
 import confetti from 'canvas-confetti';
-import { ArrowRight, ArrowLeft, Globe, Flame, Heart, Brain, GraduationCap, Briefcase, Plane, Compass, MessageCircle, Sun, Shield, Mountain, Waves, Sprout, Egg, Zap, Clock, Timer, Search, Instagram, Users, Tv, Type } from 'lucide-react';
+import { ArrowRight, ArrowLeft, Globe, Heart, Brain, Briefcase, Plane, MessageCircle, Sun, Shield, Mountain, Waves, Sprout, Egg, Zap, Clock, Timer, Search, Instagram, Users, Tv, Type } from 'lucide-react';
 
 interface OnboardingProps {
     onComplete?: () => void;

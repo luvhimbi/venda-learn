@@ -9,7 +9,7 @@ interface Props {
 }
 
 const TrueFalseQuestion: React.FC<Props> = ({ q, selected, status, onSelect }) => {
-    const renderBtn = (val: boolean, label: string, vendaLabel: string) => {
+    const renderBtn = (val: boolean, label: string) => {
         const isCorrect = val === q.correctAnswer;
         const isSelected = selected === val;
         let cls = 'btn-game-white border-dark border-3';
@@ -24,8 +24,8 @@ const TrueFalseQuestion: React.FC<Props> = ({ q, selected, status, onSelect }) =
     };
     return (
         <div className="d-flex gap-3">
-            {renderBtn(true, 'TRUE', 'NGOHO')}
-            {renderBtn(false, 'FALSE', 'MAZWIFHI')}
+            {renderBtn(true, 'TRUE')}
+            {renderBtn(false, 'FALSE')}
         </div>
     );
 };
