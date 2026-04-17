@@ -20,3 +20,9 @@ const ScorePopup: React.FC<Props> = ({ result }) => {
 };
 
 export default ScorePopup;
+
+
+
+
+
+

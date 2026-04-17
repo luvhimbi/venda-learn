@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import Mascot from '../components/Mascot';
+import Mascot from '../features/gamification/components/Mascot';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { useGSAP } from '@gsap/react';
@@ -401,3 +401,10 @@ const LandingPage: React.FC = () => {
 
 export default LandingPage;
  LandingPage;
+
+
+
+
+
+
+

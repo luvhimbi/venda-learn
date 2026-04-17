@@ -1,5 +1,5 @@
 import React from 'react';
-import SmartReader from '../../components/SmartReader';
+import SmartReader from '../../features/learning/components/SmartReader';
 
 const TermsOfUse: React.FC = () => {
     const termsText = `
@@ -71,6 +71,14 @@ const TermsOfUse: React.FC = () => {
 };
 
 export default TermsOfUse;
+
+
+
+
+
+
+
+
 
 
 

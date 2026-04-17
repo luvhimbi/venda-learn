@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { db } from '../../services/firebaseConfig';
-import { collection, addDoc, doc, updateDoc, getDocs, serverTimestamp, query, orderBy } from 'firebase/firestore';
-import AdminNavbar from '../../components/AdminNavbar';
+import { collection, addDoc, doc, updateDoc, setDoc, getDocs, serverTimestamp, query, orderBy } from 'firebase/firestore';
+import AdminNavbar from '../../components/shared/navigation/AdminNavbar';
 import { invalidateCache } from '../../services/dataCache';
 import Swal from 'sweetalert2';
 import { Globe, Edit, Loader2, Plus, X, Languages } from 'lucide-react';
@@ -31,8 +31,8 @@ const AdminLanguages: React.FC = () => {
             
             // If empty, seed Venda as default
             if (list.length === 0) {
-                await addDoc(collection(db, "languages"), {
-                    name: "Venda",
+                await setDoc(doc(db, "languages", "venda"), {
+                    name: "Tshivenda",
                     code: "ve",
                     createdAt: serverTimestamp()
                 });
@@ -68,13 +68,21 @@ const AdminLanguages: React.FC = () => {
                 });
                 Swal.fire('Updated!', 'Language has been updated.', 'success');
             } else {
-                const ref = await addDoc(collection(db, "languages"), { 
+                // Generate a slug-based ID (e.g., "Tshivenda" -> "venda")
+                const slug = form.name.toLowerCase()
+                                .replace(/tshivenda/g, 'venda') // Alias common variations
+                                .replace(/[^a-z0-p]/g, '')
+                                .trim();
+                
+                const langRef = doc(db, "languages", slug);
+                await setDoc(langRef, { 
                     ...form,
                     createdAt: serverTimestamp()
                 });
+                
                 await addDoc(collection(db, "logs"), {
                     action: "CREATE", details: `Added language: ${form.name}`,
-                    adminEmail: "Admin", targetId: ref.id, timestamp: serverTimestamp()
+                    adminEmail: "Admin", targetId: slug, timestamp: serverTimestamp()
                 });
                 Swal.fire('Added!', 'New language added.', 'success');
             }
@@ -272,3 +280,11 @@ const AdminLanguages: React.FC = () => {
 };
 
 export default AdminLanguages;
+
+
+
+
+
+
+
+

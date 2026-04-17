@@ -1,22 +1,21 @@
 import React, { useState, useCallback, useEffect } from 'react';
-import { fetchSentences, fetchUserData, fetchLanguages, awardPoints } from '../../services/dataCache';
+import { fetchGameContentByLevel, fetchUserData, fetchLanguages, awardPoints, completeLevel, markWordsAsLearned } from '../../services/dataCache';
 import { useNavigate } from 'react-router-dom';
 import { auth, db } from '../../services/firebaseConfig';
-import GameResultModal from '../../components/GameResultModal';
+import GameResultModal from '../../components/feedback/modals/GameResultModal';
 import { doc, updateDoc, getDoc, type Firestore } from 'firebase/firestore';
-import Mascot from '../../components/Mascot';
+import Mascot from '../../features/gamification/components/Mascot';
 import confetti from 'canvas-confetti';
 import { updateStreak } from "../../services/streakUtils.ts";
 import { useVisualJuice } from '../../hooks/useVisualJuice';
 import { ArrowLeft, ChevronRight, Hash, HelpCircle, BookOpen, MousePointerClick, Trophy } from 'lucide-react';
-import GameIntroModal, { resetIntroSeen } from '../../components/GameIntroModal';
-import ExitConfirmModal from '../../components/ExitConfirmModal';
+import GameIntroModal, { resetIntroSeen } from '../../components/feedback/modals/GameIntroModal';
+import ExitConfirmModal from '../../components/feedback/modals/ExitConfirmModal';
 
 interface SentencePuzzle {
     id: string;
     words: string[];
     translation: string;
-    difficulty: string;
 }
 
 const CHIP_COLORS = [
@@ -31,11 +30,6 @@ const CHIP_COLORS = [
 
 
 
-const DIFFICULTY_COLORS: Record<string, { bg: string, text: string }> = {
-    'Easy': { bg: '#ECFDF5', text: '#065F46' },
-    'Medium': { bg: '#FEF3C7', text: '#92400E' },
-    'Hard': { bg: '#FEF2F2', text: '#991B1B' },
-};
 
 const SENTENCE_SCRAMBLE_INTRO_STEPS = [
     {
@@ -62,12 +56,13 @@ const SentenceScramble: React.FC = () => {
     const [currentPuzzle, setCurrentPuzzle] = useState<SentencePuzzle | null>(null);
     const [currentIndex, setCurrentIndex] = useState(0);
     const [showRules, setShowRules] = useState(false);
-    const [selectedLevel, setSelectedLevel] = useState<string | null>(null);
+    const [isPlaying, setIsPlaying] = useState(false);
+    const [currentLevel, setCurrentLevel] = useState(1);
     const [preferredLanguage, setPreferredLanguage] = useState<any>(null);
     const [showIntro, setShowIntro] = useState(true);
     const [showExitConfirm, setShowExitConfirm] = useState(false);
     const [showResult, setShowResult] = useState(false);
-    const [resultData, setResultData] = useState({ isSuccess: false, title: '', message: '', points: 0 });
+    const [resultData, setResultData] = useState({ isSuccess: false, title: '', message: '', points: 0, isLevelComplete: false });
 
     const [scrambledWords, setScrambledWords] = useState<{ id: string, text: string, colorIdx: number }[]>([]);
     const [answerZone, setAnswerZone] = useState<{ id: string, text: string, colorIdx: number }[]>([]);
@@ -75,6 +70,7 @@ const SentenceScramble: React.FC = () => {
     const [score, setScore] = useState(0);
     const [, setStreak] = useState(0);
     const [sessionStartTime, setSessionStartTime] = useState(Date.now());
+    const sessionLearnedIds = React.useRef<Set<string>>(new Set());
     const { playCorrect, playWrong, playClick, triggerShake } = useVisualJuice();
 
     useEffect(() => {
@@ -92,72 +88,88 @@ const SentenceScramble: React.FC = () => {
     const handleIntroDismiss = useCallback(() => setShowIntro(false), []);
 
     const handleExit = () => {
-        if (selectedLevel) {
+        if (isPlaying) {
             setShowExitConfirm(true);
         } else {
             navigate('/mitambo');
         }
     };
 
-    const confirmExit = () => {
+    const confirmExit = async () => {
+        if (sessionLearnedIds.current.size > 0) {
+            await markWordsAsLearned(Array.from(sessionLearnedIds.current));
+        }
         setShowExitConfirm(false);
         navigate('/mitambo');
     };
 
-
-
-    // We don't auto-load the game into Playing state anymore
-    // useEffect(() => { loadGameData(); }, []);
-
-    const startLevel = async (level: string) => {
-        setSelectedLevel(level);
+    const loadGameData = async () => {
         setLoading(true);
         try {
-            const [data, uData, langs] = await Promise.all([
-                fetchSentences(),
+            const [uData, langs] = await Promise.all([
                 fetchUserData(),
                 fetchLanguages()
             ]);
 
+            const mastered = uData?.learnedVocabulary || [];
+
+            const levelNum = uData?.gameLevels?.sentence || 1;
+            setCurrentLevel(levelNum);
+
             let activeLang: any = null;
             if (uData && langs) {
-                activeLang = langs.find((l: any) => l.id === uData.preferredLanguageId);
+                activeLang = langs.find((l: any) => l.id === (uData.preferredLanguageId || 'venda'));
                 setPreferredLanguage(activeLang);
             }
 
-            const filtered = data.filter(d => {
-                const isCorrectDifficulty = d.difficulty === level;
-                const isCorrectLang = !activeLang || d.languageId === activeLang.id || !d.languageId;
-                return isCorrectDifficulty && isCorrectLang;
-            });
+            const langId = activeLang?.id || 'venda';
+            console.log(`[SentenceScramble] Fetching level ${levelNum} for lang ${langId} (${activeLang?.name})`);
 
-            const shuffled = [...filtered].sort(() => 0.5 - Math.random());
-            setPuzzles(shuffled);
-            if (shuffled.length > 0) {
-                setupRound(shuffled[0], 0);
+            const allLevelWords = await fetchGameContentByLevel("sentencePuzzles", langId, levelNum);
+            console.log(`[SentenceScramble] Found ${allLevelWords.length} sentences.`);
+
+            const unlearned = allLevelWords.filter((w: any) => !mastered.includes(w.id));
+
+            if (unlearned.length === 0 && allLevelWords.length > 0) {
+                setResultData({
+                    isSuccess: true,
+                    title: 'LEVEL COMPLETE!',
+                    message: `You've mastered all sentences in Level ${levelNum}!`,
+                    points: 0,
+                    isLevelComplete: true
+                });
+                setShowResult(true);
+                setIsPlaying(false);
+            } else if (allLevelWords.length > 0) {
+                const normalized = (allLevelWords as any[]).map((w: any) => ({
+                    id: w.id,
+                    words: w.words || [],
+                    translation: w.translation || w.english
+                }));
+                setPuzzles(normalized);
+                setupRound(normalized[0], 0);
+                setIsPlaying(true);
             } else {
                 setResultData({
                     isSuccess: false,
-                    title: 'No Puzzles',
-                    message: `No sentence puzzles found for ${level} in ${activeLang?.name || 'this language'}.`,
-                    points: 0
+                    title: 'NO CONTENT',
+                    message: `DEBUG: Lang[${langId}] Level[${levelNum}]. Whoops! Level ${levelNum} has no sentences in ${activeLang?.name || 'this language'} yet.`,
+                    points: 0,
+                    isLevelComplete: false
                 });
                 setShowResult(true);
-                setSelectedLevel(null);
+                setIsPlaying(false);
             }
         } catch (error) {
-            setResultData({
-                isSuccess: false,
-                title: 'Error',
-                message: 'Failed to load game data. Please try again.',
-                points: 0
-            });
-            setShowResult(true);
-            setSelectedLevel(null);
+            console.error("Failed to load sentence puzzles:", error);
         } finally {
             setLoading(false);
         }
     };
+
+    useEffect(() => {
+        loadGameData();
+    }, []);
 
     const setupRound = (puzzle: SentencePuzzle, idx: number) => {
         setCurrentPuzzle(puzzle);
@@ -210,7 +222,7 @@ const SentenceScramble: React.FC = () => {
             setStatus('correct');
 
 
-            
+
             // CONFETTI!
             confetti({
                 particleCount: 120,
@@ -223,7 +235,10 @@ const SentenceScramble: React.FC = () => {
 
             const user = auth.currentUser;
             if (user) {
-                // Using centralized awardPoints to ensure weekly leaderboard sync
+                // Buffer mastery locally
+                sessionLearnedIds.current.add(currentPuzzle.id);
+
+                // Centralized XP and tracking
                 await awardPoints(10);
 
                 const userRef = doc(db as Firestore, 'users', user.uid);
@@ -246,16 +261,22 @@ const SentenceScramble: React.FC = () => {
         }
     };
 
-    const nextRound = () => {
+    const nextRound = async () => {
         if (!currentPuzzle) return;
         const nextIdx = currentIndex + 1;
+        const currentSessionCount = sessionLearnedIds.current.size;
 
-        if (nextIdx >= puzzles.length) {
+        if (nextIdx >= puzzles.length || currentSessionCount >= 5) {
+            // Success condition: finished all puzzles or reached session goal (5)
+            const sessionIds = Array.from(sessionLearnedIds.current);
+            await completeLevel("sentence", currentLevel, sessionIds);
+
             setResultData({
                 isSuccess: true,
-                title: 'Category Complete!',
-                message: `Excellent! You've mastered all ${puzzles.length} sentences in this level.`,
-                points: score
+                title: 'LEVEL COMPLETE!',
+                message: `Excellent! You've mastered all ${puzzles.length} sentences in Level ${currentLevel}. Advance to Level ${currentLevel + 1}?`,
+                points: score,
+                isLevelComplete: true
             });
             setShowResult(true);
             return;
@@ -272,7 +293,7 @@ const SentenceScramble: React.FC = () => {
         </div>
     );
 
-    if (!selectedLevel) {
+    if (!isPlaying) {
         return (
             <div className="p-4 d-flex flex-column align-items-center justify-content-center bg-theme-base overflow-hidden position-relative" style={{ height: '100dvh' }}>
 
@@ -298,34 +319,32 @@ const SentenceScramble: React.FC = () => {
 
                 <div className="container d-flex flex-column align-items-center" style={{ maxWidth: '600px' }}>
 
-                    <div className="text-center mb-4 d-flex flex-column align-items-center">
-                        <div className="brutalist-card bg-warning p-3 mb-3 shadow-action-sm">
-                            <Hash size={32} strokeWidth={3} className="text-dark" />
+                    <div className="text-center mb-5 d-flex flex-column align-items-center">
+                        <div className="brutalist-card bg-warning p-4 mb-3 shadow-action">
+                            <Hash size={48} strokeWidth={3} className="text-dark" />
                         </div>
-                        <h1 className="fw-black mb-1 text-theme-main uppercase ls-tight text-center" style={{ fontSize: '1.75rem' }}>SENTENCE SCRAMBLE</h1>
-                        <p className="fw-bold text-theme-muted uppercase mb-0 ls-1" style={{ fontSize: '0.75rem' }}>Master {preferredLanguage?.name || ''} sentence structures</p>
+                        <h1 className="fw-black mb-1 text-theme-main uppercase ls-tight text-center mt-2" style={{ fontSize: '2.5rem' }}>SENTENCE SCRAMBLE</h1>
+                        <p className="fw-bold text-theme-muted uppercase mb-4 ls-1" style={{ fontSize: '0.85rem' }}>Master {preferredLanguage?.name || ''} sentence structures</p>
+
+                        <div className="badge bg-dark text-white px-3 py-2 rounded-pill smallest fw-black ls-1 mb-4 shadow-action-sm">
+                            CURRENTLY AT LEVEL {currentLevel}
+                        </div>
                     </div>
 
-                    <div className="d-flex flex-column gap-3 w-100">
-                        {['Beginner', 'Intermediate', 'Advanced'].map((lvl) => (
-                            <button
-                                key={lvl}
-                                onClick={() => startLevel(lvl)}
-                                className="brutalist-card transition-all hover-lift--sm w-100 p-3 text-start bg-theme-card text-theme-main shadow-action-sm border-theme-main"
-                            >
-                                <div className="d-flex justify-content-between align-items-center">
-                                    <div>
-                                        <h2 className="fw-black mb-1 uppercase ls-1" style={{ fontSize: '1.1rem' }}>{lvl}</h2>
-                                        <p className="fw-bold text-muted mb-0" style={{ fontSize: '0.75rem' }}>
-                                            {lvl === 'Beginner' ? 'Short everyday interactions' : lvl === 'Intermediate' ? 'Standard dialogue & structures' : 'Deep language logic & proverbs'}
-                                        </p>
-                                    </div>
-                                    <div className="bg-warning border border-theme-main border-2 rounded-circle d-flex align-items-center justify-content-center" style={{ width: 32, height: 32 }}>
-                                        <ChevronRight strokeWidth={4} className="text-black" size={16} />
-                                    </div>
-                                </div>
-                            </button>
-                        ))}
+                    <div className="d-flex flex-column gap-3 w-100" style={{ maxWidth: '400px' }}>
+                        <button
+                            onClick={() => setIsPlaying(true)}
+                            className="btn btn-game btn-game-primary w-100 py-3 smallest fw-black transition-all hover-lift"
+                        >
+                            START LEVEL {currentLevel} <ChevronRight size={18} className="ms-2" strokeWidth={3} />
+                        </button>
+
+                        <button
+                            onClick={() => navigate('/mitambo')}
+                            className="btn btn-game btn-game-white w-100 py-3 smallest fw-black"
+                        >
+                            BACK TO MENU
+                        </button>
                     </div>
                 </div>
 
@@ -353,13 +372,13 @@ const SentenceScramble: React.FC = () => {
         );
     }
     const expectedWords = currentPuzzle?.words.length || 0;
-    const diffColors = DIFFICULTY_COLORS[currentPuzzle?.difficulty || 'Easy'] || DIFFICULTY_COLORS['Easy'];
+
 
     return (
-        <div className="d-flex flex-column bg-theme-base overflow-hidden" style={{ 
+        <div className="d-flex flex-column bg-theme-base overflow-hidden" style={{
             height: '100dvh',
             backgroundColor: 'var(--color-bg)',
-            backgroundImage: 'url("data:image/svg+xml,%3Csvg width=\'20\' height=\'20\' viewBox=\'0 0 20 20\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cg fill=\'currentColor\' fill-opacity=\'0.01\' fill-rule=\'evenodd\'%3E%3Ccircle cx=\'3\' cy=\'3\' r=\'1\'/%3E%3C/g%3E%3C/svg%3E")' 
+            backgroundImage: 'url("data:image/svg+xml,%3Csvg width=\'20\' height=\'20\' viewBox=\'0 0 20 20\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cg fill=\'currentColor\' fill-opacity=\'0.01\' fill-rule=\'evenodd\'%3E%3Ccircle cx=\'3\' cy=\'3\' r=\'1\'/%3E%3C/g%3E%3C/svg%3E")'
         }}>
             {/* RESULT MODAL */}
             <GameResultModal
@@ -368,9 +387,9 @@ const SentenceScramble: React.FC = () => {
                 title={resultData.title}
                 message={resultData.message}
                 points={resultData.points}
-                primaryActionText={resultData.isSuccess ? "PLAY AGAIN" : "TRY AGAIN"}
+                primaryActionText={resultData.isSuccess ? "ADVANCE LEVEL" : "TRY AGAIN"}
                 secondaryActionText="EXIT TO MENU"
-                onPrimaryAction={() => { setShowResult(false); setSelectedLevel(null); setScore(0); }}
+                onPrimaryAction={() => { setShowResult(false); setScore(0); loadGameData(); }}
                 onSecondaryAction={() => { setShowResult(false); navigate('/mitambo'); }}
             />
             {/* EXIT CONFIRM MODAL */}
@@ -389,6 +408,9 @@ const SentenceScramble: React.FC = () => {
                         </button>
                         <div className="text-center">
                             <span className="smallest fw-black text-warning uppercase ls-1 mb-0 d-block">{preferredLanguage?.name || 'Local'} Grammar</span>
+                            <span className="badge bg-dark text-white smallest fw-black px-2 py-1 rounded mt-1" style={{ fontSize: '9px' }}>
+                                LEVEL {currentLevel}
+                            </span>
                         </div>
                         <div style={{ width: 44 }}></div>
                     </div>
@@ -441,8 +463,8 @@ const SentenceScramble: React.FC = () => {
                             "{currentPuzzle?.translation}"
                         </h2>
                         <div className="d-flex justify-content-center gap-2 align-items-center">
-                            <span className="badge rounded-pill px-3 py-1 fw-bold" style={{ background: diffColors.bg, color: diffColors.text, fontSize: '10px', letterSpacing: '1px' }}>
-                                {currentPuzzle?.difficulty?.toUpperCase()}
+                            <span className="badge rounded-pill bg-dark px-3 py-1 fw-bold text-white" style={{ fontSize: '10px', letterSpacing: '1px' }}>
+                                LEVEL {currentLevel}
                             </span>
                             <button onClick={() => setShowRules(true)} className="btn btn-link text-muted small text-decoration-none p-0">
                                 <i className="bi bi-question-circle"></i>
@@ -645,3 +667,11 @@ const SentenceScramble: React.FC = () => {
 };
 
 export default SentenceScramble;
+
+
+
+
+
+
+
+

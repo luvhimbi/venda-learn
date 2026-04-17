@@ -2,11 +2,14 @@ import React, { useState, useEffect } from 'react';
 import { db } from '../../services/firebaseConfig';
 import { collection, doc, deleteDoc, addDoc, updateDoc, serverTimestamp } from 'firebase/firestore';
 import { Link } from 'react-router-dom';
-import AdminNavbar from '../../components/AdminNavbar';
-import { fetchLessons as fetchLessonsFromCache, invalidateCache, getMicroLessons } from '../../services/dataCache';
+import AdminNavbar from '../../components/shared/navigation/AdminNavbar';
+import { fetchLessons as fetchLessonsFromCache, invalidateCache, getMicroLessons, incrementGlobalCacheVersion } from '../../services/dataCache';
+import { clearCollection, migrateLanguages } from '../../services/dataAdmin';
 import { seedLessons } from '../../services/seedDatabase';
+import { seedPuzzles } from '../../services/seedPuzzles';
+import { runSystemOverhaul } from '../../services/gameSeeder';
 import Swal from 'sweetalert2';
-import { Trash2, Edit, Plus, RefreshCw, Loader2, Download, ArrowDownUp, Folder, ChevronDown, ChevronRight } from 'lucide-react';
+import { Trash2, Edit, Plus, RefreshCw, Loader2, Download, ArrowDownUp, Folder, ChevronDown, ChevronRight, Bomb } from 'lucide-react';
 
 const AdminLessons: React.FC = () => {
     const [lessons, setLessons] = useState<any[]>([]);
@@ -89,6 +92,7 @@ const AdminLessons: React.FC = () => {
                 Swal.fire('Deleted!', 'Course removed.', 'success');
                 invalidateCache('lessons');
                 invalidateCache('auditLogs');
+                await incrementGlobalCacheVersion();
                 loadLessons();
             } catch (error) {
                 Swal.fire('Error', 'Failed to delete.', 'error');
@@ -98,23 +102,78 @@ const AdminLessons: React.FC = () => {
 
     const handleSeedDatabase = async () => {
         const result = await Swal.fire({
-            title: 'Sync Content?',
-            text: "Update all courses with micro lesson data?",
-            icon: 'info',
+            title: 'Deep System Sync?',
+            text: "This will: 1. Standardize language IDs, 2. Clear ALL existing lessons, 3. Seed fresh lessons & games. Your progress logic remains unchanged.",
+            icon: 'warning',
             showCancelButton: true,
             confirmButtonColor: '#FACC15',
-            confirmButtonText: 'Yes, Sync',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'YES, SYNC EVERYTHING'
         });
 
         if (result.isConfirmed) {
+            setLoading(true);
             try {
+                // 1. Migrate languages to slugs
+                await migrateLanguages();
+                
+                // 2. Clear lessons collection
+                await clearCollection("lessons");
+                
+                // 3. Clear puzzle collection
+                await clearCollection("puzzleWords");
+
+                // 4. Seed fresh data
                 await seedLessons();
-                await createAuditLog("SYNC", "Synchronized database with micro lessons data", "Bulk-Sync");
+                await seedPuzzles();
+                
+                await createAuditLog("DEEP_SYNC", "Performed systematic database cleanup and re-seeding.", "System-Wide");
+                
                 invalidateCache('lessons');
                 invalidateCache('auditLogs');
+                invalidateCache('languages');
+                invalidateCache('puzzles');
+                
+                await incrementGlobalCacheVersion();
                 loadLessons();
+                
+                Swal.fire('Success', 'Deep sync completed! 6 lessons and puzzles are now active.', 'success');
             } catch (error) {
-                Swal.fire('Error', 'Failed to sync.', 'error');
+                console.error("Deep sync failed:", error);
+                Swal.fire('Error', 'Deep sync failed. Check console.', 'error');
+            } finally {
+                setLoading(false);
+            }
+        }
+    };
+
+    const handleSystemOverhaul = async () => {
+        const result = await Swal.fire({
+            title: '☢️ NUCLEAR SYSTEM RESET?',
+            text: "This is a CRITICAL operation. It will: 1. Wipe ALL old game data, 2. Import levels from JSON, 3. Reset all world tracking. This cannot be undone.",
+            icon: 'error',
+            showCancelButton: true,
+            confirmButtonColor: '#DC2626',
+            cancelButtonColor: '#6B7280',
+            confirmButtonText: 'YES, NUKE & REBOOT'
+        });
+
+        if (result.isConfirmed) {
+            setLoading(true);
+            try {
+                await runSystemOverhaul();
+                await createAuditLog("SYSTEM_OVERHAUL", "Performed a full data wipe and level-based restoration from JSON sources.", "Global");
+                
+                invalidateCache(); // Full purge
+                await incrementGlobalCacheVersion();
+                loadLessons();
+                
+                Swal.fire('Success', 'Game system overhauled! All data is now level-driven.', 'success');
+            } catch (error) {
+                console.error("Overhaul failed:", error);
+                Swal.fire('Error', 'Overhaul failed. See console.', 'error');
+            } finally {
+                setLoading(false);
             }
         }
     };
@@ -158,6 +217,7 @@ const AdminLessons: React.FC = () => {
                 timer: 2000
             });
             invalidateCache('lessons');
+            await incrementGlobalCacheVersion();
             loadLessons();
         } catch (error) {
             console.error("Error updating order:", error);
@@ -182,17 +242,14 @@ const AdminLessons: React.FC = () => {
                                 Manage <span className="text-warning-custom">Courses</span>
                             </h1>
                         </div>
-                        <div className="mt-4 mt-md-0 d-flex gap-3">
-                            <button
-                                onClick={handleSeedDatabase}
-                                className="btn-premium-action secondary d-flex align-items-center gap-2"
-                            >
-                                <RefreshCw size={14} /> SYNC DATA
+                        <div className="mt-4 mt-md-0 d-flex gap-2">
+                             <button onClick={handleSeedDatabase} className="btn-premium-action warning d-flex align-items-center gap-2 smallest fw-bold" title="Sync lessons and standardized data">
+                                <RefreshCw size={14} className={loading ? 'animate-spin' : ''} /> DEEP SYNC
                             </button>
-                            <Link
-                                to="/admin/add-lesson"
-                                className="btn-premium-action warning d-flex align-items-center gap-2 text-decoration-none"
-                            >
+                            <button onClick={handleSystemOverhaul} className="btn-premium-action secondary d-flex align-items-center gap-2 smallest fw-bold text-danger" title="SYSTEM OVERHAUL: Wipe games and create levels from JSON">
+                                <Bomb size={14} /> NUCLEAR REBOOT
+                            </button>
+                             <Link to="/admin/add-lesson" className="btn-premium-action info d-flex align-items-center gap-2 smallest fw-bold">
                                 <Plus size={14} /> ADD COURSE
                             </Link>
                         </div>
@@ -383,3 +440,11 @@ const AdminLessons: React.FC = () => {
 };
 
 export default AdminLessons;
+
+
+
+
+
+
+
+

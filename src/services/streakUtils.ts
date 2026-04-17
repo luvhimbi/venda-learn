@@ -194,3 +194,9 @@ export const updateStreak = async (uid: string): Promise<{
         return { streak: 0, isNewDay: false, freezeUsed: false, wasReset: false };
     }
 };
+
+
+
+
+
+

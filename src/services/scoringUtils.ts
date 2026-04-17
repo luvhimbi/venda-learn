@@ -74,3 +74,9 @@ export const calculateScore = (
 
     return { base, speedBonus, streakMultiplier, total, label };
 };
+
+
+
+
+
+

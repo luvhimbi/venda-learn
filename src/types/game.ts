@@ -58,3 +58,9 @@ export interface Scene {
     background?: string;
     dialogue: DialogueLine[];
 }
+
+
+
+
+
+

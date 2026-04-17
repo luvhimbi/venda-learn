@@ -1,5 +1,5 @@
 import React from 'react';
-import SmartReader from '../../components/SmartReader';
+import SmartReader from '../../features/learning/components/SmartReader';
 
 const POPIAct: React.FC = () => {
     const popiText = `
@@ -86,6 +86,14 @@ const POPIAct: React.FC = () => {
 };
 
 export default POPIAct;
+
+
+
+
+
+
+
+
 
 
 

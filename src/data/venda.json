@@ -1,0 +1,58 @@
+{
+    "name":  "Tshivenda",
+    "code":  "ve",
+    "picturePuzzles":  [
+                           {
+                               "english":  "Sun",
+                               "word":  "Duvha",
+                               "level":  1
+                           },
+                           {
+                               "english":  "Mountain",
+                               "word":  "Thaba",
+                               "level":  1
+                           },
+                           {
+                               "english":  "Water",
+                               "word":  "Madi",
+                               "level":  1
+                           },
+                           {
+                               "english":  "Person",
+                               "word":  "Muthu",
+                               "level":  1
+                           }
+                       ],
+    "syllablePuzzles":  [
+                            {
+                                "translation":  "water",
+                                "word":  "Madi",
+                                "syllables":  [
+                                                  "Ma",
+                                                  "di"
+                                              ],
+                                "level":  1
+                            },
+                            {
+                                "translation":  "mountain",
+                                "word":  "Thaba",
+                                "syllables":  [
+                                                  "Tha",
+                                                  "ba"
+                                              ],
+                                "level":  1
+                            }
+                        ],
+    "sentencePuzzles":  [
+                            {
+                                "translation":  "I love you",
+                                "words":  [
+                                              "Ndi",
+                                              "a",
+                                              "u",
+                                              "funa"
+                                          ],
+                                "level":  1
+                            }
+                        ]
+}

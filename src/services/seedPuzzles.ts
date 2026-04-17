@@ -39,7 +39,10 @@ export const seedPuzzles = async () => {
     try {
         console.log("Starting puzzle seed...");
         for (const puzzle of puzzleData) {
-            await setDoc(doc(db as Firestore, "puzzleWords", puzzle.id), puzzle);
+            await setDoc(doc(db as Firestore, "puzzleWords", puzzle.id), {
+                ...puzzle,
+                languageId: 'venda'
+            });
         }
         alert("Zwi khou bvelela! Word Puzzles seeded successfully.");
     } catch (error) {
@@ -47,5 +50,11 @@ export const seedPuzzles = async () => {
         alert("Failed to seed puzzles.");
     }
 };
+
+
+
+
+
+
 
 

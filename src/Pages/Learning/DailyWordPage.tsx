@@ -133,3 +133,10 @@ const DailyWordPage: React.FC = () => {
 export default DailyWordPage;
 
 
+
+
+
+
+
+
+

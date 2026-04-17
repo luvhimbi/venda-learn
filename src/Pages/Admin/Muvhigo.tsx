@@ -4,7 +4,7 @@ import { onAuthStateChanged } from 'firebase/auth';
 import { auth } from '../../services/firebaseConfig';
 import { fetchTopLearnersByWeek, fetchUserData } from '../../services/dataCache';
 import { getCurrentWeekIdentifier } from "../../services/levelUtils.ts";
-import { AvatarDisplay } from '../../components/AvatarPicker';
+import { AvatarDisplay } from '../../features/avatar/components/AvatarPicker';
 import { Award, Trophy, Loader2, Info, X } from 'lucide-react';
 import Swal from 'sweetalert2';
 
@@ -426,3 +426,10 @@ const Muvhigo: React.FC = () => {
 };
 
 export default Muvhigo;
+
+
+
+
+
+
+

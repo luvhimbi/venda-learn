@@ -234,6 +234,7 @@ export const seedLessons = async () => {
                 title: lesson.title,
                 nativeTitle: lesson.nativeTitle,
                 difficulty: lesson.difficulty,
+                languageId: 'venda',
                 microLessons: lesson.microLessons
             }, { merge: true });
         }
@@ -243,5 +244,11 @@ export const seedLessons = async () => {
         alert("Failed to seed database.");
     }
 };
+
+
+
+
+
+
 
 

@@ -4,11 +4,12 @@ import { doc, updateDoc } from 'firebase/firestore';
 import { onAuthStateChanged } from 'firebase/auth';
 import { Bell, Flame, Globe, Monitor, Sun, Moon, Laptop, Clock, ArrowLeft } from 'lucide-react';
 import { useNavigate } from "react-router-dom";
-import { useTheme } from '../../contexts/ThemeContext';
-import type { ThemeMode } from '../../contexts/ThemeContext';
+import { useTheme } from '../../app/providers/contexts/ThemeContext';
+import type { ThemeMode } from '../../app/providers/contexts/ThemeContext';
 import { fetchUserData, fetchLanguages, invalidateCache } from '../../services/dataCache';
-import { updateReminderSettings, requestNotificationPermission } from '../../services/reminderService';
+
 import Swal from 'sweetalert2';
+import { requestNotificationPermission, updateReminderSettings } from '../../features/notifications/services/reminderService';
 
 interface UserProfile {
     username: string;
@@ -318,3 +319,10 @@ const Settings: React.FC = () => {
 };
 
 export default Settings;
+
+
+
+
+
+
+

@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import Mascot from '../components/Mascot';
+import Mascot from '../features/gamification/components/Mascot';
 import { motion } from 'framer-motion';
 
 const AboutUs: React.FC = () => {
@@ -151,3 +151,11 @@ const AboutUs: React.FC = () => {
 };
 
 export default AboutUs;
+
+
+
+
+
+
+
+

@@ -3,17 +3,17 @@ import { db, auth } from '../../services/firebaseConfig';
 import { doc, getDoc, updateDoc, setDoc } from 'firebase/firestore';
 import { onAuthStateChanged } from 'firebase/auth';
 import { Compass, LogOut, Camera, Share2, MoreVertical, Settings, Trophy } from 'lucide-react';
-import LogoutModal from '../../components/LogoutModal';
-import ShareProfileModal from '../../components/ShareProfileModal';
-import ShareStreakModal from '../../components/ShareStreakModal';
-import { AvatarDisplay } from '../../components/AvatarPicker';
-import AchievementCard from '../../components/AchievementCard';
+import LogoutModal from '../../components/feedback/modals/LogoutModal';
+import ShareProfileModal from '../../components/feedback/modals/ShareProfileModal';
+import ShareStreakModal from '../../components/feedback/modals/ShareStreakModal';
+import { AvatarDisplay } from '../../features/avatar/components/AvatarPicker';
+import AchievementCard from '../../features/gamification/components/AchievementCard';
 import { ALL_TROPHIES } from '../../services/achievementService';
 import { invalidateCache, fetchUserData } from '../../services/dataCache';
-import ReviewModal from '../../components/ReviewModal';
-import AvatarBuilder from '../../components/AvatarBuilder';
-import AvatarPicker from '../../components/AvatarPicker';
-import WeeklyActivityGraph from '../../components/WeeklyActivityGraph';
+import ReviewModal from '../../components/feedback/modals/ReviewModal';
+import AvatarBuilder from '../../features/avatar/components/AvatarBuilder';
+import AvatarPicker from '../../features/avatar/components/AvatarPicker';
+import WeeklyActivityGraph from '../../features/gamification/components/WeeklyActivityGraph';
 
 import Swal from 'sweetalert2';
 import { useNavigate, Link } from "react-router-dom";
@@ -388,3 +388,11 @@ const Profile: React.FC = () => {
 };
 
 export default Profile;
+
+
+
+
+
+
+
+

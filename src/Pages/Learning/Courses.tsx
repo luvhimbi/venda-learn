@@ -9,7 +9,7 @@ import { Key, MessageSquare, Star, Lightbulb, CheckSquare, Zap, ChevronRight, Ch
 import { motion, AnimatePresence } from 'framer-motion';
 import Skeleton from 'react-loading-skeleton';
 import 'react-loading-skeleton/dist/skeleton.css';
-import JuicyButton from '../../components/JuicyButton';
+import JuicyButton from '../../components/ui/JuicyButton/JuicyButton';
 import LanguageCharacter from '../../components/illustrations/LanguageCharacters';
 import '../../styles/learning-grid.css';
 
@@ -466,3 +466,11 @@ const Courses: React.FC = () => {
 };
 
 export default Courses;
+
+
+
+
+
+
+
+

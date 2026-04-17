@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import Mascot from '../../components/Mascot';
+import Mascot from '../../features/gamification/components/Mascot';
 import { useVisualJuice } from '../../hooks/useVisualJuice';
 import confetti from 'canvas-confetti';
 import { ArrowRight, ArrowLeft, Globe, Heart, Brain, Briefcase, Plane, MessageCircle, Sun, Shield, Mountain, Waves, Sprout, Egg, Zap, Clock, Timer, Search, Instagram, Users, Tv, Type } from 'lucide-react';
@@ -186,17 +186,17 @@ const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
         switch (step) {
             case -1: // INTRO
                 return (
-                    <div className="w-100 text-center pb-5 mt-4">
-                        <div className="d-flex justify-content-center mb-4 animate-chommie">
-                            <Mascot width="220px" height="220px" mood="excited" />
+                    <div className="w-100 text-center pb-3">
+                        <div className="d-flex justify-content-center mb-3 animate-chommie">
+                            <Mascot width="150px" height="150px" mood="excited" />
                         </div>
-                        <h2 className="fw-black text-center text-uppercase ls-tight mb-3" style={{ fontSize: '2.2rem' }}>
+                        <h2 className="fw-black text-center text-uppercase ls-tight mb-2" style={{ fontSize: '1.6rem' }}>
                             Aweh! I'm Elphie
                         </h2>
-                        <div className="mb-4">
-                            <span className="badge bg-warning text-dark text-uppercase border border-2 border-dark px-3 py-2" style={{ fontSize: '0.85rem' }}>Your Culture Guide</span>
+                        <div className="mb-2">
+                            <span className="badge bg-warning text-dark text-uppercase border border-2 border-dark px-3 py-2" style={{ fontSize: '0.75rem' }}>Your Culture Guide</span>
                         </div>
-                        <p className="fw-bold text-theme-muted mb-5 mx-auto px-3" style={{ maxWidth: '380px' }}>
+                        <p className="fw-bold text-theme-muted mb-3 mx-auto px-3 smaller">
                             Ready to speak the lingo? I'll be your guide through Mzansi's languages and cultural stories.
                         </p>
                         <div className="mx-auto px-4" style={{ maxWidth: '400px' }}>
@@ -219,21 +219,22 @@ const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
             case 0: // TARGET LANGUAGE
                 return (
                     <div className="w-100">
-                        <div className="d-flex justify-content-center mb-4 animate-chommie">
-                            <Mascot width="140px" height="140px" mood="excited" />
+                        <div className="d-flex justify-content-center mb-2 animate-chommie">
+                            <Mascot width="80px" height="80px" mood="excited" />
                         </div>
-                        <h2 className="fw-black text-center text-uppercase ls-tight mb-4" style={{ fontSize: '1.8rem' }}>
-                            Aweh! What do you want to learn?
+                        <h2 className="fw-black text-center text-uppercase ls-tight mb-3" style={{ fontSize: '1.4rem' }}>
+                            What do you want to learn?
                         </h2>
-                        <div className="row g-3 mx-auto" style={{ maxWidth: '440px' }}>
+                        <div className="row g-2 mx-auto" style={{ maxWidth: '440px' }}>
                             {LANGUAGES.map(lang => (
-                                <div className="col-6" key={lang.id}>
+                                <div className="col-6 col-md-4" key={lang.id}>
                                     <button 
                                         onClick={() => handleSelectOption('language', lang.id)}
-                                        className={`btn text-start p-3 brutalist-card hover-press d-flex flex-column align-items-center justify-content-center gap-2 w-100 h-100 ${preferences.language === lang.id ? 'bg-theme-accent border-theme-main text-dark' : 'bg-theme-surface text-theme-main'}`}
+                                        className={`btn text-start p-2 brutalist-card hover-press d-flex flex-column align-items-center justify-content-center gap-1 w-100 ${preferences.language === lang.id ? 'bg-theme-accent border-theme-main text-dark' : 'bg-theme-surface text-theme-main'}`}
+                                        style={{ minHeight: '100px' }}
                                     >
-                                        <div className="bg-theme-base p-2 rounded-circle border border-2 border-theme-main shadow-action-sm d-flex align-items-center justify-content-center">{lang.icon}</div>
-                                        <span className="fw-black text-uppercase small">{lang.id}</span>
+                                        <div className="bg-theme-base p-1 rounded-circle border border-2 border-theme-main shadow-action-sm d-flex align-items-center justify-content-center" style={{ transform: 'scale(0.8)' }}>{lang.icon}</div>
+                                        <span className="fw-black text-uppercase smallest ls-1">{lang.id}</span>
                                     </button>
                                 </div>
                             ))}
@@ -243,21 +244,22 @@ const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
             case 1: // NATIVE LANGUAGE
                 return (
                     <div className="w-100">
-                        <div className="d-flex justify-content-center mb-4 animate-chommie">
-                            <Mascot width="140px" height="140px" mood="happy" />
+                        <div className="d-flex justify-content-center mb-2 animate-chommie">
+                            <Mascot width="80px" height="80px" mood="happy" />
                         </div>
-                        <h2 className="fw-black text-center text-uppercase ls-tight mb-4" style={{ fontSize: '1.8rem' }}>
-                            And what's your native language?
+                        <h2 className="fw-black text-center text-uppercase ls-tight mb-3" style={{ fontSize: '1.4rem' }}>
+                            And your native language?
                         </h2>
-                        <div className="row g-3 mx-auto" style={{ maxWidth: '440px' }}>
+                        <div className="row g-2 mx-auto" style={{ maxWidth: '440px' }}>
                             {NATIVE_LANGUAGES.map(lang => (
-                                <div className="col-6" key={lang.id}>
+                                <div className="col-6 col-md-4" key={lang.id}>
                                     <button 
                                         onClick={() => handleSelectOption('nativeLanguage', lang.id)}
-                                        className={`btn text-start p-3 brutalist-card hover-press d-flex flex-column align-items-center justify-content-center gap-2 w-100 h-100 ${preferences.nativeLanguage === lang.id ? 'bg-theme-accent border-theme-main text-dark' : 'bg-theme-surface text-theme-main'}`}
+                                        className={`btn text-start p-2 brutalist-card hover-press d-flex flex-column align-items-center justify-content-center gap-1 w-100 ${preferences.nativeLanguage === lang.id ? 'bg-theme-accent border-theme-main text-dark' : 'bg-theme-surface text-theme-main'}`}
+                                        style={{ minHeight: '100px' }}
                                     >
-                                        <div className="bg-theme-base p-2 rounded-circle border border-2 border-theme-main shadow-action-sm d-flex align-items-center justify-content-center">{lang.icon}</div>
-                                        <span className="fw-black text-uppercase small">{lang.id}</span>
+                                        <div className="bg-theme-base p-1 rounded-circle border border-2 border-theme-main shadow-action-sm d-flex align-items-center justify-content-center" style={{ transform: 'scale(0.8)' }}>{lang.icon}</div>
+                                        <span className="fw-black text-uppercase smallest ls-1">{lang.id}</span>
                                     </button>
                                 </div>
                             ))}
@@ -266,15 +268,15 @@ const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
                 );
             case 2: // CONNECTION FUN FACT
                 return (
-                    <div className="w-100 text-center mt-4">
-                        <div className="d-flex justify-content-center mb-4 animate-chommie">
-                            <Mascot width="180px" height="180px" mood="excited" />
+                    <div className="w-100 text-center">
+                        <div className="d-flex justify-content-center mb-3 animate-chommie">
+                            <Mascot width="120px" height="120px" mood="excited" />
                         </div>
-                        <h2 className="fw-black text-center text-uppercase ls-tight mb-3" style={{ fontSize: '1.8rem' }}>
+                        <h2 className="fw-black text-center text-uppercase ls-tight mb-2" style={{ fontSize: '1.6rem' }}>
                             Fun Fact!
                         </h2>
-                        <div className="brutalist-card bg-theme-surface mx-auto p-4 mb-5 shadow-action-sm border border-4 border-theme-main text-start" style={{ maxWidth: '400px' }}>
-                            <p className="fw-bold mb-0 text-theme-main" style={{ fontSize: '1.1rem', lineHeight: '1.6' }}>
+                        <div className="brutalist-card bg-theme-surface mx-auto p-3 mb-3 shadow-action-sm border border-4 border-theme-main text-start" style={{ maxWidth: '400px' }}>
+                            <p className="fw-bold mb-0 text-theme-main" style={{ fontSize: '1rem', lineHeight: '1.4' }}>
                                 {getConnectionMessage(preferences.nativeLanguage, preferences.language)}
                             </p>
                         </div>
@@ -289,7 +291,7 @@ const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
                                 className="btn w-100 fw-black py-3 text-dark border border-4 border-theme-main rounded-0 shadow-action text-uppercase ls-1 hover-press d-flex align-items-center justify-content-center gap-2"
                                 style={{ backgroundColor: 'var(--venda-yellow)' }}
                             >
-                                THAT'S COOL! CONTINUE
+                                SHARP! CONTINUE
                                 <ArrowRight size={24} strokeWidth={3} />
                             </button>
                         </div>
@@ -297,21 +299,21 @@ const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
                 );
             case 3: // LEVEL
                 return (
-                    <div className="w-100 mt-4">
-                        <h2 className="fw-black text-center text-uppercase ls-tight mb-2" style={{ fontSize: '1.8rem' }}>
-                            How much {preferences.language} do you know?
+                    <div className="w-100">
+                        <h2 className="fw-black text-center text-uppercase ls-tight mb-3" style={{ fontSize: '1.5rem' }}>
+                            Your {preferences.language} level?
                         </h2>
-                        <div className="d-flex flex-column gap-3 mx-auto mt-5" style={{ maxWidth: '400px' }}>
+                        <div className="d-flex flex-column gap-2 mx-auto" style={{ maxWidth: '400px' }}>
                             {LEVELS.map(lvl => (
                                 <button 
                                     key={lvl.id}
                                     onClick={() => handleSelectOption('level', lvl.id)}
-                                    className={`btn text-start p-3 brutalist-card hover-press w-100 d-flex align-items-center gap-3 ${preferences.level === lvl.id ? 'bg-theme-accent border-theme-main text-dark' : 'bg-theme-surface text-theme-main'}`}
+                                    className={`btn text-start p-2 brutalist-card hover-press w-100 d-flex align-items-center gap-3 ${preferences.level === lvl.id ? 'bg-theme-accent border-theme-main text-dark' : 'bg-theme-surface text-theme-main'}`}
                                 >
-                                    <div className="bg-theme-base p-2 rounded-circle border border-2 border-theme-main shadow-action-sm">{lvl.icon}</div>
+                                    <div className="bg-theme-base p-1 rounded-circle border border-2 border-theme-main shadow-action-sm" style={{ transform: 'scale(0.8)' }}>{lvl.icon}</div>
                                     <div>
-                                        <div className="fw-black fs-5 text-uppercase">{lvl.title}</div>
-                                        <div className="fw-bold text-theme-muted small">{lvl.detail}</div>
+                                        <div className="fw-black small text-uppercase">{lvl.title}</div>
+                                        <div className="fw-bold text-theme-muted smaller">{lvl.detail}</div>
                                     </div>
                                 </button>
                             ))}
@@ -320,19 +322,20 @@ const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
                 );
             case 4: // REASON
                 return (
-                    <div className="w-100 mt-4">
-                        <h2 className="fw-black text-center text-uppercase ls-tight mb-2" style={{ fontSize: '1.8rem' }}>
-                            Why are you learning {preferences.language}?
+                    <div className="w-100">
+                        <h2 className="fw-black text-center text-uppercase ls-tight mb-3" style={{ fontSize: '1.5rem' }}>
+                            Why learn {preferences.language}?
                         </h2>
-                        <div className="row g-3 mx-auto mt-4" style={{ maxWidth: '420px' }}>
+                        <div className="row g-2 mx-auto" style={{ maxWidth: '400px' }}>
                             {REASONS.map(rsn => (
                                 <div className="col-6" key={rsn.id}>
                                     <button 
                                         onClick={() => handleSelectOption('reason', rsn.id)}
-                                        className={`btn p-4 brutalist-card hover-press w-100 h-100 d-flex flex-column align-items-center justify-content-center text-center gap-2 ${preferences.reason === rsn.id ? 'bg-theme-accent border-theme-main text-dark' : 'bg-theme-surface text-theme-main'}`}
+                                        className={`btn p-3 brutalist-card hover-press w-100 h-100 d-flex flex-column align-items-center justify-content-center text-center gap-2 ${preferences.reason === rsn.id ? 'bg-theme-accent border-theme-main text-dark' : 'bg-theme-surface text-theme-main'}`}
+                                        style={{ minHeight: '110px' }}
                                     >
-                                        <div className="bg-theme-base p-2 rounded-circle border border-2 border-theme-main shadow-action-sm">{rsn.icon}</div>
-                                        <span className="fw-black text-uppercase small">{rsn.title}</span>
+                                        <div className="bg-theme-base p-1 rounded-circle border border-2 border-theme-main shadow-action-sm" style={{ transform: 'scale(0.8)' }}>{rsn.icon}</div>
+                                        <span className="fw-black text-uppercase smallest ls-1">{rsn.title}</span>
                                     </button>
                                 </div>
                             ))}
@@ -342,25 +345,25 @@ const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
             case 5: // DAILY GOAL
                 return (
                     <div className="w-100">
-                        <div className="d-flex justify-content-center mb-4 animate-chommie">
-                            <Mascot width="120px" height="120px" mood="happy" />
+                        <div className="d-flex justify-content-center mb-3 animate-chommie">
+                            <Mascot width="80px" height="80px" mood="happy" />
                         </div>
-                        <h2 className="fw-black text-center text-uppercase ls-tight mb-2" style={{ fontSize: '1.8rem' }}>
-                            How much time can you spend?
+                        <h2 className="fw-black text-center text-uppercase ls-tight mb-1" style={{ fontSize: '1.5rem' }}>
+                            Your Daily Goal
                         </h2>
-                        <p className="text-center fw-bold text-theme-muted mb-4 small px-3">Building a habit requires consistency!</p>
-                        <div className="d-flex flex-column gap-3 mx-auto" style={{ maxWidth: '400px' }}>
+                        <p className="text-center fw-bold text-theme-muted mb-3 smallest text-uppercase ls-1">Stay consistent!</p>
+                        <div className="d-flex flex-column gap-2 mx-auto" style={{ maxWidth: '400px' }}>
                             {TIMES.map(t => (
                                 <button 
                                     key={t.id}
                                     onClick={() => handleSelectOption('timeId', t.id, t.mins)}
-                                    className={`btn text-start p-3 brutalist-card hover-press d-flex align-items-center justify-content-between w-100 ${preferences.timeId === t.id ? 'bg-theme-accent border-theme-main text-dark' : 'bg-theme-surface text-theme-main'}`}
+                                    className={`btn text-start p-2 brutalist-card hover-press d-flex align-items-center justify-content-between w-100 ${preferences.timeId === t.id ? 'bg-theme-accent border-theme-main text-dark' : 'bg-theme-surface text-theme-main'}`}
                                 >
                                     <div className="d-flex align-items-center gap-3">
-                                        <div className="bg-theme-base p-2 rounded-circle border border-2 border-theme-main shadow-action-sm d-flex align-items-center justify-content-center">{t.icon}</div>
-                                        <span className="fw-black fs-5 text-uppercase">{t.title}</span>
+                                        <div className="bg-theme-base p-1 rounded-circle border border-2 border-theme-main shadow-action-sm d-flex align-items-center justify-content-center" style={{ transform: 'scale(0.8)' }}>{t.icon}</div>
+                                        <span className="fw-black small text-uppercase">{t.title}</span>
                                     </div>
-                                    <span className="badge bg-dark fw-bold">{t.mins}</span>
+                                    <span className="badge bg-dark fw-bold smallest">{t.mins}</span>
                                 </button>
                             ))}
                         </div>
@@ -368,19 +371,20 @@ const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
                 );
             case 6: // SOURCE
                 return (
-                    <div className="w-100 mt-4">
-                        <h2 className="fw-black text-center text-uppercase ls-tight mb-2" style={{ fontSize: '1.8rem' }}>
-                            How did you hear about us?
+                    <div className="w-100">
+                        <h2 className="fw-black text-center text-uppercase ls-tight mb-3" style={{ fontSize: '1.5rem' }}>
+                            Where did you find us?
                         </h2>
-                        <div className="row g-3 mx-auto mt-4" style={{ maxWidth: '420px' }}>
+                        <div className="row g-2 mx-auto" style={{ maxWidth: '400px' }}>
                             {SOURCES.map(src => (
                                 <div className="col-6" key={src.id}>
                                     <button 
                                         onClick={() => handleSelectOption('source', src.id)}
-                                        className="btn p-4 brutalist-card hover-press w-100 bg-theme-surface h-100 d-flex flex-column align-items-center justify-content-center text-center gap-2 text-theme-main"
+                                        className="btn p-3 brutalist-card hover-press w-100 bg-theme-surface h-100 d-flex flex-column align-items-center justify-content-center text-center gap-1 text-theme-main"
+                                        style={{ minHeight: '110px' }}
                                     >
-                                        <div className="bg-theme-base p-2 rounded-circle border border-2 border-theme-main shadow-action-sm">{src.icon}</div>
-                                        <span className="fw-black text-uppercase small">{src.title}</span>
+                                        <div className="bg-theme-base p-1 rounded-circle border border-2 border-theme-main shadow-action-sm" style={{ transform: 'scale(0.8)' }}>{src.icon}</div>
+                                        <span className="fw-black text-uppercase smallest ls-1">{src.title}</span>
                                     </button>
                                 </div>
                             ))}
@@ -415,15 +419,15 @@ const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
                 );
             case 8: // SUCCESS / PLAN SET
                 return (
-                    <div className="w-100 text-center pb-5 mt-4">
-                        <div className="d-flex justify-content-center mb-4 animate-chommie">
-                            <Mascot width="180px" height="180px" mood="excited" />
+                    <div className="w-100 text-center">
+                        <div className="d-flex justify-content-center mb-3 animate-chommie">
+                            <Mascot width="120px" height="120px" mood="excited" />
                         </div>
-                        <h2 className="fw-black text-uppercase ls-tight mb-2" style={{ fontSize: '2rem', color: 'var(--color-text)' }}>
+                        <h2 className="fw-black text-uppercase ls-tight mb-1" style={{ fontSize: '1.8rem', color: 'var(--color-text)' }}>
                             Your Plan is Set!
                         </h2>
-                        <p className="fw-bold text-theme-muted mb-5 mx-auto px-3" style={{ maxWidth: '350px' }}>
-                            We've customized a {preferences.timeMins.split('/')[0].trim()} daily curriculum for {preferences.language}. Let's get started!
+                        <p className="fw-bold text-theme-muted mb-4 mx-auto px-3 smaller">
+                            We've customized a {preferences.timeMins.split('/')[0].trim()} daily curriculum for {preferences.language}.
                         </p>
                         <div className="mx-auto px-4" style={{ maxWidth: '400px' }}>
                             <button 
@@ -453,7 +457,7 @@ const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
 
             {/* Header / Progress Fill */}
             {step >= -1 && step < 7 && (
-                <div className="w-100 py-3 px-3 d-flex align-items-center justify-content-center position-relative" style={{ zIndex: 10 }}>
+                <div className="w-100 py-2 px-3 d-flex align-items-center justify-content-center position-relative" style={{ zIndex: 10 }}>
                     <button 
                         onClick={() => {
                             playClick();
@@ -461,12 +465,12 @@ const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
                             if (step <= -1) navigate('/');
                             else setStep(prev => prev - 1);
                         }}
-                        className="btn p-0 text-theme-main border-0 shadow-none hover-press me-3"
+                        className="btn p-0 text-theme-main border-0 shadow-none hover-press me-2"
                         style={{ flexShrink: 0 }}
                     >
-                        <ArrowLeft size={28} strokeWidth={2.5} />
+                        <ArrowLeft size={24} strokeWidth={2.5} />
                     </button>
-                    <div className="brutalist-card p-0" style={{ flexGrow: 1, maxWidth: '500px', height: '22px', backgroundColor: 'var(--color-surface-soft)' }}>
+                    <div className="brutalist-card p-0" style={{ flexGrow: 1, maxWidth: '500px', height: '18px', backgroundColor: 'var(--color-surface-soft)' }}>
                         <div 
                             style={{ 
                                 height: '100%', 
@@ -476,13 +480,12 @@ const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
                             }} 
                         />
                     </div>
-                    {/* Add an empty div for balance to keep progress bar centered if needed, but flex-grow 1 should be fine */}
-                    <div style={{ width: '28px', flexShrink: 0 }} className="ms-3 d-none d-md-block"></div>
+                    <div style={{ width: '24px', flexShrink: 0 }} className="ms-2 d-none d-md-block"></div>
                 </div>
             )}
 
             {/* Content Area */}
-            <div className="flex-grow-1 d-flex align-items-center justify-content-center p-3 position-relative" style={{ zIndex: 5 }}>
+            <div className="flex-grow-1 d-flex align-items-center justify-content-center p-2 position-relative" style={{ zIndex: 5, minHeight: 0 }}>
                 <AnimatePresence mode="wait">
                     <motion.div
                         key={step}
@@ -490,7 +493,8 @@ const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
                         animate={{ x: 0, opacity: 1 }}
                         exit={{ x: -50, opacity: 0 }}
                         transition={{ duration: 0.3, ease: 'easeOut' }}
-                        className="w-100 d-flex justify-content-center"
+                        className="w-100 d-flex justify-content-center overflow-auto py-2"
+                        style={{ maxHeight: '100%' }}
                     >
                         {renderStepContent()}
                     </motion.div>
@@ -501,3 +505,11 @@ const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
 };
 
 export default Onboarding;
+
+
+
+
+
+
+
+

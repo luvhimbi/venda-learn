@@ -4,13 +4,13 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowLeft, HelpCircle, Info, Trophy, User, RotateCcw, Palette, Check } from 'lucide-react';
 import { doc, updateDoc, increment, type Firestore } from 'firebase/firestore';
 import { auth, db } from '../../services/firebaseConfig';
-import GameResultModal from '../../components/GameResultModal';
+import GameResultModal from '../../components/feedback/modals/GameResultModal';
 import { awardPoints, fetchUserData } from '../../services/dataCache';
 import { useVisualJuice } from '../../hooks/useVisualJuice';
-import GameIntroModal, { resetIntroSeen } from '../../components/GameIntroModal';
-import ExitConfirmModal from '../../components/ExitConfirmModal';
-import Mascot from '../../components/Mascot';
-import { AvatarDisplay } from '../../components/AvatarPicker';
+import GameIntroModal, { resetIntroSeen } from '../../components/feedback/modals/GameIntroModal';
+import ExitConfirmModal from '../../components/feedback/modals/ExitConfirmModal';
+import Mascot from '../../features/gamification/components/Mascot';
+import { AvatarDisplay } from '../../features/avatar/components/AvatarPicker';
 
 // --- CONSTANTS ---
 const COWS_PER_PLAYER = 12;
@@ -861,3 +861,11 @@ const Morabaraba: React.FC = () => {
 };
 
 export default Morabaraba;
+
+
+
+
+
+
+
+

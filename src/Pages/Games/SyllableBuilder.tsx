@@ -1,51 +1,48 @@
 import React, { useState, useCallback, useEffect } from 'react';
-import { fetchSyllables, fetchUserData, fetchLanguages, awardPoints } from '../../services/dataCache';
 import { useNavigate } from 'react-router-dom';
-import { Layout, HelpCircle, ArrowLeft, ChevronRight, MousePointerClick, Trophy } from 'lucide-react';
+import { Layout, HelpCircle, ArrowLeft, MousePointerClick, Trophy } from 'lucide-react';
 import { auth, db } from '../../services/firebaseConfig';
-import GameResultModal from '../../components/GameResultModal';
+import GameResultModal from '../../components/feedback/modals/GameResultModal';
+import { fetchUserData, fetchLanguages, awardPoints, fetchGameContentByLevel, markWordsAsLearned, completeLevel } from '../../services/dataCache';
 import { doc, updateDoc, getDoc, type Firestore } from 'firebase/firestore';
-import Mascot from '../../components/Mascot';
+import Mascot from '../../features/gamification/components/Mascot';
 import confetti from 'canvas-confetti';
 import { updateStreak } from "../../services/streakUtils.ts";
 import { useVisualJuice } from '../../hooks/useVisualJuice';
-import GameIntroModal, { resetIntroSeen } from '../../components/GameIntroModal';
-import ExitConfirmModal from '../../components/ExitConfirmModal';
-
+import GameIntroModal, { resetIntroSeen } from '../../components/feedback/modals/GameIntroModal';
+import ExitConfirmModal from '../../components/feedback/modals/ExitConfirmModal';
 
 interface SyllablePuzzle {
     id: string;
     word: string;
     syllables: string[];
-    translation: string;
+    english: string;
 }
 
 const BLOCK_COLORS = [
-    { bg: '#EFF6FF', border: '#93C5FD', shadow: '#60A5FA', text: '#1E40AF' },
-    { bg: '#FEF3C7', border: '#FCD34D', shadow: '#F59E0B', text: '#92400E' },
-    { bg: '#ECFDF5', border: '#6EE7B7', shadow: '#34D399', text: '#065F46' },
-    { bg: '#FDF2F8', border: '#F9A8D4', shadow: '#EC4899', text: '#9D174D' },
-    { bg: '#F5F3FF', border: '#C4B5FD', shadow: '#8B5CF6', text: '#5B21B6' },
-    { bg: '#FFF7ED', border: '#FDBA74', shadow: '#F97316', text: '#9A3412' },
+    { bg: '#FACC15', text: '#1a1a1a', border: '#EAB308', shadow: '#CA8A04' },
+    { bg: '#3b82f6', text: '#ffffff', border: '#2563eb', shadow: '#1d4ed8' },
+    { bg: '#10B981', text: '#ffffff', border: '#059669', shadow: '#047857' },
+    { bg: '#ef4444', text: '#ffffff', border: '#dc2626', shadow: '#b91c1c' },
+    { bg: '#a855f7', text: '#ffffff', border: '#9333ea', shadow: '#7e22ce' },
+    { bg: '#f59e0b', text: '#1a1a1a', border: '#d97706', shadow: '#b45309' }
 ];
-
-
 
 const SYLLABLE_BUILDER_INTRO_STEPS = [
     {
         icon: <Layout size={28} strokeWidth={3} />,
-        title: 'See the Word',
-        description: 'An English word is shown at the top. Your goal is to construct its translation!'
+        title: 'Build the Word',
+        description: 'See a word broken into colorful syllables. Drag and drop or click them in the correct order!'
     },
     {
         icon: <MousePointerClick size={28} strokeWidth={3} />,
-        title: 'Tap Syllable Blocks',
-        description: 'For example, if the translation is "BABA", tap the block "BA" twice in order. Tap placed blocks to remove them.'
+        title: 'Match the Sound',
+        description: 'Listen to the syllable sounds and arrange them to form the complete local word correctly.'
     },
     {
         icon: <Trophy size={28} strokeWidth={3} />,
-        title: 'Build the Word!',
-        description: 'Once all syllables are placed correctly, hit CHECK ANSWER to submit. Each correct word earns you +5 XP!'
+        title: 'Master Levels',
+        description: 'Complete 10 words to master a level. Earn XP and unlock higher challenges as you grow!'
     }
 ];
 
@@ -53,14 +50,16 @@ const SyllableBuilder: React.FC = () => {
     const navigate = useNavigate();
     const [loading, setLoading] = useState(false);
     const [puzzles, setPuzzles] = useState<SyllablePuzzle[]>([]);
+    const [currentLevel, setCurrentLevel] = useState(1);
+    const [masteredIds, setMasteredIds] = useState<string[]>([]);
     const [currentPuzzle, setCurrentPuzzle] = useState<SyllablePuzzle | null>(null);
     const [currentIndex, setCurrentIndex] = useState(0);
     const [showIntro, setShowIntro] = useState(true);
     const [showRules, setShowRules] = useState(false);
-    const [selectedLevel, setSelectedLevel] = useState<string | null>(null);
+    const [isPlaying, setIsPlaying] = useState(false);
     const [showExitConfirm, setShowExitConfirm] = useState(false);
     const [showResult, setShowResult] = useState(false);
-    const [resultData, setResultData] = useState({ isSuccess: false, title: '', message: '', points: 0 });
+    const [resultData, setResultData] = useState({ isSuccess: false, title: '', message: '', points: 0, isLevelComplete: false });
 
     const [preferredLanguage, setPreferredLanguage] = useState<any>(null);
     const [pool, setPool] = useState<{ id: string, text: string, colorIdx: number }[]>([]);
@@ -69,6 +68,7 @@ const SyllableBuilder: React.FC = () => {
     const [score, setScore] = useState(0);
     const [, setStreak] = useState(0);
     const [sessionStartTime, setSessionStartTime] = useState(Date.now());
+    const sessionLearnedIds = React.useRef<Set<string>>(new Set());
     const { playCorrect, playWrong, playClick, triggerShake } = useVisualJuice();
 
     useEffect(() => {
@@ -86,14 +86,17 @@ const SyllableBuilder: React.FC = () => {
     const handleIntroDismiss = useCallback(() => setShowIntro(false), []);
 
     const handleExit = () => {
-        if (selectedLevel) {
+        if (isPlaying) {
             setShowExitConfirm(true);
         } else {
             navigate('/mitambo');
         }
     };
 
-    const confirmExit = () => {
+    const confirmExit = async () => {
+        if (sessionLearnedIds.current.size > 0) {
+            await markWordsAsLearned(Array.from(sessionLearnedIds.current));
+        }
         setShowExitConfirm(false);
         navigate('/mitambo');
     };
@@ -103,56 +106,77 @@ const SyllableBuilder: React.FC = () => {
     // We don't auto-load the game into Playing state anymore
     // useEffect(() => { loadGameData(); }, []);
 
-    const startLevel = async (level: string) => {
-        setSelectedLevel(level);
+    const loadGameData = async () => {
         setLoading(true);
         try {
-            const [data, uData, langs] = await Promise.all([
-                fetchSyllables(),
+            const [uData, langs] = await Promise.all([
                 fetchUserData(),
                 fetchLanguages()
             ]);
 
+            const mastered = uData?.learnedVocabulary || [];
+            setMasteredIds(mastered);
+            
+            const levelNum = uData?.gameLevels?.syllable || 1;
+            setCurrentLevel(levelNum);
+
             let activeLang: any = null;
             if (uData && langs) {
-                activeLang = langs.find((l: any) => l.id === uData.preferredLanguageId);
+                activeLang = langs.find((l: any) => l.id === (uData.preferredLanguageId || 'venda'));
                 setPreferredLanguage(activeLang);
             }
 
-            const filtered = data.filter(d => {
-                const isCorrectDifficulty = d.difficulty === level;
-                const isCorrectLang = !activeLang || d.languageId === activeLang.id || !d.languageId;
-                return isCorrectDifficulty && isCorrectLang;
-            });
+            const langId = activeLang?.id || 'venda';
+            console.log(`[SyllableBuilder] Fetching level ${levelNum} for lang ${langId} (${activeLang?.name})`);
 
-            // Shuffle and limit to 5 puzzles to avoid repetition and make the session finite
-            const shuffled = [...filtered].sort(() => 0.5 - Math.random()).slice(0, 5);
-            setPuzzles(shuffled);
-            if (shuffled.length > 0) {
-                setupRound(shuffled[0], 0);
+            const allLevelWords = await fetchGameContentByLevel("syllablePuzzles", langId, levelNum);
+            console.log(`[SyllableBuilder] Found ${allLevelWords.length} words.`);
+            
+            // Filter out fully mastered
+            const unlearned = allLevelWords.filter((w: any) => !mastered.includes(w.id));
+
+            if (unlearned.length === 0 && allLevelWords.length > 0) {
+                setResultData({
+                    isSuccess: true,
+                    title: 'LEVEL COMPLETE!',
+                    message: `You've mastered all ${allLevelWords.length} words in Level ${levelNum}!`,
+                    points: 0,
+                    isLevelComplete: true
+                });
+                setShowResult(true);
+                setIsPlaying(false);
+            } else if (allLevelWords.length > 0) {
+                // ... setup logic ...
+                const normalized = (allLevelWords as any[]).map((w: any) => ({
+                    id: w.id,
+                    word: w.nativeWord || w.word,
+                    syllables: w.syllables || [],
+                    english: w.translation || w.english
+                }));
+                setPuzzles(normalized as any[]);
+                setupRound(normalized[0], 0);
+                setIsPlaying(true);
             } else {
                 setResultData({
                     isSuccess: false,
-                    title: 'No Puzzles',
-                    message: `No puzzles found for ${level} in ${activeLang?.name || 'this language'}.`,
-                    points: 0
+                    title: 'NO CONTENT',
+                    message: `DEBUG: Lang[${langId}] Level[${levelNum}]. Whoops! Level ${levelNum} has no content in ${activeLang?.name || 'this language'} yet.`,
+                    points: 0,
+                    isLevelComplete: false
                 });
                 setShowResult(true);
-                setSelectedLevel(null);
+                setIsPlaying(false);
             }
         } catch (error) {
-            setResultData({
-                isSuccess: false,
-                title: 'Error',
-                message: 'Failed to load game data. Please try again.',
-                points: 0
-            });
-            setShowResult(true);
-            setSelectedLevel(null);
+            console.error("Failed to load Syllable game data:", error);
         } finally {
             setLoading(false);
         }
     };
+
+    useEffect(() => {
+        loadGameData();
+    }, []);
 
     const setupRound = (puzzle: SyllablePuzzle, idx: number) => {
         setCurrentPuzzle(puzzle);
@@ -200,23 +224,15 @@ const SyllableBuilder: React.FC = () => {
             playCorrect();
             const totalDuration = Math.floor((Date.now() - sessionStartTime) / 1000);
 
+            // Mastery Buffering
+            if (!masteredIds.includes(currentPuzzle.id)) {
+                sessionLearnedIds.current.add(currentPuzzle.id);
+            }
 
-            
-            // CONFETTI!
-            confetti({
-                particleCount: 100,
-                spread: 70,
-                origin: { y: 0.6 },
-                colors: ['#FACC15', '#FFD700', '#FFFFFF']
-            });
-
-
-
+            // XP and Stats
             const user = auth.currentUser;
             if (user) {
-                // Using centralized awardPoints to ensure weekly leaderboard sync
                 await awardPoints(5);
-
                 const userRef = doc(db as Firestore, 'users', user.uid);
                 await updateDoc(userRef, {
                     [`gamePerformance.syllableBuilder.${currentPuzzle.id}`]: {
@@ -227,7 +243,17 @@ const SyllableBuilder: React.FC = () => {
                 });
                 await updateStreak(user.uid);
             }
+            
             setScore(prev => prev + 5);
+            
+            // CONFETTI!
+            confetti({
+                particleCount: 100,
+                spread: 70,
+                origin: { y: 0.6 },
+                colors: ['#FACC15', '#FFD700', '#FFFFFF']
+            });
+
             setTimeout(() => nextRound(), 1500);
         } else {
             setStatus('wrong');
@@ -241,19 +267,35 @@ const SyllableBuilder: React.FC = () => {
         if (!currentPuzzle) return;
         const nextIdx = currentIndex + 1;
         
-        if (nextIdx >= puzzles.length) {
-            setResultData({
-                isSuccess: true,
-                title: 'Category Complete!',
-                message: `You've built all ${puzzles.length} words in this level. Ndi hone!`,
-                points: score + 5 // Include points for the last correctly answered word
-            });
-            setShowResult(true);
+        // Find next unlearned word in the loaded puzzles
+        const mastered = [...masteredIds];
+        const nextValidIdx = puzzles.findIndex((p, i) => i >= nextIdx && !mastered.includes(p.id));
+
+        const currentSessionCount = sessionLearnedIds.current.size;
+
+        if (nextValidIdx === -1 || currentSessionCount >= 10) {
+            // Level is complete either because session goal reached (10 words) or no more content
+            finalizeLevel();
             return;
         }
 
         setSessionStartTime(Date.now());
-        setupRound(puzzles[nextIdx], nextIdx);
+        setupRound(puzzles[nextValidIdx], nextValidIdx);
+    };
+
+    const finalizeLevel = async () => {
+        const sessionIds = Array.from(sessionLearnedIds.current);
+        await completeLevel("syllable", currentLevel, sessionIds);
+        
+        setResultData({
+            isSuccess: true,
+            title: 'LEVEL COMPLETE!',
+            message: `Magnificent! You've mastered ${sessionIds.length} words in Level ${currentLevel}. Ready for Level ${currentLevel + 1}?`,
+            points: score,
+            isLevelComplete: true
+        });
+        setShowResult(true);
+        setIsPlaying(false);
     };
 
     if (loading) return (
@@ -263,7 +305,7 @@ const SyllableBuilder: React.FC = () => {
         </div>
     );
 
-    if (!selectedLevel) {
+    if (!isPlaying) {
         return (
             <div className="p-4 d-flex flex-column align-items-center justify-content-center bg-theme-base overflow-hidden position-relative" style={{ height: '100dvh' }}>
 
@@ -298,25 +340,16 @@ const SyllableBuilder: React.FC = () => {
                     </div>
 
                     <div className="d-flex flex-column gap-3 w-100">
-                        {['Beginner', 'Intermediate', 'Advanced'].map((lvl) => (
+                        <div className="brutalist-card bg-theme-card p-4 text-center border-theme-main shadow-action-sm">
+                            <span className="badge bg-dark text-white smallest fw-black px-3 py-1 rounded mb-3 d-inline-block" style={{ letterSpacing: '1px' }}>LEVEL {currentLevel}</span>
+                            <p className="fw-bold text-theme-muted small mb-3">Master 10 words to advance to the next level</p>
                             <button
-                                key={lvl}
-                                onClick={() => startLevel(lvl)}
-                                className="brutalist-card transition-all hover-lift--sm w-100 p-3 text-start bg-theme-card text-theme-main shadow-action-sm border-theme-main"
+                                onClick={() => loadGameData()}
+                                className="btn btn-game btn-game-primary w-100 py-3 smallest fw-black"
                             >
-                                <div className="d-flex justify-content-between align-items-center">
-                                    <div>
-                                        <h2 className="fw-black mb-1 uppercase ls-1" style={{ fontSize: '1.1rem' }}>{lvl}</h2>
-                                        <p className="fw-bold text-muted mb-0" style={{ fontSize: '0.75rem' }}>
-                                            {lvl === 'Beginner' ? 'Short simple words' : lvl === 'Intermediate' ? 'Standard multi-syllable terms' : 'Complex phrases and names'}
-                                        </p>
-                                    </div>
-                                    <div className="bg-warning border border-theme-main border-2 rounded-circle d-flex align-items-center justify-content-center" style={{ width: 32, height: 32 }}>
-                                        <ChevronRight strokeWidth={4} className="text-black" size={16} />
-                                    </div>
-                                </div>
+                                START LEVEL {currentLevel}
                             </button>
-                        ))}
+                        </div>
                     </div>
                 </div>
 
@@ -355,9 +388,17 @@ const SyllableBuilder: React.FC = () => {
                 title={resultData.title}
                 message={resultData.message}
                 points={resultData.points}
-                primaryActionText={resultData.isSuccess ? "PLAY AGAIN" : "TRY AGAIN"}
+                primaryActionText={resultData.isLevelComplete ? "NEXT LEVEL" : resultData.isSuccess ? "PLAY AGAIN" : "TRY AGAIN"}
                 secondaryActionText="EXIT TO DASHBOARD"
-                onPrimaryAction={() => { setShowResult(false); setSelectedLevel(null); setScore(0); }}
+                onPrimaryAction={() => { 
+                    setShowResult(false); 
+                    if (resultData.isLevelComplete) {
+                        setCurrentLevel(prev => prev + 1);
+                        loadGameData();
+                    } else {
+                        loadGameData();
+                    }
+                }}
                 onSecondaryAction={() => { setShowResult(false); navigate('/mitambo'); }}
             />
             {/* EXIT CONFIRM MODAL */}
@@ -423,7 +464,7 @@ const SyllableBuilder: React.FC = () => {
                     <div className="bg-theme-card rounded-4 shadow-sm p-4 text-center mb-4 border border-theme-main">
                         <p className="text-theme-muted fw-bold mb-1" style={{ fontSize: '11px', letterSpacing: '2px', textTransform: 'uppercase' }}>Translate this word</p>
                         <h1 className="fw-bold mb-1 text-theme-main" style={{ fontSize: 'clamp(2rem, 8vw, 3.5rem)', letterSpacing: '-1px' }}>
-                            {currentPuzzle?.translation}
+                            {currentPuzzle?.english}
                         </h1>
                         <p className="text-theme-muted small mb-0">Build the correct word using the blocks below.</p>
                         <button onClick={() => setShowRules(true)} className="btn btn-link text-theme-muted small text-decoration-none mt-1 d-flex align-items-center justify-content-center gap-1">
@@ -652,4 +693,12 @@ const SyllableBuilder: React.FC = () => {
 };
 
 export default SyllableBuilder;
+
+
+
+
+
+
+
+
 

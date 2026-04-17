@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import AdminNavbar from '../../components/AdminNavbar';
+import AdminNavbar from '../../components/shared/navigation/AdminNavbar';
 import { fetchAuditLogs } from '../../services/dataCache';
 import { Clock, Loader2 } from 'lucide-react';
 
@@ -186,5 +186,13 @@ const AdminAuditLog: React.FC = () => {
 };
 
 export default AdminAuditLog;
+
+
+
+
+
+
+
+
 
 

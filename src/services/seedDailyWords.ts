@@ -37,3 +37,9 @@ export const seedDailyWords = async () => {
 };
 
 
+
+
+
+
+
+

@@ -406,3 +406,9 @@ export const LanguageCharacter: React.FC<CharacterMapperProps> = ({ languageId, 
 };
 
 export default LanguageCharacter;
+
+
+
+
+
+

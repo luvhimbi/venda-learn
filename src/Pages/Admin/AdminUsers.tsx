@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { db } from '../../services/firebaseConfig';
 import { collection, doc, deleteDoc, addDoc, serverTimestamp, setDoc } from 'firebase/firestore';
-import AdminNavbar from '../../components/AdminNavbar';
+import AdminNavbar from '../../components/shared/navigation/AdminNavbar';
 import { fetchAllUsers, invalidateCache } from '../../services/dataCache';
 import Swal from 'sweetalert2';
 import { BadgeCheck, ShieldAlert, UserMinus, Search, Loader2 } from 'lucide-react';
@@ -454,5 +454,12 @@ const AdminUsers: React.FC = () => {
 };
 
 export default AdminUsers;
+
+
+
+
+
+
+
 
 

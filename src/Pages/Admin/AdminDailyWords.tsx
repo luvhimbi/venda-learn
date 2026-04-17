@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { db } from '../../services/firebaseConfig';
 import { collection, addDoc, doc, updateDoc, deleteDoc, getDocs, serverTimestamp } from 'firebase/firestore';
-import AdminNavbar from '../../components/AdminNavbar';
+import AdminNavbar from '../../components/shared/navigation/AdminNavbar';
 import Swal from 'sweetalert2';
 import { BookOpen, BookText, Edit, Trash2, Loader2, Plus, X, Globe, Search } from 'lucide-react';
 import { invalidateCache, fetchLanguages } from '../../services/dataCache';
@@ -348,6 +348,14 @@ const AdminDailyWords: React.FC = () => {
 };
 
 export default AdminDailyWords;
+
+
+
+
+
+
+
+
 
 
 

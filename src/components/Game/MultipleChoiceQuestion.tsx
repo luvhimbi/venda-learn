@@ -27,3 +27,9 @@ const MultipleChoiceQuestion: React.FC<Props> = ({ q, selected, status, onSelect
 );
 
 export default MultipleChoiceQuestion;
+
+
+
+
+
+

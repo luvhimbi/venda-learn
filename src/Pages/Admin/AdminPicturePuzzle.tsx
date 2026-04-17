@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { db } from '../../services/firebaseConfig';
 import { collection, addDoc, getDocs, deleteDoc, doc, updateDoc, serverTimestamp, writeBatch, type Firestore } from 'firebase/firestore';
-import AdminNavbar from '../../components/AdminNavbar';
+import AdminNavbar from '../../components/shared/navigation/AdminNavbar';
 import Swal from 'sweetalert2';
 import { Loader2, Plus, Trash2, Image as ImageIcon, ExternalLink, X, Edit, Upload, Search, Globe } from 'lucide-react';
-import { invalidateCache, fetchLanguages } from '../../services/dataCache';
+import { invalidateCache, fetchLanguages, difficultyToLevel } from '../../services/dataCache';
 
 interface PicturePuzzlePart {
     id: string;
@@ -29,6 +29,7 @@ const AdminPicturePuzzle: React.FC = () => {
     const [editingId, setEditingId] = useState<string | null>(null);
     const [submitting, setSubmitting] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
+    const [filterDifficulty, setFilterDifficulty] = useState('All');
     const [filterLanguage, setFilterLanguage] = useState('All');
 
     const [form, setForm] = useState({
@@ -97,6 +98,7 @@ const AdminPicturePuzzle: React.FC = () => {
                 nativeWord: form.nativeWord.trim(),
                 english: form.english.trim(),
                 difficulty: form.difficulty,
+                level: difficultyToLevel(form.difficulty || 'Beginner'),
                 languageId: form.languageId
             };
 
@@ -165,7 +167,8 @@ const AdminPicturePuzzle: React.FC = () => {
                     imageUrl: item.imageUrl || 'placeholder',
                     nativeWord: item.nativeWord,
                     english: item.english,
-                    difficulty: item.difficulty || 'Beginner',
+                     difficulty: item.difficulty || 'Beginner',
+                    level: difficultyToLevel(item.difficulty || 'Beginner'),
                     languageId: item.languageId || form.languageId || '',
                     createdAt: new Date(),
                 });
@@ -235,8 +238,9 @@ const AdminPicturePuzzle: React.FC = () => {
         const matchesSearch = !searchQuery || 
             p.nativeWord.toLowerCase().includes(searchQuery.toLowerCase()) ||
             p.english.toLowerCase().includes(searchQuery.toLowerCase());
+        const matchesDifficulty = filterDifficulty === 'All' || p.difficulty === filterDifficulty;
         const matchesLanguage = filterLanguage === 'All' || p.languageId === filterLanguage || (filterLanguage === 'none' && !p.languageId);
-        return matchesSearch && matchesLanguage;
+        return matchesSearch && matchesDifficulty && matchesLanguage;
     });
 
     const indexOfLast = currentPage * itemsPerPage;
@@ -319,6 +323,15 @@ const AdminPicturePuzzle: React.FC = () => {
                                     <input className="form-control admin-input" placeholder="e.g. Dog"
                                         value={form.english} onChange={e => setForm({ ...form, english: e.target.value })} />
                                 </div>
+                                <div className="col-md-12">
+                                    <label className="smallest fw-bold ls-1 text-uppercase text-secondary mb-2 d-block">Difficulty</label>
+                                    <select className="form-select admin-input"
+                                        value={form.difficulty} onChange={e => setForm({ ...form, difficulty: e.target.value })}>
+                                        <option>Beginner</option>
+                                        <option>Intermediate</option>
+                                        <option>Advanced</option>
+                                    </select>
+                                </div>
                             </div>
                             <div className="mt-4 d-flex gap-3 justify-content-end">
                                 <button type="button" onClick={resetForm} className="btn text-muted smallest fw-bold ls-1">CANCEL</button>
@@ -372,6 +385,13 @@ const AdminPicturePuzzle: React.FC = () => {
                             <option value="none">No Language</option>
                             {languages.map(l => <option key={l.id} value={l.id}>{l.name}</option>)}
                         </select>
+                        <select className="form-select admin-input" style={{ width: 170, fontSize: 13 }}
+                            value={filterDifficulty} onChange={e => { setFilterDifficulty(e.target.value); setCurrentPage(1); }}>
+                            <option value="All">All Levels</option>
+                            <option value="Beginner">Level 1 (Beginner)</option>
+                            <option value="Intermediate">Level 2 (Intermediate)</option>
+                            <option value="Advanced">Level 3 (Advanced)</option>
+                        </select>
                         <div className="position-relative">
                             <Search size={14} className="position-absolute top-50 translate-middle-y" style={{ left: 12, color: '#9CA3AF' }} />
                             <input className="form-control admin-input ps-4" placeholder="Search word or translation..."
@@ -419,11 +439,20 @@ const AdminPicturePuzzle: React.FC = () => {
                                             <div className="d-flex justify-content-between align-items-start mb-2">
                                                 <div>
                                                     <h6 className="fw-bold mb-0 text-dark">{pz.nativeWord}</h6>
-                                                    <span className="smallest text-muted text-uppercase ls-1">{pz.english}</span>
+                                                     <span className="smallest text-muted text-uppercase ls-1">{pz.english}</span>
                                                 </div>
-                                                <span className="badge bg-light text-muted border px-2 py-1 d-flex align-items-center gap-1" style={{ fontSize: 9, fontWeight: 600 }}>
-                                                    <Globe size={9} />{getLangName(pz.languageId)}
-                                                </span>
+                                                <div className="d-flex flex-column align-items-end gap-1">
+                                                    <span className="badge rounded-pill px-2 py-1" style={{
+                                                        backgroundColor: `${pz.difficulty === 'Advanced' ? '#EF4444' : pz.difficulty === 'Intermediate' ? '#FACC15' : '#10B981'}20`,
+                                                        color: pz.difficulty === 'Advanced' ? '#EF4444' : pz.difficulty === 'Intermediate' ? '#FACC15' : '#10B981',
+                                                        fontSize: 10, fontWeight: 700
+                                                    }}>
+                                                        {pz.difficulty === 'Advanced' ? 'Level 3' : pz.difficulty === 'Intermediate' ? 'Level 2' : 'Level 1'} ({pz.difficulty || 'Beginner'})
+                                                    </span>
+                                                    <span className="badge bg-light text-muted border px-2 py-1 d-flex align-items-center gap-1" style={{ fontSize: 9, fontWeight: 600 }}>
+                                                        <Globe size={9} />{getLangName(pz.languageId)}
+                                                    </span>
+                                                </div>
                                             </div>
                                             <div className="d-flex gap-2 mt-2">
                                                 <button onClick={() => handleEdit(pz)} className="btn btn-sm btn-outline-dark rounded-pill px-3 d-flex align-items-center gap-1"
@@ -479,3 +508,11 @@ const AdminPicturePuzzle: React.FC = () => {
 };
 
 export default AdminPicturePuzzle;
+
+
+
+
+
+
+
+

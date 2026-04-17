@@ -2,8 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { getDocs, collection } from 'firebase/firestore';
 import { db } from '../../services/firebaseConfig';
-import AdminNavbar from '../../components/AdminNavbar';
-import { Layout, Hash, Image as ImageIcon, Bomb, Loader2, Gamepad2, ChevronRight } from 'lucide-react';
+import AdminNavbar from '../../components/shared/navigation/AdminNavbar';
+import { Layout, Hash, Image as ImageIcon, Loader2, Gamepad2, ChevronRight } from 'lucide-react';
 
 interface GameStat {
     title: string;
@@ -27,11 +27,10 @@ const AdminGameContent: React.FC = () => {
     const loadStats = async () => {
         setLoading(true);
         try {
-            const [syllableSnap, sentenceSnap, pictureSnap, wordBombSnap] = await Promise.all([
+            const [syllableSnap, sentenceSnap, pictureSnap] = await Promise.all([
                 getDocs(collection(db, "syllablePuzzles")),
                 getDocs(collection(db, "sentencePuzzles")),
-                getDocs(collection(db, "picturePuzzles")),
-                getDocs(collection(db, "wordBombWords"))
+                getDocs(collection(db, "picturePuzzles"))
             ]);
 
             setStats([
@@ -65,16 +64,6 @@ const AdminGameContent: React.FC = () => {
                     link: '/admin/picture-puzzles',
                     collection: 'picturePuzzles'
                 },
-                {
-                    title: 'Word Bomb',
-                    subtitle: 'Falling word translation challenge',
-                    icon: <Bomb size={28} strokeWidth={2.5} />,
-                    count: wordBombSnap.size,
-                    color: '#EF4444',
-                    bgColor: '#FEF2F2',
-                    link: '/admin/word-bomb',
-                    collection: 'wordBombWords'
-                }
             ]);
         } catch (error) {
             console.error("Error loading game stats:", error);
@@ -226,3 +215,11 @@ const AdminGameContent: React.FC = () => {
 };
 
 export default AdminGameContent;
+
+
+
+
+
+
+
+

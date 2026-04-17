@@ -169,3 +169,10 @@ const WordCards: React.FC = () => {
 };
 
 export default WordCards;
+
+
+
+
+
+
+

@@ -5,13 +5,13 @@ import { onAuthStateChanged } from 'firebase/auth';
 import { auth, db } from '../services/firebaseConfig';
 import { fetchLessons, refreshUserData, getMicroLessons, fetchLanguages } from '../services/dataCache';
 import LandingPage from './LandingPage';
-import InstallBanner from '../components/InstallBanner';
-import TourGuide from '../components/TourGuide';
-import JuicyButton from '../components/JuicyButton';
-import PremiumStreakModal from '../components/PremiumStreakModal';
-import NotificationNudge from '../components/NotificationNudge';
+import InstallBanner from '../components/feedback/banners/InstallBanner';
+import TourGuide from '../features/onboarding/components/TourGuide';
+import JuicyButton from '../components/ui/JuicyButton/JuicyButton';
+import PremiumStreakModal from '../components/feedback/modals/PremiumStreakModal';
+import NotificationNudge from '../features/notifications/components/NotificationNudge';
 import LanguageCharacter from '../components/illustrations/LanguageCharacters';
-import AchievementCard from '../components/AchievementCard';
+import AchievementCard from '../features/gamification/components/AchievementCard';
 import { ALL_TROPHIES } from '../services/achievementService';
 
 
@@ -385,3 +385,11 @@ const Home: React.FC = () => {
 };
 
 export default Home;
+
+
+
+
+
+
+
+

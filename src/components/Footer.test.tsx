@@ -1,7 +1,7 @@
 import { render, screen } from '@testing-library/react';
 import { describe, it, expect } from 'vitest';
 import { MemoryRouter } from 'react-router-dom';
-import Footer from './Footer';
+import Footer from '../components/shared/Footer/Footer';
 
 describe('Footer Component', () => {
   it('renders the footer navigation and brand description', () => {
@@ -30,3 +30,9 @@ describe('Footer Component', () => {
     expect(flagImg).toHaveAttribute('src', 'https://flagcdn.com/za.svg');
   });
 });
+
+
+
+
+
+

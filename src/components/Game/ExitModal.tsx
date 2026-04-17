@@ -1,5 +1,5 @@
 import React from 'react';
-import Mascot from '../Mascot';
+import Mascot from '../../features/gamification/components/Mascot';
 
 interface Props {
     onClose: () => void;
@@ -59,3 +59,8 @@ const ExitModal: React.FC<Props> = ({ onClose, onConfirm }) => (
 );
 
 export default ExitModal;
+
+
+
+
+

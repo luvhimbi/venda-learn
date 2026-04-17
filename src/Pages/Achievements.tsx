@@ -2,10 +2,10 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ALL_TROPHIES } from '../services/achievementService';
 import { fetchUserData } from '../services/dataCache';
-import AchievementCard from '../components/AchievementCard';
-import SharePreviewModal from '../components/SharePreviewModal';
+import AchievementCard from '../features/gamification/components/AchievementCard';
+import SharePreviewModal from '../components/feedback/modals/SharePreviewModal';
 import { ArrowLeft,  Trophy as TrophyIconLucide } from 'lucide-react';
-import SEO from '../components/SEO';
+import SEO from '../components/shared/SEO/SEO';
 
 const Achievements: React.FC = () => {
     const [userData, setUserData] = useState<any>(null);
@@ -157,3 +157,11 @@ const Achievements: React.FC = () => {
 };
 
 export default Achievements;
+
+
+
+
+
+
+
+

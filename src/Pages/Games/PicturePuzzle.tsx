@@ -33,21 +33,21 @@ import {
     Waves,
     Wind, Fish,
     Ham, DollarSign, Church, Shirt, Utensils, Hand, Car,
-    HelpCircle, MousePointerClick, Timer
+    HelpCircle, MousePointerClick, Timer, ChevronRight, Trophy
 } from 'lucide-react';
-import { fetchPicturePuzzles, fetchUserData, fetchLanguages, awardPoints } from '../../services/dataCache';
+import { fetchGameContentByLevel, fetchUserData, fetchLanguages, awardPoints, completeLevel, markWordsAsLearned } from '../../services/dataCache';
 import { useNavigate } from 'react-router-dom';
 import { auth, db } from '../../services/firebaseConfig';
-import GameResultModal from '../../components/GameResultModal';
-import {doc, updateDoc, getDoc, type Firestore} from 'firebase/firestore';
-import Mascot from '../../components/Mascot';
+import GameResultModal from '../../components/feedback/modals/GameResultModal';
+import {doc, updateDoc, type Firestore} from 'firebase/firestore';
+import Mascot from '../../features/gamification/components/Mascot';
 import { useVisualJuice } from '../../hooks/useVisualJuice';
 import { updateStreak } from '../../services/streakUtils';
-import { popupService } from "../../services/popupService.ts";
-import GameIntroModal, { resetIntroSeen } from '../../components/GameIntroModal';
-import ExitConfirmModal from '../../components/ExitConfirmModal';
+import GameIntroModal, { resetIntroSeen } from '../../components/feedback/modals/GameIntroModal';
+import ExitConfirmModal from '../../components/feedback/modals/ExitConfirmModal';
 
 interface GameSlide {
+    id: string;
     imageUrl: string;
     nativeWord: string;
     english: string;
@@ -139,11 +139,15 @@ const PicturePuzzle: React.FC = () => {
     const [answerStatus, setAnswerStatus] = useState<'correct' | 'wrong' | null>(null);
     const [cardBg, setCardBg] = useState(CARD_BGNDS[0]);
     const [roundCount, setRoundCount] = useState(0);
-    const [, setStreak] = useState(0);
+    const [isPlaying, setIsPlaying] = useState(false);
+    const sessionLearnedIds = React.useRef<Set<string>>(new Set());
+    const [currentLevel, setCurrentLevel] = useState(1);
+    const [currentSlideIndex, setCurrentSlideIndex] = useState(0);
     const [showIntro, setShowIntro] = useState(true);
     const [showExitConfirm, setShowExitConfirm] = useState(false);
     const [showResult, setShowResult] = useState(false);
-    const [resultData, setResultData] = useState({ isSuccess: false, title: '', message: '', points: 0 });
+    const [resultData, setResultData] = useState({ isSuccess: false, title: '', message: '', points: 0, isLevelComplete: false });
+    const targetScore = currentLevel === 1 ? 40 : currentLevel === 2 ? 60 : 80;
     const { playCorrect, playWrong, playClick, playWin, playLose, triggerShake } = useVisualJuice();
     const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
@@ -154,15 +158,18 @@ const PicturePuzzle: React.FC = () => {
     const handleIntroDismiss = useCallback(() => setShowIntro(false), []);
 
     const handleExit = () => {
-        if (gameActive) {
+        if (isPlaying) {
             setShowExitConfirm(true);
         } else {
             navigate('/mitambo');
         }
     };
 
-    const confirmExit = () => {
+    const confirmExit = async () => {
         stopTimer();
+        if (sessionLearnedIds.current.size > 0) {
+            await markWordsAsLearned(Array.from(sessionLearnedIds.current));
+        }
         setShowExitConfirm(false);
         navigate('/mitambo');
     };
@@ -206,43 +213,51 @@ const PicturePuzzle: React.FC = () => {
     const loadGameData = async () => {
         setLoading(true);
         try {
-            const [allSlides, uData, langs] = await Promise.all([
-                fetchPicturePuzzles(),
+            const [uData, langs] = await Promise.all([
                 fetchUserData(),
                 fetchLanguages()
             ]);
 
+            // mastered variable and state removed
+            
+            const levelNum = uData?.gameLevels?.picture || 1;
+            setCurrentLevel(levelNum);
+
             let activeLang: any = null;
             if (uData && langs) {
-                activeLang = langs.find((l: any) => l.id === uData.preferredLanguageId);
+                activeLang = langs.find((l: any) => l.id === (uData.preferredLanguageId || 'venda'));
                 setPreferredLanguage(activeLang);
             }
 
-            const filtered = allSlides.filter((p: any) => {
-                const isCorrectLang = !activeLang || p.languageId === activeLang.id || !p.languageId;
-                return isCorrectLang;
-            });
-            const shuffled = [...filtered].sort(() => 0.5 - Math.random());
-            setSlides(shuffled);
-            if (shuffled.length > 0) {
-                setGameActive(true);
-                setupRound(shuffled[0], shuffled, 0);
+            const langId = activeLang?.id || 'venda';
+            console.log(`[PicturePuzzle] Fetching level ${levelNum} for lang ${langId} (${activeLang?.name})`);
+
+            const allLevelWords = await fetchGameContentByLevel("picturePuzzles", langId, levelNum);
+            console.log(`[PicturePuzzle] Found ${allLevelWords.length} pictures.`);
+
+            if (allLevelWords.length > 0) {
+                const normalized = (allLevelWords as any[]).map((w: any) => ({
+                    id: w.id,
+                    imageUrl: w.imageUrl || '',
+                    nativeWord: w.nativeWord || '',
+                    english: w.english || ''
+                })).sort(() => 0.5 - Math.random());
+                setSlides(normalized);
+                setCurrentSlideIndex(0);
+                setupRound(normalized[0], normalized, 0);
             } else {
-                popupService.error('Musi wo fhela', 'No puzzles found! Vha khou humbelwa u lingedza hafhu.');
-                navigate('/mitambo');
-            }
-            if (auth.currentUser) {
-                const snap = await getDoc(doc(db as Firestore, "users", auth.currentUser.uid));
-                if (snap.exists()) setStreak(snap.data().streak || 0);
+                setResultData({
+                    isSuccess: false,
+                    title: 'NO CONTENT',
+                    message: `DEBUG: Lang[${langId}] Level[${levelNum}]. Whoops! Level ${levelNum} has no pictures in ${activeLang?.name || 'this language'} yet.`,
+                    points: 0,
+                    isLevelComplete: false
+                });
+                setShowResult(true);
+                setIsPlaying(false);
             }
         } catch (error) {
-            setResultData({
-                isSuccess: false,
-                title: 'Error',
-                message: 'Failed to load game data. Please check your connection.',
-                points: 0
-            });
-            setShowResult(true);
+            console.error("Failed to load picture puzzles:", error);
         } finally {
             setLoading(false);
         }
@@ -270,7 +285,12 @@ const PicturePuzzle: React.FC = () => {
 
         if (answer === currentSlide.nativeWord) {
             setAnswerStatus('correct');
-            const newScore = score + 5;
+            // Buffer mastery locally
+            if (currentSlide.id) {
+                sessionLearnedIds.current.add(currentSlide.id);
+            }
+            
+            const newScore = score + 10;
             setScore(newScore);
 
             setMascotCheerText(MASCOT_CHEERS[Math.floor(Math.random() * MASCOT_CHEERS.length)]);
@@ -279,8 +299,8 @@ const PicturePuzzle: React.FC = () => {
             setTimeout(() => setShowMascotCheer(false), 900);
 
             setTimeout(() => {
-                const currentIndex = slides.indexOf(currentSlide);
-                const nextIndex = (currentIndex + 1) % slides.length;
+                const nextIndex = (currentSlideIndex + 1) % slides.length;
+                setCurrentSlideIndex(nextIndex);
                 setupRound(slides[nextIndex], slides, roundCount + 1);
             }, 800);
         } else {
@@ -302,6 +322,15 @@ const PicturePuzzle: React.FC = () => {
         const user = auth.currentUser;
         if (user && score > 0) {
             try {
+                const sessionIds = Array.from(sessionLearnedIds.current);
+                
+                // Tracking total level completion if they performed well
+                if (score >= targetScore) { // Threshold for "completing" a level session in the race
+                     await completeLevel("picture", currentLevel, sessionIds);
+                } else if (sessionIds.length > 0) {
+                     await markWordsAsLearned(sessionIds);
+                }
+                
                 // Using centralized awardPoints to ensure weekly leaderboard sync
                 await awardPoints(score);
                 
@@ -330,11 +359,12 @@ const PicturePuzzle: React.FC = () => {
 
         setResultData({
             isSuccess,
-            title: isSuccess ? 'Tshifhinga tsho fhela!' : 'Game Over',
+            title: isSuccess ? (score >= targetScore ? 'MURABA-RARE! (Perfect!)' : 'ZWAVHU\u1E10I! (Good!)') : 'Game Over',
             message: isSuccess 
-                ? `Time's up! You did a great job matching the ${roundCount} pictures.` 
+                ? `Time's up! You did a great job matching the ${roundCount} pictures. ${score >= targetScore ? 'Level Mastered!' : `Try to score ${targetScore}+ to advance levels!`}` 
                 : `Time's up! No pictures matched this time. Don't give up, keep practicing!`,
-            points: score
+            points: score,
+            isLevelComplete: score >= targetScore
         });
         setShowResult(true);
     };
@@ -350,6 +380,65 @@ const PicturePuzzle: React.FC = () => {
     const timerPercent = (timeLeft / GAME_DURATION) * 100;
     const timerColor = timeLeft > 20 ? '#FACC15' : timeLeft > 10 ? '#F97316' : '#EF4444';
 
+    if (!isPlaying) {
+        return (
+            <div className="p-4 d-flex flex-column align-items-center justify-content-center bg-theme-base overflow-hidden position-relative" style={{ height: '100dvh' }}>
+
+                <button onClick={() => navigate('/mitambo')} className="btn-game btn-game-white rounded-circle d-flex align-items-center justify-content-center position-absolute" style={{ top: '20px', left: '20px', width: 44, height: 44, padding: 0, zIndex: 10 }}>
+                    <ArrowLeft size={24} strokeWidth={3} fill="none" className="text-theme-main" />
+                </button>
+
+                <button onClick={() => { resetIntroSeen('picturePuzzle'); setShowIntro(true); }} className="btn-game btn-game-white rounded-circle d-flex align-items-center justify-content-center position-absolute" style={{ top: '20px', right: '20px', width: 44, height: 44, padding: 0, zIndex: 10 }}>
+                    <HelpCircle size={24} strokeWidth={3} className="text-theme-main" />
+                </button>
+
+                {/* INTRO MODAL */}
+                {showIntro && (
+                    <GameIntroModal
+                        gameId="picturePuzzle"
+                        gameTitle="PICTURE MATCH"
+                        gameIcon={<ImageIcon size={28} strokeWidth={3} />}
+                        steps={PICTURE_PUZZLE_INTRO_STEPS}
+                        accentColor="#FACC15"
+                        onClose={handleIntroDismiss}
+                    />
+                )}
+
+                <div className="container d-flex flex-column align-items-center" style={{ maxWidth: '600px' }}>
+
+                    <div className="text-center mb-5 d-flex flex-column align-items-center">
+                        <div className="brutalist-card bg-amber p-4 mb-3 shadow-action" style={{ background: 'var(--game-amber)' }}>
+                            <ImageIcon size={48} strokeWidth={3} className="text-dark" />
+                        </div>
+                        <h1 className="fw-black mb-1 text-theme-main uppercase ls-tight text-center mt-2" style={{ fontSize: '2.5rem' }}>PICTURE MATCH</h1>
+                        <p className="fw-bold text-theme-muted uppercase mb-4 ls-1" style={{ fontSize: '0.85rem' }}>Flash translation & icon pairing in {preferredLanguage?.name || ''}</p>
+                        
+                        <div className="badge bg-dark text-white px-3 py-2 rounded-pill smallest fw-black ls-1 mb-4 shadow-action-sm">
+                            CURRENTLY AT LEVEL {currentLevel}
+                        </div>
+                    </div>
+
+                    <div className="d-flex flex-column gap-3 w-100" style={{ maxWidth: '400px' }}>
+                        <button
+                            onClick={() => { setIsPlaying(true); setGameActive(true); setSessionStartTime(Date.now()); }}
+                            className="btn btn-game btn-game-primary w-100 py-3 smallest fw-black transition-all hover-lift"
+                            style={{ background: 'var(--game-amber)', borderColor: 'var(--color-text)' }}
+                        >
+                            START LEVEL {currentLevel} <ChevronRight size={18} className="ms-2" strokeWidth={3} />
+                        </button>
+                        
+                        <button
+                            onClick={() => navigate('/mitambo')}
+                            className="btn btn-game btn-game-white w-100 py-3 smallest fw-black"
+                        >
+                            BACK TO MENU
+                        </button>
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
     return (
         <div className="d-flex flex-column overflow-hidden" style={{ 
             height: '100dvh',
@@ -363,33 +452,19 @@ const PicturePuzzle: React.FC = () => {
                 title={resultData.title}
                 message={resultData.message}
                 points={resultData.points}
-                primaryActionText="PLAY AGAIN"
+                primaryActionText={resultData.isLevelComplete ? "ADVANCE LEVEL" : "PLAY AGAIN"}
                 secondaryActionText="EXIT TO MENU"
                 onPrimaryAction={() => { 
                     setShowResult(false); 
                     setScore(0);
                     setTimeLeft(GAME_DURATION);
+                    setIsPlaying(true);
                     setGameActive(true);
                     setSessionStartTime(Date.now());
-                    const reshuffled = [...slides].sort(() => 0.5 - Math.random());
-                    setSlides(reshuffled);
-                    setupRound(reshuffled[0], reshuffled, 0);
+                    loadGameData();
                 }}
                 onSecondaryAction={() => { setShowResult(false); navigate('/mitambo'); }}
             />
-
-            {/* INTRO MODAL */}
-            {showIntro && (
-                <GameIntroModal
-                    gameId="picturePuzzle"
-                    gameTitle="PICTURE PUZZLE"
-                    gameIcon={<ImageIcon size={28} strokeWidth={3} />}
-                    steps={PICTURE_PUZZLE_INTRO_STEPS}
-                    accentColor="#FACC15"
-                    onClose={handleIntroDismiss}
-                />
-            )}
-
             {/* EXIT CONFIRM MODAL */}
             <ExitConfirmModal
                 visible={showExitConfirm}
@@ -397,7 +472,7 @@ const PicturePuzzle: React.FC = () => {
                 onCancel={() => setShowExitConfirm(false)}
             />
 
-            {/* DARK HEADER */}
+            {/* HEADER */}
             <div className="px-3 pt-4 pb-4">
                 <div className="container" style={{ maxWidth: '600px' }}>
                     <div className="d-flex justify-content-between align-items-center mb-3">
@@ -406,7 +481,9 @@ const PicturePuzzle: React.FC = () => {
                         </button>
                         <div className="text-center">
                             <span className="smallest fw-black text-warning uppercase ls-1 mb-0 d-block">{preferredLanguage?.name || 'Local'} Race</span>
-                            <h2 className="fw-black mb-0 text-theme-main ls-tight" style={{ fontSize: '1.5rem' }}>TSHIFANISO</h2>
+                            <span className="badge bg-dark text-white smallest fw-black px-2 py-1 rounded mt-1" style={{ fontSize: '9px' }}>
+                                LEVEL {currentLevel}
+                            </span>
                         </div>
                         <div className="d-flex align-items-center gap-2">
                             <button onClick={() => { resetIntroSeen('picturePuzzle'); setShowIntro(true); }} className="btn-game btn-game-white rounded-circle d-flex align-items-center justify-content-center" style={{ width: 36, height: 36, padding: 0 }} title="How to play">
@@ -414,7 +491,7 @@ const PicturePuzzle: React.FC = () => {
                             </button>
                         </div>
                     </div>
-                    <div className="d-flex align-items-center justify-content-center">
+                    <div className="d-flex align-items-center justify-content-center gap-3">
                         {/* TIMER */}
                         <div className="d-flex align-items-center gap-2 bg-theme-surface rounded-pill px-3 py-1 border border-theme-main">
                             <Clock size={16} style={{ color: timerColor }} />
@@ -422,6 +499,13 @@ const PicturePuzzle: React.FC = () => {
                                 <div style={{ width: `${timerPercent}%`, height: '100%', background: timerColor, transition: 'all 0.3s' }}></div>
                             </div>
                             <span className="fw-black smallest" style={{ color: timerColor }}>{timeLeft}S</span>
+                        </div>
+
+                        {/* GOAL INDICATOR */}
+                        <div className="d-flex align-items-center gap-2 bg-theme-surface rounded-pill px-3 py-1 border border-theme-main shadow-action-sm">
+                            <Trophy size={14} className="text-warning" />
+                            <span className="smallest fw-black opacity-75">GOAL:</span>
+                            <span className="smallest fw-black text-warning">{targetScore} XP</span>
                         </div>
                     </div>
                 </div>
@@ -586,4 +670,12 @@ const PicturePuzzle: React.FC = () => {
 };
 
 export default PicturePuzzle;
+
+
+
+
+
+
+
+
 

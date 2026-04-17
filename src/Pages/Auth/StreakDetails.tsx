@@ -6,9 +6,9 @@ import { doc, updateDoc, increment } from 'firebase/firestore';
 import { fetchUserData } from '../../services/dataCache';
 import { ArrowLeft, Flame, Shield, Trophy } from 'lucide-react';
 import Swal from 'sweetalert2';
-import StreakCalendar from '../../components/StreakCalendar';
-import Mascot from '../../components/Mascot';
-import ShareStreakModal from '../../components/ShareStreakModal';
+import StreakCalendar from '../../features/gamification/components/StreakCalendar';
+import Mascot from '../../features/gamification/components/Mascot';
+import ShareStreakModal from '../../components/feedback/modals/ShareStreakModal';
 
 const StreakDetails: React.FC = () => {
     const navigate = useNavigate();
@@ -161,3 +161,11 @@ const StreakDetails: React.FC = () => {
 };
 
 export default StreakDetails;
+
+
+
+
+
+
+
+

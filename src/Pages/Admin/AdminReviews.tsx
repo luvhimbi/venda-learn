@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import AdminNavbar from '../../components/AdminNavbar';
+import AdminNavbar from '../../components/shared/navigation/AdminNavbar';
 import { fetchReviews, deleteReview } from '../../services/dataCache';
 import { Star, Trash2, User, Clock, MessageSquare, Loader2 } from 'lucide-react';
 import { popupService } from '../../services/popupService';
@@ -154,3 +154,11 @@ const AdminReviews: React.FC = () => {
 };
 
 export default AdminReviews;
+
+
+
+
+
+
+
+

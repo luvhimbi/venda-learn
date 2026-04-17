@@ -1,5 +1,5 @@
 import React from 'react';
-import SmartReader from '../../components/SmartReader';
+import SmartReader from '../../features/learning/components/SmartReader';
 
 const DMCA: React.FC = () => {
     const dmcaText = `
@@ -57,3 +57,11 @@ const DMCA: React.FC = () => {
 };
 
 export default DMCA;
+
+
+
+
+
+
+
+

@@ -16,3 +16,8 @@ export const getCurrentWeekIdentifier = (): string => {
     const weekNo = Math.ceil((((date.getTime() - yearStart.getTime()) / 86400000) + 1) / 7);
     return `${date.getUTCFullYear()}-W${weekNo}`;
 };
+
+
+
+
+

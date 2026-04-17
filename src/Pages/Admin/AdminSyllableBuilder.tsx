@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { db } from '../../services/firebaseConfig';
 import { collection, addDoc, doc, updateDoc, deleteDoc, getDocs, serverTimestamp, writeBatch, type Firestore } from 'firebase/firestore';
-import AdminNavbar from '../../components/AdminNavbar';
-import { invalidateCache, fetchLanguages } from '../../services/dataCache';
+import AdminNavbar from '../../components/shared/navigation/AdminNavbar';
+import { invalidateCache, fetchLanguages, difficultyToLevel } from '../../services/dataCache';
 import Swal from 'sweetalert2';
 import { Layout, Edit, Trash2, Loader2, Plus, X, Upload, Search, Globe } from 'lucide-react';
 
@@ -87,7 +87,8 @@ const AdminSyllableBuilder: React.FC = () => {
                 word: form.word.trim(),
                 syllables: syllablesArray,
                 translation: form.translation.trim(),
-                difficulty: form.difficulty
+                difficulty: form.difficulty,
+                level: difficultyToLevel(form.difficulty)
             };
             if (form.languageId) docData.languageId = form.languageId;
 
@@ -153,6 +154,7 @@ const AdminSyllableBuilder: React.FC = () => {
                     syllables: item.syllables,
                     translation: item.translation,
                     difficulty: item.difficulty || 'Beginner',
+                    level: difficultyToLevel(item.difficulty || 'Beginner'),
                     ...(item.languageId ? { languageId: item.languageId } : (form.languageId ? { languageId: form.languageId } : {}))
                 });
                 count++;
@@ -401,12 +403,12 @@ const AdminSyllableBuilder: React.FC = () => {
                             <option value="none">No Language</option>
                             {languages.map(l => <option key={l.id} value={l.id}>{l.name}</option>)}
                         </select>
-                        <select className="form-select admin-input" style={{ width: 140, fontSize: 13 }}
+                        <select className="form-select admin-input" style={{ width: 170, fontSize: 13 }}
                             value={filterDifficulty} onChange={e => { setFilterDifficulty(e.target.value); setCurrentPage(1); }}>
                             <option value="All">All Levels</option>
-                            <option>Beginner</option>
-                            <option>Intermediate</option>
-                            <option>Advanced</option>
+                            <option value="Beginner">Level 1 (Beginner)</option>
+                            <option value="Intermediate">Level 2 (Intermediate)</option>
+                            <option value="Advanced">Level 3 (Advanced)</option>
                         </select>
                     </div>
                 </div>
@@ -439,7 +441,7 @@ const AdminSyllableBuilder: React.FC = () => {
                                                     color: difficultyColor(entry.difficulty),
                                                     fontSize: 10, fontWeight: 700
                                                 }}>
-                                                    {entry.difficulty}
+                                                    {entry.difficulty === 'Advanced' ? 'Level 3' : entry.difficulty === 'Intermediate' ? 'Level 2' : 'Level 1'} ({entry.difficulty})
                                                 </span>
                                                 <span className="badge bg-light text-muted border px-2 py-1 d-flex align-items-center gap-1" style={{ fontSize: 9, fontWeight: 600 }}>
                                                     <Globe size={9} />{getLangName(entry.languageId)}
@@ -507,3 +509,11 @@ const AdminSyllableBuilder: React.FC = () => {
 };
 
 export default AdminSyllableBuilder;
+
+
+
+
+
+
+
+

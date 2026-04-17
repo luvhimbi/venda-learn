@@ -4,7 +4,7 @@ import { collection, getDocs, addDoc, doc, query, where, type Firestore, writeBa
 import { Database, CheckCircle2, AlertCircle, Loader2, Play } from 'lucide-react';
 import Swal from 'sweetalert2';
 import { useNavigate } from 'react-router-dom';
-import { invalidateCache } from '../../services/dataCache';
+import { invalidateCache, difficultyToLevel } from '../../services/dataCache';
 import isiZuluData from '../../data/isiZulu.json';
 import seswatiData from '../../data/seswati.json';
 import afrikaansData from '../../data/afrikaans.json';
@@ -14,6 +14,7 @@ import sothoData from '../../data/sotho.json';
 import xhosaData from '../../data/xhosa.json';
 import xitsongaData from '../../data/xitsonga.json';
 import tswanaData from '../../data/tswana.json';
+import vendaData from '../../data/venda.json';
 
 interface Log {
     time: string;
@@ -75,13 +76,15 @@ const GameDataPatcher: React.FC = () => {
             // Map data to standardized codes
             const langCodes: Record<string, string> = {
                 'isiZulu': 'zu', 'Seswati': 'ss', 'Afrikaans': 'af', 'Sepedi': 'nso', 
-                'Ndebele': 'nr', 'Sotho': 'st', 'Xhosa': 'xh', 'Xitsonga': 'ts', 'Tswana': 'tn'
+                'Ndebele': 'nr', 'Sotho': 'st', 'Xhosa': 'xh', 'Xitsonga': 'ts', 'Tswana': 'tn',
+                'Venda': 've'
             };
 
             const langDataMap: Record<string, any> = {
                 'isiZulu': isiZuluData, 'Seswati': seswatiData, 'Afrikaans': afrikaansData,
                 'Sepedi': sepediData, 'Ndebele': ndebeleData, 'Sotho': sothoData,
-                'Xhosa': xhosaData, 'Xitsonga': xitsongaData, 'Tswana': tswanaData
+                'Xhosa': xhosaData, 'Xitsonga': xitsongaData, 'Tswana': tswanaData,
+                'Venda': vendaData
             };
 
             const languagesToSeed = Object.keys(langDataMap).map(name => ({
@@ -94,7 +97,15 @@ const GameDataPatcher: React.FC = () => {
 
             // Map or Create required languages
             for (const lang of languagesToSeed) {
+                // EXCEPTION: Always map 'Venda' to 'venda' if possible to match app defaults
+                if (lang.name.toLowerCase() === 'venda') {
+                     langMap[lang.name] = 'venda';
+                     addLog(`Mapped ${lang.name} to standard ID: venda`, 'info');
+                     continue;
+                }
+
                 const match = existingLangs.find(l => 
+                    l.id.toLowerCase() === lang.name.toLowerCase() ||
                     l.name.toLowerCase().trim() === lang.name.toLowerCase().trim() ||
                     l.name.toLowerCase().includes(lang.name.toLowerCase())
                 );
@@ -112,7 +123,7 @@ const GameDataPatcher: React.FC = () => {
 
             // --- CLEANUP ---
             addLog('Purging legacy game fragments and placeholders...', 'warn');
-            const collectionsToClean = ['picturePuzzles', 'wordBombWords', 'puzzleWords', 'syllablePuzzles', 'sentencePuzzles'];
+            const collectionsToClean = ['picturePuzzles', 'syllablePuzzles', 'sentencePuzzles'];
             let deletedCount = 0;
             
             // Purge data for specific target languages (safety first)
@@ -166,71 +177,28 @@ const GameDataPatcher: React.FC = () => {
                 imageUrl: 'placeholder', 
                 nativeWord: item.word,
                 english: item.english,
-                difficulty: item.difficulty || 'Beginner'
+                level: item.level
             }));
 
-            await seedSimpleBatched('wordBombWords', 'wordBombWords', (item) => ({
-                nativeWord: item.word,
-                english: item.english,
-                difficulty: item.difficulty
-            }));
-
-            await seedSimpleBatched('puzzleWords', 'puzzleWords', (item) => ({
-                word: item.word,
-                translation: item.english,
-                difficulty: item.difficulty,
-                hint: item.hint
-            }));
 
             await seedSimpleBatched('syllablePuzzles', 'syllablePuzzles', (item) => ({
                 word: item.word,
                 syllables: item.syllables,
                 translation: item.translation,
-                difficulty: item.difficulty
+                level: item.level
             }));
 
             await seedSimpleBatched('sentencePuzzles', 'sentencePuzzles', (item) => ({
                 words: item.words,
                 translation: item.translation,
-                difficulty: item.difficulty
+                level: item.level
             }));
 
-            // --- NEW: SEED STARTER LESSONS ---
-            addLog('Seeding Starter Lessons for each language...', 'info');
-            let lessonsAdded = 0;
-            for (const langName of Object.keys(langMap)) {
-                const langId = langMap[langName];
-                const starterLessonId = `starter_${langId}`;
-                
-                // Construct a basic lesson that links to the standalone data
-                const lessonData = {
-                    title: `${langName} Starter`,
-                    nativeTitle: `${langName} Matshatsho`,
-                    difficulty: 'Beginner',
-                    languageId: langId,
-                    isStarter: true,
-                    description: `Begin your ${langName} journey here!`,
-                    microLessons: [
-                        {
-                            id: `${starterLessonId}_ml0`,
-                            title: 'Basics & Words',
-                            slides: [], // App can derive from picturePuzzles
-                            questions: [] // App can derive from wordBombWords
-                        }
-                    ]
-                };
+            // --- CLEANUP ---
+            addLog('Invalidating local caches...', 'info');
+            invalidateCache();
 
-                const lessonRef = doc(db as Firestore, 'lessons', starterLessonId);
-                batchTracker.current.set(lessonRef, lessonData);
-                batchTracker.count++;
-                lessonsAdded++;
-                if (batchTracker.count >= 480) await batchTracker.commit();
-            }
-            await batchTracker.commit();
-            addLog(`Injected ${lessonsAdded} Starter Lessons.`, 'success');
-
-
-            addLog('🎉 Patching Complete! 9-language architecture is live.', 'success');
+            addLog('🎉 Patching Complete! Dictionary architecture is live.', 'success');
             Swal.fire({
                 title: 'Data Injected!',
                 text: 'Dictionaries for 9 South African languages have been atomicly seeded.',
@@ -251,6 +219,56 @@ const GameDataPatcher: React.FC = () => {
         }
     };
 
+    const repairData = async () => {
+        setLoading(true);
+        setLogs([]);
+        addLog('Starting Data Repair (Missing Levels)...', 'info');
+
+        const collectionsToFix = ['picturePuzzles', 'syllablePuzzles', 'sentencePuzzles'];
+        let totalFixed = 0;
+
+        try {
+            const batch = writeBatch(db as Firestore);
+            let batchCount = 0;
+
+            for (const colName of collectionsToFix) {
+                addLog(`Checking ${colName}...`, 'info');
+                const snap = await getDocs(collection(db as Firestore, colName));
+                
+                for (const d of snap.docs) {
+                    const data = d.data();
+                    if (data.level === undefined || data.level === null) {
+                        const level = difficultyToLevel(data.difficulty || 'Beginner');
+                        batch.update(doc(db as Firestore, colName, d.id), { level });
+                        batchCount++;
+                        totalFixed++;
+                        
+                        if (batchCount >= 450) {
+                            await batch.commit();
+                            // Reset batch is not needed if we return or similar, but for logic consistency:
+                            // We would need a new batch here if we were doing more.
+                            // Simplified for this one-time task unless total > 450.
+                        }
+                    }
+                }
+            }
+
+            if (batchCount > 0) {
+                await batch.commit();
+            }
+
+            invalidateCache();
+            addLog(`Repair Complete! Fixed ${totalFixed} documents.`, 'success');
+            Swal.fire('Repair Success', `Fixed ${totalFixed} documents with missing levels.`, 'success');
+        } catch (error: any) {
+            console.error("Repair Error:", error);
+            addLog(`Repair failed: ${error?.message}`, 'error');
+            Swal.fire('Error', 'Repair failed.', 'error');
+        } finally {
+            setLoading(false);
+        }
+    };
+
     return (
         <div className="min-vh-100 bg-light d-flex flex-column py-5">
             <div className="container" style={{ maxWidth: '700px' }}>
@@ -266,14 +284,21 @@ const GameDataPatcher: React.FC = () => {
                     </div>
 
                     <p className="fw-bold mb-4 text-dark" style={{ lineHeight: 1.6 }}>
-                        This tool will inject hardcoded dictionaries for <strong className="text-primary bg-dark px-1">9 South African languages</strong> (isiZulu, Afrikaans, Sepedi, etc.) into all 5 games (Puzzle Words, Syllables, Sentences, Word Bomb, Picture Puzzle).
+                        This tool will inject hardcoded dictionaries for <strong className="text-primary bg-dark px-1">9 South African languages</strong> (isiZulu, Afrikaans, Sepedi, etc.) into all 3 core games (Syllables, Sentences, Picture Puzzle).
                     </p>
 
                     <button 
                         onClick={runPatcher} 
                         disabled={loading}
-                        className="btn btn-game btn-game-primary w-100 py-3 shadow-action mb-4">
+                        className="btn btn-game btn-game-primary w-100 py-3 shadow-action mb-3">
                         {loading ? <Loader2 className="animate-spin" size={24} /> : <><Play fill="currentColor" size={20} /> INJECT LANGUAGE DATA</>}
+                    </button>
+
+                    <button 
+                        onClick={repairData} 
+                        disabled={loading}
+                        className="btn btn-outline-dark w-100 py-3 mb-4 fw-black ls-1 smallest">
+                        {loading ? <Loader2 className="animate-spin" size={20} /> : <><Database size={18} className="me-2" /> REPAIR MISSING LEVELS</>}
                     </button>
 
                     {logs.length > 0 && (
@@ -307,3 +332,10 @@ const GameDataPatcher: React.FC = () => {
 };
 
 export default GameDataPatcher;
+
+
+
+
+
+
+

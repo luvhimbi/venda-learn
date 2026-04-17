@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { db } from '../../services/firebaseConfig';
 import { collection, getDocs, writeBatch, doc } from 'firebase/firestore';
-import AdminNavbar from '../../components/AdminNavbar';
+import AdminNavbar from '../../components/shared/navigation/AdminNavbar';
 import { invalidateCache } from '../../services/dataCache';
 import Swal from 'sweetalert2';
 import { Trash2, RotateCcw, ShieldAlert, Loader2, Home } from 'lucide-react';
@@ -198,3 +198,11 @@ const SystemReset: React.FC = () => {
 };
 
 export default SystemReset;
+
+
+
+
+
+
+
+

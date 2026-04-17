@@ -1,6 +1,6 @@
 import { render } from '@testing-library/react';
 import { describe, it, expect } from 'vitest';
-import MascotAuthHeader from './MascotAuthHeader';
+import MascotAuthHeader from '../features/auth/components/MascotAuthHeader';
 
 describe('MascotAuthHeader Gamified Component', () => {
   it('renders the core SVG elements', () => {
@@ -20,3 +20,9 @@ describe('MascotAuthHeader Gamified Component', () => {
     expect(styleTag?.innerHTML).toContain('animation: scribble 0.3s infinite ease-in-out');
   });
 });
+
+
+
+
+
+

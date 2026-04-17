@@ -4,9 +4,9 @@ import { db } from '../../services/firebaseConfig';
 import { doc, setDoc, addDoc, collection, serverTimestamp, getDocs, query, orderBy } from 'firebase/firestore';
 
 import { useNavigate } from 'react-router-dom';
-import AdminNavbar from '../../components/AdminNavbar';
-import QuestionBuilder from '../../components/QuestionBuilder';
-import { invalidateCache } from '../../services/dataCache';
+import AdminNavbar from '../../components/shared/navigation/AdminNavbar';
+import QuestionBuilder from '../../components/forms/QuestionBuilder/QuestionBuilder';
+import { invalidateCache, incrementGlobalCacheVersion } from '../../services/dataCache';
 import useAutoSave from '../../hooks/useAutoSave';
 import Swal from 'sweetalert2';
 import { ArrowLeft, CloudCheck, RotateCcw, Plus, Book, Layers, Trash2, X, Rocket, GripVertical } from 'lucide-react';
@@ -285,6 +285,7 @@ const AddLesson: React.FC = () => {
 
             invalidateCache('lessons');
             invalidateCache('auditLogs');
+            await incrementGlobalCacheVersion();
             publishedRef.current = true;
             clearSaved();
 
@@ -562,7 +563,7 @@ const AddLesson: React.FC = () => {
                                 <span className="smallest text-muted fw-bold ls-1 d-block mb-3">{currentMl.questions.length} QUESTION{currentMl.questions.length !== 1 ? 'S' : ''}</span>
                                 <QuestionBuilder
                                     questions={currentMl.questions}
-                                    onChange={(qs) => updateMl('questions', qs)}
+                                    onChange={(qs: any[]) => updateMl('questions', qs)}
                                 />
                             </div>
                         </div>
@@ -731,6 +732,14 @@ const AddLesson: React.FC = () => {
     );
 };
 export default AddLesson;
+
+
+
+
+
+
+
+
 
 
 

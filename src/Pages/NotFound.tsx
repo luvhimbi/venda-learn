@@ -4,8 +4,8 @@ import { useNavigate } from 'react-router-dom';
 import { auth, db } from '../services/firebaseConfig';
 import { onAuthStateChanged } from 'firebase/auth';
 import { doc, getDoc } from 'firebase/firestore';
-import Mascot404 from "../components/Mascot404.tsx";
-import JuicyButton from "../components/JuicyButton.tsx";
+import Mascot404 from "../components/feedback/Mascot404/Mascot404";
+import JuicyButton from "../components/ui/JuicyButton/JuicyButton";
 
 const NotFound: React.FC = () => {
     const navigate = useNavigate();
@@ -94,4 +94,11 @@ const NotFound: React.FC = () => {
 };
 
 export default NotFound;
+
+
+
+
+
+
+
 

@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { useMachine } from '@xstate/react';
-import { gameRoomMachine } from '../../machines/gameRoomMachine';
+import { gameRoomMachine } from '../../app/machines/gameRoomMachine';
 import type { Question, MCQuestion, TFQuestion, FBQuestion, MPQuestion, LCQuestion } from '../../types/game';
 import ScorePopup from '../../components/Game/ScorePopup';
 import ExitModal from '../../components/Game/ExitModal';
@@ -12,7 +12,7 @@ import MatchPairsQuestion from '../../components/Game/MatchPairsQuestion';
 import ListenChooseQuestion from '../../components/Game/ListenChooseQuestion';
 import { useAudio } from '../../hooks/useAudio';
 import { useGameLogic } from '../../hooks/useGameLogic';
-import Mascot, { type MascotMood } from '../../components/Mascot';
+import Mascot, { type MascotMood } from '../../features/gamification/components/Mascot';
 import { useVisualJuice } from '../../hooks/useVisualJuice';
 import { updateStreak } from '../../services/streakUtils';
 import { HelpCircle, X, Bookmark, CheckCircle2, Volume2, Play, Users } from 'lucide-react';
@@ -831,3 +831,12 @@ const GameRoom: React.FC = () => {
 };
 
 export default GameRoom;
+
+
+
+
+
+
+
+
+

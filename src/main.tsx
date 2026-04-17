@@ -6,10 +6,15 @@ import "bootstrap/dist/css/bootstrap.min.css";
 // Bootstrap JS (for modals, dropdowns, etc.)
 import "bootstrap/dist/js/bootstrap.bundle.min.js"
 import './index.css'
-import App from './App.tsx'
+import App from './app/App.tsx'
 
 import { HelmetProvider } from 'react-helmet-async';
-import { ThemeProvider } from './contexts/ThemeContext.tsx';
+import { ThemeProvider } from './app/providers/contexts/ThemeContext.tsx';
+
+import { checkGlobalCacheBust } from './services/dataCache.ts';
+
+// Check for global cache bust on startup
+checkGlobalCacheBust();
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
@@ -27,3 +32,8 @@ if ('serviceWorker' in navigator) {
             .catch(err => console.log('Service Worker registration failed:', err));
     });
 }
+
+
+
+
+

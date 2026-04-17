@@ -1,6 +1,6 @@
-import React, {useState, useEffect, useMemo} from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Puzzle, Image, Layout, FileText, Gamepad2, Bomb, ArrowRight, Trophy, X } from 'lucide-react';
+import { Image, Layout, FileText, Gamepad2, ArrowRight, Trophy, X } from 'lucide-react';
 import { popupService } from '../../services/popupService';
 import { fetchUserData, fetchLanguages, warmupGameCache } from '../../services/dataCache';
 import { onAuthStateChanged } from "firebase/auth";
@@ -12,6 +12,7 @@ const GamesDashboard: React.FC = () => {
     const [isLoggedIn, setIsLoggedIn] = useState<boolean | null>(null);
     const [preferredLanguage, setPreferredLanguage] = useState<any>(null);
     const [loading, setLoading] = useState(true);
+    const [gameLevels, setGameLevels] = useState<Record<string, number>>({});
 
     const handleLoginNagger = () => {
         popupService.confirm(
@@ -32,10 +33,13 @@ const GamesDashboard: React.FC = () => {
                     fetchUserData(),
                     fetchLanguages()
                 ]);
-                
-                if (uData && langs) {
-                    const lang = langs.find((l: any) => l.id === uData.preferredLanguageId);
-                    setPreferredLanguage(lang || { name: 'Language', id: 'default' });
+
+                if (uData) {
+                    setGameLevels(uData.gameLevels || {});
+                    if (langs) {
+                        const lang = langs.find((l: any) => l.id === uData.preferredLanguageId);
+                        setPreferredLanguage(lang || { name: 'Language', id: 'default' });
+                    }
                 }
             }
             setLoading(false);
@@ -46,66 +50,50 @@ const GamesDashboard: React.FC = () => {
 
     const games = useMemo(() => {
         const langName = preferredLanguage?.name || 'Local';
-        
+
         return [
-            {
-                id: 'word-puzzle',
-                title: `Guess the ${langName} Word`,
-                description: `Guess the 5-letter target word. A fun way to test your ${langName} vocabulary.`,
-                icon: <Puzzle size={48} />,
-                route: '/word-puzzle',
-                color: 'var(--venda-yellow)',
-                gradient: 'linear-gradient(135deg, #FACC15 0%, #EAB308 100%)'
-            },
-            {
-                id: 'picture-puzzle',
-                title: `Picture Match (${langName})`,
-                description: `Race against the clock and match pictures to the correct ${langName} words.`,
-                icon: <Image size={48} />,
-                route: '/picture-puzzle',
-                color: 'var(--game-amber)',
-                gradient: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)'
-            },
             {
                 id: 'syllable-builder',
                 title: `${langName} Syllables`,
+                level: gameLevels.syllable || 1,
                 description: `Learn how to build ${langName} words! Arrange the blocks in the correct order.`,
-                icon: <Layout size={48} />,
+                icon: <Layout size={40} />,
                 route: '/syllable-builder',
                 color: 'var(--venda-blue)',
                 gradient: 'linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)'
             },
             {
+                id: 'picture-puzzle',
+                title: `Picture Match (${langName})`,
+                level: gameLevels.picture || 1,
+                description: `Race against the clock and match pictures to the correct ${langName} words.`,
+                icon: <Image size={40} />,
+                route: '/picture-puzzle',
+                color: 'var(--game-amber)',
+                gradient: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)'
+            },
+            {
                 id: 'sentence-scramble',
                 title: 'Sentence Scramble',
+                level: gameLevels.sentence || 1,
                 description: `Unscramble the words to form correct ${langName} sentences accurately.`,
-                icon: <FileText size={48} />,
+                icon: <FileText size={40} />,
                 route: '/game/scramble',
                 color: 'var(--venda-green)',
                 gradient: 'linear-gradient(135deg, #10B981 0%, #059669 100%)'
             },
             {
-                id: 'word-bomb',
-                title: `${langName} Word Bomb 💣`,
-                description: `English words fall from the sky — type the matching ${langName} translation fast!`,
-                icon: <Bomb size={48} />,
-                route: '/word-bomb',
-                color: 'var(--venda-red)',
-                gradient: 'linear-gradient(135deg, #ef4444 0%, #b91c1c 100%)'
-            },
-            {
                 id: 'morabaraba',
                 title: 'Morabaraba Strategy',
                 description: 'The ancient South African "Board of 12 Cows". Outsmart the CPU or a friend in this classic game.',
-                icon: <Trophy size={48} />,
+                icon: <Trophy size={40} />,
                 route: '/morabaraba',
-                color: 'var(--venda-dark)',
-                gradient: 'linear-gradient(135deg, #1e293b 0%, #0f172a 100%)'
+                color: 'var(--venda-purple)',
+                gradient: 'linear-gradient(135deg, #a855f7 0%, #7e22ce 100%)'
             }
         ];
-    }, [preferredLanguage]);
+    }, [preferredLanguage, gameLevels]);
 
-    // Shuffle games on each visit so users discover all games
     const shuffledGames = useMemo(() => {
         const arr = [...games];
         for (let i = arr.length - 1; i > 0; i--) {
@@ -148,8 +136,8 @@ const GamesDashboard: React.FC = () => {
     }
 
     return (
-        <div className="min-vh-100 pt-4 pb-5 bg-theme-base" style={{ 
-            backgroundImage: 'url("data:image/svg+xml,%3Csvg width=\'20\' height=\'20\' viewBox=\'0 0 20 20\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cg fill=\'currentColor\' fill-opacity=\'0.02\' fill-rule=\'evenodd\'%3E%3Ccircle cx=\'3\' cy=\'3\' r=\'1\'/%3E%3C/g%3E%3C/svg%3E")' 
+        <div className="min-vh-100 pt-4 pb-5 bg-theme-base" style={{
+            backgroundImage: 'url("data:image/svg+xml,%3Csvg width=\'20\' height=\'20\' viewBox=\'0 0 20 20\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cg fill=\'currentColor\' fill-opacity=\'0.02\' fill-rule=\'evenodd\'%3E%3Ccircle cx=\'3\' cy=\'3\' r=\'1\'/%3E%3C/g%3E%3C/svg%3E")'
         }}>
             <div className="container">
                 <div className="mb-4 d-flex align-items-center">
@@ -187,14 +175,21 @@ const GamesDashboard: React.FC = () => {
                                         className="py-4 d-flex align-items-center justify-content-center text-white border-bottom border-theme-main border-4"
                                         style={{ background: game.gradient }}
                                     >
-                                        <div className="p-3 rounded-circle border border-white border-2 d-flex align-items-center justify-content-center" 
-                                             style={{ backgroundColor: 'rgba(255, 255, 255, 0.2)' }}>
+                                        <div className="p-3 rounded-circle border border-white border-2 d-flex align-items-center justify-content-center"
+                                            style={{ backgroundColor: 'rgba(255, 255, 255, 0.2)' }}>
                                             {React.cloneElement(game.icon as React.ReactElement, { color: '#ffffff', strokeWidth: 2.5, size: 40 } as any)}
                                         </div>
                                     </div>
                                     <div className="p-3 flex-grow-1 bg-theme-card d-flex flex-column">
-                                        <h3 className="fw-black mb-1 text-theme-main uppercase ls-1" style={{ fontSize: '1.25rem' }}>{game.title}</h3>
-                                        <p className="small fw-bold text-theme-muted mb-3 flex-grow-1">{game.description}</p>
+                                        <div className="d-flex justify-content-between align-items-start mb-1">
+                                            <h3 className="fw-black mb-0 text-theme-main uppercase ls-1" style={{ fontSize: '1.1rem' }}>{game.title}</h3>
+                                            {(game as any).level && (
+                                                <span className="badge bg-dark text-white smallest fw-black px-2 py-1 rounded" style={{ letterSpacing: '0.5px', fontSize: '10px' }}>
+                                                    LVL {(game as any).level}
+                                                </span>
+                                            )}
+                                        </div>
+                                        <p className="small fw-bold text-theme-muted mb-3 flex-grow-1" style={{ fontSize: '0.8rem', lineHeight: '1.3' }}>{game.description}</p>
                                         <button className="btn btn-game btn-game-primary w-100 py-3 smallest fw-black">
                                             PLAY NOW <ArrowRight size={18} className="ms-2" strokeWidth={3} />
                                         </button>
@@ -222,6 +217,13 @@ const GamesDashboard: React.FC = () => {
 };
 
 export default GamesDashboard;
+
+
+
+
+
+
+
 
 
 

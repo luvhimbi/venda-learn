@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Users, Book, Zap, ShieldCheck, Loader2, Gamepad2 } from 'lucide-react';
-import AdminNavbar from '../../components/AdminNavbar';
+import AdminNavbar from '../../components/shared/navigation/AdminNavbar';
 import { fetchAllUsers, fetchLessons } from '../../services/dataCache';
 
 const AdminDashboard: React.FC = () => {
@@ -251,6 +251,14 @@ const AdminDashboard: React.FC = () => {
 };
 
 export default AdminDashboard;
+
+
+
+
+
+
+
+
 
 
 
