@@ -10,7 +10,8 @@ export const useAudio = () => {
     const speakVenda = useCallback((text: string) => {
         setIsPlayingAudio(true);
         window.speechSynthesis.cancel();
-        const u = new SpeechSynthesisUtterance(text);
+        // Convert to lowercase to prevent TTS engines from spelling out fully capitalized strings
+        const u = new SpeechSynthesisUtterance(text.toLowerCase());
         u.rate = 0.8;
         u.onend = () => setIsPlayingAudio(false);
         window.speechSynthesis.speak(u);

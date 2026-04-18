@@ -16,9 +16,9 @@ const TrueFalseQuestion: React.FC<Props> = ({ q, selected, status, onSelect }) =
         if (isSelected) cls = isCorrect ? 'btn-success border-success text-white' : 'btn-danger border-danger text-white';
         else if (selected !== null && isCorrect && status === 'wrong') cls = 'btn-success border-success text-white';
         return (
-            <button className={`btn btn-lg py-4 fw-bold rounded-pill flex-fill ${cls}`}
+            <button className={`btn py-3 fw-bold rounded-pill flex-fill ${cls}`}
                 onClick={(e) => { e.stopPropagation(); onSelect(val); }} disabled={selected !== null}>
-                <span className="fs-3 text-uppercase ls-1">{label}</span>
+                <span className="text-uppercase ls-1" style={{ fontSize: '1.1rem' }}>{label}</span>
             </button>
         );
     };

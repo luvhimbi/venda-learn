@@ -14,13 +14,13 @@ import { useAudio } from '../../hooks/useAudio';
 import { useGameLogic } from '../../hooks/useGameLogic';
 import Mascot, { type MascotMood } from '../../features/gamification/components/Mascot';
 import { useVisualJuice } from '../../hooks/useVisualJuice';
-import { updateStreak } from '../../services/streakUtils';
 import { HelpCircle, X, Bookmark, CheckCircle2, Volume2, Play, Users } from 'lucide-react';
 import { db, auth } from '../../services/firebaseConfig';
-import { doc, updateDoc, arrayUnion } from 'firebase/firestore';
+import { doc, updateDoc } from 'firebase/firestore';
 import { onAuthStateChanged } from 'firebase/auth';
 import { type Difficulty } from "../../services/scoringUtils.ts";
-import { fetchLessons, fetchUserData, refreshUserData, invalidateCache, getMicroLessons, awardPoints } from '../../services/dataCache';
+import { fetchLessons, fetchUserData, getMicroLessons } from '../../services/dataCache';
+import { progressTracker } from '../../services/progressTracker';
 import Swal from 'sweetalert2';
 
 const MASCOT_CHEERS = [
@@ -83,6 +83,8 @@ const GameRoom: React.FC = () => {
     const [sessionStartTime] = useState(Date.now());
     const [hasPlayedWinSound, setHasPlayedWinSound] = useState(false);
     const [finishedTime, setFinishedTime] = useState<number | null>(null);
+    const [correctSessionWords, setCorrectSessionWords] = useState<string[]>([]);
+    const [wrongSessionWords, setWrongSessionWords] = useState<string[]>([]);
     const { playCorrect, playWrong, triggerShake, playWin, playWinner } = useVisualJuice();
 
     const handleFinishQuiz = async (finalScore: number, _finalCorrect: number, totalDuration: number) => {
@@ -93,84 +95,54 @@ const GameRoom: React.FC = () => {
             triggerConfetti();
         }
 
-        if (auth.currentUser) {
-            const userRef = doc(db, "users", auth.currentUser.uid);
-            const currentData = await refreshUserData();
-            if (currentData) {
-                const mlId = microLessonId || lesson?.id || `${lessonId}__ml_0`;
-                const courseId = lesson?.courseId || lessonId;
-                const totalSessionTime = finishedTime || Math.floor((Date.now() - sessionStartTime) / 1000);
-                const quizDuration = totalDuration || 0;
-                const studyDuration = Math.max(0, totalSessionTime - quizDuration);
+        if (auth.currentUser && lessonId) {
+            const streakResult = await progressTracker.submitSession({
+                lessonId: lessonId,
+                microLessonId: microLessonId || `${lessonId}__ml_0`,
+                courseId: lesson?.courseId || lessonId,
+                isFirstTime,
+                finalScore,
+                totalSessionTime: finishedTime || Math.floor((Date.now() - sessionStartTime) / 1000),
+                quizDuration: totalDuration || 0,
+                correctWords: correctSessionWords,
+                wrongWords: wrongSessionWords
+            });
 
-                if (isFirstTime) {
-                    await awardPoints(finalScore);
-
-                    const updateData: any = {
-                        completedLessons: arrayUnion(mlId),
-                        lastLessonId: null,
-                        [`microLessonProgress.${mlId}`]: {
-                            completed: true,
-                            score: finalScore,
-                            quizDuration: quizDuration,
-                            studyDuration: studyDuration,
-                            totalDuration: totalSessionTime,
-                            timestamp: new Date().toISOString()
-                        },
-                    };
-
-                    const lessons = await fetchLessons();
-                    const foundCourse = lessons.find((l: any) => l.id === lessonId);
-                    if (foundCourse) {
-                        const allMls = getMicroLessons(foundCourse);
-                        const alreadyCompleted = currentData.completedLessons || [];
-                        const nowCompleted = [...alreadyCompleted, mlId];
-                        const allMlsDone = allMls.every((ml: any) => nowCompleted.includes(ml.id));
-                        if (allMlsDone) updateData.completedCourses = arrayUnion(courseId);
+            if (streakResult?.isNewDay) {
+                setTimeout(() => {
+                    if (streakResult.freezeUsed) {
+                        Swal.fire({
+                            title: 'Streak Frozen!',
+                            text: `A freeze was used to protect your ${streakResult.streak} day streak!`,
+                            icon: 'info',
+                            imageUrl: 'https://cdn-icons-png.flaticon.com/512/2913/2913524.png',
+                            imageWidth: 80,
+                            confirmButtonColor: '#0EA5E9',
+                            confirmButtonText: 'Whew!',
+                            customClass: { popup: 'rounded-4' }
+                        });
+                    } else if (streakResult.wasReset) {
+                        Swal.fire({
+                            title: 'New Streak!',
+                            text: `Starting fresh today. Keep it up!`,
+                            icon: 'info',
+                            confirmButtonColor: '#64748B',
+                            confirmButtonText: 'Let us go!',
+                            customClass: { popup: 'rounded-4' }
+                        });
+                    } else {
+                        Swal.fire({
+                            title: 'Streak Maintained!',
+                            text: `${streakResult.streak} Days Strong!`,
+                            icon: 'success',
+                            imageUrl: 'https://cdn-icons-png.flaticon.com/512/785/785116.png',
+                            imageWidth: 80,
+                            confirmButtonColor: '#EF4444',
+                            confirmButtonText: 'Let us go!',
+                            customClass: { popup: 'rounded-4' }
+                        });
                     }
-                    await updateDoc(userRef, updateData);
-                }
-
-                const streakResult = await updateStreak(auth.currentUser.uid);
-                invalidateCache(`user_${auth.currentUser.uid}`);
-                invalidateCache('topLearners');
-
-                if (streakResult?.isNewDay) {
-                    setTimeout(() => {
-                        if (streakResult.freezeUsed) {
-                            Swal.fire({
-                                title: 'Streak Frozen!',
-                                text: `A freeze was used to protect your ${streakResult.streak} day streak!`,
-                                icon: 'info',
-                                imageUrl: 'https://cdn-icons-png.flaticon.com/512/2913/2913524.png',
-                                imageWidth: 80,
-                                confirmButtonColor: '#0EA5E9',
-                                confirmButtonText: 'Whew!',
-                                customClass: { popup: 'rounded-4' }
-                            });
-                        } else if (streakResult.wasReset) {
-                            Swal.fire({
-                                title: 'New Streak!',
-                                text: `Starting fresh today. Keep it up!`,
-                                icon: 'info',
-                                confirmButtonColor: '#64748B',
-                                confirmButtonText: 'Let us go!',
-                                customClass: { popup: 'rounded-4' }
-                            });
-                        } else {
-                            Swal.fire({
-                                title: 'Streak Maintained!',
-                                text: `${streakResult.streak} Days Strong!`,
-                                icon: 'success',
-                                imageUrl: 'https://cdn-icons-png.flaticon.com/512/785/785116.png',
-                                imageWidth: 80,
-                                confirmButtonColor: '#EF4444',
-                                confirmButtonText: 'Let us go!',
-                                customClass: { popup: 'rounded-4' }
-                            });
-                        }
-                    }, 1300);
-                }
+                }, 1300);
             }
             localStorage.removeItem(storageKey);
         }
@@ -204,7 +176,7 @@ const GameRoom: React.FC = () => {
     const {
         currentQIndex, setCurrentQIndex,
         score,
-        lastScoreResult,
+        lastScoreResult, setLastScoreResult,
         answerStatus, setAnswerStatus,
         showExplanation, setShowExplanation,
         scoreBreakdown,
@@ -213,7 +185,6 @@ const GameRoom: React.FC = () => {
         handleCorrect: onCorrectAnswer,
         handleWrong: onWrongAnswer,
         awardConsolation,
-        moveNext: nextQuestion,
         reset: resetGameLogic
     } = useGameLogic({
         difficulty: (lesson?.difficulty as Difficulty) || 'Easy',
@@ -221,8 +192,12 @@ const GameRoom: React.FC = () => {
         initialState: initialPersistentState?.quizState,
         onFinish: handleFinishQuiz,
         onCorrect: () => {
-            setSelectedOption(null);
-            setSelectedTF(null);
+            const currentQ = lesson?.questions?.[currentQIndex];
+            const word = currentQ?.nativeWord || currentQ?.word || currentQ?.tshivenda || currentQ?.venda;
+            if (word) {
+                setCorrectSessionWords(prev => [...prev, word]);
+            }
+            
             setMascotMood('excited');
             playCorrect();
             setMascotCheerText(MASCOT_CHEERS[Math.floor(Math.random() * MASCOT_CHEERS.length)]);
@@ -233,6 +208,14 @@ const GameRoom: React.FC = () => {
             }, 1100);
         },
         onWrong: () => {
+            const currentQ = lesson?.questions?.[currentQIndex];
+            if (currentQ && !currentQ._isRepeat) {
+                const word = currentQ.nativeWord || currentQ.word || currentQ.tshivenda || currentQ.venda;
+                if (word) {
+                    setWrongSessionWords(prev => [...prev, word]);
+                }
+            }
+
             setMascotMood('sad');
             playWrong();
             const arena = document.getElementById('wb-arena-shake');
@@ -377,13 +360,36 @@ const GameRoom: React.FC = () => {
         answer.toLowerCase() === correctAnswer.toLowerCase() ? onCorrectAnswer() : onWrongAnswer();
     };
 
+    const handleQuizAdvance = (currentScore: number, currentCorrect: number) => {
+        setAnswerStatus(null);
+        setShowExplanation(false);
+        setSelectedOption(null);
+        setSelectedTF(null);
+        setLastScoreResult(null);
+
+        // Strict Rule: Lesson must appear first, then a quiz.
+        // After a quiz finishes, immediately attempt to show the next lesson slide
+        if (lesson.slides && currentSlide + 1 < lesson.slides.length) {
+            send({ type: 'CONTINUE_STUDY' });
+            const nextSlideIndex = currentSlide + 1;
+            setCurrentSlide(nextSlideIndex);
+            saveProgress(nextSlideIndex, 'STUDY');
+        } 
+        // If we ran out of slides but there are still questions
+        else if (lesson.questions && currentQIndex + 1 < lesson.questions.length) {
+            setCurrentQIndex((prev: number) => prev + 1);
+        } else {
+            handleFinishQuiz(currentScore, currentCorrect, Math.floor((Date.now() - sessionStartTime) / 1000));
+        }
+    };
+
     const handleMatchComplete = (allCorrect: boolean) => {
         if (allCorrect) {
             onCorrectAnswer();
         } else {
             setAnswerStatus('correct');
             awardConsolation();
-            setTimeout(() => nextQuestion(), 1200);
+            setTimeout(() => handleQuizAdvance(score, correctCount), 1200);
         }
     };
 
@@ -438,7 +444,7 @@ const GameRoom: React.FC = () => {
                                     {showSavedHint ? 'PROGRESS SAVED!' : 'SAVE SESSION'}
                                 </button>
                             ) : (
-                                <span className="smallest fw-black text-danger uppercase ls-1">{streak > 1 ? `🔥 ${streak} STREAK` : ''}</span>
+                                <span className="smallest fw-black text-danger uppercase ls-1"></span>
                             )}
                         </div>
                     </div>
@@ -492,13 +498,6 @@ const GameRoom: React.FC = () => {
                                     </div>
                                 </div>
 
-                                {isFirstTime && scoreBreakdown.streakBonus > 0 && (
-                                    <div className="mt-4 pt-3 border-top border-theme-main border-2 d-flex justify-content-center gap-3">
-                                        <span className="badge bg-danger text-white border-0 py-2 px-3 fw-black rounded-pill ls-1 smallest animate__animated animate__pulse animate__infinite">
-                                            🔥 STREAK BONUS: +{scoreBreakdown.streakBonus} XP
-                                        </span>
-                                    </div>
-                                )}
                             </div>
 
                             <div className="px-md-4">
@@ -606,7 +605,7 @@ const GameRoom: React.FC = () => {
                                             }
                                         }}
                                         style={{ flex: 2 }}>
-                                        {lesson.questions && lesson.questions.length > currentSlide ? 'TAKE QUIZ' : 'NEXT SLIDE'}
+                                        NEXT SLIDE
                                     </button>
                                 ) : (
                                     <button className="btn btn-game btn-game-dark px-3 fw-black ls-1 flex-grow-2 shadow-action-light"
@@ -625,7 +624,7 @@ const GameRoom: React.FC = () => {
                                                 setMascotMood('excited');
                                             }
                                         }}>
-                                        {lesson.questions?.length > currentSlide ? 'TAKE QUIZ' : 'FINISH'}
+                                        FINISH
                                     </button>
                                 )}
                             </div>
@@ -689,17 +688,13 @@ const GameRoom: React.FC = () => {
                         <div className="container py-3" style={{ maxWidth: '650px' }}>
                             <div className="animate__animated animate__fadeIn px-2 w-100">
                                 <div className="brutalist-card p-3 p-md-4 w-100 text-center shadow-action">
-                                    <div className="d-flex justify-content-center mb-3">
-                                        <span className="badge brutalist-card--sm bg-theme-surface text-theme-main border-theme-main border-2 p-3 smallest fw-black uppercase ls-1 d-flex align-items-center gap-2">
+                                    <div className="d-flex justify-content-center mb-2">
+                                        <span className="badge brutalist-card--sm bg-theme-surface text-theme-main border-theme-main border-2 px-2 py-1 smallest fw-black uppercase ls-1 d-flex align-items-center gap-1" style={{ fontSize: '0.6rem' }}>
                                             {currentLabel.icon} {currentLabel.label}
                                         </span>
                                     </div>
 
-                                    <div className="mb-3 d-flex justify-content-center">
-                                        <Mascot width="80px" height="80px" mood={mascotMood} />
-                                    </div>
-
-                                    <h2 className="fw-black text-theme-main mb-4 ls-tight uppercase" style={{ fontSize: 'clamp(1.5rem, 5vw, 2.5rem)' }}>{q.question}</h2>
+                                    <h2 className="fw-black text-theme-main mb-3 ls-tight uppercase" style={{ fontSize: 'clamp(1.1rem, 4vw, 1.6rem)' }}>{q.question}</h2>
 
                                     <div className="w-100 text-start pb-5" style={{ marginBottom: showExplanation ? '200px' : '0', transition: 'margin-bottom 0.3s' }}>
                                         {renderQuestion()}
@@ -716,37 +711,28 @@ const GameRoom: React.FC = () => {
                             <div className="container py-2 py-md-3" style={{ maxWidth: '650px' }}>
                                 {answerStatus === 'correct' ? (
                                     <div className="d-flex flex-column gap-2">
-                                        <div className="d-flex align-items-center gap-2 px-2">
-                                            <div className="bg-white brutalist-card--sm rounded-circle d-flex align-items-center justify-content-center" style={{ width: 40, height: 40 }}>
-                                                <CheckCircle2 size={24} color="#16a34a" />
+                                        <div className="d-flex align-items-center gap-3 px-1">
+                                            <Mascot width="50px" height="50px" mood="excited" />
+                                            <div className="flex-grow-1 p-2 rounded-3" style={{ backgroundColor: 'rgba(255,255,255,0.3)', border: '2px solid rgba(22,163,106,0.3)' }}>
+                                                <h2 className="fw-black mb-0 ls-tight uppercase" style={{ color: '#16a34a', fontSize: '1rem' }}>You got it! 🎉</h2>
+                                                <p className="smallest fw-bold mb-0 text-uppercase ls-1" style={{ color: '#16a34a', opacity: 0.8, fontSize: '0.55rem' }}>Keep this energy going!</p>
                                             </div>
-                                            <h2 className="fw-black mb-0 ls-tight uppercase" style={{ color: '#16a34a', fontSize: '1.1rem' }}>Perfect!</h2>
                                         </div>
                                         <button className="btn btn-game w-100 py-2 text-white border-0 mt-1"
                                             style={{ backgroundColor: '#22c55e', boxShadow: '0 4px 0 #16a34a', fontSize: '1rem' }}
                                             onClick={() => {
-                                                if (lesson.slides && lesson.slides.length > currentSlide + 1) {
-                                                    send({ type: 'CONTINUE_STUDY' });
-                                                    const nextSlideIndex = currentSlide + 1;
-                                                    setCurrentSlide(nextSlideIndex);
-                                                    saveProgress(nextSlideIndex, 'STUDY');
-                                                    nextQuestion(score, correctCount);
-                                                } else {
-                                                    nextQuestion(score, correctCount);
-                                                }
+                                                handleQuizAdvance(score, correctCount);
                                             }}>
                                             CONTINUE QUEST
                                         </button>
                                     </div>
                                 ) : (
                                     <div className="d-flex flex-column gap-2">
-                                        <div className="d-flex align-items-center gap-2 px-2">
-                                            <div className="bg-white brutalist-card--sm rounded-circle d-flex align-items-center justify-content-center" style={{ width: 40, height: 40 }}>
-                                                <HelpCircle size={24} color="#f59e0b" />
-                                            </div>
-                                            <div>
-                                                <h2 className="fw-black mb-0 ls-tight uppercase" style={{ color: 'var(--color-text)', fontSize: '1.1rem' }}>Nice Try!</h2>
-                                                <p className="smallest fw-black ls-1 mb-0 text-uppercase" style={{ color: 'var(--color-text)', opacity: 0.7, fontSize: '0.55rem' }}>You're almost there, let's learn!</p>
+                                        <div className="d-flex align-items-center gap-3 px-1">
+                                            <Mascot width="50px" height="50px" mood="sad" />
+                                            <div className="flex-grow-1 p-2 rounded-3" style={{ backgroundColor: 'rgba(255,255,255,0.2)', border: '2px solid rgba(245,158,11,0.3)' }}>
+                                                <h2 className="fw-black mb-0 ls-tight uppercase" style={{ color: 'var(--color-text)', fontSize: '1rem' }}>Almost there!</h2>
+                                                <p className="smallest fw-bold mb-0 text-uppercase ls-1" style={{ color: 'var(--color-text)', opacity: 0.7, fontSize: '0.55rem' }}>Don't worry, mistakes help you learn!</p>
                                             </div>
                                         </div>
 
@@ -781,7 +767,7 @@ const GameRoom: React.FC = () => {
                                                     style={{ backgroundColor: '#64748b', boxShadow: '0 4px 0 #475569', fontSize: '0.85rem' }}
                                                     onClick={() => {
                                                         const newScore = isFirstTime ? awardConsolation() : score;
-                                                        nextQuestion(newScore);
+                                                        handleQuizAdvance(newScore, correctCount);
                                                     }}>
                                                     SKIP FOR NOW
                                                 </button>

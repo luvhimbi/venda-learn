@@ -14,11 +14,11 @@ const ListenChooseQuestion: React.FC<Props> = ({ q, selected, status, onSelect, 
     useEffect(() => { speakNative(q.nativeWord); }, []);
     return (
         <div>
-            <button className="btn btn-game-white border-dark border-3 rounded-pill px-5 py-3 mb-4 fw-black ls-1 smallest"
+            <button className="btn btn-game-white border-dark border-3 rounded-pill px-4 py-2 mb-3 fw-black ls-1 smallest"
                 onClick={() => speakNative(q.nativeWord)}>
-                <i className="bi bi-volume-up-fill fs-3 me-2"></i> PLAY AGAIN
+                <i className="bi bi-volume-up-fill fs-5 me-2"></i> PLAY AGAIN
             </button>
-            <div className="d-grid gap-3 mt-2">
+            <div className="d-grid gap-2 mt-1">
                 {q.options.map(opt => {
                     const isCorrect = opt === q.correctAnswer;
                     const isSelected = selected === opt;
@@ -26,7 +26,7 @@ const ListenChooseQuestion: React.FC<Props> = ({ q, selected, status, onSelect, 
                     if (isSelected) cls = isCorrect ? 'btn-success border-success text-white' : 'btn-danger border-danger text-white';
                     else if (selected && isCorrect && status === 'wrong') cls = 'btn-success border-success text-white opacity-75';
                     return (
-                        <button key={opt} className={`btn btn-lg py-4 fw-bold rounded-4 ${cls}`}
+                        <button key={opt} className={`btn py-3 fw-bold rounded-4 ${cls}`} style={{ fontSize: '0.95rem' }}
                             onClick={() => onSelect(opt)} disabled={!!selected}>
                             {opt}
                         </button>

@@ -16,17 +16,17 @@ const FillBlankQuestion: React.FC<Props> = ({ q, onSubmit, status }) => {
             <div className="d-flex gap-2">
                 <input
                     type="text"
-                    className={`form-control form-control-lg rounded-3 fw-bold text-center ${submitted ? (status === 'correct' ? 'border-success' : 'border-danger') : ''}`}
+                    className={`form-control rounded-3 fw-bold text-center ${submitted ? (status === 'correct' ? 'border-success' : 'border-danger') : ''}`}
                     placeholder="Type your answer…"
                     value={input}
                     onChange={e => setInput(e.target.value)}
                     disabled={submitted}
                     onKeyDown={e => { if (e.key === 'Enter' && input.trim()) onSubmit(input.trim()); }}
-                    style={{ borderWidth: 2 }}
+                    style={{ borderWidth: 2, fontSize: '0.95rem', padding: '12px' }}
                 />
             </div>
             {!submitted && (
-                <button className="btn game-btn-primary w-100 py-3 fw-bold ls-1 mt-3"
+                <button className="btn game-btn-primary w-100 py-2 fw-bold ls-1 mt-3" style={{ fontSize: '0.95rem' }}
                     disabled={!input.trim()}
                     onClick={() => onSubmit(input.trim())}>
                     CHECK ANSWER

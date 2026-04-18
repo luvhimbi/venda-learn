@@ -14,7 +14,6 @@ import Profile from "../Pages/Auth/Profile";
 import Settings from "../Pages/Auth/Settings";
 import Muvhigo from "../Pages/Admin/Muvhigo";
 import GameRoom from "../Pages/Games/GameRoom";
-import DailyWordPage from "../Pages/Learning/DailyWordPage";
 import Courses from "../Pages/Learning/Courses";
 import PrivacyPolicy from "../Pages/Policy/PrivacyPolicy";
 import TermsOfUse from "../Pages/Policy/TermsOfUse";
@@ -30,12 +29,12 @@ import AddLesson from "../Pages/Admin/AddLesson";
 import AdminLessons from "../Pages/Admin/AdminLesson";
 import AdminUsers from '../Pages/Admin/AdminUsers';
 import AdminAuditLog from "../Pages/Admin/AdminAuditLog";
-import AdminDailyWords from "../Pages/Admin/AdminDailyWords";
 import SystemReset from "../Pages/Admin/SystemReset";
 import GamesDashboard from "../Pages/Games/GamesDashboard";
 import PicturePuzzle from "../Pages/Games/PicturePuzzle";
 import SyllableBuilder from "../Pages/Games/SyllableBuilder";
 import SentenceScramble from "../Pages/Games/SentenceScramble";
+import WeakVocabQuiz from "../Pages/Games/WeakVocabQuiz";
 import AdminLanguages from "../Pages/Admin/AdminLanguages";
 import AdminPicturePuzzle from "../Pages/Admin/AdminPicturePuzzle";
 import AdminSyllableBuilder from "../Pages/Admin/AdminSyllableBuilder";
@@ -64,7 +63,7 @@ const AppContent: React.FC = () => {
     const location = useLocation();
     const isAdminPath = location.pathname.startsWith('/admin');
     const isAuthPath = ['/login', '/register', '/reset-password', '/onboarding'].includes(location.pathname);
-    const gamePaths = ['/game/', '/picture-puzzle', '/syllable-builder', '/morabaraba'];
+    const gamePaths = ['/game/', '/picture-puzzle', '/syllable-builder', '/morabaraba', '/weak-vocab'];
     const isGameRoomPath = gamePaths.some(path => location.pathname.startsWith(path));
     const isStandalonePath = isAuthPath || isGameRoomPath;
     const [user, setUser] = useState<any>(null);
@@ -132,12 +131,12 @@ const AppContent: React.FC = () => {
                         <Route path="/reset-password" element={<ResetPassword />} />
                         <Route path="/muvhigo" element={<Muvhigo />} />
                         <Route path="/game/:lessonId/:microLessonId?" element={<GameRoom />} />
-                        <Route path="/word-of-the-day" element={<DailyWordPage />} />
                         <Route path="/mitambo" element={<GamesDashboard />} />
                         <Route path="/morabaraba" element={<Morabaraba />} />
                         <Route path="/picture-puzzle" element={<PicturePuzzle />} />
                         <Route path="/syllable-builder" element={<SyllableBuilder />} />
                         <Route path="/game/scramble" element={<SentenceScramble />} />
+                        <Route path="/weak-vocab" element={<WeakVocabQuiz />} />
                         <Route path="/courses" element={<Courses />} />
                         <Route path="/profile" element={<Profile />} />
                         <Route path="/settings" element={<Settings />} />
@@ -227,8 +226,7 @@ const AppContent: React.FC = () => {
                         />
 
                         {/* Manage Student Records */}
-                        <Route
-                            path="/admin/users"
+                        <Route path="/admin/users"
                             element={
                                 <AdminRoute>
                                     <AdminUsers />
@@ -236,7 +234,6 @@ const AppContent: React.FC = () => {
                             }
                         />
                         <Route path="/admin/logs" element={<AdminAuditLog />} />
-                        <Route path="/admin/daily-words" element={<AdminRoute><AdminDailyWords /></AdminRoute>} />
 
                         {/* History Management */}
                         <Route path="/admin/languages" element={<AdminRoute><AdminLanguages /></AdminRoute>} />

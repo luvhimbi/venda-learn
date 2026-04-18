@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Image, Layout, FileText, Gamepad2, ArrowRight, Trophy, X } from 'lucide-react';
+import { Image, Layout, FileText, Gamepad2, ArrowRight, Trophy, X, Target } from 'lucide-react';
 import { popupService } from '../../services/popupService';
 import { fetchUserData, fetchLanguages, warmupGameCache } from '../../services/dataCache';
 import { onAuthStateChanged } from "firebase/auth";
@@ -81,6 +81,15 @@ const GamesDashboard: React.FC = () => {
                 route: '/game/scramble',
                 color: 'var(--venda-green)',
                 gradient: 'linear-gradient(135deg, #10B981 0%, #059669 100%)'
+            },
+            {
+                id: 'weak-vocab',
+                title: 'Weak Vocab Quiz',
+                description: `Target your weakest ${langName} words with a focused review quiz to boost mastery.`,
+                icon: <Target size={40} />,
+                route: '/weak-vocab',
+                color: '#EF4444',
+                gradient: 'linear-gradient(135deg, #EF4444 0%, #DC2626 100%)'
             },
             {
                 id: 'morabaraba',

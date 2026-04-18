@@ -314,28 +314,6 @@ export const fetchTopLearnersByWeek = async (count = 20): Promise<any[]> => {
     }
 };
 
-export const fetchDailyWord = async (): Promise<any> => {
-    const today = new Date().toISOString().split('T')[0];
-    const stored = localStorage.getItem('dailyWord_record');
-    if (stored) {
-        const record = JSON.parse(stored);
-        if (record.date === today) return record.word;
-    }
-    let allWords = getCached<any[]>('allDailyWords').data;
-    if (!allWords) {
-        const snap = await getDocs(collection(db as Firestore, "dailyWords"));
-        allWords = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-        setCache('allDailyWords', allWords);
-    }
-    if (!allWords || allWords.length === 0) return { word: "Vhuthu", meaning: "Humanity" };
-    const seenIds = JSON.parse(localStorage.getItem('seenWordIds') || '[]');
-    let candidates = allWords.filter(w => !seenIds.includes(w.id));
-    if (candidates.length === 0) { candidates = allWords; localStorage.setItem('seenWordIds', '[]'); }
-    const picked = candidates[Math.floor(Math.random() * candidates.length)];
-    localStorage.setItem('dailyWord_record', JSON.stringify({ date: today, word: picked }));
-    localStorage.setItem('seenWordIds', JSON.stringify([...seenIds, picked.id]));
-    return picked;
-};
 
 // ... Remaining fetchers (AuditLogs, Puzzles, etc.) simplified forbrevity but maintaining patterns ...
 

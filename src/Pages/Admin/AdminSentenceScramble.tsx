@@ -60,7 +60,8 @@ const AdminSentenceScramble: React.FC = () => {
 
     const getLangName = (langId?: string) => {
         if (!langId) return 'No Language';
-        return languages.find(l => l.id === langId)?.name || 'Unknown';
+        const lang = languages.find(l => l.id === langId || l.name === langId);
+        return lang ? lang.name : langId;
     };
 
     const resetForm = () => {
@@ -215,11 +216,18 @@ const AdminSentenceScramble: React.FC = () => {
 
     // Filtering & pagination
     const filtered = entries.filter(e => {
-        const matchesSearch = !searchQuery ||
-            e.translation.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            e.words.join(' ').toLowerCase().includes(searchQuery.toLowerCase());
+        const query = searchQuery.toLowerCase().trim();
+        const matchesSearch = !query ||
+            e.translation.toLowerCase().includes(query) ||
+            e.words.join(' ').toLowerCase().includes(query);
         const matchesDifficulty = filterDifficulty === 'All' || e.difficulty === filterDifficulty;
-        const matchesLanguage = filterLanguage === 'All' || e.languageId === filterLanguage || (filterLanguage === 'none' && !e.languageId);
+        
+        const selectedLang = languages.find(l => l.id === filterLanguage);
+        const matchesLanguage = filterLanguage === 'All' || 
+            e.languageId === filterLanguage || 
+            (selectedLang && e.languageId === selectedLang.name) ||
+            (filterLanguage === 'none' && !e.languageId);
+            
         return matchesSearch && matchesDifficulty && matchesLanguage;
     });
 

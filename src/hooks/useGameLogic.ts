@@ -80,11 +80,11 @@ export const useGameLogic = ({
 
     const awardCorrectAnswer = useCallback(() => {
         const elapsed = Date.now() - questionStartTime;
-        const result = calculateScore(difficulty, streak, elapsed);
+        const result = calculateScore(difficulty, 0, elapsed);
 
         const newScore = score + result.total;
         const newCorrect = correctCount + 1;
-        const newStreak = streak + 1;
+        const newStreak = 0; // Disabled in-game streaks
 
         setScore(newScore);
         setCorrectCount(newCorrect);
@@ -96,7 +96,7 @@ export const useGameLogic = ({
             ...prev,
             base: prev.base + result.base,
             speed: prev.speed + result.speedBonus,
-            streakBonus: prev.streakBonus + Math.round((result.base + result.speedBonus) * (result.streakMultiplier - 1)),
+            streakBonus: 0,
         }));
 
         if (onCorrect) {
@@ -140,6 +140,7 @@ export const useGameLogic = ({
         streak,
         setStreak,
         lastScoreResult,
+        setLastScoreResult,
         answerStatus,
         setAnswerStatus,
         showExplanation,

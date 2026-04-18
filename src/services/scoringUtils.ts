@@ -13,19 +13,19 @@ export interface ScoreResult {
 
 // ---- CONSTANTS ----
 const BASE_POINTS: Record<Difficulty, number> = {
-    Beginner: 10,
-    Intermediate: 15,
-    Advanced: 20,
+    Beginner: 1,
+    Intermediate: 2,
+    Advanced: 3,
 };
 
-const MAX_SPEED_BONUS = 5;        // extra points for answering fast
+const MAX_SPEED_BONUS = 1;        // extra points for answering fast
 const SPEED_BONUS_WINDOW_MS = 10_000; // must answer within 10 s to earn any
 const FAST_THRESHOLD_MS = 3_000;      // ≤3 s gets full bonus
 
 const STREAK_TIER_1 = 3;   // 3 consecutive → ×1.5
 const STREAK_TIER_2 = 5;   // 5 consecutive → ×2.0
 
-export const CONSOLATION_POINTS = 2; // awarded when wrong but user reads explanation
+export const CONSOLATION_POINTS = 0; // No consolation to preserve value
 
 // ---- HELPERS ----
 

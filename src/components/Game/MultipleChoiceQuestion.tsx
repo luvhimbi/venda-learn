@@ -17,7 +17,7 @@ const MultipleChoiceQuestion: React.FC<Props> = ({ q, selected, status, onSelect
             if (isSelected) cls = isCorrect ? 'btn-success border-success text-white' : 'btn-danger border-danger text-white';
             else if (selected && isCorrect && status === 'wrong') cls = 'btn-success border-success text-white opacity-75';
             return (
-                <button key={opt} className={`btn btn-lg py-4 fw-bold rounded-4 ${cls}`}
+                <button key={opt} className={`btn py-3 fw-bold rounded-4 ${cls}`} style={{ fontSize: '0.95rem' }}
                     onClick={() => onSelect(opt)} disabled={!!selected}>
                     {opt}
                 </button>

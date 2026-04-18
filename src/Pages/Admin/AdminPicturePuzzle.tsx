@@ -70,7 +70,8 @@ const AdminPicturePuzzle: React.FC = () => {
 
     const getLangName = (langId?: string) => {
         if (!langId) return 'No Language';
-        return languages.find(l => l.id === langId)?.name || 'Unknown';
+        const lang = languages.find(l => l.id === langId || l.name === langId);
+        return lang ? lang.name : langId;
     };
 
     const resetForm = () => {
@@ -235,11 +236,18 @@ const AdminPicturePuzzle: React.FC = () => {
 
     // Filtering & pagination
     const filtered = puzzles.filter(p => {
-        const matchesSearch = !searchQuery || 
-            p.nativeWord.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            p.english.toLowerCase().includes(searchQuery.toLowerCase());
+        const query = searchQuery.toLowerCase().trim();
+        const matchesSearch = !query || 
+            p.nativeWord.toLowerCase().includes(query) ||
+            p.english.toLowerCase().includes(query);
         const matchesDifficulty = filterDifficulty === 'All' || p.difficulty === filterDifficulty;
-        const matchesLanguage = filterLanguage === 'All' || p.languageId === filterLanguage || (filterLanguage === 'none' && !p.languageId);
+        
+        const selectedLang = languages.find(l => l.id === filterLanguage);
+        const matchesLanguage = filterLanguage === 'All' || 
+            p.languageId === filterLanguage || 
+            (selectedLang && p.languageId === selectedLang.name) ||
+            (filterLanguage === 'none' && !p.languageId);
+            
         return matchesSearch && matchesDifficulty && matchesLanguage;
     });
 

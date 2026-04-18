@@ -119,7 +119,7 @@ const SortableSlide: React.FC<SortableSlideProps> = ({ id, index, slide, onUpdat
                     <div className="row g-3">
                         <div className="col-6">
                             <label className="editor-label">Target Language</label>
-                            <input className="editor-input" placeholder="e.g. Ndaa" value={slide.venda} onChange={(e) => onUpdate('venda', e.target.value)} />
+                            <input className="editor-input" placeholder="e.g. Ndaa" value={slide.nativeWord || slide.venda || ''} onChange={(e) => onUpdate('nativeWord', e.target.value)} />
                         </div>
                         <div className="col-6">
                             <label className="editor-label">English</label>
@@ -220,7 +220,7 @@ const AddLesson: React.FC = () => {
     const publishedRef = useRef(false);
 
     const hasWork = Boolean(course.id || course.title || course.nativeTitle ||
-        course.microLessons.some((ml: any) => ml.title || ml.slides.some((s: any) => s.venda || s.english) || ml.questions.length > 0));
+        course.microLessons.some((ml: any) => ml.title || ml.slides.some((s: any) => s.nativeWord || s.venda || s.english) || ml.questions.length > 0));
 
     useEffect(() => {
         const handleBeforeUnload = (e: BeforeUnloadEvent) => {
@@ -367,7 +367,7 @@ const AddLesson: React.FC = () => {
             });
             if (newSlides.length > 0) {
                 const current = [...currentMl.slides];
-                if (current.length === 1 && !current[0].venda && !current[0].english) {
+                if (current.length === 1 && !(current[0].nativeWord || current[0].venda) && !current[0].english) {
                     updateMl('slides', newSlides);
                 } else {
                     updateMl('slides', [...current, ...newSlides]);
