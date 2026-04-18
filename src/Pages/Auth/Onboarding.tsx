@@ -87,6 +87,20 @@ const getConnectionMessage = (native: string, target: string) => {
     return `${target} is a beautiful language! Knowing ${native} gives you a unique cultural perspective to learn from.`;
 };
 
+const getLevelMessage = (level: string, language: string) => {
+    const lang = language || 'Tshivenda';
+    switch (level) {
+        case 'beginner':
+            return `Starting from scratch? Awesome! We'll have you speaking your first ${lang} words in no time.`;
+        case 'some':
+            return `You already know some ${lang}? Nice! You've got the foundations down, let's build on that.`;
+        case 'conversational':
+            return `Impressive! You're already conversational in ${lang}. We'll help you master the nuances and local slang.`;
+        default:
+            return `Great! Let's tailor your ${lang} journey to your specific needs.`;
+    }
+};
+
 const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
     const navigate = useNavigate();
     const [searchParams] = useSearchParams();
@@ -130,10 +144,12 @@ const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
         
         setPreferences(newPrefs);
         
-        // Auto-advance after small delay for juice
-        setTimeout(() => {
-            setStep(prev => prev + 1);
-        }, 300);
+        // Auto-advance after small delay for juice (except for level)
+        if (key !== 'level') {
+            setTimeout(() => {
+                setStep(prev => prev + 1);
+            }, 300);
+        }
     };
 
     const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
@@ -436,6 +452,39 @@ const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
                                 </button>
                             ))}
                         </div>
+
+                        {/* Merged Outcome Section */}
+                        {preferences.level && (
+                            <motion.div 
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                className="mt-4"
+                            >
+                                <div className="brutalist-card bg-theme-surface mx-auto p-3 mb-3 shadow-action-sm border border-4 border-theme-main text-start d-flex align-items-start gap-3" style={{ maxWidth: '400px' }}>
+                                    <div style={{ flexShrink: 0 }}>
+                                        <Mascot width="60px" height="60px" mood="excited" />
+                                    </div>
+                                    <p className="fw-bold mb-0 text-theme-main" style={{ fontSize: '0.95rem', lineHeight: '1.4' }}>
+                                        {getLevelMessage(preferences.level, preferences.language)}
+                                    </p>
+                                </div>
+                                <div className="mx-auto px-4" style={{ maxWidth: '400px' }}>
+                                    <button 
+                                        onClick={() => {
+                                            triggerHaptic('medium');
+                                            playClick();
+                                            playSwipe();
+                                            setStep(4);
+                                        }}
+                                        className="btn w-100 fw-black py-3 text-dark border border-4 border-theme-main rounded-0 shadow-action text-uppercase ls-1 hover-press d-flex align-items-center justify-content-center gap-2"
+                                        style={{ backgroundColor: 'var(--venda-yellow)' }}
+                                    >
+                                        CONTINUE
+                                        <ArrowRight size={24} strokeWidth={3} />
+                                    </button>
+                                </div>
+                            </motion.div>
+                        )}
                     </div>
                 );
             case 4: // REASON
@@ -641,7 +690,7 @@ const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
                                 </div>
                             )}
 
-                            {step === 10 && (
+                             {step === 10 && (
                                 <div className="mb-4">
                                     <label className="form-label smallest fw-black text-uppercase ls-1">Email Address</label>
                                     <div className="custom-input-group custom-input-group--brutalist">
