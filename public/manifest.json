@@ -5,25 +5,25 @@
   "icons": [
     {
       "src": "/images/ven.png",
-      "sizes": "500x500",
+      "sizes": "192x192",
       "type": "image/png",
       "purpose": "any"
     },
     {
       "src": "/images/ven.png",
-      "sizes": "500x500",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/images/ven.png",
+      "sizes": "192x192",
       "type": "image/png",
       "purpose": "maskable"
     },
     {
       "src": "/images/ven.png",
-      "sizes": "500x500",
-      "type": "image/png",
-      "purpose": "any"
-    },
-    {
-      "src": "/images/ven.png",
-      "sizes": "500x500",
+      "sizes": "512x512",
       "type": "image/png",
       "purpose": "maskable"
     }
@@ -47,28 +47,28 @@
       "short_name": "Lessons",
       "description": "Continue your learning journey",
       "url": "/courses",
-      "icons": [{ "src": "/images/ven.png", "sizes": "192x192 500x500", "type": "image/png", "purpose": "any" }]
+      "icons": [{ "src": "/images/ven.png", "sizes": "192x192 512x512", "type": "image/png", "purpose": "any" }]
     },
     {
       "name": "Games",
       "short_name": "Games",
       "description": "Play educational games",
       "url": "/mitambo",
-      "icons": [{ "src": "/images/ven.png", "sizes": "192x192 500x500", "type": "image/png", "purpose": "any" }]
+      "icons": [{ "src": "/images/ven.png", "sizes": "192x192 512x512", "type": "image/png", "purpose": "any" }]
     },
     {
       "name": "Leaderboard",
       "short_name": "Leaderboard",
       "description": "Check the rankings",
       "url": "/muvhigo",
-      "icons": [{ "src": "/images/ven.png", "sizes": "192x192 500x500", "type": "image/png", "purpose": "any" }]
+      "icons": [{ "src": "/images/ven.png", "sizes": "192x192 512x512", "type": "image/png", "purpose": "any" }]
     },
     {
       "name": "Profile",
       "short_name": "Profile",
       "description": "View your achievements",
       "url": "/profile",
-      "icons": [{ "src": "/images/ven.png", "sizes": "192x192 500x500", "type": "image/png", "purpose": "any" }]
+      "icons": [{ "src": "/images/ven.png", "sizes": "192x192 512x512", "type": "image/png", "purpose": "any" }]
     }
   ],
   "widgets": [
@@ -83,14 +83,14 @@
       "screenshots": [
         {
           "src": "/images/ven.png",
-          "sizes": "500x500",
+          "sizes": "512x512",
           "label": "Chommie Widget"
         }
       ],
       "icons": [
         {
           "src": "/images/ven.png",
-          "sizes": "500x500",
+          "sizes": "512x512",
           "type": "image/png"
         }
       ]
