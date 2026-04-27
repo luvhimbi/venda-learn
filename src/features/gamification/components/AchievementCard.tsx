@@ -20,6 +20,8 @@ const AchievementCard: React.FC<AchievementCardProps> = ({
     onShare
 }) => {
     
+    return null; // Disabled globally
+
     return (
         <div 
             className={`achievement-card h-100 brutalist-card transition-all p-3 ${isEarned ? 'earned' : 'locked'}`}
@@ -49,7 +51,7 @@ const AchievementCard: React.FC<AchievementCardProps> = ({
                     )}
                     {isEarned && onShare && (
                         <button 
-                            onClick={(e) => { e.stopPropagation(); onShare(id); }}
+                            onClick={(e) => { e.stopPropagation(); onShare?.(id); }}
                             className="position-absolute btn-game-white rounded-circle d-flex align-items-center justify-content-center border border-theme-main border-2 shadow-action-sm share-badge transition-all"
                             style={{ width: 32, height: 32, top: -8, right: -12, zIndex: 5 }}
                             title="Share"

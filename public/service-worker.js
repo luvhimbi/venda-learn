@@ -53,7 +53,7 @@ self.addEventListener('fetch', (event) => {
         event.respondWith(
             fetch(request)
                 .then((response) => {
-                    // Cache the latest index.html
+                    // Cache the latest index.html under the root key
                     const responseClone = response.clone();
                     caches.open(CACHE_NAME).then((cache) => {
                         cache.put('/', responseClone);
@@ -61,8 +61,14 @@ self.addEventListener('fetch', (event) => {
                     return response;
                 })
                 .catch(() => {
+                    // Fallback to the cached index.html for ANY navigation request
                     return caches.match('/').then((cached) => {
-                        return cached || new Response('Offline', { status: 503 });
+                        return cached || caches.match('/index.html').then((cachedIndex) => {
+                            return cachedIndex || new Response('Offline: Resource not cached.', { 
+                                status: 503, 
+                                headers: { 'Content-Type': 'text/plain' } 
+                            });
+                        });
                     });
                 })
         );

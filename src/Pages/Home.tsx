@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { doc, updateDoc, type Firestore } from 'firebase/firestore';
 import { onAuthStateChanged } from 'firebase/auth';
 import { auth, db } from '../services/firebaseConfig';
-import { fetchLessons, refreshUserData, getMicroLessons, fetchLanguages } from '../services/dataCache';
+import { fetchLessons, refreshUserData, getMicroLessons, fetchLanguages, warmupGameCache } from '../services/dataCache';
 import LandingPage from './LandingPage';
 import InstallBanner from '../components/feedback/banners/InstallBanner';
 import TourGuide from '../features/onboarding/components/TourGuide';
@@ -12,7 +12,7 @@ import PremiumStreakModal from '../components/feedback/modals/PremiumStreakModal
 import NotificationNudge from '../features/notifications/components/NotificationNudge';
 import LanguageCharacter from '../components/illustrations/LanguageCharacters';
 import AchievementCard from '../features/gamification/components/AchievementCard';
-import { ALL_TROPHIES } from '../services/achievementService';
+import { ALL_TROPHIES, ENABLE_TROPHIES } from '../services/achievementService';
 
 
 const Home: React.FC = () => {
@@ -58,6 +58,7 @@ const Home: React.FC = () => {
 
                     if (userData) {
                         setUserData(userData);
+                        warmupGameCache(); // Prefetch game data for offline support
                         const prefId = userData.preferredLanguageId
                             || localStorage.getItem('chommie_student_lang')
                             || localStorage.getItem('venda_student_lang');
@@ -201,18 +202,20 @@ const Home: React.FC = () => {
                                     </div>
 
                                     {/* Trophies Card */}
-                                    <div className="brutalist-card--sm d-flex align-items-center flex-fill gap-2 p-2 pe-3 bg-theme-card shadow-action-sm transition-all hover-lift border border-theme-main border-3"
-                                         onClick={() => navigate('/achievements')}
-                                         style={{ minWidth: '100px', cursor: 'pointer' }}>
-                                        <div className="stat-icon-box rounded-3 d-flex align-items-center justify-content-center bg-info border border-dark border-2"
-                                            style={{ width: 34, height: 34 }}>
-                                            <i className="bi bi-trophy-fill fs-6 text-dark"></i>
+                                    {ENABLE_TROPHIES && (
+                                        <div className="brutalist-card--sm d-flex align-items-center flex-fill gap-2 p-2 pe-3 bg-theme-card shadow-action-sm transition-all hover-lift border border-theme-main border-3"
+                                             onClick={() => navigate('/achievements')}
+                                             style={{ minWidth: '100px', cursor: 'pointer' }}>
+                                            <div className="stat-icon-box rounded-3 d-flex align-items-center justify-content-center bg-info border border-dark border-2"
+                                                style={{ width: 34, height: 34 }}>
+                                                <i className="bi bi-trophy-fill fs-6 text-dark"></i>
+                                            </div>
+                                            <div className="lh-1">
+                                                <p className="mb-0 fw-black text-theme-main" style={{ fontSize: '1rem' }}>{userData?.trophies?.length || 0}</p>
+                                                <p className="mb-0 smallest fw-black text-theme-muted uppercase ls-1" style={{ fontSize: '8px' }}>TROPHIES</p>
+                                            </div>
                                         </div>
-                                        <div className="lh-1">
-                                            <p className="mb-0 fw-black text-theme-main" style={{ fontSize: '1rem' }}>{userData?.trophies?.length || 0}</p>
-                                            <p className="mb-0 smallest fw-black text-theme-muted uppercase ls-1" style={{ fontSize: '8px' }}>TROPHIES</p>
-                                        </div>
-                                    </div>
+                                    )}
                                 </div>
 
                                 {/* Row 2: Target Language (Wide) */}
@@ -285,7 +288,7 @@ const Home: React.FC = () => {
                         </section>
 
                         {/* RECENT TROPHIES */}
-                        {userData?.trophies?.length > 0 && (
+                        {ENABLE_TROPHIES && userData?.trophies?.length > 0 && (
                             <section className="mb-5 text-start">
                                 <div className="d-flex justify-content-between align-items-center mb-4 px-2">
                                     <h6 className="fw-black text-uppercase text-theme-main smallest ls-2 mb-0">RECENT ACHIEVEMENTS</h6>

@@ -7,8 +7,6 @@ import LogoutModal from '../../components/feedback/modals/LogoutModal';
 import ShareProfileModal from '../../components/feedback/modals/ShareProfileModal';
 import ShareStreakModal from '../../components/feedback/modals/ShareStreakModal';
 import { AvatarDisplay } from '../../features/avatar/components/AvatarPicker';
-import AchievementCard from '../../features/gamification/components/AchievementCard';
-import { ALL_TROPHIES } from '../../services/achievementService';
 import { invalidateCache, fetchUserData } from '../../services/dataCache';
 import ReviewModal from '../../components/feedback/modals/ReviewModal';
 import AvatarBuilder from '../../features/avatar/components/AvatarBuilder';
@@ -16,7 +14,7 @@ import AvatarPicker from '../../features/avatar/components/AvatarPicker';
 import WeeklyActivityGraph from '../../features/gamification/components/WeeklyActivityGraph';
 
 import Swal from 'sweetalert2';
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 interface UserProfile {
     username: string;
@@ -119,22 +117,7 @@ const Profile: React.FC = () => {
         }
     };
 
-    const calculateProgress = (trophy: any) => {
-        if (!userData) return 0;
-        const { type, value } = trophy.requirement;
-        let current = 0;
 
-        switch (type) {
-            case 'login': current = 1; break;
-            case 'level': current = userData.level || 1; break;
-            case 'points': current = userData.points || 0; break;
-            case 'streak': current = userData.streak || 0; break;
-            case 'lessons': current = userData.completedLessons?.length || 0; break;
-            default: current = 0;
-        }
-
-        return Math.min(Math.round((current / value) * 100), 100);
-    };
 
     const handleLogout = async () => {
         try {
@@ -145,9 +128,7 @@ const Profile: React.FC = () => {
         }
     };
 
-    const handleShareAchievement = () => {
-        navigate('/achievements');
-    };
+
 
     if (loading) return (
         <div className="min-vh-100 bg-theme-base d-flex justify-content-center align-items-center">
@@ -309,30 +290,6 @@ const Profile: React.FC = () => {
                 </header>
 
                 <div className="animate__animated animate__fadeIn">
-                    <section className="mb-5">
-                        <div className="d-flex justify-content-between align-items-center mb-4">
-                            <h3 className="fw-black text-theme-main mb-0 ls-tight uppercase" style={{ fontSize: '1.25rem' }}>My Achievements</h3>
-                            <Link to="/achievements" className="smallest fw-black text-warning ls-1 uppercase text-decoration-none">VIEW ALL COLLECTION</Link>
-                        </div>
-                        <div className="row g-3">
-                            {[...ALL_TROPHIES].slice(0, 6).map((trophy: any, idx: number) => {
-                                const isEarned = (userData?.trophies || []).includes(trophy.id);
-                                const progress = calculateProgress(trophy);
-                                return (
-                                    <div key={trophy.id} className="col-6 col-md-4 col-lg-2 animate__animated animate__zoomIn" style={{ animationDelay: `${idx * 0.1}s` }}>
-                                        <AchievementCard
-                                            id={trophy.id}
-                                            color={trophy.color}
-                                            isEarned={isEarned}
-                                            progress={progress}
-                                            rarity={trophy.rarity as any}
-                                            onShare={handleShareAchievement}
-                                        />
-                                    </div>
-                                );
-                            })}
-                        </div>
-                    </section>
 
                     <div className="row g-4 mt-2">
                         <div className={`col-12 ${(userData?.weeklyXP || 0) > 0 ? 'col-md-7' : ''}`}>

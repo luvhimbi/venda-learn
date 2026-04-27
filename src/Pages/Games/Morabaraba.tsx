@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowLeft, HelpCircle, Info, Trophy, User, RotateCcw, Palette, Check } from 'lucide-react';
+import { ArrowLeft, HelpCircle, Info, Trophy, User, RotateCcw, Palette, Check, BookOpen } from 'lucide-react';
 import { doc, updateDoc, increment, type Firestore } from 'firebase/firestore';
 import { auth, db } from '../../services/firebaseConfig';
 import GameResultModal from '../../components/feedback/modals/GameResultModal';
@@ -11,6 +11,7 @@ import GameIntroModal, { resetIntroSeen } from '../../components/feedback/modals
 import ExitConfirmModal from '../../components/feedback/modals/ExitConfirmModal';
 import Mascot from '../../features/gamification/components/Mascot';
 import { AvatarDisplay } from '../../features/avatar/components/AvatarPicker';
+import LearningChallengeModal from '../../components/feedback/modals/LearningChallengeModal';
 
 // --- CONSTANTS ---
 const COWS_PER_PLAYER = 12;
@@ -172,6 +173,11 @@ const Morabaraba: React.FC = () => {
         return THEMES.find(t => t.id === saved) || THEMES[0];
     });
 
+    // Learning Mode State
+    const [learningMode, setLearningMode] = useState(true);
+    const [showChallenge, setShowChallenge] = useState(false);
+    const [pendingAction, setPendingAction] = useState<{ id: number; isAICall: boolean } | null>(null);
+
     useEffect(() => {
         localStorage.setItem('morabaraba_theme', currentTheme.id);
     }, [currentTheme]);
@@ -246,11 +252,39 @@ const Morabaraba: React.FC = () => {
     };
 
     // Game Actions
-    const performAction = useCallback(async (id: number, isAICall = false) => {
+    const performAction = useCallback(async (id: number, isAICall = false, verified = false) => {
         if (gameOver) return;
         if (!isAICall && aiProcessing) return; // Prevent user clicking during AI turn
 
         const currentPlayer = turn;
+
+        // Intercept for Learning Challenge if it's Player 1's turn and not yet verified
+        if (learningMode && !isAICall && currentPlayer === 1 && !verified) {
+            // Only trigger challenge for actual moves (placing, moving, shooting)
+            // Selection (selectedJunction === null) doesn't require a challenge
+            const currentPhase = phaseP1;
+            
+            let shouldTrigger = false;
+            if (shootMode) {
+                if (id !== undefined && id !== null && board[id] === 2) shouldTrigger = true;
+            } else if (currentPhase === 'placing') {
+                if (board[id] === null) shouldTrigger = true;
+            } else if (currentPhase === 'moving' || currentPhase === 'flying') {
+                if (selectedJunction !== null) {
+                    if (board[id] === null) {
+                        const isFlying = currentPhase === 'flying';
+                        const neighbors = getNeighbors(selectedJunction);
+                        if (isFlying || neighbors.includes(id)) shouldTrigger = true;
+                    }
+                }
+            }
+
+            if (shouldTrigger) {
+                setPendingAction({ id, isAICall });
+                setShowChallenge(true);
+                return;
+            }
+        }
         const opponent = currentPlayer === 1 ? 2 : 1;
         const currentPhase = currentPlayer === 1 ? phaseP1 : phaseP2;
 
@@ -525,8 +559,32 @@ const Morabaraba: React.FC = () => {
         setAiProcessing(false);
     };
 
+    const handleChallengeSuccess = () => {
+        if (pendingAction) {
+            const { id, isAICall } = pendingAction;
+            setPendingAction(null);
+            setShowChallenge(false);
+            performAction(id, isAICall, true); // Call with verified = true
+        }
+    };
+
+    const handleChallengeFailure = () => {
+        setPendingAction(null);
+        setShowChallenge(false);
+        playWrong();
+        triggerShake('m-board');
+        // If challenge failed, user loses their turn!
+        setTurn(2); 
+    };
+
     return (
         <div className="min-vh-100 py-3 position-relative overflow-hidden" style={{ backgroundColor: 'var(--color-bg)', backgroundImage: 'url("data:image/svg+xml,%3Csvg width=\'20\' height=\'20\' viewBox=\'0 0 20 20\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cg fill=\'%23000000\' fill-opacity=\'0.02\' fill-rule=\'evenodd\'%3E%3Ccircle cx=\'3\' cy=\'3\' r=\'1\'/%3E%3C/g%3E%3C/svg%3E")' }}>
+
+            <LearningChallengeModal 
+                isOpen={showChallenge}
+                onSuccess={handleChallengeSuccess}
+                onFailure={handleChallengeFailure}
+            />
 
             {/* RESULT MODAL */}
             <GameResultModal
@@ -621,6 +679,10 @@ const Morabaraba: React.FC = () => {
                     <div className="d-flex align-items-center gap-2">
                         <button onClick={() => setShowThemePicker(true)} className="btn-game bg-theme-surface text-theme-main border border-2 border-theme-main rounded-circle d-flex align-items-center justify-content-center" style={{ width: 44, height: 44, padding: 0 }}>
                             <Palette size={22} className="text-theme-main" strokeWidth={3} />
+                        </button>
+                        <button onClick={() => setLearningMode(!learningMode)} className={`btn-game ${learningMode ? 'btn-game-primary' : 'bg-theme-surface text-theme-main border border-2 border-theme-main'} rounded-pill px-3 py-1 smallest fw-black uppercase d-flex align-items-center gap-1`}>
+                            <BookOpen size={14} />
+                            {learningMode ? 'LEARN ON' : 'LEARN OFF'}
                         </button>
                         <button onClick={() => setIsVsAI(!isVsAI)} className={`btn-game ${isVsAI ? 'btn-game-primary' : 'bg-theme-surface text-theme-main border border-2 border-theme-main'} rounded-pill px-3 py-1 smallest fw-black uppercase`}>
                             {isVsAI ? 'CPU' : 'PVP'}
@@ -783,8 +845,8 @@ const Morabaraba: React.FC = () => {
 
                             {/* Shoot Overlay */}
                             {shootMode && (
-                                <div className="position-absolute top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center pointer-events-none" style={{ backgroundColor: 'rgba(239, 68, 68, 0.1)', border: '4px solid #ef4444' }}>
-                                    <div className="bg-danger text-white px-3 py-1 fw-black rounded shadow-action uppercase animate__animated animate__fadeInDown">
+                                <div className="position-absolute top-0 start-0 w-100 h-100 d-flex align-items-start justify-content-center pt-3 pointer-events-none" style={{ backgroundColor: 'rgba(239, 68, 68, 0.05)', border: '4px solid #ef4444' }}>
+                                    <div className="bg-danger text-white px-3 py-1 fw-black rounded shadow-action uppercase animate__animated animate__fadeInDown" style={{ fontSize: '0.8rem', letterSpacing: '1px' }}>
                                         CAPTURE A COW!
                                     </div>
                                 </div>

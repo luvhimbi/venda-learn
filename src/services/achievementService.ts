@@ -4,6 +4,8 @@ import type { Firestore } from 'firebase/firestore';
 import { doc, updateDoc, arrayUnion } from 'firebase/firestore';
 import type { Trophy } from '../types/achievements';
 
+export const ENABLE_TROPHIES = false; // [TOGGLE] Set to false to disable trophies across the app
+
 export const ALL_TROPHIES: Trophy[] = [
     {
         id: 'first_login',
@@ -191,7 +193,7 @@ export const ALL_TROPHIES: Trophy[] = [
  * Checks which trophies the user is eligible for but hasn't earned yet.
  */
 export const checkAchievements = (userData: any, earnedIds: string[] = []): Trophy[] => {
-    if (!userData) return [];
+    if (!userData || !ENABLE_TROPHIES) return [];
 
     return ALL_TROPHIES.filter(trophy => {
         // Skip if already earned
@@ -218,7 +220,7 @@ export const checkAchievements = (userData: any, earnedIds: string[] = []): Trop
  * Awards multiple trophies to a user in Firestore.
  */
 export const awardTrophies = async (uid: string, trophyIds: string[]) => {
-    if (!uid || trophyIds.length === 0) return;
+    if (!uid || trophyIds.length === 0 || !ENABLE_TROPHIES) return;
 
     try {
         const userRef = doc(db as Firestore, "users", uid);
@@ -231,11 +233,3 @@ export const awardTrophies = async (uid: string, trophyIds: string[]) => {
         return false;
     }
 };
-
-
-
-
-
-
-
-

@@ -70,6 +70,12 @@ const SmartReader: React.FC<SmartReaderProps> = ({ title, text }) => {
         const utterance = new SpeechSynthesisUtterance(paragraphs[index]);
         utterance.rate = rate;
         utterance.pitch = 1.0;
+        utterance.lang = 'en-US'; // Default to English for better compatibility
+
+        // Try to pick a natural sounding voice if available
+        const voices = window.speechSynthesis.getVoices();
+        const preferredVoice = voices.find(v => v.name.includes('Google') || v.name.includes('Natural')) || voices[0];
+        if (preferredVoice) utterance.voice = preferredVoice;
 
         utterance.onend = () => {
             // If we were cancelled (stopped), don't continue
@@ -80,12 +86,17 @@ const SmartReader: React.FC<SmartReaderProps> = ({ title, text }) => {
         };
 
         utterance.onerror = (e) => {
+            if (e.error === 'interrupted' || e.error === 'canceled') return;
             console.error("Speech error", e);
             setIsSpeaking(false);
         };
 
         utteranceRef.current = utterance;
-        window.speechSynthesis.speak(utterance);
+        
+        // Brief delay ensures previous cancellations are processed by the internal engine
+        setTimeout(() => {
+            window.speechSynthesis.speak(utterance);
+        }, 50);
     };
 
     const handlePlayPause = () => {

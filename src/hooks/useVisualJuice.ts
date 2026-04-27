@@ -3,10 +3,10 @@ import { Howl } from 'howler';
 import { fetchUserData } from '../services/dataCache';
 
 const sounds = {
-    correct: new Howl({ src: ['https://assets.mixkit.co/active_storage/sfx/2013/2013-preview.mp3'], volume: 0.5 }),
-    wrong: new Howl({ src: ['https://assets.mixkit.co/active_storage/sfx/2018/2018-preview.mp3'], volume: 0.4 }),
-    click: new Howl({ src: ['https://assets.mixkit.co/active_storage/sfx/2568/2568-preview.mp3'], volume: 0.3 }),
-    swipe: new Howl({ src: ['https://assets.mixkit.co/active_storage/sfx/2572/2572-preview.mp3'], volume: 1.0 }),
+    correct: new Howl({ src: ['https://www.soundjay.com/buttons/sounds/button-3.mp3'], volume: 0.5 }),
+    wrong: new Howl({ src: ['https://www.soundjay.com/buttons/sounds/button-10.mp3'], volume: 0.4 }),
+    click: new Howl({ src: ['https://www.soundjay.com/buttons/sounds/button-16.mp3'], volume: 0.3 }),
+    swipe: new Howl({ src: ['https://www.soundjay.com/buttons/sounds/button-20.mp3'], volume: 0.8 }),
     win: new Howl({ src: ['/Audio/you_win.ogg'], volume: 0.6 }),
     lose: new Howl({ src: ['/Audio/you_lose.ogg'], volume: 0.6 }),
     winner: new Howl({ src: ['/Audio/winner.ogg'], volume: 0.6 }),
