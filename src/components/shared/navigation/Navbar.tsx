@@ -105,11 +105,7 @@ const Navbar: React.FC = () => {
                                     Leaderboard
                                 </Link>
                             </li>
-                            <li className="nav-item w-100 w-lg-auto text-center">
-                                <Link className={`nav-link nav-custom-link ${isActive('/mitambo') || isActive('/picture-puzzle') ? 'active-link' : ''}`} to="/mitambo">
-                                    Games
-                                </Link>
-                            </li>
+
 
                             {user ? (
                                 <div className="d-flex align-items-center justify-content-center gap-3 mt-3 mt-lg-0">

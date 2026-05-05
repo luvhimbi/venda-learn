@@ -7,6 +7,7 @@ const KNOWN_CACHES = [CACHE_NAME, AVATAR_CACHE, IMAGE_CACHE];
 // Pre-cache these on install (app shell)
 const PRECACHE_URLS = [
     '/',
+    '/index.html',
     '/images/elphie.png'
 ];
 
@@ -14,7 +15,12 @@ const PRECACHE_URLS = [
 self.addEventListener('install', (event) => {
     event.waitUntil(
         caches.open(CACHE_NAME).then((cache) => {
-            return cache.addAll(PRECACHE_URLS);
+            // Use a more resilient approach: cache what we can
+            return Promise.allSettled(
+                PRECACHE_URLS.map(url => 
+                    cache.add(url).catch(err => console.warn(`Failed to precache ${url}:`, err))
+                )
+            );
         })
     );
     self.skipWaiting(); // Activate immediately
@@ -53,19 +59,26 @@ self.addEventListener('fetch', (event) => {
         event.respondWith(
             fetch(request)
                 .then((response) => {
-                    // Cache the latest index.html under the root key
-                    const responseClone = response.clone();
-                    caches.open(CACHE_NAME).then((cache) => {
-                        cache.put('/', responseClone);
-                    });
+                    // Cache the latest index.html under the root key for future offline use
+                    if (response.ok) {
+                        const responseClone = response.clone();
+                        caches.open(CACHE_NAME).then((cache) => {
+                            cache.put('/', responseClone);
+                        });
+                    }
                     return response;
                 })
                 .catch(() => {
                     // Fallback to the cached index.html for ANY navigation request
                     return caches.match('/').then((cached) => {
-                        return cached || caches.match('/index.html').then((cachedIndex) => {
-                            return cachedIndex || new Response('Offline: Resource not cached.', { 
+                        if (cached) return cached;
+                        return caches.match('/index.html').then((cachedIndex) => {
+                            if (cachedIndex) return cachedIndex;
+                            
+                            // If absolutely nothing is found, return a more helpful offline message
+                            return new Response('Offline: Morabaraba and other pages require an initial online load to work offline.', { 
                                 status: 503, 
+                                statusText: 'Offline',
                                 headers: { 'Content-Type': 'text/plain' } 
                             });
                         });
@@ -146,7 +159,20 @@ self.addEventListener('fetch', (event) => {
             .catch(() => {
                 return caches.match(request).then((cached) => {
                     if (cached) return cached;
-                    return new Response('Offline', { status: 503, statusText: 'Offline' });
+                    
+                    // Final fallback for missing resources: return a 404-like response if it's an image
+                    if (request.destination === 'image') {
+                        return new Response(
+                            Uint8Array.from(atob('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mN88P/BfwAJhAPk3KFb2AAAAABJRU5ErkJggg=='), c => c.charCodeAt(0)),
+                            { headers: { 'Content-Type': 'image/png' } }
+                        );
+                    }
+                    
+                    return new Response('Offline: Resource not available.', { 
+                        status: 503, 
+                        statusText: 'Offline',
+                        headers: { 'Content-Type': 'text/plain' }
+                    });
                 });
             })
     );

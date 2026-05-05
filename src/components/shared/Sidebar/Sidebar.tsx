@@ -59,8 +59,6 @@ const Sidebar: React.FC = () => {
 
     const navItems: { path: string, label: string, icon: string, badge?: number, tourClass?: string }[] = [
         { path: '/', label: 'Home', icon: 'bi-house-heart-fill', tourClass: 'tour-sidebar-home' },
-        { path: '/courses', label: 'Lessons', icon: 'bi-journal-bookmark-fill', tourClass: 'tour-sidebar-lessons' },
-        { path: '/mitambo', label: 'Games', icon: 'bi-controller', tourClass: 'tour-sidebar-games' },
         { path: '/muvhigo', label: 'Leaderboard', icon: 'bi-bar-chart-fill', tourClass: 'tour-sidebar-progress' },
     ];
 

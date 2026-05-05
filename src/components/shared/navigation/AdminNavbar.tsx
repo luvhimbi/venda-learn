@@ -83,11 +83,7 @@ const AdminNavbar: React.FC = () => {
                                 Content
                             </Link>
                         </li>
-                        <li className="nav-item">
-                            <Link className={`nav-link admin-nav-link ${isActive('/admin/game-content') ? 'active' : ''}`} to="/admin/game-content">
-                                Games
-                            </Link>
-                        </li>
+
                         <li className="nav-item">
                             <Link className={`nav-link admin-nav-link ${isActive('/admin/reviews') ? 'active' : ''}`} to="/admin/reviews">
                                 Reviews

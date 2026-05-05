@@ -330,59 +330,11 @@ export const fetchAuditLogs = async (): Promise<any[]> => {
     return logs;
 };
 
-export const fetchPuzzles = async (): Promise<any[]> => {
-    const { data, status } = getCached<any[]>('puzzles');
-    if (status === 'stale') {
-        getDocs(collection(db as Firestore, "puzzleWords")).then(snap => setCache('puzzles', snap.docs.map(d => ({ id: d.id, ...d.data() })))).catch(() => {});
-    }
-    if (data && status !== 'expired') return data;
-    const snap = await getDocs(collection(db as Firestore, "puzzleWords"));
-    const puzzles = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-    setCache('puzzles', puzzles);
-    return puzzles;
-};
-
-export const fetchSyllables = async (): Promise<any[]> => {
-    const { data, status } = getCached<any[]>('syllablePuzzles');
-    if (status === 'stale') {
-        getDocs(collection(db as Firestore, "syllablePuzzles")).then(snap => setCache('syllablePuzzles', snap.docs.map(d => ({ id: d.id, ...d.data() })))).catch(() => {});
-    }
-    if (data && status !== 'expired') return data;
-    const snap = await getDocs(collection(db as Firestore, "syllablePuzzles"));
-    const puzzles = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-    setCache('syllablePuzzles', puzzles);
-    return puzzles;
-};
-
-export const fetchSentences = async (): Promise<any[]> => {
-    const { data, status } = getCached<any[]>('sentencePuzzles');
-    if (status === 'stale') {
-        getDocs(collection(db as Firestore, "sentencePuzzles")).then(snap => setCache('sentencePuzzles', snap.docs.map(d => ({ id: d.id, ...d.data() })))).catch(() => {});
-    }
-    if (data && status !== 'expired') return data;
-    const snap = await getDocs(collection(db as Firestore, "sentencePuzzles"));
-    const puzzles = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-    setCache('sentencePuzzles', puzzles);
-    return puzzles;
-};
-
-
 // Helper for lessons
 export const getMicroLessons = (course: any): any[] => {
     if (course.microLessons && course.microLessons.length > 0) return course.microLessons;
     if (course.slides || course.questions) return [{ id: `${course.id}__ml_0`, title: 'Part 1', slides: course.slides || [], questions: course.questions || [] }];
     return [];
-};
-
-export const fetchPicturePuzzles = async (): Promise<any[]> => {
-    const { data, status } = getCached<any[]>('picturePuzzles');
-    if (status === 'stale') { /* Background revalidation logic simplifies here but usually depends on fetchLessons */ }
-    if (data && status !== 'expired') return data;
-    const [standaloneSnap, courses] = await Promise.all([getDocs(collection(db as Firestore, "picturePuzzles")), fetchLessons()]);
-    const slides: any[] = standaloneSnap.docs.map(d => d.data()).filter(d => d.imageUrl && d.nativeWord);
-    courses.forEach((c: any) => getMicroLessons(c).forEach((ml: any) => ml.slides?.forEach((s: any) => { if(s.imageUrl && s.nativeWord) slides.push(s); })));
-    setCache('picturePuzzles', slides);
-    return slides;
 };
 
 export const fetchLearnedStats = async (): Promise<any> => {
@@ -412,9 +364,9 @@ export const fetchDailyChallenge = async (): Promise<any[]> => {
     return selected;
 };
 
-export const warmupGameCache = async () => {
+export const warmupCache = async () => {
     try {
-        await Promise.all([fetchLessons(), fetchPuzzles(), fetchSyllables(), fetchSentences(), fetchPicturePuzzles(), fetchTopLearners(5)]);
+        await Promise.all([fetchLessons(), fetchTopLearners(5)]);
     } catch (error) { console.error("Warmup failed", error); }
 };
 
@@ -480,76 +432,7 @@ export const deleteReview = async (reviewId: string): Promise<void> => {
     invalidateCache('reviews');
 };
 
-/**
- * Mastery Tracking: Marks words as learned and updates level progress.
- */
-export const completeLevel = async (gameType: string, levelNum: number, wordIds: string[]) => {
-    const user = auth.currentUser;
-    if (!user) return;
 
-    try {
-        const userRef = doc(db as Firestore, "users", user.uid);
-        
-        // Use an object update to increment the level progress for this specific game type
-        // and add word IDs to the learned list.
-        await updateDoc(userRef, {
-            [`gameLevels.${gameType}`]: levelNum + 1,
-            learnedVocabulary: arrayUnion(...wordIds),
-            lastActivity: serverTimestamp()
-        });
-        
-        // Invalidate user data cache to reflect new level/vocab
-        invalidateCache(`user_${user.uid}`);
-        await refreshUserData();
-    } catch (e) {
-        console.error("Failed to complete level:", e);
-    }
-};
-
-/**
- * Fetches game content filtered by level and language.
- */
-export const fetchGameContentByLevel = async (collectionName: string, langId: string, level: number) => {
-    try {
-        const q = query(
-            collection(db as Firestore, collectionName),
-            where("languageId", "==", langId),
-            where("level", "==", level)
-        );
-        const snap = await getDocs(q);
-        
-        // Deduplicate items base on nativeWord to prevent session repetition if DB has duplicates
-        const uniqueItems = new Map<string, any>();
-        snap.docs.forEach(d => {
-            const data = d.data();
-            // Use nativeWord or native or englishWord as fallback for key
-            const key = (data.nativeWord || data.native || data.englishWord || "").toLowerCase().trim();
-            if (key && !uniqueItems.has(key)) {
-                uniqueItems.set(key, { id: d.id, ...data });
-            } else if (!key) {
-                // If no key, just add it (unlikely for valid content)
-                uniqueItems.set(d.id, { id: d.id, ...data });
-            }
-        });
-
-        return Array.from(uniqueItems.values());
-    } catch (e) {
-        console.error(`Error fetching ${collectionName} for level ${level}:`, e);
-        return [];
-    }
-};
-
-/**
- * Converts difficulty string to numeric level.
- */
-export const difficultyToLevel = (difficulty: string): number => {
-    switch (difficulty?.toLowerCase()) {
-        case 'beginner': return 1;
-        case 'intermediate': return 2;
-        case 'advanced': return 3;
-        default: return 1;
-    }
-};
 
 /**
  * Vocabulary Tracking: Adds multiple words to the user's mastered list in a single transaction.
